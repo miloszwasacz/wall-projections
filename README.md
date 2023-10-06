@@ -16,7 +16,7 @@ Sonny - meetings secretary
 
 Milosz - project manager
 
-Thomas - not yet decided
+Thomas - merge master
 
 (feel free to edit this guys)
 
