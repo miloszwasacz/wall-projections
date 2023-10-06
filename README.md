@@ -46,8 +46,9 @@ Thomas - not yet decided
 
 1. They approach the replica artefact
 2. The hotspots are projected onto the artefact?
-
-TO DO
+3. The visitor touches a hotspot on the artefact.
+4. Information regarding that part of the artefact is projected onto a nearby wall.
+5. The visitor reads/watches the information projected to learn more about the artefact.
 
 ### Exhibit maintainer
 
@@ -75,6 +76,7 @@ Updating hotspot content:
 3. They transfer the files they want to be projected, i.e. an image or a video file for each hotspot
     - Could work simply using directory structure - each hotspot has its own folder which requires there to be one and only one image or video file inside of it to be projected
     - That would make it nice and easy for the museum staff
+    - Could also have a simple program for editing the information stored in a file. Maybe use a rebranded zip file similar to Word .docx to cleanly package the information.
 4. Plug the USB back into the hardware
 
 ## MVP
