@@ -8,17 +8,15 @@ A project with Bristol Muesuem, to create interactive replicas of muesuem exhibi
 
 ## Roles
 
-Sergi - project structure and interface
+Sergi ([@Rolodophone](https://github.com/Rolodophone)) - project structure and interface
 
-Daniel - client liaison (github.com/danieldiamand)
+Daniel ([@danieldiamand](https://github.com/danieldiamand)) - client liaison
 
-Sonny - meetings secretary
+Sonny ([@ed22699](https://github.com/ed22699)) - meetings secretary
 
-Milosz - project manager
+Miłosz ([@miloszwasacz](https://github.com/miloszwasacz)) - project manager
 
-Thomas - merge master
-
-(feel free to edit this guys)
+Thomas ([@LW22736](https://github.com/LW22736)) - merge master
 
 ## Stakeholders
 
