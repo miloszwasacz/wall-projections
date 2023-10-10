@@ -10,7 +10,7 @@ A project with Bristol Muesuem, to create interactive replicas of muesuem exhibi
 
 Sergi - project structure and interface
 
-Daniel - client liaison
+Daniel - client liaison (https://github.com/danieldiamand)
 
 Sonny - meetings secretary
 
