@@ -1,4 +1,4 @@
-package com.2023Team.app;
+package com.speuob.wallprojections23;
 
 import static org.junit.Assert.assertTrue;
 
