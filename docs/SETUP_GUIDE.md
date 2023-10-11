@@ -1,0 +1,16 @@
+# To setup a Raspberry Pi for Wall Projection:
+
+## Requirements
+- Raspberry Pi 3 Model B+
+- A microSD card (at least 8GB)
+- A microSD card reader
+- A computer
+
+## Setup
+1. Connect a microSD card reader to your computer and insert the microSD card.
+2. Download and run the [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+3. In the Raspberry Pi Imager:
+   - Select "RASPBERRY PI OS (32-BIT)" for the Operating System.
+   - Choose your microSD card (likely listed as "generic storage").
+   - Click "Write" and wait for the operation to complete.
+4. Insert the microSD card into the Raspberry Pi 3
