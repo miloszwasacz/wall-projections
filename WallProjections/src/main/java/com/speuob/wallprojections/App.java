@@ -1,4 +1,4 @@
-package com.2023Team.app;
+package com.speuob.wallprojections;
 
 /**
  * Hello world!
