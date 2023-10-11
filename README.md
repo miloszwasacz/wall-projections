@@ -80,3 +80,7 @@ Updating hotspot content:
 ## MVP
 
 Use 1 button (instead of a camera system) to trigger the projection of 2 hotspots (lit-up circles) onto the replica artifact.
+
+## Frameworks Used
+- Java version: JDK 17
+- Raspberry Pi OS with desktop
