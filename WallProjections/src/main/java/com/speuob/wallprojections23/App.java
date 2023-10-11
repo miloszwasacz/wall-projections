@@ -1,4 +1,4 @@
-package com.speuob.wallprojections;
+package com.speuob.wallprojections23;
 
 /**
  * Hello world!
