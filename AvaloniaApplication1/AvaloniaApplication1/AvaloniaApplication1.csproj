@@ -13,10 +13,6 @@
 		<AvaloniaResource Include="Assets\**" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <AvaloniaResource Include="Nalesniki.mp4" />
-	</ItemGroup>
-
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.0.4" />
