@@ -1,10 +1,14 @@
 # 2023-WallProjections
 
-A project with Bristol Muesuem, to create interactive replicas of muesuem exhibits using projectors.
+A project with Bristol Museum, to create interactive replicas of museum exhibits using projectors.
 
 ## Useful links
 
-[SEP projects list](https://www.ole.bris.ac.uk/bbcswebdav/pid-8046087-dt-content-rid-46849402_2/xid-46849402_2)
+- [SEP projects list](https://www.ole.bris.ac.uk/bbcswebdav/pid-8046087-dt-content-rid-46849402_2/xid-46849402_2)
+- [Avalonia VideoView sample (LibVLCSharp)](https://code.videolan.org/videolan/LibVLCSharp/-/tree/3.x/samples/LibVLCSharp.Avalonia.Sample)
+- [LibVLCSharp docs](https://code.videolan.org/videolan/LibVLCSharp)
+- [.NET app deployment for Raspberry](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
+- [.NET GPIO tutorial for Raspberry](https://learn.microsoft.com/en-us/dotnet/iot/tutorials/gpio-input)
 
 ## Roles
 
@@ -82,5 +86,6 @@ Updating hotspot content:
 Use 1 button (instead of a camera system) to trigger the projection of 2 hotspots (lit-up circles) onto the replica artifact.
 
 ## Frameworks Used
-- Java version: JDK 17
+
+<!-- - Java version: JDK 17 -->
 - Raspberry Pi OS with desktop
