@@ -64,6 +64,10 @@
             "Avalonia.Themes.Fluent": {
               "target": "Package",
               "version": "[11.0.2, )"
+            },
+            "System.Device.Gpio": {
+              "target": "Package",
+              "version": "[2.2.0-*, )"
             }
           },
           "imports": [

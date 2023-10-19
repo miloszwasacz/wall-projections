@@ -888,6 +888,22 @@
           "lib/netcoreapp2.0/_._": {}
         }
       },
+      "System.Device.Gpio/2.2.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/System.Device.Gpio.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/System.Device.Gpio.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net5.0/System.Device.Gpio.targets": {}
+        }
+      },
       "System.Diagnostics.Debug/4.3.0": {
         "type": "package",
         "dependencies": {
@@ -2739,6 +2755,26 @@
         "version.txt"
       ]
     },
+    "System.Device.Gpio/2.2.0": {
+      "sha512": "ShuBDkL/QlQvaeUXcTvtY8xnb0U/ueisVw3VcIgybmrHAl4BiQ/oZEi8yQFzb/xlzDc12AZ/J1oUE9AawV7Yag==",
+      "type": "package",
+      "path": "system.device.gpio/2.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net5.0/System.Device.Gpio.targets",
+        "lib/net6.0-windows10.0.17763/System.Device.Gpio.dll",
+        "lib/net6.0-windows10.0.17763/System.Device.Gpio.xml",
+        "lib/net6.0/System.Device.Gpio.dll",
+        "lib/net6.0/System.Device.Gpio.xml",
+        "lib/netstandard2.0/System.Device.Gpio.dll",
+        "lib/netstandard2.0/System.Device.Gpio.xml",
+        "system.device.gpio.2.2.0.nupkg.sha512",
+        "system.device.gpio.nuspec"
+      ]
+    },
     "System.Diagnostics.Debug/4.3.0": {
       "sha512": "ZUhUOdqmaG5Jk3Xdb8xi5kIyQYAA4PnTNlHx1mu9ZY3qv4ELIdKbnL/akbGaKi2RnNUWaZsAs31rvzFdewTj2g==",
       "type": "package",
@@ -4477,7 +4513,8 @@
       "Avalonia.Desktop >= 11.0.2",
       "Avalonia.Diagnostics >= 11.0.2",
       "Avalonia.Fonts.Inter >= 11.0.2",
-      "Avalonia.Themes.Fluent >= 11.0.2"
+      "Avalonia.Themes.Fluent >= 11.0.2",
+      "System.Device.Gpio >= 2.2.0-*"
     ]
   },
   "packageFolders": {
@@ -4544,6 +4581,10 @@
           "Avalonia.Themes.Fluent": {
             "target": "Package",
             "version": "[11.0.2, )"
+          },
+          "System.Device.Gpio": {
+            "target": "Package",
+            "version": "[2.2.0-*, )"
           }
         },
         "imports": [
