@@ -3,7 +3,7 @@
 using System.Device.Gpio;
 using System.Threading.Tasks;
 
-int pin = 21;
+int pin = 2;
 
 using var controller = new GpioController();
 controller.OpenPin(pin, PinMode.InputPullUp);
