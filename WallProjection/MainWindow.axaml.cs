@@ -2,42 +2,62 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using System;
+using System.Collections.Generic;
 using Avalonia.Interactivity;
 using System.Drawing;
 using Avalonia.Input;
+using System.Device.Gpio;
+using System.Threading.Tasks;
 
 namespace WallProjection;
 
 public partial class MainWindow : Window
 {
 
+
+    private readonly Dictionary<int, string> pinToPath = new Dictionary<int, string>
+        {
+            {2,  "assets/image1.jpg"},
+            {3, "assets/image2.jpg" },
+            {4, "assets/image1.jpg" },
+            {17, "assets/image2.jpg" },
+        };
+
     public MainWindow()
     {
         InitializeComponent();
         displayedImage = this.Find<Avalonia.Controls.Image>("displayedImage");
-        this.KeyDown += KeyDownHandler;
+   
+        ShowImage("./assets/image1.jpg");
     }
 
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
+
+        using var controller = new GpioController();
+
+        foreach (int pin in pinToPath.Keys)
+        {
+            Console.WriteLine("made pin:" + pin);
+            controller.OpenPin(pin, PinMode.InputPullUp); //Detecting change in voltage for each pin in pins
+            controller.RegisterCallbackForPinValueChangedEvent( //If pin is Falling (connected to GND) call function OnPinEvent
+            pin,
+            PinEventTypes.Falling,
+            (sender, args) => ButtonPressed(sender, args, pin));
+        }
     }
 
-    private void KeyDownHandler(object? sender, KeyEventArgs e)
+    private void ButtonPressed(object sender, PinValueChangedEventArgs args, int pin)
     {
-        if (sender == null)
+        Console.WriteLine("Pressed pin:" + pin);
+        if (pinToPath.TryGetValue(pin, out string path))
         {
-            throw new ArgumentNullException(nameof(sender));
+            this.ShowImage(path);
         }
-
-        switch (e.Key)
+        else
         {
-            case Key.A:
-                this.ShowImage("assets/image1.jpg");
-                break;
-            case Key.B:
-                this.ShowImage("assets/image2.jpg");
-                break;
+            Console.Error.WriteLine($"Dictionary doesn't contain path for pin {pin}");
         }
     }
 
