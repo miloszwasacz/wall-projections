@@ -2,17 +2,45 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using System;
+using Avalonia.Interactivity;
 using System.Drawing;
+using Avalonia.Input;
 
 namespace WallProjection;
 
 public partial class MainWindow : Window
 {
+
     public MainWindow()
     {
         InitializeComponent();
-        this.ShowImage(@"assets/image1.jpg");
+        displayedImage = this.Find<Avalonia.Controls.Image>("displayedImage");
+        this.KeyDown += KeyDownHandler;
     }
+
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
+
+    private void KeyDownHandler(object? sender, KeyEventArgs e)
+    {
+        if (sender == null)
+        {
+            throw new ArgumentNullException(nameof(sender));
+        }
+
+        switch (e.Key)
+        {
+            case Key.A:
+                this.ShowImage("assets/image1.jpg");
+                break;
+            case Key.B:
+                this.ShowImage("assets/image2.jpg");
+                break;
+        }
+    }
+
 
     private void ShowImage(string path)
     {
@@ -24,7 +52,7 @@ public partial class MainWindow : Window
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Error displaying image at path {path}: {e.Message});
+            Console.Error.WriteLine($"Error displaying image at path {path}: {e.Message}");
         }
     }
 }
