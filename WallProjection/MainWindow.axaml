@@ -5,5 +5,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjection.MainWindow"
         Title="WallProjection">
-    Welcome to Avalonia!
+	    <Grid Name="rootGrid" Background="Black">
+		    <Image Name="displayedImage" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False"/>
+	    </Grid>
 </Window>
