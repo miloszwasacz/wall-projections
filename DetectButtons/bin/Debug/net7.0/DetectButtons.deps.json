@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v7.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v7.0": {
+      "DetectButtons/1.0.0": {
+        "dependencies": {
+          "System.Device.Gpio": "2.2.0"
+        },
+        "runtime": {
+          "DetectButtons.dll": {}
+        }
+      },
+      "System.Device.Gpio/2.2.0": {
+        "runtime": {
+          "lib/net6.0/System.Device.Gpio.dll": {
+            "assemblyVersion": "2.2.0.0",
+            "fileVersion": "2.200.22.47910"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "DetectButtons/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Device.Gpio/2.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ShuBDkL/QlQvaeUXcTvtY8xnb0U/ueisVw3VcIgybmrHAl4BiQ/oZEi8yQFzb/xlzDc12AZ/J1oUE9AawV7Yag==",
+      "path": "system.device.gpio/2.2.0",
+      "hashPath": "system.device.gpio.2.2.0.nupkg.sha512"
+    }
+  }
+}
