@@ -1,0 +1,9 @@
+11:49:46.024 [main] INFO  org.openrndr.extra.olive.Olive - no existing watcher
+11:49:46.573 [main] INFO  org.openrndr.extra.olive.ScriptObjectLoaderJSR233 - creating scripting engine took 541ms
+11:49:46.576 [main] INFO  org.openrndr.extra.olive.Olive - change detected, reloading script
+11:49:48.329 [main] INFO  org.openrndr.internal.gl3.ApplicationGLFWGL3 - 3.4.0 Win32 WGL Null EGL OSMesa VisualC DLL
+11:49:48.950 [main] INFO  org.openrndr.Application - no preload class found 'org.openrndr.Preload'
+11:49:48.985 [main] INFO  org.openrndr.internal.gl3.ApplicationGLFWGL3 - OpenGL vendor: Intel
+11:49:48.988 [main] INFO  org.openrndr.internal.gl3.ApplicationGLFWGL3 - OpenGL renderer: Intel(R) UHD Graphics
+11:49:48.989 [main] INFO  org.openrndr.internal.gl3.ApplicationGLFWGL3 - OpenGL version: 4.5.0 - Build 31.0.101.4255
+11:49:55.233 [DefaultDispatcher-worker-2] INFO  org.openrndr.extra.olive.Olive - loading script took 8094ms
