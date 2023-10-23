@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "QTc3L3CxPREBaQYLQKDihSicLMgnUWy1UNNrhGS7pZxUcD0WyVfBb6UQcEAiDFMEfsOkHzL7qrOJ3MVC48GX6A==",
+  "dgSpecHash": "iRxpWCx+E/BkeEPBd5zaBcJNULOnSi5135qumvumuUMaT294OopqW+tAo8aFWm1EhoRwYg3p4hfpWz8BuNAjyw==",
   "success": true,
   "projectFilePath": "S:\\uni\\coding\\2023-WallProjections\\WallProjection\\WallProjection.csproj",
   "expectedPackageFiles": [
@@ -25,6 +25,7 @@
     "C:\\Users\\danie\\.nuget\\packages\\harfbuzzsharp.nativeassets.macos\\2.8.2.3\\harfbuzzsharp.nativeassets.macos.2.8.2.3.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\harfbuzzsharp.nativeassets.webassembly\\2.8.2.3\\harfbuzzsharp.nativeassets.webassembly.2.8.2.3.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\harfbuzzsharp.nativeassets.win32\\2.8.2.3\\harfbuzzsharp.nativeassets.win32.2.8.2.3.nupkg.sha512",
+    "C:\\Users\\danie\\.nuget\\packages\\libvlcsharp\\3.8.1\\libvlcsharp.3.8.1.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\microcom.runtime\\0.11.0\\microcom.runtime.0.11.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\microsoft.codeanalysis.analyzers\\3.0.0\\microsoft.codeanalysis.analyzers.3.0.0.nupkg.sha512",
     "C:\\Users\\danie\\.nuget\\packages\\microsoft.codeanalysis.common\\3.8.0\\microsoft.codeanalysis.common.3.8.0.nupkg.sha512",
