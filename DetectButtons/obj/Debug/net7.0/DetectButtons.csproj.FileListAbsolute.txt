@@ -1,0 +1,17 @@
+S:\uni\coding\2023-WallProjections\DetectButtons\bin\Debug\net7.0\DetectButtons.exe
+S:\uni\coding\2023-WallProjections\DetectButtons\bin\Debug\net7.0\DetectButtons.deps.json
+S:\uni\coding\2023-WallProjections\DetectButtons\bin\Debug\net7.0\DetectButtons.runtimeconfig.json
+S:\uni\coding\2023-WallProjections\DetectButtons\bin\Debug\net7.0\DetectButtons.dll
+S:\uni\coding\2023-WallProjections\DetectButtons\bin\Debug\net7.0\DetectButtons.pdb
+S:\uni\coding\2023-WallProjections\DetectButtons\bin\Debug\net7.0\System.Device.Gpio.dll
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.csproj.AssemblyReference.cache
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.GeneratedMSBuildEditorConfig.editorconfig
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.AssemblyInfoInputs.cache
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.AssemblyInfo.cs
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.csproj.CoreCompileInputs.cache
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.csproj.CopyComplete
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.dll
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\refint\DetectButtons.dll
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.pdb
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\DetectButtons.genruntimeconfig.cache
+S:\uni\coding\2023-WallProjections\DetectButtons\obj\Debug\net7.0\ref\DetectButtons.dll

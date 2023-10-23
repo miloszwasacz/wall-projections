@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "CXhaCmefk/TPM4VKIw6AYl+AQru2GmdGd0QnZinUcB99elGQZU0i8oGnY8QosiDVqBXwUFwc2gH5mOeiUJ6gPw==",
+  "success": true,
+  "projectFilePath": "S:\\uni\\coding\\2023-WallProjections\\DetectButtons\\DetectButtons.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\danie\\.nuget\\packages\\system.device.gpio\\2.2.0\\system.device.gpio.2.2.0.nupkg.sha512",
+    "C:\\Users\\danie\\.nuget\\packages\\microsoft.netcore.app.runtime.linux-arm\\7.0.12\\microsoft.netcore.app.runtime.linux-arm.7.0.12.nupkg.sha512",
+    "C:\\Users\\danie\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-arm\\7.0.12\\microsoft.aspnetcore.app.runtime.linux-arm.7.0.12.nupkg.sha512",
+    "C:\\Users\\danie\\.nuget\\packages\\microsoft.netcore.app.host.linux-arm\\7.0.12\\microsoft.netcore.app.host.linux-arm.7.0.12.nupkg.sha512"
+  ],
+  "logs": []
+}
