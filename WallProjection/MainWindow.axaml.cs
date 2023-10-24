@@ -5,16 +5,21 @@ using System;
 using Avalonia.Interactivity;
 using System.Drawing;
 using Avalonia.Input;
+using LibVLCSharp.Shared;
+using LibVLCSharp.Avalonia;
 
 namespace WallProjection;
 
 public partial class MainWindow : Window
 {
 
+    /*private readonly LibVLC _libVlc = new();*/
+
     public MainWindow()
     {
         InitializeComponent();
         displayedImage = this.Find<Avalonia.Controls.Image>("displayedImage");
+        displayedVideo = this.Find<VideoView>("displayedVideo");
         this.KeyDown += KeyDownHandler;
     }
 
