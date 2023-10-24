@@ -47,7 +47,7 @@
           "dependencies": {
             "Avalonia": {
               "target": "Package",
-              "version": "[11.0.2, )"
+              "version": "[11.0.4, )"
             },
             "Avalonia.Desktop": {
               "target": "Package",
@@ -66,6 +66,10 @@
               "version": "[11.0.2, )"
             },
             "LibVLCSharp": {
+              "target": "Package",
+              "version": "[3.8.1, )"
+            },
+            "LibVLCSharp.Avalonia": {
               "target": "Package",
               "version": "[3.8.1, )"
             }

@@ -129,3 +129,5 @@ S:\uni\coding\2023-WallProjections\WallProjection\obj\Debug\net6.0\WallProjectio
 S:\uni\coding\2023-WallProjections\WallProjection\obj\Debug\net6.0\WallProjection.csproj.CopyComplete
 S:\uni\coding\2023-WallProjections\WallProjection\obj\Debug\net6.0\WallProjection.genruntimeconfig.cache
 S:\uni\coding\2023-WallProjections\WallProjection\obj\Debug\net6.0\ref\WallProjection.dll
+S:\uni\coding\2023-WallProjections\WallProjection\bin\Debug\net6.0\LibVLCSharp.dll
+S:\uni\coding\2023-WallProjections\WallProjection\bin\Debug\net6.0\LibVLCSharp.Avalonia.dll
