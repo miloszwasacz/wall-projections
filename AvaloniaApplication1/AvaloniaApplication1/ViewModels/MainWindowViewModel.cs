@@ -1,6 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.IO;
 using LibVLCSharp.Shared;
+using Python.Runtime;
 
 namespace AvaloniaApplication1.ViewModels;
 
@@ -15,23 +17,30 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
 
     public void Play()
     {
-        // Task.Run(async delegate
-        // {
-        //     await Task.Delay(1000);
-            using var media = new Media(
-                _libVlc,
-                new Uri(@"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-            );
-            MediaPlayer.Play(media);
-        // }).Start();
+        using var media = new Media(
+            _libVlc,
+            new Uri(@"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+        );
+        MediaPlayer.Play(media);
     }
 
     public MediaPlayer MediaPlayer { get; }
 
+    public void OpenPython()
+    {
+        string file = @"Scripts\main.py";
+        Debug.Print("Opening python");
+        using var scope = Py.CreateScope();
+        var code = File.ReadAllText(file);
+        Debug.Print("Code read");
+        var scriptCompiled = PythonEngine.Compile(code, file);
+        scope.Execute(scriptCompiled);
+    }
+
     public void Dispose()
     {
-        MediaPlayer?.Dispose();
-        _libVlc?.Dispose();
+        MediaPlayer.Dispose();
+        _libVlc.Dispose();
     }
 
 
