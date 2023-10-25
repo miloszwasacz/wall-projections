@@ -6,11 +6,13 @@ using Avalonia.Interactivity;
 using WallProjection.ViewModels;
 using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
+using Avalonia.Threading;
 
 namespace WallProjection.Views;
 
 public partial class MainWindow : Window
 {
+    private DispatcherTimer imageTimer = new DispatcherTimer();
 
     public MainWindow()
     {
@@ -23,11 +25,11 @@ public partial class MainWindow : Window
     {
         if (e.Key == Key.Space)
         {
-            PlayVideo("C:/Users/danie/Downloads/video1.mp4");
+            PlayVideo(@"S:/uni/coding/2023-WallProjections/WallProjection/Assets/video1.mp4");
         }
         if (e.Key == Key.A)
         {
-            ShowImage("C:/Users/danie/Downloads/image2.jpg");
+            ShowImage(@"S:/uni/coding/2023-WallProjections/WallProjection/Assets/image1.jpg", 1.2);
         }
     }
 
@@ -40,12 +42,21 @@ public partial class MainWindow : Window
         
     }
 
-    private void ShowImage(string path)
+    private void ShowImage(string path, double time)
     {
+        imageTimer.Stop();
 
         displayedVideo.IsVisible = false;
         displayedImage.IsVisible = true;
         var bitmap = new Avalonia.Media.Imaging.Bitmap(path);
         displayedImage.Source = bitmap;
+
+        imageTimer.Interval = TimeSpan.FromSeconds(time);
+        imageTimer.Tick += (sender, e) => //what happens when timer runs out
+        {
+            imageTimer.Stop();
+            displayedImage.IsVisible = false;
+        };
+        imageTimer.Start(); //start new timer
     }
 }
