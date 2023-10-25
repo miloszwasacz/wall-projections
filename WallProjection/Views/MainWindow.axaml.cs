@@ -37,9 +37,17 @@ public partial class MainWindow : Window
     {
         displayedImage.IsVisible = false;
         displayedVideo.IsVisible = true;
-        var vm = DataContext as MainWindowViewModel;
-        vm?.Play(path);
-        
+        try
+        {
+            var vm = DataContext as MainWindowViewModel;
+            vm?.Play(path);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("An error occurred playing video: " + ex.Message);
+        }
+
+
     }
 
     private void ShowImage(string path, double time)
@@ -48,8 +56,13 @@ public partial class MainWindow : Window
 
         displayedVideo.IsVisible = false;
         displayedImage.IsVisible = true;
-        var bitmap = new Avalonia.Media.Imaging.Bitmap(path);
-        displayedImage.Source = bitmap;
+        try {
+            var bitmap = new Avalonia.Media.Imaging.Bitmap(path);
+            displayedImage.Source = bitmap;
+        }
+        catch(Exception ex) {
+            Console.Error.WriteLine("An error occurred showing image: " + ex.Message);
+        }
 
         imageTimer.Interval = TimeSpan.FromSeconds(time);
         imageTimer.Tick += (sender, e) => //what happens when timer runs out
@@ -58,5 +71,5 @@ public partial class MainWindow : Window
             displayedImage.IsVisible = false;
         };
         imageTimer.Start(); //start new timer
-    }
+        }
 }
