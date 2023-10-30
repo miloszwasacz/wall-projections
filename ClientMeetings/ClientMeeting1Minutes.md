@@ -1,6 +1,6 @@
 # Client Meeting 1 Minutes
 
-Meeting with Zaheed Jaffar (Senior AV) and his boss Mark Pajak
+Meeting with Zahid Jaffer (Senior AV) and his boss Mark Pajak
 
 ## Main Requirements
 - Reusable system with minimal setup where the artefacts are on a table and hotspots for the items can be moved around with minimal mapping 
@@ -22,8 +22,8 @@ Meeting with Zaheed Jaffar (Senior AV) and his boss Mark Pajak
 - Camera, they have Azul Connects (special 3D camera) and a LIDAR camera
 
 ## Licensing
-- Open source, Zaheed wants it to be accessible for other museums as the current alternatives are very pricy, wants a version which people can build upon
+- Open source, Zahid wants it to be accessible for other museums as the current alternatives are very pricy, wants a version which people can build upon
 
 ## Other
-- Need to give Zaheed the details for the module manager so that they can speak about budgets
+- Need to give Zahid the details for the module manager so that they can speak about budgets
 - Very basic version of what they want can be found in the Curiosity Gallery, uses buttons 
