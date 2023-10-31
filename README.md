@@ -1,6 +1,6 @@
 # 2023-WallProjections
 
-A project with Bristol Muesuem, to create interactive replicas of muesuem exhibits using projectors.
+A project with Bristol Museum, to create interactive replicas of museum exhibits using projectors.
 
 ## Useful links
 
@@ -79,8 +79,8 @@ Updating hotspot content:
 
 ## MVP
 
-Use 1 button (instead of a camera system) to trigger the projection of 2 hotspots (lit-up circles) onto the replica artifact.
+Use buttons (instead of a camera system) to trigger the projection of hotspots (lit-up circles) onto the replica artifact.
 
-## Frameworks Used
-- Java version: JDK 17
+## Technologies used
+
 - Raspberry Pi OS with desktop
