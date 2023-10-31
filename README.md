@@ -8,15 +8,11 @@ A project with Bristol Museum, to create interactive replicas of museum exhibits
 
 ## Roles
 
-Sergi ([@Rolodophone](https://github.com/Rolodophone)) - project structure and interface
-
-Daniel ([@danieldiamand](https://github.com/danieldiamand)) - client liaison
-
-Sonny ([@ed22699](https://github.com/ed22699)) - meetings secretary
-
-Miłosz ([@miloszwasacz](https://github.com/miloszwasacz)) - project manager
-
-Thomas ([@LW22736](https://github.com/LW22736)) - merge master
+- Sergi ([@Rolodophone](https://github.com/Rolodophone)) - project structure and interface
+- Daniel ([@danieldiamand](https://github.com/danieldiamand)) - client liaison
+- Sonny ([@ed22699](https://github.com/ed22699)) - meetings secretary
+- Miłosz ([@miloszwasacz](https://github.com/miloszwasacz)) - project manager
+- Thomas ([@LW22736](https://github.com/LW22736)) - merge master
 
 ## Stakeholders
 
@@ -72,9 +68,9 @@ Updating hotspot content:
 1. Take the USB stick from whatever computing hardware we’re using
 2. Connect it into their computer
 3. They transfer the files they want to be projected, i.e. an image or a video file for each hotspot
-    - Could work simply using directory structure - each hotspot has its own folder which requires there to be one and only one image or video file inside of it to be projected
-    - That would make it nice and easy for the museum staff
-    - Could also have a simple program for editing the information stored in a file. Maybe use a rebranded zip file similar to Word .docx to cleanly package the information.
+   - Could work simply using directory structure - each hotspot has its own folder which requires there to be one and only one image or video file inside of it to be projected
+   - That would make it nice and easy for the museum staff
+   - Could also have a simple program for editing the information stored in a file. Maybe use a rebranded zip file similar to Word .docx to cleanly package the information.
 4. Plug the USB back into the hardware
 
 ## MVP
@@ -83,4 +79,6 @@ Use buttons (instead of a camera system) to trigger the projection of hotspots (
 
 ## Technologies used
 
-- Raspberry Pi OS with desktop
+- [Raspberry Pi OS with desktop](https://www.raspberrypi.com/software/raspberry-pi-desktop/)
+- [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [Avalonia UI](https://docs.avaloniaui.net/) 
