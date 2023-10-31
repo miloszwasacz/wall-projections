@@ -1,22 +1,25 @@
 # 2023-WallProjections
 
-A project with Bristol Muesuem, to create interactive replicas of muesuem exhibits using projectors.
+A project with Bristol Museum, to create interactive replicas of museum exhibits using projectors.
 
 ## Useful links
 
-[SEP projects list](https://www.ole.bris.ac.uk/bbcswebdav/pid-8046087-dt-content-rid-46849402_2/xid-46849402_2)
+- [SEP projects list](https://www.ole.bris.ac.uk/bbcswebdav/pid-8046087-dt-content-rid-46849402_2/xid-46849402_2)
+- [.NET app deployment for Raspberry](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
+- [.NET GPIO tutorial for Raspberry](https://learn.microsoft.com/en-us/dotnet/iot/tutorials/gpio-input)
+- [Avalonia docs](https://docs.avaloniaui.net/docs/next/welcome)
+- [LibVLCSharp docs](https://code.videolan.org/videolan/LibVLCSharp)
+- [Avalonia VideoView sample (LibVLCSharp)](https://code.videolan.org/videolan/LibVLCSharp/-/tree/3.x/samples/LibVLCSharp.Avalonia.Sample)
+- [Python.NET docs](https://pythonnet.github.io/pythonnet/)
+- [MediaPipe docs](https://mediapipe-studio.webapps.google.com/home)
 
 ## Roles
 
-Sergi ([@Rolodophone](https://github.com/Rolodophone)) - project structure and interface
-
-Daniel ([@danieldiamand](https://github.com/danieldiamand)) - client liaison
-
-Sonny ([@ed22699](https://github.com/ed22699)) - meetings secretary
-
-Miłosz ([@miloszwasacz](https://github.com/miloszwasacz)) - project manager
-
-Thomas ([@LW22736](https://github.com/LW22736)) - merge master
+- Sergi ([@Rolodophone](https://github.com/Rolodophone)) - project structure and interface
+- Daniel ([@danieldiamand](https://github.com/danieldiamand)) - client liaison
+- Sonny ([@ed22699](https://github.com/ed22699)) - meetings secretary
+- Miłosz ([@miloszwasacz](https://github.com/miloszwasacz)) - project manager
+- Thomas ([@LW22736](https://github.com/LW22736)) - merge master
 
 ## Stakeholders
 
@@ -72,15 +75,19 @@ Updating hotspot content:
 1. Take the USB stick from whatever computing hardware we’re using
 2. Connect it into their computer
 3. They transfer the files they want to be projected, i.e. an image or a video file for each hotspot
-    - Could work simply using directory structure - each hotspot has its own folder which requires there to be one and only one image or video file inside of it to be projected
-    - That would make it nice and easy for the museum staff
-    - Could also have a simple program for editing the information stored in a file. Maybe use a rebranded zip file similar to Word .docx to cleanly package the information.
+   - Could work simply using directory structure - each hotspot has its own folder which requires there to be one and only one image or video file inside of it to be projected
+   - That would make it nice and easy for the museum staff
+   - Could also have a simple program for editing the information stored in a file. Maybe use a rebranded zip file similar to Word .docx to cleanly package the information.
 4. Plug the USB back into the hardware
 
 ## MVP
 
-Use 1 button (instead of a camera system) to trigger the projection of 2 hotspots (lit-up circles) onto the replica artifact.
+Use buttons (instead of a camera system) to trigger the projection of hotspots (lit-up circles) onto the replica artifact.
 
-## Frameworks Used
-- Java version: JDK 17
-- Raspberry Pi OS with desktop
+## Technologies used
+
+- [Raspberry Pi OS with desktop](https://www.raspberrypi.com/software/raspberry-pi-desktop/)
+- [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [Avalonia UI](https://docs.avaloniaui.net/)
+- [LibVLCSharp](https://code.videolan.org/videolan/LibVLCSharp)
+- [Python.NET](https://github.com/pythonnet/pythonnet)
