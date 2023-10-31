@@ -4,7 +4,14 @@ A project with Bristol Museum, to create interactive replicas of museum exhibits
 
 ## Useful links
 
-[SEP projects list](https://www.ole.bris.ac.uk/bbcswebdav/pid-8046087-dt-content-rid-46849402_2/xid-46849402_2)
+- [SEP projects list](https://www.ole.bris.ac.uk/bbcswebdav/pid-8046087-dt-content-rid-46849402_2/xid-46849402_2)
+- [.NET app deployment for Raspberry](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
+- [.NET GPIO tutorial for Raspberry](https://learn.microsoft.com/en-us/dotnet/iot/tutorials/gpio-input)
+- [Avalonia docs](https://docs.avaloniaui.net/docs/next/welcome)
+- [LibVLCSharp docs](https://code.videolan.org/videolan/LibVLCSharp)
+- [Avalonia VideoView sample (LibVLCSharp)](https://code.videolan.org/videolan/LibVLCSharp/-/tree/3.x/samples/LibVLCSharp.Avalonia.Sample)
+- [Python.NET docs](https://pythonnet.github.io/pythonnet/)
+- [MediaPipe docs](https://mediapipe-studio.webapps.google.com/home)
 
 ## Roles
 
@@ -81,4 +88,6 @@ Use buttons (instead of a camera system) to trigger the projection of hotspots (
 
 - [Raspberry Pi OS with desktop](https://www.raspberrypi.com/software/raspberry-pi-desktop/)
 - [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
-- [Avalonia UI](https://docs.avaloniaui.net/) 
+- [Avalonia UI](https://docs.avaloniaui.net/)
+- [LibVLCSharp](https://code.videolan.org/videolan/LibVLCSharp)
+- [Python.NET](https://github.com/pythonnet/pythonnet)
