@@ -3,7 +3,7 @@ using WallProjections.Helper;
 
 namespace WallProjections.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : ActivatableViewModelBase
 {
     private string _greeting = "Welcome to Avalonia!";
 
@@ -13,11 +13,18 @@ public class MainWindowViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _greeting, value);
     }
 
-    public MainWindowViewModel()
+    private void OnPressDetected(object? _, PythonEventHandler.PressDetectedArgs args)
     {
-        PythonEventHandler.Instance.PressDetected += (_, args) =>
-        {
-            Greeting = args.Button.ToString();
-        };
+        Greeting = args.Button.ToString();
+    }
+
+    protected override void OnStart()
+    {
+        PythonEventHandler.Instance.PressDetected += OnPressDetected;
+    }
+
+    protected override void OnStop()
+    {
+        PythonEventHandler.Instance.PressDetected -= OnPressDetected;
     }
 }
