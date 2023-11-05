@@ -58,7 +58,7 @@ internal class Program
             var scriptCompiled = PythonEngine.Compile(code);
             scope.Execute(scriptCompiled);
             //TODO Change to a real method
-            scope.InvokeMethod("simulate_buttons", PythonEventHandler.Instance.ToPython());
+            scope.InvokeMethod("detect_buttons", PythonEventHandler.Instance.ToPython());
         }, cts.Token);
         return cts;
     }
