@@ -4,11 +4,26 @@ import mediapipe as mp
 hands_model = mp.solutions.hands.Hands()
 webcam = cv2.VideoCapture(0)
 
-HOTSPOT_COORDS = (0.5, 0.5)
+
 HOTSPOT_SCREEN_COORDS = (320, 240)
 FINGERTIP_INDICES = (4, 8, 12, 16, 20)
 
-hotspot_was_pressed = False
+
+class HotSpot():
+    def __init__(self, id, x, y, radius):
+        self.id = id
+        self.x = x
+        self.y = y
+        self.radius = radius
+    
+    def isPointInside(self, point):
+        """
+        Returns true if given point is inside hotspot
+        """
+        squaredDist = (self.x - point.x)**2 + (self.y - point.y)**2
+        return squaredDist <= self.radius**2
+
+hotSpots = [HotSpot(1, 0.5, 0.5, 0.01)]
 
 def detect_buttons(event_handler): #This function is called by Program.cs
     while webcam.isOpened():
@@ -19,18 +34,13 @@ def detect_buttons(event_handler): #This function is called by Program.cs
         model_output = hands_model.process(img_rbg)
 
         # detect if finger over hotspot
-        if model_output.multi_hand_landmarks is not None:
-            hotspot_pressed = False
+        if model_output.multi_hand_landmarks:
+            fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in model_output.multi_hand_landmarks]
+            for fingertip_coord in fingertip_coords:
+                for hotSpot in hotSpots:
+                    if hotSpot.isPointInside(fingertip_coord):
+                        event_handler.OnPressDetected(hotSpot.id)
 
-            for landmarks in model_output.multi_hand_landmarks:
-                for i in FINGERTIP_INDICES:
-                    fingertip_coords = landmarks.landmark[i]
-                    if (fingertip_coords.x - HOTSPOT_COORDS[0])**2 + (fingertip_coords.y - HOTSPOT_COORDS[1])**2 <= 0.001:
-                        hotspot_pressed = True
-                        if not hotspot_was_pressed:
-                            event_handler.OnPressDetected(1)
-
-            hotspot_was_pressed = hotspot_pressed
 
         # annotate hand landmarks and hotspot onscreen
         cv2.circle(img, HOTSPOT_SCREEN_COORDS, 10, (255, 0, 255), thickness=2)
@@ -49,5 +59,5 @@ def detect_buttons(event_handler): #This function is called by Program.cs
 if __name__ == "__main__":
     class EventHandler:
         def OnPressDetected(self, id):
-            print(id)
+            print("button pressed", id)
     detect_buttons(EventHandler())
