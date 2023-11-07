@@ -1,6 +1,30 @@
-﻿namespace WallProjections.ViewModels;
+﻿using ReactiveUI;
+using WallProjections.Helper;
 
-public class MainWindowViewModel : ViewModelBase
+namespace WallProjections.ViewModels;
+
+public class MainWindowViewModel : ActivatableViewModelBase
 {
-    public string Greeting => "Welcome to Avalonia!";
+    private string _greeting = "Welcome to Avalonia!";
+
+    public string Greeting
+    {
+        get => _greeting;
+        private set => this.RaiseAndSetIfChanged(ref _greeting, value);
+    }
+
+    private void OnPressDetected(object? _, PythonEventHandler.PressDetectedArgs args)
+    {
+        Greeting = args.Button.ToString();
+    }
+
+    protected override void OnStart()
+    {
+        PythonEventHandler.Instance.PressDetected += OnPressDetected;
+    }
+
+    protected override void OnStop()
+    {
+        PythonEventHandler.Instance.PressDetected -= OnPressDetected;
+    }
 }
