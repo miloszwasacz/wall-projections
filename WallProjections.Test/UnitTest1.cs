@@ -12,7 +12,7 @@ public class Tests
     {
         MainWindowViewModel viewModel = new();
 
-        Assert.That(viewModel.Greeting, Is.EqualTo("Welcome to Avalonia!"));
+        Assert.IsNotNull(viewModel);
     }
 
     [AvaloniaTest]
@@ -24,7 +24,6 @@ public class Tests
         };
         mainWindow.Show();
 
-        var textBlock = mainWindow.GetControl<TextBlock>("Greeting");
-        Assert.That(textBlock.Text, Is.EqualTo("Welcome to Avalonia!"));
+        Assert.That(mainWindow.DataContext, Is.InstanceOf(typeof(MainWindowViewModel)));
     }
 }

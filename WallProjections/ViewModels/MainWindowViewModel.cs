@@ -1,6 +1,19 @@
-﻿namespace WallProjections.ViewModels;
+﻿using ReactiveUI;
+
+namespace WallProjections.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public string Greeting => "Welcome to Avalonia!";
+    private DisplayViewModel? _displayViewModel;
+
+    public DisplayViewModel? DisplayViewModel
+    {
+        get => _displayViewModel;
+        set => this.RaiseAndSetIfChanged(ref _displayViewModel, value);
+    }
+
+    public void CreateDisplayViewModel(string fileNumber)
+    {
+        DisplayViewModel = new DisplayViewModel(fileNumber);
+    }
 }
