@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Avalonia;
 using Avalonia.ReactiveUI;
-using WallProjections.Configuration;
 
 namespace WallProjections;
 
