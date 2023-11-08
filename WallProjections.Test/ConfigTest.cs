@@ -10,12 +10,16 @@ namespace WallProjections.Test;
 public class ConfigTests
 {
     /// <summary>
+    /// Default location to save config during tests.
+    /// </summary>
+    private const string ConfigLocation = "config_test.json";
+
+    /// <summary>
     /// Tests that loaded config is identical to the original config.
     /// </summary>
     [Test]
     public void TestSaveAndLoad()
     {
-        const string configLocation = "config_test.json";
         var hotspots = new List<Hotspot> { new(
                 id: 0,
                 textFile: "example.txt",
@@ -24,15 +28,13 @@ public class ConfigTests
                 y: 2,
                 r: 3
             ) };
-        var original = new Config(hotspots, configLocation);
+        var original = new Config(hotspots, ConfigLocation);
 
-        var success = original.SaveConfig();
-        // Check that file saves correctly.
-        Assert.That(success, Is.EqualTo(0));
+        original.SaveConfig();
 
 
         // Check read file is same as saved config.
-        var recreated = Config.LoadConfig(configLocation);
+        var recreated = Config.LoadConfig(ConfigLocation);
 
 
         Assert.That(original.Hotspots, Has.Count.EqualTo(recreated.Hotspots.Count));
@@ -47,6 +49,31 @@ public class ConfigTests
             Assert.That(original.Hotspots[0].TextFile, Is.EqualTo(recreated.Hotspots[0].TextFile));
             Assert.That(original.Hotspots[0].ImgFile, Is.EqualTo(recreated.Hotspots[0].ImgFile));
             Assert.That(original.Hotspots[0].VideoFile, Is.EqualTo(recreated.Hotspots[0].VideoFile));
+        });
+    }
+
+    /// <summary>
+    /// Checks that GetHotspot returns the correct hotspot.
+    /// </summary>
+    [Test]
+    public void TestGetHotspot()
+    {
+        var config = new Config(
+            hotspots: new List<Hotspot>
+            {
+                new(id: 1, textFile: "test.txt"),
+                new(id: 2, textFile: "test2.txt", imgFile: "test.jpg")
+            }
+            );
+
+        var hotspot1 = config.GetHotspot(1);
+        Assert.That(hotspot1, Is.Not.Null);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(hotspot1!.Id, Is.EqualTo(1));
+            Assert.That(hotspot1.TextFile, Is.EqualTo("test.txt"));
+            Assert.That(config.GetHotspot(3), Is.Null);
         });
     }
 }

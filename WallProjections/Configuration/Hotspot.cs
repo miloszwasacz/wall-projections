@@ -12,40 +12,40 @@ public class Hotspot
     /// <summary>
     /// ID of the hotspot. Used by input to tell UI which hotspot info to show.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; }
 
     /// <summary>
     /// Path to file/filename for text to show.
     /// </summary>
-    public string? TextFile { get; set; }
+    public string TextFile { get; }
 
     /// <summary>
     /// Path to file/filename for image file to show.
     /// </summary>
-    public string? ImgFile { get; set; }
+    public string? ImgFile { get; }
 
     /// <summary>
     /// Path to file/filename for a video file to show.
     /// </summary>
-    public string? VideoFile { get; set; }
+    public string? VideoFile { get; }
 
     /// <summary>
     /// X value of the hotspot.
     /// </summary>
     [JsonInclude]
-    public double? X { get; set; }
+    public double? X { get; }
 
     /// <summary>
     /// Y value of the hotspot.
     /// </summary>
     [JsonInclude]
-    public double? Y { get; set; }
+    public double? Y { get; }
 
     /// <summary>
     /// Radius of the hotspot.
     /// </summary>
     [JsonInclude]
-    public double? R { get; set; }
+    public double? R { get; }
 
     /// <summary>
     /// Constructor for Hotspot
@@ -59,8 +59,8 @@ public class Hotspot
     /// <param name="r">Radius for hotspot in camera.</param>
     /// <exception cref="ArgumentException">Thrown if both image + video at once, or no content defined.</exception>
     public Hotspot(
-        int id = default,
-        string? textFile = null,
+        int id,
+        string textFile,
         string? imgFile = null,
         string? videoFile = null,
         double? x = default,
@@ -69,11 +69,6 @@ public class Hotspot
         )
     {
         Id = id;
-
-        if (textFile == null && imgFile == null && videoFile == null)
-        {
-            throw new ArgumentException("At least one of textFile, imgFile, videoFile must be defined.");
-        }
 
         if (imgFile != null && videoFile != null)
         {
