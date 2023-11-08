@@ -2,16 +2,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:WallProjections.ViewModels" 
+             xmlns:vm="using:WallProjections.ViewModels"
+             xmlns:views="clr-namespace:WallProjections.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.DisplayView"
              x:DataType="vm:DisplayViewModel">
-    
-    <!-- <Image Source="/Assets/1.png"/> -->
-    <StackPanel>
-        <TextBlock Name="Message"
-                   Text="{Binding Description}"/>
-    </StackPanel>
- 
-</UserControl>
 
+    <Grid ColumnDefinitions="2*, *" RowDefinitions="*"
+          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <TextBlock Grid.Column="0" Grid.Row="0"
+                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                   Text="{Binding Description}"
+                   Margin="10" />
+        <views:VideoView Grid.Column="1" Grid.Row="0"
+                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                         DataContext="{Binding VideoViewModel}"
+                         Margin="10" />
+    </Grid>
+</UserControl>

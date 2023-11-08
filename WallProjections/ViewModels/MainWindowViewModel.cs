@@ -9,7 +9,7 @@ public class MainWindowViewModel : ViewModelBase
     public DisplayViewModel? DisplayViewModel
     {
         get => _displayViewModel;
-        set => this.RaiseAndSetIfChanged(ref _displayViewModel, value);
+        private set => this.RaiseAndSetIfChanged(ref _displayViewModel, value);
     }
 
     public void CreateDisplayViewModel(string fileNumber)
