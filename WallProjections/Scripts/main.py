@@ -5,7 +5,6 @@ hands_model = mp.solutions.hands.Hands()
 webcam = cv2.VideoCapture(0)
 
 
-HOTSPOT_SCREEN_COORDS = (320, 240)
 FINGERTIP_INDICES = (4, 8, 12, 16, 20)
 
 
@@ -23,11 +22,13 @@ class HotSpot():
         squaredDist = (self.x - point.x)**2 + (self.y - point.y)**2
         return squaredDist <= self.radius**2
 
-hotSpots = [HotSpot(1, 0.5, 0.5, 0.01)]
+hotSpots = [HotSpot(1, 0.5, 0.5, 0.01), HotSpot(2, 0.8, 0.2, 0.03)]
 
 def detect_buttons(event_handler): #This function is called by Program.cs
     while webcam.isOpened():
         success, img = webcam.read()
+        height, width, _ = img.shape
+    
 
         # run model
         img_rbg = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -43,7 +44,8 @@ def detect_buttons(event_handler): #This function is called by Program.cs
 
 
         # annotate hand landmarks and hotspot onscreen
-        cv2.circle(img, HOTSPOT_SCREEN_COORDS, 10, (255, 0, 255), thickness=2)
+        for hotSpot in hotSpots:
+            cv2.circle(img, (int(hotSpot.x* width), int(hotSpot.y* height)), int(hotSpot.radius*1000), (255, 0, 255), thickness=2)
         if model_output.multi_hand_landmarks is not None:
             for landmarks in model_output.multi_hand_landmarks:
                 mp.solutions.drawing_utils.draw_landmarks(img, landmarks, connections=mp.solutions.hands.HAND_CONNECTIONS)
