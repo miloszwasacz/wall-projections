@@ -12,9 +12,10 @@ A project with Bristol Museum, to create interactive replicas of museum exhibits
   - [Avalonia docs](https://docs.avaloniaui.net/docs/next/welcome)
   - [LibVLCSharp docs](https://code.videolan.org/videolan/LibVLCSharp)
   - [Avalonia VideoView sample (LibVLCSharp)](https://code.videolan.org/videolan/LibVLCSharp/-/tree/3.x/samples/LibVLCSharp.Avalonia.Sample)
-- NUnit
+- NUnit & Pose
     - [NUnit docs](https://docs.nunit.org/)
     - [Avalonia NUnit sample](https://github.com/AvaloniaUI/Avalonia.Samples/tree/main/src/Avalonia.Samples/Testing/TestableApp.Headless.NUnit)
+    - [Pose docs](https://github.com/tonerdo/pose)
 - [Python.NET docs](https://pythonnet.github.io/pythonnet/)
 - [MediaPipe docs](https://mediapipe-studio.webapps.google.com/home)
 
@@ -97,3 +98,4 @@ Use buttons (instead of a camera system) to trigger the projection of hotspots (
 - [LibVLCSharp](https://code.videolan.org/videolan/LibVLCSharp)
 - [Python.NET](https://github.com/pythonnet/pythonnet)
 - [NUnit](https://docs.nunit.org/)
+- [Pose](https://github.com/tonerdo/pose)

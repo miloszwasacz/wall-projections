@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using WallProjections.ViewModels;
 using WallProjections.Views;
