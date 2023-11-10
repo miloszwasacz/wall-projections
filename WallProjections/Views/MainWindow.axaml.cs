@@ -18,7 +18,7 @@ public partial class MainWindow : Window
     // ReSharper disable UnusedParameter.Local
     private void InputElement_OnKeyDown(object? sender, KeyEventArgs e)
     {
-        string? key = e.Key switch
+        var key = e.Key switch
         {
             Key.D1 => "1",
             Key.D2 => "2",

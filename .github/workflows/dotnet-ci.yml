@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.0.x
+
       - uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
@@ -26,9 +27,15 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget
+
+      - name: Install LibVLCSharp
+        run: sudo apt install libvlc-dev
+
       - name: Restore dependencies
         run: dotnet restore
+
       - name: Build
         run: dotnet build --no-restore
+
       - name: Test
         run: dotnet test --no-build --verbosity normal
