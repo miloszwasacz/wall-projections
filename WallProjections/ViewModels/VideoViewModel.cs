@@ -45,11 +45,12 @@ public sealed class VideoViewModel : ViewModelBase, IDisposable
         _libVlc.Dispose();
     }
 
-    public void PlayVideo()
+    public bool PlayVideo()
     {
         var media = new Media(_libVlc, _videoPath);
-        _mediaPlayer?.Play(media);
+        var success = _mediaPlayer?.Play(media);
         media.Dispose();
+        return success ?? false;
     }
 
     public void StopVideo()

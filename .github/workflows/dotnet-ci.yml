@@ -28,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget
 
-      - name: Install LibVLCSharp
+      - name: Install LibVLCSharp dependencies
         run: sudo apt install -y libvlc-dev vlc
 
       - name: Restore dependencies

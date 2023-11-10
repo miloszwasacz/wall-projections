@@ -24,10 +24,12 @@ public sealed class MediaPlayerMock : MediaPlayer
     /// Adds the MRL of the given media to the list of played media
     /// </summary>
     /// <param name="media">Media whose MRL will be added to the list of played media</param>
-    public override void Play(Media media)
+    /// <returns>Always returns true</returns>
+    public override bool Play(Media media)
     {
         _mrlList.Add(media.Mrl);
         media.Dispose();
+        return true;
     }
 
     /// <summary>

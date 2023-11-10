@@ -24,10 +24,7 @@ public sealed class VLCMediaPlayer : MediaPlayer
     }
 
     /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Play(LibVLCSharp.Shared.Media)" />
-    public override void Play(Media media)
-    {
-        Player.Play(media);
-    }
+    public override bool Play(Media media) => Player.Play(media) && Player.IsPlaying;
 
     /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Stop" />
     public override void Stop()

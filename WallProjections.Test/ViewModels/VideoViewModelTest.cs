@@ -22,8 +22,19 @@ public class VideoViewModelTest
     {
         var videoViewModel = new VideoViewModel(VideoPath);
         var mediaPlayer = MediaPlayerMock.InjectInto(videoViewModel);
-        videoViewModel.PlayVideo();
-        Assert.That(mediaPlayer.HasPlayedOnly(VideoPath));
+        Assert.Multiple(() =>
+        {
+            Assert.That(videoViewModel.PlayVideo());
+            Assert.That(mediaPlayer.HasPlayedOnly(VideoPath));
+        });
+        videoViewModel.Dispose();
+    }
+
+    [Test]
+    public void PlayNonExistentVideoTest()
+    {
+        var videoViewModel = new VideoViewModel("nonexistent.mp4");
+        Assert.That(!videoViewModel.PlayVideo());
         videoViewModel.Dispose();
     }
 

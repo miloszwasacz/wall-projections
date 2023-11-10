@@ -15,7 +15,7 @@ public abstract class MediaPlayer : IDisposable
     public abstract LibVLCSharp.Shared.MediaPlayer Player { get; }
 
     /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Play(LibVLCSharp.Shared.Media)" />
-    public abstract void Play(Media media);
+    public abstract bool Play(Media media);
 
     /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Stop" />
     public abstract void Stop();
