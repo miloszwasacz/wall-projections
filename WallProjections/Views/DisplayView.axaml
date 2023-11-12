@@ -2,11 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:WallProjections.ViewModels"
+             xmlns:vm="using:WallProjections.ViewModels.Interfaces"
              xmlns:views="clr-namespace:WallProjections.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.DisplayView"
-             x:DataType="vm:DisplayViewModel">
+             x:DataType="vm:IDisplayViewModel">
 
     <Grid ColumnDefinitions="2*, *" RowDefinitions="*"
           HorizontalAlignment="Stretch" VerticalAlignment="Stretch">

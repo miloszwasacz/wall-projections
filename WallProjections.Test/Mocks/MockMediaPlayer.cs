@@ -1,41 +1,45 @@
-﻿using System.Reflection;
-using LibVLCSharp.Shared;
-using WallProjections.ViewModels;
-using MediaPlayer = WallProjections.Models.MediaPlayer;
+﻿using LibVLCSharp.Shared;
+using WallProjections.Models;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test.Mocks;
 
 /// <summary>
-/// A mock of <see cref="MediaPlayer"/> for injecting into <see cref="WallProjections.ViewModels.VideoViewModel"/>
+/// A mock of <see cref="VLCMediaPlayer"/> for injecting into <see cref="WallProjections.ViewModels.VideoViewModel"/>
 /// </summary>
-public sealed class MediaPlayerMock : MediaPlayer
+public sealed class MockMediaPlayer : IMediaPlayer
 {
-    /// <summary>
-    /// A stub of <see cref="LibVLCSharp.Shared.MediaPlayer"/> which should not be used
-    /// </summary>
-    public override LibVLCSharp.Shared.MediaPlayer Player => null!;
-
+    private readonly bool _fileExists;
     private readonly List<string> _mrlList = new();
     private int _stoppedCount;
     private int _disposedCount;
 
+    /// <summary>
+    /// A mock of <see cref="VLCMediaPlayer"/> for injecting into <see cref="WallProjections.ViewModels.VideoViewModel"/>
+    /// </summary>
+    /// <param name="fileExists">Determines the return value of <see cref="MockMediaPlayer.Play"/></param>
+    public MockMediaPlayer(bool fileExists = true)
+    {
+        _fileExists = fileExists;
+    }
 
     /// <summary>
     /// Adds the MRL of the given media to the list of played media
     /// </summary>
     /// <param name="media">Media whose MRL will be added to the list of played media</param>
-    /// <returns>Always returns true</returns>
-    public override bool Play(Media media)
+    /// <returns>True if the <see cref="MockMediaPlayer(bool)"/> was constructed with <code>true</code></returns>
+    public bool Play(Media media)
     {
-        _mrlList.Add(media.Mrl);
+        if (_fileExists)
+            _mrlList.Add(media.Mrl);
         media.Dispose();
-        return true;
+        return _fileExists;
     }
 
     /// <summary>
     /// Increases the number of times the media player has been stopped
     /// </summary>
-    public override void Stop()
+    public void Stop()
     {
         _stoppedCount++;
     }
@@ -43,27 +47,9 @@ public sealed class MediaPlayerMock : MediaPlayer
     /// <summary>
     /// Increases the number of times the media player has been disposed
     /// </summary>
-    public override void Dispose()
+    public void Dispose()
     {
         _disposedCount++;
-    }
-
-    /// <summary>
-    /// Injects a <see cref="MediaPlayerMock"/> into the provided <see cref="VideoViewModel"/>
-    /// by replacing the <see cref="MediaPlayer"/>
-    /// </summary>
-    /// <param name="vm">The target of injection</param>
-    /// <returns>The mock media player</returns>
-    /// <exception cref="NullReferenceException">Could not inject the mock because the required field was missing</exception>
-    public static MediaPlayerMock InjectInto(VideoViewModel vm)
-    {
-        var mediaPlayerMock = new MediaPlayerMock();
-        var mp = vm.MediaPlayer;
-        var props = vm.GetType().GetField("_mediaPlayer", BindingFlags.NonPublic | BindingFlags.Instance)
-                    ?? throw new NullReferenceException("Could not find _mediaPlayer field");
-        props.SetValue(vm, mediaPlayerMock);
-        mp?.Dispose();
-        return mediaPlayerMock;
     }
 
     /// <summary>

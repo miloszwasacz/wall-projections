@@ -1,21 +1,18 @@
-using System;
-using Avalonia.Controls;
 using Avalonia.Input;
-using WallProjections.ViewModels;
+using Avalonia.ReactiveUI;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
 {
-    private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel ??
-                                             throw new NullReferenceException("Window does not have a ViewModel");
-    
     public MainWindow()
     {
         InitializeComponent();
     }
 
     // ReSharper disable UnusedParameter.Local
+    //TODO Get rid of this
     private void InputElement_OnKeyDown(object? sender, KeyEventArgs e)
     {
         var key = e.Key switch
@@ -27,6 +24,6 @@ public partial class MainWindow : Window
         };
 
         if (key is not null)
-            ViewModel.CreateDisplayViewModel(key);
+            ViewModel?.CreateDisplayViewModel(key);
     }
 }

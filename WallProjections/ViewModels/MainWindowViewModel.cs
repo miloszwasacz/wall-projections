@@ -1,19 +1,26 @@
 ﻿using ReactiveUI;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
 {
-    private DisplayViewModel? _displayViewModel;
+    private readonly IViewModelProvider _vmProvider;
+    private IDisplayViewModel? _displayViewModel;
 
-    public DisplayViewModel? DisplayViewModel
+    public IDisplayViewModel? DisplayViewModel
     {
         get => _displayViewModel;
         private set => this.RaiseAndSetIfChanged(ref _displayViewModel, value);
     }
 
-    public void CreateDisplayViewModel(string fileNumber)
+    public MainWindowViewModel(IViewModelProvider vmProvider)
     {
-        DisplayViewModel = new DisplayViewModel(fileNumber);
+        _vmProvider = vmProvider;
+    }
+
+    public void CreateDisplayViewModel(string id)
+    {
+        DisplayViewModel = _vmProvider.GetDisplayViewModel(id);
     }
 }

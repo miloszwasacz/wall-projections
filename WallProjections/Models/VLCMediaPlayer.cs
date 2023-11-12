@@ -1,40 +1,26 @@
 ﻿using LibVLCSharp.Shared;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Models;
 
 // ReSharper disable once InconsistentNaming
-/// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer"/>
-/// <remarks>
-/// This is a wrapper around LibVLCSharp's <see cref="LibVLCSharp.Shared.MediaPlayer" /> class
-/// </remarks>
-public sealed class VLCMediaPlayer : MediaPlayer
+/// <summary>
+/// This is a wrapper implementing <see cref="IMediaPlayer"/> around
+/// LibVLCSharp's <see cref="MediaPlayer" /> class
+/// </summary>
+public sealed class VLCMediaPlayer : MediaPlayer, IMediaPlayer
 {
     /// <summary>
-    /// The underlying <see cref="LibVLCSharp.Shared.MediaPlayer" /> instance
+    /// This is a wrapper implementing <see cref="IMediaPlayer"/> around
+    /// LibVLCSharp's <see cref="MediaPlayer" /> class
     /// </summary>
-    public override LibVLCSharp.Shared.MediaPlayer Player { get; }
-
-    /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer(LibVLCSharp.Shared.LibVLC)"/>
-    /// <remarks>
-    /// This is a wrapper around LibVLCSharp's <see cref="LibVLCSharp.Shared.MediaPlayer" /> class
-    /// </remarks>
-    public VLCMediaPlayer(LibVLC libVlc)
+    public VLCMediaPlayer(LibVLC libVlc) : base(libVlc)
     {
-        Player = new LibVLCSharp.Shared.MediaPlayer(libVlc);
     }
 
-    /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Play(LibVLCSharp.Shared.Media)" />
-    public override bool Play(Media media) => Player.Play(media) && Player.IsPlaying;
-
-    /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Stop" />
-    public override void Stop()
-    {
-        Player.Stop();
-    }
-
-    /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Dispose" />
-    public override void Dispose()
-    {
-        Player.Dispose();
-    }
+    // /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Play(LibVLCSharp.Shared.Media)" />
+    // public new bool Play(Media media) => base.Play(media) && IsPlaying;
+    //
+    // /// <inheritdoc cref="LibVLCSharp.Shared.MediaPlayer.Stop" />
+    // public new void Stop() => base.Stop();
 }

@@ -9,9 +9,9 @@ public class Tests
     [Test]
     public void Test1()
     {
-        MainWindowViewModel viewModel = new();
+        var viewModel = ViewModelProvider.Instance.GetMainWindowViewModel();
 
-        Assert.IsNotNull(viewModel);
+        Assert.That(viewModel, Is.Not.Null);
     }
 
     [AvaloniaTest]
@@ -19,7 +19,7 @@ public class Tests
     {
         var mainWindow = new MainWindow
         {
-            DataContext = new MainWindowViewModel()
+            DataContext = ViewModelProvider.Instance.GetMainWindowViewModel()
         };
         mainWindow.Show();
 

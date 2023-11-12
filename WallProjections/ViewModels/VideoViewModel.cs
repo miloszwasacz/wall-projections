@@ -1,34 +1,33 @@
 ﻿using System;
 using LibVLCSharp.Shared;
 using ReactiveUI;
-using WallProjections.Models;
-using MediaPlayer = LibVLCSharp.Shared.MediaPlayer;
-using MediaPlayerWrapper = WallProjections.Models.MediaPlayer;
+using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
 
-public sealed class VideoViewModel : ViewModelBase, IDisposable
+public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 {
-    private readonly LibVLC _libVlc = new();
+    private readonly LibVLC _libVlc;
     private readonly string _videoPath;
     private bool _isDisposed;
-    private MediaPlayerWrapper? _mediaPlayer;
+    private IMediaPlayer? _mediaPlayer;
 
-    public VideoViewModel(string videoPath)
+    public VideoViewModel(string videoPath, LibVLC libVlc, IMediaPlayer mediaPlayer)
     {
         _videoPath = videoPath;
-        _mediaPlayer = new VLCMediaPlayer(_libVlc);
+        _libVlc = libVlc;
+        _mediaPlayer = mediaPlayer;
     }
 
-    public MediaPlayer? MediaPlayer
+    public IMediaPlayer? MediaPlayer
     {
-        get => _mediaPlayer?.Player;
+        get => _mediaPlayer;
         private set
         {
             if (value is not null)
                 throw new InvalidOperationException("MediaPlayer cannot be set to a non-null value");
-            _mediaPlayer = null;
-            this.RaisePropertyChanged();
+            this.RaiseAndSetIfChanged(ref _mediaPlayer, null);
         }
     }
 
@@ -42,7 +41,6 @@ public sealed class VideoViewModel : ViewModelBase, IDisposable
         var mediaPlayer = _mediaPlayer;
         MediaPlayer = null;
         mediaPlayer?.Dispose();
-        _libVlc.Dispose();
     }
 
     public bool PlayVideo()

@@ -1,6 +1,7 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using WallProjections.ViewModels;
 
 namespace WallProjections;
 
@@ -14,6 +15,7 @@ internal class Program
     public static void Main(string[] args)
     {
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        ViewModelProvider.Instance.Dispose();
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

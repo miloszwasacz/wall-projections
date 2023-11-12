@@ -1,22 +1,16 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:WallProjections.ViewModels"
+        xmlns:vm="using:WallProjections.ViewModels.Interfaces"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
+        x:DataType="vm:IMainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="WallProjections"
         xmlns:views="clr-namespace:WallProjections.Views"
-        KeyDown="InputElement_OnKeyDown"> <!-- this line links display to main-->
-
-
+        KeyDown="InputElement_OnKeyDown">
 
     <views:DisplayView DataContext="{Binding DisplayViewModel}"/>
-    <!-- <TextBlock Name="Greeting"
-               Text="{Binding Greeting}"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center" /> -->
 
 </Window>

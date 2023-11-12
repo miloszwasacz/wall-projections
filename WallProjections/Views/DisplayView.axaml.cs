@@ -1,9 +1,9 @@
 using Avalonia.ReactiveUI;
-using WallProjections.ViewModels;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.Views;
 
-public partial class DisplayView : ReactiveUserControl<DisplayViewModel>
+public partial class DisplayView : ReactiveUserControl<IDisplayViewModel>
 {
     public DisplayView()
     {
