@@ -8,7 +8,7 @@ namespace WallProjections.Test.ViewModels;
 public class VideoViewModelTest
 {
     private const string VideoPath = "test.mp4";
-    private static readonly LibVLC LibVlc = new();
+    private static LibVLC LibVlc => new();
 
     [Test]
     public void CreationTest()

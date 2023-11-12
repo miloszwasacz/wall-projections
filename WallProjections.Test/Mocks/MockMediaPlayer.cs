@@ -27,7 +27,7 @@ public sealed class MockMediaPlayer : IMediaPlayer
     /// Adds the MRL of the given media to the list of played media
     /// </summary>
     /// <param name="media">Media whose MRL will be added to the list of played media</param>
-    /// <returns>True if the <see cref="MockMediaPlayer(bool)"/> was constructed with <code>true</code></returns>
+    /// <returns>True if the <see cref="MockMediaPlayer(bool)"/> was constructed with <i>true</i></returns>
     public bool Play(Media media)
     {
         if (_fileExists)
