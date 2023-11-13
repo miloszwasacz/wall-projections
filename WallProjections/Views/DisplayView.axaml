@@ -8,15 +8,14 @@
              x:Class="WallProjections.Views.DisplayView"
              x:DataType="vm:IDisplayViewModel">
 
-    <Grid ColumnDefinitions="2*, *" RowDefinitions="*"
-          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <TextBlock Grid.Column="0" Grid.Row="0"
-                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                   Text="{Binding Description}"
-                   Margin="10" />
-        <views:VideoView Grid.Column="1" Grid.Row="0"
-                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                         DataContext="{Binding VideoViewModel}"
-                         Margin="10" />
+    <!--TODO Remove testing background colors -->
+    <Grid ColumnDefinitions="*, *" RowDefinitions="*, 2*, *"
+          Background="Blue">
+        <TextBlock Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
+                   Background="Aqua"
+                   Text="{Binding Description}" />
+        <views:VideoView Grid.Column="1" Grid.Row="1"
+                         Background="Red"
+                         DataContext="{Binding VideoViewModel}" />
     </Grid>
 </UserControl>

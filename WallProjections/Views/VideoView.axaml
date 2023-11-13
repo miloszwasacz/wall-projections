@@ -6,7 +6,8 @@
              xmlns:vm="clr-namespace:WallProjections.ViewModels.Interfaces"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.VideoView"
-             x:DataType="vm:IVideoViewModel">
+             x:DataType="vm:IVideoViewModel"
+             SizeChanged="OnResize">
 
     <vlc:VideoView MediaPlayer="{Binding MediaPlayer}" />
 </UserControl>
