@@ -9,10 +9,12 @@ public class MockViewModelProvider : IViewModelProvider
         throw new NotImplementedException();
     }
 
-    public IDisplayViewModel GetDisplayViewModel(string id)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockDisplayViewModel"/> with the given <paramref name="id"/>
+    /// </summary>
+    /// <param name="id">The ID of an artifact the viewmodel should display data about</param>
+    /// <returns>A new <see cref="MockDisplayViewModel"/></returns>
+    public IDisplayViewModel GetDisplayViewModel(string id) => new MockDisplayViewModel(id);
 
     /// <summary>
     /// Creates a new <see cref="MockVideoViewModel"/> with the given <paramref name="videoPath"/>
