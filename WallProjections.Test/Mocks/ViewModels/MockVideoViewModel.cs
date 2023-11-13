@@ -1,8 +1,9 @@
 ﻿using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks.Models;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
 
-namespace WallProjections.Test.Mocks;
+namespace WallProjections.Test.Mocks.ViewModels;
 
 /// <summary>
 /// A mock of <see cref="VideoViewModel"/> for injecting into <see cref="DisplayViewModel"/>

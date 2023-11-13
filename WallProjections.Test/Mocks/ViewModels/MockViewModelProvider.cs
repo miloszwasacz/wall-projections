@@ -1,6 +1,6 @@
 ﻿using WallProjections.ViewModels.Interfaces;
 
-namespace WallProjections.Test.Mocks;
+namespace WallProjections.Test.Mocks.ViewModels;
 
 public class MockViewModelProvider : IViewModelProvider
 {

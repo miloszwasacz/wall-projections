@@ -2,7 +2,7 @@
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 
-namespace WallProjections.Test.Mocks;
+namespace WallProjections.Test.Mocks.Models;
 
 /// <summary>
 /// A mock of <see cref="VLCMediaPlayer"/> for injecting into <see cref="WallProjections.ViewModels.VideoViewModel"/>

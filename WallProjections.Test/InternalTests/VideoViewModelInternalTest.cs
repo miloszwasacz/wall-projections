@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using LibVLCSharp.Shared;
-using WallProjections.Test.Mocks;
+using WallProjections.Test.Mocks.Models;
 using WallProjections.ViewModels;
 
 namespace WallProjections.Test.InternalTests;

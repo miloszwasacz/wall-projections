@@ -1,4 +1,4 @@
-﻿using WallProjections.Test.Mocks;
+﻿using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels;
 
 namespace WallProjections.Test.ViewModels;

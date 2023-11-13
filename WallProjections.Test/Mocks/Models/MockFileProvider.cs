@@ -1,6 +1,6 @@
 ﻿using WallProjections.Models.Interfaces;
 
-namespace WallProjections.Test.Mocks;
+namespace WallProjections.Test.Mocks.Models;
 
 public class MockFileProvider : IFileProvider
 {
