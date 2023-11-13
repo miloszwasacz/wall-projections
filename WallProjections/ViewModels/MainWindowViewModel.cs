@@ -1,4 +1,5 @@
 ﻿using ReactiveUI;
+using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
@@ -19,8 +20,8 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         _vmProvider = vmProvider;
     }
 
-    public void CreateDisplayViewModel(string id)
+    public void CreateDisplayViewModel(string id, IFileProvider fileProvider)
     {
-        DisplayViewModel = _vmProvider.GetDisplayViewModel(id);
+        DisplayViewModel = _vmProvider.GetDisplayViewModel(id, fileProvider);
     }
 }

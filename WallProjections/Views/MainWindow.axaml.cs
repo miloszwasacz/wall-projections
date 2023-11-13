@@ -1,5 +1,6 @@
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
+using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.Views;
@@ -24,6 +25,6 @@ public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
         };
 
         if (key is not null)
-            ViewModel?.CreateDisplayViewModel(key);
+            ViewModel?.CreateDisplayViewModel(key, new FileProvider());
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using LibVLCSharp.Shared;
 using WallProjections.Models;
+using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
@@ -18,9 +19,16 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     public static ViewModelProvider Instance => _viewModelProvider ??= new ViewModelProvider();
 
     /// <summary>
+    /// The backing field for the <see cref="LibVlc"/> property
+    /// </summary>
+    /// <remarks>Reset when <see cref="Dispose"/> is called so that a new instance can be created if needed</remarks>
+    private LibVLC? _libVlc;
+
+    /// <summary>
     /// A global instance of <see cref="LibVLC"/> to use for <see cref="LibVLCSharp"/> library
     /// </summary>
-    private readonly LibVLC _libVlc = new();
+    /// <remarks>Only instantiated if needed</remarks>
+    private LibVLC LibVlc => _libVlc ??= new LibVLC();
 
     private ViewModelProvider()
     {
@@ -38,9 +46,10 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// Creates a new <see cref="DisplayViewModel"/> instance with the given <paramref name="id"/>
     /// </summary>
     /// <param name="id">The id of a Hotspot</param>
+    /// <param name="fileProvider">The FileProvider to look for files associated with the artifact</param>
     /// <returns>A new <see cref="DisplayViewModel"/> instance</returns>
-    public IDisplayViewModel GetDisplayViewModel(string id) =>
-        new DisplayViewModel(this, new FileProvider(), id);
+    public IDisplayViewModel GetDisplayViewModel(string id, IFileProvider fileProvider) =>
+        new DisplayViewModel(this, fileProvider, id);
 
     /// <summary>
     /// Creates a new <see cref="VideoViewModel"/> instance with the given <paramref name="videoPath"/>
@@ -48,10 +57,15 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="videoPath">The path to the video to play</param>
     /// <returns>A new <see cref="VideoViewModel"/> instance</returns>
     public IVideoViewModel GetVideoViewModel(string videoPath) =>
-        new VideoViewModel(videoPath, _libVlc, new VLCMediaPlayer(_libVlc));
+        new VideoViewModel(videoPath, LibVlc, new VLCMediaPlayer(LibVlc));
 
+    /// <summary>
+    /// Disposes of the <see cref="LibVlc"/> instance on resets the backing field to <i>null</i>,
+    /// so that a new instance can be created if needed
+    /// </summary>
     public void Dispose()
     {
-        _libVlc.Dispose();
+        _libVlc?.Dispose();
+        _libVlc = null;
     }
 }
