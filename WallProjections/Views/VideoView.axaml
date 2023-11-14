@@ -9,5 +9,5 @@
              x:DataType="vm:IVideoViewModel"
              SizeChanged="OnResize">
 
-    <vlc:VideoView MediaPlayer="{Binding MediaPlayer}" />
+    <vlc:VideoView Name="VideoPlayer" MediaPlayer="{Binding MediaPlayer}" />
 </UserControl>

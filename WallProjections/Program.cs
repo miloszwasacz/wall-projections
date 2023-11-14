@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using WallProjections.ViewModels;
 
+[assembly: InternalsVisibleTo("WallProjections.Test")]
 namespace WallProjections;
 
 // ReSharper disable once ClassNeverInstantiated.Global

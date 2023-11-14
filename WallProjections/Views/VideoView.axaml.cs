@@ -9,8 +9,7 @@ public partial class VideoView : UserControl
         InitializeComponent();
     }
 
-    // ReSharper disable UnusedParameter.Local
-    private void OnResize(object? sender, SizeChangedEventArgs e)
+    internal void OnResize(object? sender, SizeChangedEventArgs e)
     {
         if (e.WidthChanged)
             Height = e.NewSize.Width * 9 / 16;
