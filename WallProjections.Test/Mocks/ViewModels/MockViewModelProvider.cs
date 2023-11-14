@@ -5,10 +5,11 @@ namespace WallProjections.Test.Mocks.ViewModels;
 
 public class MockViewModelProvider : IViewModelProvider
 {
-    public IMainWindowViewModel GetMainWindowViewModel()
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockMainWindowViewModel"/> with self as the <see cref="IViewModelProvider"/>
+    /// </summary>
+    /// <returns>A new <see cref="MockMainWindowViewModel"/></returns>
+    public IMainWindowViewModel GetMainWindowViewModel() => new MockMainWindowViewModel(this);
 
     /// <summary>
     /// Creates a new <see cref="MockDisplayViewModel"/> with the given <paramref name="id"/>
