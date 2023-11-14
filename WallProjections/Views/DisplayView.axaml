@@ -12,9 +12,11 @@
     <Grid ColumnDefinitions="*, *" RowDefinitions="*, 2*, *"
           Background="Blue">
         <TextBlock Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
+                   Name="Description"
                    Background="Aqua"
                    Text="{Binding Description}" />
         <views:VideoView Grid.Column="1" Grid.Row="1"
+                         Name="VideoView"
                          Background="Red"
                          DataContext="{Binding VideoViewModel}" />
     </Grid>
