@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using WallProjections.Configuration.Interfaces;
 
 namespace WallProjections.Configuration;
 
@@ -10,48 +12,68 @@ namespace WallProjections.Configuration;
 /// Stores all user customisable configuration for the program.
 /// </summary>
 [Serializable]
-public class Config
+public class Config : IConfig
 {
+    /// <summary>
+    /// Backing field for <see cref="Hotspots"/>
+    /// </summary>
+    [JsonIgnore]
+    private List<Hotspot> _hotspots;
+
     /// <summary>
     /// List of all hotspots (their locations and content).
     /// </summary>
     [JsonInclude]
-    private List<Hotspot> Hotspots { get; }
+    public IEnumerable<Hotspot> Hotspots => _hotspots.AsReadOnly();
 
-    /// <summary>
-    /// Location where to store configuration.
-    /// </summary>
     public string ConfigLocation { get; }
 
-    /// <summary>
-    /// Backing field for <see cref="TempPath"/>
-    /// </summary>
     [JsonIgnore]
-    private static string? _tempPath;
+    public static string TempPath => IConfig.TempPath;
 
     /// <summary>
-    /// Location where the opened files are stored.
+    /// Default constructor for Config for if no hotspot.
     /// </summary>
-    [JsonIgnore]
-    public static string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+    /// <param name="configLocation">Path to save config file.</param>
+    public Config(string configLocation = "config.json")
+    {
+        _hotspots = new List<Hotspot>();
+        ConfigLocation = configLocation;
+    }
 
     /// <summary>
-    /// Returns hotspot if Id matches a hotspot.
+    /// Constructs a new Config object using list of hotspots and a custom location.
     /// </summary>
-    /// <param name="id">Id to match Hotspot</param>
-    /// <returns>Hotspot with matching Id if exists, or null if no such Hotspot.</returns>
+    /// <param name="hotspots">Collection of hotspots to create config with.</param>
+    /// <param name="configLocation">Path to save config location.</param>
+    [JsonConstructor]
+    public Config(IEnumerable<Hotspot>? hotspots, string configLocation = "config.json")
+    {
+        ConfigLocation = configLocation;
+        hotspots ??= new List<Hotspot>();
+        _hotspots = new List<Hotspot>(hotspots);
+    }
+
+    /// <summary>
+    /// Specific constructor so deserializer matches parameters correctly.
+    /// </summary>
+    /// <param name="hotspots">List of hotspots.</param>
+    /// <param name="configLocation">Location to store config file.</param>
+    public Config(List<Hotspot> hotspots, string configLocation)
+        : this(hotspots.AsReadOnly(), configLocation) {}
+    
     public Hotspot? GetHotspot(int id)
     {
-        return Hotspots.Find(x => x.Id == id);
+        return _hotspots.Find(x => x.Id == id);
     }
 
-    public string? GetHotspotFolder(Hotspot hotspot)
+    public int HotspotCount()
     {
-        return Path.Combine(Config.TempPath, hotspot.Id.ToString());
+        return _hotspots.Count;
     }
 
     /// <summary>
-    /// Saves the current state of Config to the file path from ConfigLocation.
+    /// Saves the current state of Config to the file name stored in <see cref="ConfigLocation"/>.
     /// Throws exception if error occurs on save.
     /// </summary>
     /// <exception cref="PathTooLongException">Config path too long for system.</exception>
@@ -66,37 +88,19 @@ public class Config
         var options = new JsonSerializerOptions { WriteIndented = true,  };
         var configOutput = JsonSerializer.Serialize(this, options);
 
-        File.WriteAllText(Path.Combine(TempPath, ConfigLocation), configOutput);
+        File.WriteAllText(ConfigLocation, configOutput);
     }
 
     /// <summary>
-    /// Default constructor for Config for if no hotspot.
+    /// Saves the current state of Config to the file name stored in <see cref="ConfigLocation"/> using path.
+    /// Throws exception if error occurs on save.
     /// </summary>
-    /// <param name="configLocation">Path to save config file.</param>
-    public Config(string configLocation = "config.json")
+    /// <param name="path">Path to store config file in.</param>
+    public void SaveConfig(string path)
     {
-        Hotspots = new List<Hotspot>();
-        ConfigLocation = configLocation;
-    }
+        var options = new JsonSerializerOptions { WriteIndented = true,  };
+        var configOutput = JsonSerializer.Serialize(this, options);
 
-    /// <summary>
-    /// Constructs a new Config object using list of hotspots and a custom location.
-    /// </summary>
-    /// <param name="hotspots">Collection of hotspots to create config with.</param>
-    /// <param name="configLocation">Path to save config location.</param>
-    public Config(IEnumerable<Hotspot>? hotspots, string configLocation = "config.json")
-    {
-        ConfigLocation = configLocation;
-        hotspots ??= new List<Hotspot>();
-        Hotspots = new List<Hotspot>(hotspots);
+        File.WriteAllText(Path.Combine(path, ConfigLocation), configOutput);
     }
-
-    /// <summary>
-    /// Specific constructor so deserializer matches parameters correctly.
-    /// </summary>
-    /// <param name="hotspots">List of hotspots.</param>
-    /// <param name="configLocation">Location to store config file.</param>
-    [JsonConstructor]
-    public Config(List<Hotspot> hotspots, string configLocation)
-        : this(hotspots.AsReadOnly(), configLocation) {}
 }

@@ -15,22 +15,12 @@ public class Hotspot
     public int Id { get; }
 
     /// <summary>
-    /// X value of the hotspot.
+    /// Record of coordinates for hotspot position (X, Y, Radius)
     /// </summary>
     [JsonInclude]
-    public double? X { get; }
+    public Coord Position { get; }
 
-    /// <summary>
-    /// Y value of the hotspot.
-    /// </summary>
-    [JsonInclude]
-    public double? Y { get; }
 
-    /// <summary>
-    /// Radius of the hotspot.
-    /// </summary>
-    [JsonInclude]
-    public double? R { get; }
 
     /// <summary>
     /// Constructor for Hotspot
@@ -42,14 +32,15 @@ public class Hotspot
     /// <exception cref="ArgumentException">Thrown if both image + video at once, or no content defined.</exception>
     public Hotspot(
         int id,
-        double? x = default,
-        double? y = default,
-        double? r = default
+        double x = default,
+        double y = default,
+        double r = default
         )
     {
         Id = id;
-        X = x;
-        Y = y;
-        R = r;
+        Position = new Coord(x, y, r);
     }
+
+    [JsonConstructor]
+    public Hotspot(int id, Coord position): this(id, position.X, position.Y, position.R) {}
 }
