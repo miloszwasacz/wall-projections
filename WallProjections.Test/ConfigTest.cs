@@ -29,7 +29,7 @@ public class ConfigTests
             }
         );
 
-        Assert.That(config.HotspotCount(), Is.EqualTo(1));
+        Assert.That(config.HotspotCount(), Is.EqualTo(2));
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class ConfigTests
                 id: 0,
                 x: 1,
                 y: 2,
-                r: 3
+                r: 3.5
             ) };
         var original = new Config(hotspots, ConfigLocation);
 
