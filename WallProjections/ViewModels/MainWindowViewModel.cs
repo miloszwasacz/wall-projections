@@ -1,4 +1,4 @@
-﻿using ReactiveUI;
+using ReactiveUI;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 
@@ -24,4 +24,6 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
     {
         DisplayViewModel = _vmProvider.GetDisplayViewModel(id, fileProvider);
     }
+    
+    //TODO Handle Python events (see f1dd495)
 }
