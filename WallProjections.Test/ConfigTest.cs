@@ -93,8 +93,8 @@ public class ConfigTests
 
         CheckConfigsEqual(config, config2);
 
-        Assert.That(File.Exists(Path.Combine(Config.TempPath, "0/0.txt")), Is.True);
-        Assert.That(File.ReadAllText(Path.Combine(Config.TempPath, "0/0.txt")), Is.EqualTo("Hello World\n"));
+        Assert.That(File.Exists(Path.Combine(IConfig.GetHotspotFolder(config.GetHotspot(0)!), "0.txt")), Is.True);
+        Assert.That(File.ReadAllText(Path.Combine(IConfig.GetHotspotFolder(config.GetHotspot(0)!), "0.txt")), Is.EqualTo("Hello World\n"));
     }
 
     /// <summary>
