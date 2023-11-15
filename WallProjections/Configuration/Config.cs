@@ -24,6 +24,12 @@ public class Config
     public string ConfigLocation { get; }
 
     /// <summary>
+    /// Location where the opened files are stored.
+    /// </summary>
+    [JsonIgnore]
+    public string TempPath { get; set; }
+
+    /// <summary>
     /// Saves the current state of Config to the file path from ConfigLocation.
     /// Throws exception if error occurs on save.
     /// </summary>
@@ -39,30 +45,35 @@ public class Config
         var options = new JsonSerializerOptions { WriteIndented = true,  };
         var configOutput = JsonSerializer.Serialize(this, options);
 
-        File.WriteAllText(ConfigLocation, configOutput);
+        File.WriteAllText(Path.Combine(TempPath, ConfigLocation), configOutput);
     }
 
     /// <summary>
     /// Loads a config from a .json file.
     /// </summary>
-    /// <param name="configLocation">Location that configuration is stored.</param>
+    /// <param name="configLocation">Name of configuration file.</param>
+    /// <param name="tempPath">Path to temporary folder to use.</param>
     /// <returns>Loaded Config.</returns>
     /// <exception cref="JsonException">Format of config file is invalid.</exception>
-    public static Config LoadConfig(string configLocation)
+    public static Config LoadConfig(string tempPath, string configLocation)
     {
+        var configPath = Path.Combine(tempPath, configLocation);
+
         // Create default config if none exists.
-        if (!File.Exists(configLocation))
+        if (!File.Exists(configPath))
         {
             var newConfig = new Config(new List<Hotspot>());
+            newConfig.TempPath = tempPath;
             newConfig.SaveConfig();
             return newConfig;
         }
 
         try
         {
-            var configJson = File.ReadAllText(configLocation);
+            var configJson = File.ReadAllText(configPath);
             var config = JsonSerializer.Deserialize<Config>(configJson);
             if (config is null) throw new JsonException();
+            config.TempPath = tempPath;
             return config;
         }
         catch (Exception e)
