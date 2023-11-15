@@ -1,4 +1,8 @@
 import time
+
+TIMEREQUIRED=1.5 
+GRACEPERIOD=0.5
+
 class _Button:
     """
     The _Button class is used to keep track if a HotSpot is activated:
@@ -8,15 +12,11 @@ class _Button:
     - During unpressed periods (even if the button is repressed within GRACEPERIOD) our timer doeesn't count up
     """
 
-    def __init__(self, TIMEREQUIRED, GRACEPERIOD):
-        self.TIMEREQUIRED = TIMEREQUIRED
-        self.GRACEPERIOD = GRACEPERIOD
-
-
+    def __init__(self):
 
         self.timeAtPressed = time.time() #time.time() when button last pressed on unpressed
         self.isPressed = False
-        self.newTimeRequired = self.TIMEREQUIRED # the time required for successful press, including the time of unpresses
+        self.newTimeRequired = TIMEREQUIRED # the time required for successful press, including the time of unpresses
     
     
     def _pressedTime(self):
@@ -29,16 +29,16 @@ class _Button:
         """
 
         if not self.isPressed: #If previously unpressed:
-            if self._pressedTime() < self.GRACEPERIOD:#If within grace period:
+            if self._pressedTime() < GRACEPERIOD:#If within grace period:
                 self.newTimeRequired +=  self._pressedTime() #Increase time required by time spent outside of HotSpot
                 self.timeAtPressed = time.time()
             else: #Otherwise reset:
-                self.newTimeRequired = self.TIMEREQUIRED
+                self.newTimeRequired = TIMEREQUIRED
                 self.timeAtPressed = time.time()
             self.isPressed = True
         else: #If previosuly pressed:
             if self._pressedTime() > self.newTimeRequired: #If pressed for long enough:
-                self.newTimeRequired = self.TIMEREQUIRED
+                self.newTimeRequired = TIMEREQUIRED
                 self.timeAtPressed = time.time()
                 self.isPressed = True
                 return True
@@ -66,7 +66,7 @@ class HotSpot():
     """
     The HotSpot class represents an onscreen hotspot which a user interacts with
     """
-    def __init__(self, id, x, y, eventHandler, radius=0.03, unpressedColor=(0, 255, 0), pressedColor = (255, 0, 0), TIMEREQUIRED=1.5, GRACEPERIOD=0.5):
+    def __init__(self, id, x, y, eventHandler, radius=0.03, unpressedColor=(0, 255, 0), pressedColor = (255, 0, 0)):
         self.id = id
         self._x = x
         self._y = y
@@ -74,7 +74,7 @@ class HotSpot():
         self._unpressedColor = unpressedColor
         self._pressesdColor = pressedColor
         self._eventHandler = eventHandler
-        self._button = _Button(TIMEREQUIRED, GRACEPERIOD)
+        self._button = _Button()
     
     def onScreenXY(self, width, height):
         return (int(width*self._x), int(height*self._y))
