@@ -28,7 +28,7 @@ public class ViewModelProviderTest
     public void GetDisplayViewModelTest()
     {
         const string artifactId = "test";
-        var files = new[] { "test.txt", "test.mp4" };
+        var files = new[] { "test", "test.mp4" };
         var fileProvider = new MockFileProvider(files);
         var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(artifactId, fileProvider);
         Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());

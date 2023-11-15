@@ -9,7 +9,7 @@ namespace WallProjections.Test.ViewModels;
 public class DisplayViewModelTest
 {
     private const string ArtifactId = "1";
-    private const string TextPath = "test.txt";
+    private const string TextPath = "test";
     private const string VideoPath = "test.mp4";
     private static string[] Files => new [] {TextPath, VideoPath};
     private static string[] FilesNoVideo => new [] {TextPath};
@@ -29,7 +29,7 @@ public class DisplayViewModelTest
 
             Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
             //TODO Add proper tests for the Description once DisplayViewModel is refactored
-            Assert.That(displayViewModel.Description, Is.EqualTo(TextPath));
+            Assert.That(displayViewModel.Description, Is.EqualTo(string.Empty));
 
             var videoViewModel = displayViewModel.VideoViewModel as MockVideoViewModel ?? throw MockException;
             Assert.That(videoViewModel.VideoPath, Is.EqualTo(VideoPath));
@@ -46,7 +46,7 @@ public class DisplayViewModelTest
         {
             Assert.That(displayViewModel.VideoViewModel, Is.Null);
             //TODO Add proper tests for the Description once DisplayViewModel is refactored
-            Assert.That(displayViewModel.Description, Is.EqualTo(TextPath));
+            Assert.That(displayViewModel.Description, Is.EqualTo(string.Empty));
         });
     }
 

@@ -33,6 +33,11 @@ public class MockDisplayViewModel : IDisplayViewModel
     /// </summary>
     public IVideoViewModel? VideoViewModel { get; } = new MockVideoViewModel(DefaultVideoPath);
 
+    //TODO Implement mock properties
+    public ViewModelBase? ImageViewModel => throw new NotImplementedException();
+    public bool HasImages => throw new NotImplementedException();
+    public bool HasVideos => throw new NotImplementedException();
+
     /// <summary>
     /// A mock of <see cref="DisplayViewModel"/> for injecting into <see cref="MainWindowViewModel"/>
     /// </summary>
