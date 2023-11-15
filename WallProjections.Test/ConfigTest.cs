@@ -16,7 +16,24 @@ public class ConfigTests
     private const string ConfigLocation = "config_test.json";
 
     /// <summary>
-    /// Checks that GetHotspot returns the correct hotspot.
+    /// Test to ensure the correct count is returned from <see cref="Config.HotspotCount"/>
+    /// </summary>
+    [Test]
+    public void TestHotspotCount()
+    {
+        var config = new Config(
+            hotspots: new List<Hotspot>
+            {
+                new(id: 1),
+                new(id: 2)
+            }
+        );
+
+        Assert.That(config.HotspotCount(), Is.EqualTo(1));
+    }
+
+    /// <summary>
+    /// Checks that <see cref="Config.GetHotspot"/> returns the correct hotspot.
     /// </summary>
     [Test]
     public void TestGetHotspot()
@@ -40,7 +57,8 @@ public class ConfigTests
     }
 
     /// <summary>
-    /// Tests that loaded config is identical to the original config.
+    /// Tests that loaded config from <see cref="ContentImporter.LoadConfig"/> is identical to the original config
+    /// saved with <see cref="Config.SaveConfig()"/>.
     /// </summary>
     [Test]
     public void TestSaveAndLoad()
@@ -63,7 +81,7 @@ public class ConfigTests
     }
 
     /// <summary>
-    /// Test that the provided zip file loads the config correctly and
+    /// Test that the <see cref="ContentImporter.Load"/> method loads the config and the file correctly.
     /// </summary>
     [Test]
     public void TestContentImporterLoad()
