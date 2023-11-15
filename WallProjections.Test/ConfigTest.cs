@@ -95,6 +95,8 @@ public class ConfigTests
 
         Assert.That(File.Exists(Path.Combine(IConfig.GetHotspotFolder(config.GetHotspot(0)!), "0.txt")), Is.True);
         Assert.That(File.ReadAllText(Path.Combine(IConfig.GetHotspotFolder(config.GetHotspot(0)!), "0.txt")), Is.EqualTo("Hello World\n"));
+
+        ContentImporter.Cleanup(config);
     }
 
     /// <summary>
