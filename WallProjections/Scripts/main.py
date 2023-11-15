@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+from HotSpot import HotSpot
 
 hands_model = mp.solutions.hands.Hands()
 webcam = cv2.VideoCapture(0)
@@ -8,23 +9,10 @@ webcam = cv2.VideoCapture(0)
 FINGERTIP_INDICES = (4, 8, 12, 16, 20)
 
 
-class HotSpot():
-    def __init__(self, id, x, y, radius):
-        self.id = id
-        self.x = x
-        self.y = y
-        self.radius = radius
-    
-    def isPointInside(self, point):
-        """
-        Returns true if given point is inside hotspot
-        """
-        squaredDist = (self.x - point.x)**2 + (self.y - point.y)**2
-        return squaredDist <= self.radius**2
-
-hotSpots = [HotSpot(1, 0.5, 0.5, 0.01), HotSpot(2, 0.8, 0.2, 0.03)]
-
 def detect_buttons(event_handler): #This function is called by Program.cs
+    #Load hotspots
+    hotSpots = [HotSpot(0, 0.5, 0.5, event_handler), HotSpot(1, 0.8, 0.8, event_handler)]
+    
     while webcam.isOpened():
         success, img = webcam.read()
         height, width, _ = img.shape
@@ -37,15 +25,13 @@ def detect_buttons(event_handler): #This function is called by Program.cs
         # detect if finger over hotspot
         if model_output.multi_hand_landmarks:
             fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in model_output.multi_hand_landmarks]
-            for fingertip_coord in fingertip_coords:
-                for hotSpot in hotSpots:
-                    if hotSpot.isPointInside(fingertip_coord):
-                        event_handler.OnPressDetected(hotSpot.id)
+            for hotSpot in hotSpots:
+                hotSpot.update(fingertip_coords)
 
 
         # annotate hand landmarks and hotspot onscreen
         for hotSpot in hotSpots:
-            cv2.circle(img, (int(hotSpot.x* width), int(hotSpot.y* height)), int(hotSpot.radius*1000), (255, 0, 255), thickness=2)
+            cv2.circle(img, hotSpot.onScreenXY(width, height), hotSpot.onScreenRadius(), hotSpot.onScreenColor(), thickness=2)
         if model_output.multi_hand_landmarks is not None:
             for landmarks in model_output.multi_hand_landmarks:
                 mp.solutions.drawing_utils.draw_landmarks(img, landmarks, connections=mp.solutions.hands.HAND_CONNECTIONS)

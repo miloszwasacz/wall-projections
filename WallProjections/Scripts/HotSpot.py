@@ -12,33 +12,42 @@ class _Button:
         self.TIMEREQUIRED = TIMEREQUIRED
         self.GRACEPERIOD = GRACEPERIOD
 
-        self.timePressed = None #time.time() when button started pressing
-        self.timeUnpressed = None #time.time() when button started unpressing
+
+
+        self.timeAtPressed = time.time() #time.time() when button last pressed on unpressed
+        self.isPressed = False
         self.newTimeRequired = self.TIMEREQUIRED # the time required for successful press, including the time of unpresses
     
     def press(self):
-        currentTime = time.time()
-        if currentTime - self.timePressed > self.newTimeRequired: #Button has been successfully pressed:
-            #reset button
-            self.timePressed = None
-            self.timeUnpressed = None
-            self.newTimeRequired = self.TIMEREQUIRED
-            return True
-        if self.timePressed == None: #Button not pressed:
-            self.timePressed = time.time()
-            self.timeUnpressed = None
-        elif currentTime - self.timeUnpressed < self.GRACEPERIOD: #Button breifly unpressed:
-            self.newTimeRequired += currentTime - self.timeUnpressed
-            self.timeUnpressed = None
+        return True
+        # currentTime = time.time()
+        # if self.timePressed == None: #Button not pressed:
+        #     self.timePressed = time.time()
+        #     self.timeUnpressed = None
+        # elif currentTime - self.timePressed > self.newTimeRequired: #Button has been successfully pressed:
+        #     #reset button
+        #     self.timePressed = None
+        #     self.timeUnpressed = None
+        #     self.newTimeRequired = self.TIMEREQUIRED
+        #     return True
+        # elif currentTime - self.timeUnpressed < self.GRACEPERIOD: #Button breifly unpressed:
+        #     self.newTimeRequired += currentTime - self.timeUnpressed
+        #     self.timeUnpressed = None
 
-        return False
+        # return False
 
     def unPress(self):
-        if self.timeUnpressed == None:
-            self.timeUnpressed = time.time()
+        """On unpress:
+        Either been unpressed for more than 
+        """
+        return False
+        # if self.timeUnpressed == None:
+        #     self.timeUnpressed = time.time()
 
     def getPressedAmount(self):
-        return min(0, max (self.timePressed / self.newTimeRequired, 1))
+        if self.timeAtPressed == None:
+            return 0
+        return min(0, max (self.timeAtPressed / self.newTimeRequired, 1))
         
 class HotSpot():
     """
@@ -54,21 +63,18 @@ class HotSpot():
         self._eventHandler = eventHandler
         self._button = _Button(TIMEREQUIRED, GRACEPERIOD)
     
-    def onScreenX(self, width):
-        return width*self._x
-    
-    def onScreenY(self, height):
-        return height*self._y
+    def onScreenXY(self, width, height):
+        return (int(width*self._x), int(height*self._y))
     
     def onScreenRadius(self):
-        return 1000*self._radius
+        return int(1000*self._radius)
     
     def onScreenColor(self):
         pressedAmount = self._button.getPressedAmount()
         return(
-            (1 - pressedAmount)* self._unpressedColor[0] + pressedAmount * self._pressesdColor[0],
-            (1 - pressedAmount)* self._unpressedColor[1] + pressedAmount * self._pressesdColor[1],
-            (1 - pressedAmount)* self._unpressedColor[2] + pressedAmount * self._pressesdColor[2],     
+            int((1 - pressedAmount)* self._unpressedColor[0] + pressedAmount * self._pressesdColor[0]),
+            int((1 - pressedAmount)* self._unpressedColor[1] + pressedAmount * self._pressesdColor[1]),
+            int((1 - pressedAmount)* self._unpressedColor[2] + pressedAmount * self._pressesdColor[2]),     
         )
 
     def update(self, points):
@@ -92,4 +98,4 @@ class HotSpot():
         Returns true if given point is inside hotspot
         """
         squaredDist = (self._x - point.x)**2 + (self._y - point.y)**2
-        return squaredDist <= self.radius**2
+        return squaredDist <= self._radius**2
