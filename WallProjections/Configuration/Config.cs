@@ -30,6 +30,16 @@ public class Config
     public string TempPath { get; set; }
 
     /// <summary>
+    /// Returns hotspot if Id matches a hotspot.
+    /// </summary>
+    /// <param name="id">Id to match Hotspot</param>
+    /// <returns>Hotspot with matching Id if exists, or null if no such Hotspot.</returns>
+    public Hotspot? GetHotspot(int id)
+    {
+        return Hotspots.Find(x => x.Id == id);
+    }
+
+    /// <summary>
     /// Saves the current state of Config to the file path from ConfigLocation.
     /// Throws exception if error occurs on save.
     /// </summary>
@@ -46,51 +56,6 @@ public class Config
         var configOutput = JsonSerializer.Serialize(this, options);
 
         File.WriteAllText(Path.Combine(TempPath, ConfigLocation), configOutput);
-    }
-
-    /// <summary>
-    /// Loads a config from a .json file.
-    /// </summary>
-    /// <param name="configLocation">Name of configuration file.</param>
-    /// <param name="tempPath">Path to temporary folder to use.</param>
-    /// <returns>Loaded Config.</returns>
-    /// <exception cref="JsonException">Format of config file is invalid.</exception>
-    public static Config LoadConfig(string tempPath, string configLocation)
-    {
-        var configPath = Path.Combine(tempPath, configLocation);
-
-        // Create default config if none exists.
-        if (!File.Exists(configPath))
-        {
-            var newConfig = new Config(new List<Hotspot>());
-            newConfig.TempPath = tempPath;
-            newConfig.SaveConfig();
-            return newConfig;
-        }
-
-        try
-        {
-            var configJson = File.ReadAllText(configPath);
-            var config = JsonSerializer.Deserialize<Config>(configJson);
-            if (config is null) throw new JsonException();
-            config.TempPath = tempPath;
-            return config;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Returns hotspot if Id matches a hotspot.
-    /// </summary>
-    /// <param name="id">Id to match Hotspot</param>
-    /// <returns>Hotspot with matching Id if exists, or null if no such Hotspot.</returns>
-    public Hotspot? GetHotspot(int id)
-    {
-        return Hotspots.Find(x => x.Id == id);
     }
 
     /// <summary>
