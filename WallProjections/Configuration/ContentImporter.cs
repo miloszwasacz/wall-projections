@@ -28,7 +28,7 @@ public class ContentImporter
     /// <param name="config">The Config class used to access the files.</param>
     public static void Cleanup(Config config)
     {
-        Directory.Delete(Config.TempPath);
+        Directory.Delete(Config.TempPath, true);
     }
 
     /// <summary>
