@@ -18,42 +18,55 @@ class _Button:
         self.isPressed = False
         self.newTimeRequired = self.TIMEREQUIRED # the time required for successful press, including the time of unpresses
     
-    def press(self):
-        return True
-        # currentTime = time.time()
-        # if self.timePressed == None: #Button not pressed:
-        #     self.timePressed = time.time()
-        #     self.timeUnpressed = None
-        # elif currentTime - self.timePressed > self.newTimeRequired: #Button has been successfully pressed:
-        #     #reset button
-        #     self.timePressed = None
-        #     self.timeUnpressed = None
-        #     self.newTimeRequired = self.TIMEREQUIRED
-        #     return True
-        # elif currentTime - self.timeUnpressed < self.GRACEPERIOD: #Button breifly unpressed:
-        #     self.newTimeRequired += currentTime - self.timeUnpressed
-        #     self.timeUnpressed = None
+    
+    def _pressedTime(self):
+        return time.time() - self.timeAtPressed
 
-        # return False
+    def press(self):
+        """
+        Called every frame the HotSpot is pressed,
+        returns a Bool indicating if the button has been pressed for long enough
+        """
+
+        if not self.isPressed: #If previously unpressed:
+            if self._pressedTime() < self.GRACEPERIOD:#If within grace period:
+                self.newTimeRequired +=  self._pressedTime() #Increase time required by time spent outside of HotSpot
+                self.timeAtPressed = time.time()
+            else: #Otherwise reset:
+                self.newTimeRequired = self.TIMEREQUIRED
+                self.timeAtPressed = time.time()
+            self.isPressed = True
+        else: #If previosuly pressed:
+            if self._pressedTime() > self.newTimeRequired: #If pressed for long enough:
+                self.newTimeRequired = self.TIMEREQUIRED
+                self.timeAtPressed = time.time()
+                self.isPressed = True
+                return True
+        return False
 
     def unPress(self):
-        """On unpress:
-        Either been unpressed for more than 
         """
-        return False
-        # if self.timeUnpressed == None:
-        #     self.timeUnpressed = time.time()
+        Called every frame the HotSpot is not pressed
+        """
+        if self.isPressed: #If previously pressed:
+            self.newTimeRequired -= self._pressedTime() #Decrease time required by time spent inside of HotSpot
+            self.timeAtPressed = time.time()
+            self.isPressed = False
 
     def getPressedAmount(self):
-        if self.timeAtPressed == None:
-            return 0
-        return min(0, max (self.timeAtPressed / self.newTimeRequired, 1))
+        """
+        Returns a value between 0 (fully unpressed) and 1 (fully pressed.)
+        """
+        if self.isPressed:
+            return 1
+        return 0
+
         
 class HotSpot():
     """
     The HotSpot class represents an onscreen hotspot which a user interacts with
     """
-    def __init__(self, id, x, y, eventHandler, radius=0.03, unpressedColor=(0, 255, 0), pressedColor = (255, 0, 0), TIMEREQUIRED=2.5, GRACEPERIOD=0.8):
+    def __init__(self, id, x, y, eventHandler, radius=0.03, unpressedColor=(0, 255, 0), pressedColor = (255, 0, 0), TIMEREQUIRED=1.5, GRACEPERIOD=0.5):
         self.id = id
         self._x = x
         self._y = y
@@ -70,6 +83,9 @@ class HotSpot():
         return int(1000*self._radius)
     
     def onScreenColor(self):
+        """
+        Returns a color RGB tuple between pressed and unpressed color depending on buttons pressedAmount
+        """
         pressedAmount = self._button.getPressedAmount()
         return(
             int((1 - pressedAmount)* self._unpressedColor[0] + pressedAmount * self._pressesdColor[0]),
