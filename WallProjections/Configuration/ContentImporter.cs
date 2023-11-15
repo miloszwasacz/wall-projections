@@ -8,7 +8,7 @@ public class ContentImporter
 {
     public static Config Load(string zipPath)
     {
-        string tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         while (Directory.Exists(tempPath))
         {
             tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -20,5 +20,14 @@ public class ContentImporter
 
         var config = Config.LoadConfig(tempPath, "config.json");
         return config;
+    }
+
+    /// <summary>
+    /// Cleans up the temporary folder.
+    /// </summary>
+    /// <param name="config">The Config class used to access the files.</param>
+    public static void Cleanup(Config config)
+    {
+        Directory.Delete(config.TempPath);
     }
 }
