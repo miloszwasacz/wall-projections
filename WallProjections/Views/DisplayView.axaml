@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:WallProjections.ViewModels.Interfaces"
+             xmlns:views="clr-namespace:WallProjections.Views"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="WallProjections.Views.DisplayView"
+             x:DataType="vm:IDisplayViewModel">
+
+    <!--TODO Remove testing background colors -->
+    <Grid ColumnDefinitions="*, *" RowDefinitions="*"
+          Background="Blue">
+        <TextBlock Grid.Column="0" Grid.Row="0"
+                   Name="Description"
+                   Background="Aqua"
+                   TextWrapping="Wrap"
+                   Text="{Binding Description}" />
+        <Grid Grid.Column="1" Grid.Row="0"
+              ColumnDefinitions="*" RowDefinitions="*, 2*, *"
+              Name="ImageViewGrid"
+              IsVisible="{Binding HasImages}"
+              Background="Chartreuse">
+            <views:ImageView Grid.Column="0" Grid.Row="1"
+                             DataContext="{Binding ImageViewModel}" />
+        </Grid>
+        <Grid Grid.Column="1" Grid.Row="0"
+              ColumnDefinitions="*" RowDefinitions="*, 2*, *"
+              Name="VideoViewGrid"
+              IsVisible="{Binding HasVideos}"
+              Background="Red">
+            <views:VideoView Grid.Column="0" Grid.Row="1"
+                             Name="VideoView"
+                             DataContext="{Binding VideoViewModel}" />
+        </Grid>
+
+    </Grid>
+</UserControl>

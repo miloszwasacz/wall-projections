@@ -1,11 +1,15 @@
-﻿using System;
+using System;
+using System.Runtime.CompilerServices;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using WallProjections.ViewModels;
 using Python.Runtime;
 using WallProjections.Helper;
+
+[assembly: InternalsVisibleTo("WallProjections.Test")]
 
 namespace WallProjections;
 
@@ -25,6 +29,7 @@ internal class Program
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         pythonThread.Cancel();
         pythonThread.Dispose();
+        ViewModelProvider.Instance.Dispose();
     }
 
     /// <summary>

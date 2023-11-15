@@ -1,30 +1,29 @@
-﻿using ReactiveUI;
-using WallProjections.Helper;
+using ReactiveUI;
+using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
 
-public class MainWindowViewModel : ActivatableViewModelBase
+public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
 {
-    private string _greeting = "Welcome to Avalonia!";
+    private readonly IViewModelProvider _vmProvider;
+    private IDisplayViewModel? _displayViewModel;
 
-    public string Greeting
+    public IDisplayViewModel? DisplayViewModel
     {
-        get => _greeting;
-        private set => this.RaiseAndSetIfChanged(ref _greeting, value);
+        get => _displayViewModel;
+        private set => this.RaiseAndSetIfChanged(ref _displayViewModel, value);
     }
 
-    private void OnPressDetected(object? _, PythonEventHandler.PressDetectedArgs args)
+    public MainWindowViewModel(IViewModelProvider vmProvider)
     {
-        Greeting = args.Button.ToString();
+        _vmProvider = vmProvider;
     }
 
-    protected override void OnStart()
+    public void CreateDisplayViewModel(string id, IFileProvider fileProvider)
     {
-        PythonEventHandler.Instance.PressDetected += OnPressDetected;
+        DisplayViewModel = _vmProvider.GetDisplayViewModel(id, fileProvider);
     }
-
-    protected override void OnStop()
-    {
-        PythonEventHandler.Instance.PressDetected -= OnPressDetected;
-    }
+    
+    //TODO Handle Python events (see f1dd495)
 }
