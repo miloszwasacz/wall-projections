@@ -8,19 +8,17 @@ namespace WallProjections.Configuration;
 
 public class ContentImporter
 {
+    /// <summary>
+    /// Load a zip file of the config.json file and the media files.
+    /// </summary>
+    /// <param name="zipPath">Path to the zip file</param>
+    /// <returns>Config with the loaded</returns>
     public static Config Load(string zipPath)
     {
-        var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        while (Directory.Exists(tempPath))
-        {
-            tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        }
+        Directory.CreateDirectory(Config.TempPath);
+        ZipFile.ExtractToDirectory(zipPath, Config.TempPath);
 
-        var folderInfo = Directory.CreateDirectory(tempPath);
-
-        ZipFile.ExtractToDirectory(zipPath, tempPath);
-
-        var config = LoadConfig(tempPath, "config.json");
+        var config = LoadConfig(Config.TempPath, "config.json");
         return config;
     }
 
@@ -30,7 +28,7 @@ public class ContentImporter
     /// <param name="config">The Config class used to access the files.</param>
     public static void Cleanup(Config config)
     {
-        Directory.Delete(config.TempPath);
+        Directory.Delete(Config.TempPath);
     }
 
     /// <summary>
@@ -48,7 +46,6 @@ public class ContentImporter
         if (!File.Exists(configPath))
         {
             var newConfig = new Config(new List<Hotspot>());
-            newConfig.TempPath = tempPath;
             newConfig.SaveConfig();
             return newConfig;
         }
@@ -58,7 +55,6 @@ public class ContentImporter
             var configJson = File.ReadAllText(configPath);
             var config = JsonSerializer.Deserialize<Config>(configJson);
             if (config is null) throw new JsonException();
-            config.TempPath = tempPath;
             return config;
         }
         catch (Exception e)

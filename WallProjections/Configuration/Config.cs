@@ -16,7 +16,7 @@ public class Config
     /// List of all hotspots (their locations and content).
     /// </summary>
     [JsonInclude]
-    public List<Hotspot> Hotspots { get; }
+    private List<Hotspot> Hotspots { get; }
 
     /// <summary>
     /// Location where to store configuration.
@@ -24,10 +24,16 @@ public class Config
     public string ConfigLocation { get; }
 
     /// <summary>
+    /// Backing field for <see cref="TempPath"/>
+    /// </summary>
+    [JsonIgnore]
+    private static string? _tempPath;
+
+    /// <summary>
     /// Location where the opened files are stored.
     /// </summary>
     [JsonIgnore]
-    public string TempPath { get; set; }
+    public static string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
     /// <summary>
     /// Returns hotspot if Id matches a hotspot.
@@ -37,6 +43,11 @@ public class Config
     public Hotspot? GetHotspot(int id)
     {
         return Hotspots.Find(x => x.Id == id);
+    }
+
+    public string? GetHotspotFolder(Hotspot hotspot)
+    {
+        return Path.Combine(Config.TempPath, hotspot.Id.ToString());
     }
 
     /// <summary>
