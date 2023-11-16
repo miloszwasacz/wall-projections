@@ -34,4 +34,5 @@ For each `Hotspot` in `config.json`, create a folder in `Media` with matching ID
 - `Id.PNG`
 - `Id.mp4`
 
-where `Id` is `Hotspot.Id`
+where `Id` is `Hotspot.Id` (files can be any name but using `Id` is best for 
+readability).
