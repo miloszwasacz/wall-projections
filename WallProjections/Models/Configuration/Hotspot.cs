@@ -26,21 +26,15 @@ public class Hotspot
     /// Constructor for Hotspot
     /// </summary>
     /// <param name="id">ID used by input detection to show info.</param>
-    /// <param name="x">X value for hotspot in camera. If not default, then </param>
-    /// <param name="y">Y value for hotspot in camera.</param>
-    /// <param name="r">Radius for hotspot in camera.</param>
+    /// <param name="position">Position of hotspot stored as <see cref="Coord"/> record.</param>
     /// <exception cref="ArgumentException">Thrown if both image + video at once, or no content defined.</exception>
-    public Hotspot(
-        int id,
-        double x = default,
-        double y = default,
-        double r = default
-        )
+    [JsonConstructor]
+    public Hotspot(int id, Coord position)
     {
         Id = id;
-        Position = new Coord(x, y, r);
+        Position = position;
     }
 
-    [JsonConstructor]
-    public Hotspot(int id, Coord position): this(id, position.X, position.Y, position.R) {}
+    public Hotspot(int id, double x = default, double y = default, double r = default)
+        : this(id, new Coord(x, y, r)) {}
 }
