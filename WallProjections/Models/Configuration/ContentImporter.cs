@@ -41,8 +41,6 @@ public class ContentImporter : IContentImporter
 
     public IConfig LoadConfig(string zipPath)
     {
-        var configPath = Path.Combine(TempPath, ConfigLocation);
-
         try
         {
             var zipFile = ZipFile.OpenRead(zipPath);
