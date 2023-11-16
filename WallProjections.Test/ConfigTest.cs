@@ -1,5 +1,5 @@
-using WallProjections.Configuration;
-using WallProjections.Configuration.Interfaces;
+using WallProjections.Models.Configuration;
+using WallProjections.Models.Configuration.Interfaces;
 
 namespace WallProjections.Test;
 

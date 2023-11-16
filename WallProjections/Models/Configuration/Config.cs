@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using WallProjections.Configuration.Interfaces;
+using WallProjections.Models.Configuration.Interfaces;
 
-namespace WallProjections.Configuration;
+namespace WallProjections.Models.Configuration;
 
 /// <summary>
 /// Stores all user customisable configuration for the program.

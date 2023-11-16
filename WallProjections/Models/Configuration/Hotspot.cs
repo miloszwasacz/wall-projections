@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace WallProjections.Configuration;
+namespace WallProjections.Models.Configuration;
 
 /// <summary>
 /// Stores the location of a hotspot, its size, and the content to be displayed.

@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
 
-namespace WallProjections.Configuration;
+namespace WallProjections.Models.Configuration;
 
 public class ContentImporter
 {

@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace WallProjections.Configuration.Interfaces;
+namespace WallProjections.Models.Configuration.Interfaces;
 
 public interface IConfig
 {
