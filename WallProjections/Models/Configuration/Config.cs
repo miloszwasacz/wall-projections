@@ -33,10 +33,9 @@ public class Config : IConfig
     /// Constructs a new Config object using list of hotspots and a custom location.
     /// </summary>
     /// <param name="hotspots">Collection of hotspots to create config with.</param>
-    public Config(IEnumerable<Hotspot>? hotspots)
+    public Config(IEnumerable<Hotspot> hotspots)
     {
-        hotspots ??= new List<Hotspot>();
-        Hotspots = new List<Hotspot>(hotspots).ToImmutableList();
+        Hotspots = hotspots.ToImmutableList();
     }
 
     /// <summary>
