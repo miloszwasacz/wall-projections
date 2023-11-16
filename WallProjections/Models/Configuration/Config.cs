@@ -26,7 +26,7 @@ public class Config : IConfig
     /// </summary>
     public Config()
     {
-        Hotspots = new List<Hotspot>().ToImmutableList();
+        Hotspots = ImmutableList<Hotspot>.Empty;
     }
 
     /// <summary>
