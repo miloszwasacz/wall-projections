@@ -8,7 +8,7 @@ namespace WallProjections.Test.Models;
 /// </summary>
 [TestFixture]
 [Author(name: "Thomas Parr")]
-public class ContentImporterTest
+public class ContentImporterTests
 {
     /// <summary>
     /// Location of the zip file for testing.
