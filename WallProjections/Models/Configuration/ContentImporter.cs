@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
+using WallProjections.Models.Configuration.Interfaces;
 
 namespace WallProjections.Models.Configuration;
 
@@ -13,7 +14,7 @@ public class ContentImporter
     /// </summary>
     /// <param name="zipPath">Path to the zip file</param>
     /// <returns>Config with the loaded</returns>
-    public static Config Load(string zipPath)
+    public static IConfig Load(string zipPath)
     {
         Directory.CreateDirectory(Config.TempPath);
         ZipFile.ExtractToDirectory(zipPath, Config.TempPath);
@@ -26,7 +27,7 @@ public class ContentImporter
     /// Cleans up the temporary folder.
     /// </summary>
     /// <param name="config">The Config class used to access the files.</param>
-    public static void Cleanup(Config config)
+    public static void Cleanup(IConfig config)
     {
         Directory.Delete(Config.TempPath, true);
     }
@@ -38,7 +39,7 @@ public class ContentImporter
     /// <param name="tempPath">Path to temporary folder to use.</param>
     /// <returns>Loaded Config.</returns>
     /// <exception cref="JsonException">Format of config file is invalid.</exception>
-    public static Config LoadConfig(string tempPath, string configLocation)
+    public static IConfig LoadConfig(string tempPath, string configLocation)
     {
         var configPath = Path.Combine(tempPath, configLocation);
 
