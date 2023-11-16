@@ -25,7 +25,7 @@ public class ContentImporter
         Directory.CreateDirectory(Config.TempPath);
         ZipFile.ExtractToDirectory(zipPath, Config.TempPath);
 
-        var config = LoadConfig(Config.TempPath, "config.json");
+        var config = LoadConfig(Config.TempPath);
         return config;
     }
 
@@ -41,13 +41,12 @@ public class ContentImporter
     /// <summary>
     /// Loads a config from a .json file.
     /// </summary>
-    /// <param name="configLocation">Name of configuration file.</param>
     /// <param name="tempPath">Path to temporary folder to use.</param>
     /// <returns>Loaded Config.</returns>
     /// <exception cref="JsonException">Format of config file is invalid.</exception>
-    public static IConfig LoadConfig(string tempPath, string configLocation)
+    public static IConfig LoadConfig(string tempPath)
     {
-        var configPath = Path.Combine(tempPath, configLocation);
+        var configPath = Path.Combine(tempPath, Config.ConfigLocation);
 
         // Create default config if none exists.
         if (!File.Exists(configPath))

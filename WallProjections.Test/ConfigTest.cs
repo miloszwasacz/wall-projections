@@ -11,11 +11,6 @@ namespace WallProjections.Test;
 public class ConfigTests
 {
     /// <summary>
-    /// Default location to save config during tests.
-    /// </summary>
-    private const string ConfigLocation = "config_test.json";
-
-    /// <summary>
     /// Test to ensure the correct count is returned from <see cref="Config.HotspotCount"/>
     /// </summary>
     [Test]
@@ -69,13 +64,13 @@ public class ConfigTests
                 y: 2,
                 r: 3.5
             ) };
-        var original = new Config(hotspots, ConfigLocation);
+        var original = new Config(hotspots);
 
         original.SaveConfig(Path.GetTempPath());
 
 
         // Check read file is same as saved config.
-        var recreated = ContentImporter.LoadConfig(Path.GetTempPath(), ConfigLocation);
+        var recreated = ContentImporter.LoadConfig(Path.GetTempPath());
 
         CheckConfigsEqual(original, recreated);
     }
@@ -89,7 +84,7 @@ public class ConfigTests
         var zipPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test.zip");
         var config = ContentImporter.Load(zipPath);
 
-        var config2 = new Config(new List<Hotspot>{ new(0, 1, 2, 3) }, "config.json");
+        var config2 = new Config(new List<Hotspot>{ new(0, 1, 2, 3) });
 
         CheckConfigsEqual(config, config2);
 
@@ -122,11 +117,7 @@ public class ConfigTests
     /// <param name="config2">Second <see cref="Config"/> class to compare.</param>
     private void CheckConfigsEqual(IConfig config1, IConfig config2)
     {
-        Assert.Multiple(() =>
-        {
-            Assert.That(config1.HotspotCount(), Is.EqualTo(config2.HotspotCount()));
-            Assert.That(config1.ConfigLocation, Is.EqualTo(config2.ConfigLocation));
-        });
+        Assert.That(config1.HotspotCount(), Is.EqualTo(config2.HotspotCount()));
 
         for (var i = 0; i < config1.HotspotCount(); i++)
         {

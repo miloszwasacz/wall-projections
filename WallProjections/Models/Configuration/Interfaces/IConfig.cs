@@ -15,11 +15,6 @@ public interface IConfig
     public static string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
     /// <summary>
-    /// Location where to store configuration.
-    /// </summary>
-    public string ConfigLocation { get; }
-
-    /// <summary>
     /// Returns hotspot if Id matches a hotspot.
     /// </summary>
     /// <param name="id">Id to match Hotspot</param>

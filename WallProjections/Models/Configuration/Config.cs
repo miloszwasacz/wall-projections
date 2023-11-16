@@ -26,7 +26,7 @@ public class Config : IConfig
     [JsonInclude]
     public ImmutableList<Hotspot> Hotspots => _hotspots.ToImmutableList();
 
-    public string ConfigLocation { get; }
+    public const string ConfigLocation = "config.json";
 
     [JsonIgnore]
     public static string TempPath => IConfig.TempPath;
@@ -34,21 +34,17 @@ public class Config : IConfig
     /// <summary>
     /// Default constructor for Config for if no hotspot.
     /// </summary>
-    /// <param name="configLocation">Path to save config file.</param>
-    public Config(string configLocation = "config.json")
+    public Config()
     {
         _hotspots = new List<Hotspot>();
-        ConfigLocation = configLocation;
     }
 
     /// <summary>
     /// Constructs a new Config object using list of hotspots and a custom location.
     /// </summary>
     /// <param name="hotspots">Collection of hotspots to create config with.</param>
-    /// <param name="configLocation">Path to save config location.</param>
-    public Config(IEnumerable<Hotspot>? hotspots, string configLocation = "config.json")
+    public Config(IEnumerable<Hotspot>? hotspots)
     {
-        ConfigLocation = configLocation;
         hotspots ??= new List<Hotspot>();
         _hotspots = new List<Hotspot>(hotspots);
     }
@@ -57,11 +53,9 @@ public class Config : IConfig
     /// Specific constructor so deserializer matches parameters correctly.
     /// </summary>
     /// <param name="hotspots">List of hotspots.</param>
-    /// <param name="configLocation">Location to store config file.</param>
     [JsonConstructor]
-    public Config(ImmutableList<Hotspot> hotspots, string configLocation)
+    public Config(ImmutableList<Hotspot> hotspots)
     {
-        ConfigLocation = configLocation;
         _hotspots = new List<Hotspot>(hotspots);
     }
     
