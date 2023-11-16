@@ -12,26 +12,21 @@ namespace WallProjections.Models.Configuration;
 [Serializable]
 public class Config : IConfig
 {
-    /// <summary>
-    /// Backing field for <see cref="Hotspots"/>
-    /// </summary>
-    [JsonIgnore]
-    private List<Hotspot> _hotspots;
 
     /// <summary>
     /// List of all hotspots (their locations and content).
     /// </summary>
     [JsonInclude]
-    public ImmutableList<Hotspot> Hotspots => _hotspots.ToImmutableList();
+    public ImmutableList<Hotspot> Hotspots { get; }
 
-    public int HotspotCount => _hotspots.Count;
+    public int HotspotCount => Hotspots.Count;
 
     /// <summary>
     /// Default constructor for Config for if no hotspot.
     /// </summary>
     public Config()
     {
-        _hotspots = new List<Hotspot>();
+        Hotspots = new List<Hotspot>().ToImmutableList();
     }
 
     /// <summary>
@@ -41,7 +36,7 @@ public class Config : IConfig
     public Config(IEnumerable<Hotspot>? hotspots)
     {
         hotspots ??= new List<Hotspot>();
-        _hotspots = new List<Hotspot>(hotspots);
+        Hotspots = new List<Hotspot>(hotspots).ToImmutableList();
     }
 
     /// <summary>
@@ -51,11 +46,11 @@ public class Config : IConfig
     [JsonConstructor]
     public Config(ImmutableList<Hotspot> hotspots)
     {
-        _hotspots = new List<Hotspot>(hotspots);
+        Hotspots = hotspots;
     }
     
     public Hotspot? GetHotspot(int id)
     {
-        return _hotspots.Find(x => x.Id == id);
+        return Hotspots.Find(x => x.Id == id);
     }
 }
