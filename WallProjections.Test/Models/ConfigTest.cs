@@ -16,11 +16,11 @@ public class ConfigTests
     /// Test to ensure the correct count is returned from <see cref="Config.HotspotCount"/>
     /// </summary>
     [Test]
-    public void TestHotspotCount()
+    public void HotspotCountTest()
     {
         var hotspots = new List<Hotspot>();
 
-        for (int i = 0; i < 5; i++)
+        for (var i = 0; i < 5; i++)
         {
             var config = new Config(hotspots);
             Assert.That(config.HotspotCount, Is.EqualTo(i));
@@ -32,7 +32,7 @@ public class ConfigTests
     /// Checks that <see cref="Config.GetHotspot"/> returns the correct hotspot.
     /// </summary>
     [Test]
-    public void TestGetHotspot()
+    public void GetHotspotTest()
     {
         var config = new Config(
             hotspots: new List<Hotspot>
@@ -57,7 +57,7 @@ public class ConfigTests
     /// </summary>
     /// <param name="config1">First <see cref="Config"/> class to compare.</param>
     /// <param name="config2">Second <see cref="Config"/> class to compare.</param>
-    public static void CheckConfigsEqual(IConfig config1, IConfig config2)
+    public static void AssertConfigsEqual(IConfig config1, IConfig config2)
     {
         Assert.That(config1.HotspotCount, Is.EqualTo(config2.HotspotCount));
 
