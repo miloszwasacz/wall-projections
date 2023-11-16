@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -23,7 +24,7 @@ public class Config : IConfig
     /// List of all hotspots (their locations and content).
     /// </summary>
     [JsonInclude]
-    public IEnumerable<Hotspot> Hotspots => _hotspots.AsReadOnly();
+    public ImmutableList<Hotspot> Hotspots => _hotspots.ToImmutableList();
 
     public string ConfigLocation { get; }
 
@@ -45,7 +46,6 @@ public class Config : IConfig
     /// </summary>
     /// <param name="hotspots">Collection of hotspots to create config with.</param>
     /// <param name="configLocation">Path to save config location.</param>
-    [JsonConstructor]
     public Config(IEnumerable<Hotspot>? hotspots, string configLocation = "config.json")
     {
         ConfigLocation = configLocation;
@@ -58,8 +58,12 @@ public class Config : IConfig
     /// </summary>
     /// <param name="hotspots">List of hotspots.</param>
     /// <param name="configLocation">Location to store config file.</param>
-    public Config(List<Hotspot> hotspots, string configLocation)
-        : this(hotspots.AsReadOnly(), configLocation) {}
+    [JsonConstructor]
+    public Config(ImmutableList<Hotspot> hotspots, string configLocation)
+    {
+        ConfigLocation = configLocation;
+        _hotspots = new List<Hotspot>(hotspots);
+    }
     
     public Hotspot? GetHotspot(int id)
     {
