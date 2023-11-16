@@ -22,14 +22,6 @@ public class Config : IConfig
     public int HotspotCount => Hotspots.Count;
 
     /// <summary>
-    /// Default constructor for Config for if no hotspot.
-    /// </summary>
-    public Config()
-    {
-        Hotspots = ImmutableList<Hotspot>.Empty;
-    }
-
-    /// <summary>
     /// Constructs a new Config object using list of hotspots and a custom location.
     /// </summary>
     /// <param name="hotspots">Collection of hotspots to create config with.</param>

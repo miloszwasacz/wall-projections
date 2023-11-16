@@ -7,8 +7,8 @@ In the root directory of the zip file, place `config.json` with the JSON in the 
         {
             "Id": 0, // Numerical ID for hotspot. Must match button inputs 1,2,3,4
             "Position": {
-                "X": 0 // Numerical value for X position of hotspot on screen. Can be non-integer.
-                "Y": 1 // Numerical value for Y position of hotspot on screen. Can be non-integer.
+                "X": 0, // Numerical value for X position of hotspot on screen. Can be non-integer.
+                "Y": 1, // Numerical value for Y position of hotspot on screen. Can be non-integer.
                 "R": 2 // Numerical value for radius of hotspot on screen. Can be non-integer.
             }
         }
