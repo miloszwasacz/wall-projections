@@ -16,6 +16,12 @@ public class ContentImporter
     /// <returns>Config with the loaded</returns>
     public static IConfig Load(string zipPath)
     {
+        // Clean up existing directly if in use.
+        if (Directory.Exists(Config.TempPath))
+        {
+            Directory.Delete(Config.TempPath, true);
+        }
+
         Directory.CreateDirectory(Config.TempPath);
         ZipFile.ExtractToDirectory(zipPath, Config.TempPath);
 
