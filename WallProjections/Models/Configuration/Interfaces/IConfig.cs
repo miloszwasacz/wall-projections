@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace WallProjections.Models.Configuration.Interfaces;
 
 public interface IConfig

@@ -1,7 +1,7 @@
 using WallProjections.Models.Configuration;
 using WallProjections.Models.Configuration.Interfaces;
 
-namespace WallProjections.Test;
+namespace WallProjections.Test.Models;
 
 /// <summary>
 /// Tests for the Config class.
