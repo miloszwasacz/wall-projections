@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using WallProjections.Models.Configuration.Interfaces;
 
@@ -26,10 +24,7 @@ public class Config : IConfig
     [JsonInclude]
     public ImmutableList<Hotspot> Hotspots => _hotspots.ToImmutableList();
 
-    public const string ConfigLocation = "config.json";
-
-    [JsonIgnore]
-    public static string TempPath => IConfig.TempPath;
+    public int HotspotCount => _hotspots.Count;
 
     /// <summary>
     /// Default constructor for Config for if no hotspot.
@@ -62,42 +57,5 @@ public class Config : IConfig
     public Hotspot? GetHotspot(int id)
     {
         return _hotspots.Find(x => x.Id == id);
-    }
-
-    public int HotspotCount()
-    {
-        return _hotspots.Count;
-    }
-
-    /// <summary>
-    /// Saves the current state of Config to the file name stored in <see cref="ConfigLocation"/>.
-    /// Throws exception if error occurs on save.
-    /// </summary>
-    /// <exception cref="PathTooLongException">Config path too long for system.</exception>
-    /// <exception cref="DirectoryNotFoundException">Directory to save config is invalid.</exception>
-    /// <exception cref="IOException">Error occurs when trying to access file.</exception>
-    /// <exception cref="UnauthorizedAccessException">
-    ///     Program does not have sufficient permissions to write config.
-    /// </exception>
-    /// <exception cref="NotSupportedException">Config path is invalid.</exception>
-    public void SaveConfig()
-    {
-        var options = new JsonSerializerOptions { WriteIndented = true,  };
-        var configOutput = JsonSerializer.Serialize(this, options);
-
-        File.WriteAllText(ConfigLocation, configOutput);
-    }
-
-    /// <summary>
-    /// Saves the current state of Config to the file name stored in <see cref="ConfigLocation"/> using path.
-    /// Throws exception if error occurs on save.
-    /// </summary>
-    /// <param name="path">Path to store config file in.</param>
-    public void SaveConfig(string path)
-    {
-        var options = new JsonSerializerOptions { WriteIndented = true,  };
-        var configOutput = JsonSerializer.Serialize(this, options);
-
-        File.WriteAllText(Path.Combine(path, ConfigLocation), configOutput);
     }
 }

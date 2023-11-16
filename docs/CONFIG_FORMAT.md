@@ -3,7 +3,6 @@
 In the root directory of the zip file, place `config.json` with the JSON in the format:
 ```json
 {
-    "ConfigLocation": "config.json", // DO NOT CHANGE
     "Hotspots": [
         {
             "Id": 0, // Numerical ID for hotspot. Must match button inputs 1,2,3,4
@@ -17,9 +16,11 @@ In the root directory of the zip file, place `config.json` with the JSON in the 
 }
 ```
 ## Media Files
-For each `Hotspot` in `config.json`, create a folder in the root of the zip file with matching ID.
+Place all folders and files for media inside a `Media` folder next to `config.json`.
+
+For each `Hotspot` in `config.json`, create a folder in `Media` with matching ID.
 > **Example:**
-> If `Hotspot.Id == 1`, then create a folder called `1`
+> If `Hotspot.Id == 1`, then create a folder called `1` inside `Media`.
 
 ### In this folder, place your media files. These must be:
 - `Id.txt`, where ID is `Hotspot.Id`
@@ -31,5 +32,6 @@ For each `Hotspot` in `config.json`, create a folder in the root of the zip file
 - `Id.JPG`
 - `Id.png`
 - `Id.PNG`
+- `Id.mp4`
 
 where `Id` is `Hotspot.Id`

@@ -11,6 +11,11 @@ namespace WallProjections.Test;
 public class ConfigTests
 {
     /// <summary>
+    /// Location of the zip file for testing.
+    /// </summary>
+    private static string TestZip => Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test.zip");
+
+    /// <summary>
     /// Test to ensure the correct count is returned from <see cref="Config.HotspotCount"/>
     /// </summary>
     [Test]
@@ -24,7 +29,7 @@ public class ConfigTests
             }
         );
 
-        Assert.That(config.HotspotCount(), Is.EqualTo(2));
+        Assert.That(config.HotspotCount, Is.EqualTo(2));
     }
 
     /// <summary>
@@ -52,27 +57,24 @@ public class ConfigTests
     }
 
     /// <summary>
-    /// Tests that loaded config from <see cref="ContentImporter.LoadConfig"/> is identical to the original config
-    /// saved with <see cref="Config.SaveConfig()"/>.
+    /// Tests that loaded config from <see cref="ContentImporter.LoadConfig"/> loads correctly.
     /// </summary>
     [Test]
-    public void TestSaveAndLoad()
+    public void TestConfigLoad()
     {
+        IContentImporter contentImporter = new ContentImporter();
         var hotspots = new List<Hotspot> { new(
                 id: 0,
                 x: 1,
                 y: 2,
-                r: 3.5
+                r: 3
             ) };
-        var original = new Config(hotspots);
-
-        original.SaveConfig(Path.GetTempPath());
-
+        IConfig config = new Config(hotspots);
 
         // Check read file is same as saved config.
-        var recreated = ContentImporter.LoadConfig(Path.GetTempPath());
+        var loadedConfig = contentImporter.LoadConfig(TestZip);
 
-        CheckConfigsEqual(original, recreated);
+        CheckConfigsEqual(config, loadedConfig);
     }
 
     /// <summary>
@@ -81,17 +83,19 @@ public class ConfigTests
     [Test]
     public void TestContentImporterLoad()
     {
-        var zipPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test.zip");
-        var config = ContentImporter.Load(zipPath);
-
-        var config2 = new Config(new List<Hotspot>{ new(0, 1, 2, 3) });
+        IContentImporter contentImporter = new ContentImporter();
+        IConfig config = contentImporter.Load(TestZip);
+        IConfig config2 = new Config(new List<Hotspot>{ new(0, 1, 2, 3) });
 
         CheckConfigsEqual(config, config2);
 
-        Assert.That(File.Exists(Path.Combine(IConfig.GetHotspotFolder(config.GetHotspot(0)!), "0.txt")), Is.True);
-        Assert.That(File.ReadAllText(Path.Combine(IConfig.GetHotspotFolder(config.GetHotspot(0)!), "0.txt")), Is.EqualTo("Hello World\n"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(Path.Combine(contentImporter.GetHotspotFolder(config.GetHotspot(0)!), "0.txt")), Is.True);
+            Assert.That(File.ReadAllText(Path.Combine(contentImporter.GetHotspotFolder(config.GetHotspot(0)!), "0.txt")), Is.EqualTo("Hello World\n"));
+        });
 
-        ContentImporter.Cleanup(config);
+        contentImporter.Cleanup();
     }
 
     /// <summary>
@@ -100,14 +104,14 @@ public class ConfigTests
     [Test]
     public void TestContentImporterCleanup()
     {
-        var zipPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test.zip");
-        var config = ContentImporter.Load(zipPath);
+        var contentImporter = new ContentImporter();
+        contentImporter.Load(TestZip);
 
-        Assert.That(Directory.Exists(Config.TempPath), Is.True);
+        Assert.That(Directory.Exists(contentImporter.TempPath), Is.True);
 
-        ContentImporter.Cleanup(config);
+        contentImporter.Cleanup();
 
-        Assert.That(Directory.Exists(Config.TempPath), Is.False);
+        Assert.That(Directory.Exists(contentImporter.TempPath), Is.False);
     }
 
     /// <summary>
@@ -115,11 +119,11 @@ public class ConfigTests
     /// </summary>
     /// <param name="config1">First <see cref="Config"/> class to compare.</param>
     /// <param name="config2">Second <see cref="Config"/> class to compare.</param>
-    private void CheckConfigsEqual(IConfig config1, IConfig config2)
+    private static void CheckConfigsEqual(IConfig config1, IConfig config2)
     {
-        Assert.That(config1.HotspotCount(), Is.EqualTo(config2.HotspotCount()));
+        Assert.That(config1.HotspotCount, Is.EqualTo(config2.HotspotCount));
 
-        for (var i = 0; i < config1.HotspotCount(); i++)
+        for (var i = 0; i < config1.HotspotCount; i++)
         {
             Assert.Multiple(() =>
             {

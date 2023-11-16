@@ -1,65 +1,62 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using WallProjections.Models.Configuration.Interfaces;
 
 namespace WallProjections.Models.Configuration;
 
-public class ContentImporter
+public class ContentImporter : IContentImporter
 {
+    private const string MediaLocation = "Media";
+    private const string ConfigLocation = "config.json";
+
     /// <summary>
-    /// Load a zip file of the config.json file and the media files.
+    /// Backing field for <see cref="TempPath"/>
     /// </summary>
-    /// <param name="zipPath">Path to the zip file</param>
-    /// <returns>Config with the loaded</returns>
-    public static IConfig Load(string zipPath)
+    private string? _tempPath;
+
+    public string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+    public IConfig Load(string zipPath)
     {
         // Clean up existing directly if in use.
-        if (Directory.Exists(Config.TempPath))
+        if (Directory.Exists(TempPath))
         {
-            Directory.Delete(Config.TempPath, true);
+            Directory.Delete(TempPath, true);
         }
 
-        Directory.CreateDirectory(Config.TempPath);
-        ZipFile.ExtractToDirectory(zipPath, Config.TempPath);
+        Directory.CreateDirectory(TempPath);
 
-        var config = LoadConfig(Config.TempPath);
+        ZipFile.ExtractToDirectory(zipPath, TempPath);
+
+        var config = LoadConfig(zipPath);
         return config;
     }
 
-    /// <summary>
-    /// Cleans up the temporary folder.
-    /// </summary>
-    /// <param name="config">The Config class used to access the files.</param>
-    public static void Cleanup(IConfig config)
+    public void Cleanup()
     {
-        Directory.Delete(Config.TempPath, true);
+        Directory.Delete(TempPath, true);
     }
 
-    /// <summary>
-    /// Loads a config from a .json file.
-    /// </summary>
-    /// <param name="tempPath">Path to temporary folder to use.</param>
-    /// <returns>Loaded Config.</returns>
-    /// <exception cref="JsonException">Format of config file is invalid.</exception>
-    public static IConfig LoadConfig(string tempPath)
+    public IConfig LoadConfig(string zipPath)
     {
-        var configPath = Path.Combine(tempPath, Config.ConfigLocation);
-
-        // Create default config if none exists.
-        if (!File.Exists(configPath))
-        {
-            var newConfig = new Config(new List<Hotspot>());
-            newConfig.SaveConfig();
-            return newConfig;
-        }
+        var configPath = Path.Combine(TempPath, ConfigLocation);
 
         try
         {
-            var configJson = File.ReadAllText(configPath);
-            var config = JsonSerializer.Deserialize<Config>(configJson);
+            var zipFile = ZipFile.OpenRead(zipPath);
+            var configEntry = zipFile.GetEntry(ConfigLocation);
+
+            if (configEntry is null)
+            {
+                throw new FileNotFoundException("config.json not in root of zip file.");
+            }
+
+            var config = JsonSerializer.Deserialize<Config>(configEntry.Open());
             if (config is null) throw new JsonException();
             return config;
         }
@@ -68,5 +65,10 @@ public class ContentImporter
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    public string GetHotspotFolder(Hotspot hotspot)
+    {
+        return Path.Combine(TempPath, MediaLocation,  hotspot.Id.ToString());
     }
 }

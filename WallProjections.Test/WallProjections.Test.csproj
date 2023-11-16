@@ -37,4 +37,8 @@
       <ProjectReference Include="..\WallProjections\WallProjections.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
+
 </Project>
