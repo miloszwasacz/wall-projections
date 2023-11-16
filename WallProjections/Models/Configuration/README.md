@@ -18,6 +18,6 @@ all media will have been loaded into a temporary folder for easier access.
 1. Call `config.GetHotspot(id)`, where
    - `id` is the ID of the hotspot.
    - `config` is `IConfig` received from `contentImporter.Load()`
-2. Call `contentImporter.GetHotspotFolder(hotspot)` where 
+2. Call `contentImporter.GetHotspotMediaFolder(hotspot)` where 
    - `hotspot` is earlier received hotspot.
    - `contentImporter` is instantiated `ContentImporter` from zip file load.
