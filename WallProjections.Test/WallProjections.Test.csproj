@@ -9,7 +9,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <Content Include="Assets/"/>
+        <Content Include="Assets\"/>
         <None Update="Assets\*">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
