@@ -10,8 +10,8 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 {
     private readonly LibVLC _libVlc;
     private readonly string _videoPath;
-    private bool _isDisposed;
     private IMediaPlayer? _mediaPlayer;
+    private bool _isDisposed;
 
     public VideoViewModel(string videoPath, LibVLC libVlc, IMediaPlayer mediaPlayer)
     {
@@ -20,6 +20,12 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         _mediaPlayer = mediaPlayer;
     }
 
+    /// <summary>
+    /// The media player used to play the videos
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// If you try to overwrite the MediaPlayer with anything that is not null
+    /// </exception>
     public IMediaPlayer? MediaPlayer
     {
         get => _mediaPlayer;

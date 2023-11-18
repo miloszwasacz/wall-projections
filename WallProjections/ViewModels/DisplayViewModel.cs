@@ -16,16 +16,16 @@ public sealed class DisplayViewModel : ActivatableViewModelBase, IDisplayViewMod
         _vmProvider = vmProvider;
         // TODO Refactor to fetch specific file types from FileLocator instead of filtering here
         var files = fileProvider.GetFiles(artifactId);
-        
+
         var textFile = files.FirstOrDefault(".txt");
         Description = textFile.EndsWith(".txt") ? File.ReadAllText(textFile) : "";
-        
+
         string[] imageEndsWith = { ".jpeg", ".JPEG", ".png", ".PNG", ".jpg", ".JPG" };
-        
+
         var imageFile = files.FirstOrDefault(x => imageEndsWith.Any(x.EndsWith));
         if (imageFile is not null)
             _imageViewModel = new ImageViewModel(imageFile);
-        
+
         var video = files.FirstOrDefault(file => Path.GetExtension(file) == ".mp4");
         if (video is not null)
         {
@@ -47,7 +47,7 @@ public sealed class DisplayViewModel : ActivatableViewModelBase, IDisplayViewMod
         get => _imageViewModel;
         // private set
         // {
-            
+
         // }
     }
 
@@ -75,5 +75,4 @@ public sealed class DisplayViewModel : ActivatableViewModelBase, IDisplayViewMod
     {
         VideoViewModel = null;
     }
-   
 }

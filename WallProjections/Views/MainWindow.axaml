@@ -11,6 +11,6 @@
         xmlns:views="clr-namespace:WallProjections.Views"
         KeyDown="InputElement_OnKeyDown">
 
-    <views:DisplayView Name="DisplayView" DataContext="{Binding DisplayViewModel}"/>
+    <views:DisplayView Name="DisplayView" DataContext="{Binding DisplayViewModel}" />
 
 </Window>

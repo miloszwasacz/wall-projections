@@ -9,6 +9,7 @@ public class ImageViewModel : ViewModelBase
 {
     private string ImagePath { get; }
     private Bitmap? _imageToLoad;
+
     public Bitmap? ImageToLoadPublic
     {
         get => _imageToLoad;

@@ -1,12 +1,11 @@
-using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
-using WallProjections.Models.Configuration.Interfaces;
+using WallProjections.Models.Interfaces;
 
-namespace WallProjections.Models.Configuration;
+namespace WallProjections.Models;
 
-public class ContentImporter : IContentImporter
+public sealed class ContentImporter : IContentImporter
 {
     private const string MediaLocation = "Media";
     private const string ConfigFileName = "config.json";
@@ -16,15 +15,19 @@ public class ContentImporter : IContentImporter
     /// </summary>
     private string? _tempPath;
 
+    /// <summary>
+    /// The path to the temporary folder where the zip file is extracted
+    /// </summary>
     private string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
+    /// <inheritdoc />
+    /// <exception cref="JsonException">Format of config file is invalid</exception>
+    /// TODO: Handle errors from trying to load from not-found/invalid zip file.
     public IConfig Load(string zipPath)
     {
         // Clean up existing directly if in use.
         if (Directory.Exists(TempPath))
-        {
             Directory.Delete(TempPath, true);
-        }
 
         Directory.CreateDirectory(TempPath);
 
@@ -34,11 +37,6 @@ public class ContentImporter : IContentImporter
         return config;
     }
 
-    public void Cleanup()
-    {
-        Directory.Delete(TempPath, true);
-    }
-
     /// <summary>
     /// Loads a config from a .json file.
     /// </summary>
@@ -46,24 +44,29 @@ public class ContentImporter : IContentImporter
     /// <returns>Loaded Config.</returns>
     /// <exception cref="JsonException">Format of config file is invalid.</exception>
     /// <exception cref="FileNotFoundException">If config file cannot be found in zip file.</exception>
-    /// TODO: More effective error handling of invalid/missing config files.
+    /// TODO More effective error handling of invalid/missing config files.
     private static IConfig LoadConfig(string zipPath)
     {
         var zipFile = ZipFile.OpenRead(zipPath);
         var configEntry = zipFile.GetEntry(ConfigFileName);
 
         if (configEntry is null)
-        {
-            throw new FileNotFoundException("config.json not in root of zip file.");
-        }
+            throw new FileNotFoundException($"{ConfigFileName} not in root of zip file.");
 
         var config = JsonSerializer.Deserialize<Config>(configEntry.Open());
         if (config is null) throw new JsonException();
         return config;
     }
 
-    public string GetHotspotMediaFolder(Hotspot hotspot)
+    /// <inheritdoc />
+    public string GetHotspotMediaFolder(Hotspot hotspot) =>
+        Path.Combine(TempPath, MediaLocation, hotspot.Id.ToString());
+
+    /// <summary>
+    /// Cleans up the temporary folder stored in <see cref="TempPath"/>.
+    /// </summary>
+    public void Dispose()
     {
-        return Path.Combine(TempPath, MediaLocation,  hotspot.Id.ToString());
+        Directory.Delete(TempPath, true);
     }
 }

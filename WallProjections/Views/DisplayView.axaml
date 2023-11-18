@@ -8,29 +8,25 @@
              x:Class="WallProjections.Views.DisplayView"
              x:DataType="vm:IDisplayViewModel">
 
-    <!--TODO Remove testing background colors -->
-    <Grid ColumnDefinitions="*, *" RowDefinitions="*"
-          Background="Blue">
-        <TextBlock Grid.Column="0" Grid.Row="0"
-                   Name="Description"
-                   Background="Aqua"
-                   TextWrapping="Wrap"
-                   Text="{Binding Description}" />
-        <Grid Grid.Column="1" Grid.Row="0"
+    <Grid ColumnDefinitions="*, *" RowDefinitions="*">
+
+        <TextBlock Name="Description" Grid.Column="0" Grid.Row="0"
+                   Text="{Binding Description}"
+                   TextWrapping="Wrap" />
+
+        <Grid Name="ImageViewGrid" Grid.Column="1" Grid.Row="0"
               ColumnDefinitions="*" RowDefinitions="*, 2*, *"
-              Name="ImageViewGrid"
-              IsVisible="{Binding HasImages}"
-              Background="Chartreuse">
+              IsVisible="{Binding HasImages}">
+
             <views:ImageView Grid.Column="0" Grid.Row="1"
                              DataContext="{Binding ImageViewModel}" />
         </Grid>
-        <Grid Grid.Column="1" Grid.Row="0"
+
+        <Grid Name="VideoViewGrid" Grid.Column="1" Grid.Row="0"
               ColumnDefinitions="*" RowDefinitions="*, 2*, *"
-              Name="VideoViewGrid"
-              IsVisible="{Binding HasVideos}"
-              Background="Red">
-            <views:VideoView Grid.Column="0" Grid.Row="1"
-                             Name="VideoView"
+              IsVisible="{Binding HasVideos}">
+
+            <views:VideoView Name="VideoView" Grid.Column="0" Grid.Row="1"
                              DataContext="{Binding VideoViewModel}" />
         </Grid>
 

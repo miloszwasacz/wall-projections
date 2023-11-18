@@ -59,7 +59,7 @@ internal class Program
             PythonEngine.Initialize();
             Py.GIL();
             using var scope = Py.CreateScope();
-            string code = File.ReadAllText("Scripts/main.py");
+            var code = File.ReadAllText("Scripts/main.py");
             var scriptCompiled = PythonEngine.Compile(code);
             scope.Execute(scriptCompiled);
             //TODO Change to a real method

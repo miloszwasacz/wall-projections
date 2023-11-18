@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text.Json.Serialization;
-using WallProjections.Models.Configuration.Interfaces;
+using WallProjections.Models.Interfaces;
 
-namespace WallProjections.Models.Configuration;
+namespace WallProjections.Models;
 
 /// <summary>
 /// Stores all user customisable configuration for the program.
@@ -12,13 +12,13 @@ namespace WallProjections.Models.Configuration;
 [Serializable]
 public class Config : IConfig
 {
-
     /// <summary>
     /// List of all hotspots (their locations and content).
     /// </summary>
     [JsonInclude]
     public ImmutableList<Hotspot> Hotspots { get; }
 
+    /// <inheritdoc />
     public int HotspotCount => Hotspots.Count;
 
     /// <summary>
@@ -39,7 +39,8 @@ public class Config : IConfig
     {
         Hotspots = hotspots;
     }
-    
+
+    /// <inheritdoc />
     public Hotspot? GetHotspot(int id)
     {
         return Hotspots.Find(x => x.Id == id);

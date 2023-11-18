@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using WallProjections.Models;
@@ -10,6 +11,7 @@ public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
     public MainWindow()
     {
         InitializeComponent();
+        WindowState = WindowState.FullScreen;
     }
 
     // ReSharper disable UnusedParameter.Local
