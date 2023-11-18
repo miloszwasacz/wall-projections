@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using WallProjections.Models;
@@ -14,10 +16,20 @@ public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
         WindowState = WindowState.FullScreen;
     }
 
-    // ReSharper disable UnusedParameter.Local
-    //TODO Get rid of this
-    private void InputElement_OnKeyDown(object? sender, KeyEventArgs e)
+    internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        switch (e.Key)
+        {
+            case Key.Escape:
+                var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+                lifetime?.Shutdown();
+                break;
+            case Key.F11:
+                WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
+                break;
+        }
+
+#if DEBUGSKIPPYTHON
         var key = e.Key switch
         {
             Key.D1 => "1",
@@ -28,5 +40,6 @@ public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
 
         if (key is not null)
             ViewModel?.CreateDisplayViewModel(key, new FileProvider());
+#endif
     }
 }

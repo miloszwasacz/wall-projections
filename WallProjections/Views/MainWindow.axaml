@@ -9,7 +9,7 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="WallProjections"
         xmlns:views="clr-namespace:WallProjections.Views"
-        KeyDown="InputElement_OnKeyDown">
+        KeyDown="OnKeyDown">
 
     <views:DisplayView Name="DisplayView" DataContext="{Binding DisplayViewModel}" />
 

@@ -4,10 +4,16 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-
         <IsPackable>false</IsPackable>
+        <Configurations>Debug;Release;DebugSkipPython</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
-    
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'DebugSkipPython' ">
+        <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
+        <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
+    </PropertyGroup>
+
     <ItemGroup>
         <Content Include="Assets\"/>
         <None Update="Assets\*">
@@ -40,7 +46,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Assets\" />
+        <Folder Include="Assets\"/>
     </ItemGroup>
 
 </Project>

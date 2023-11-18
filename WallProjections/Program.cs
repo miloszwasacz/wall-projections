@@ -1,13 +1,16 @@
 using System;
 using System.Runtime.CompilerServices;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using WallProjections.ViewModels;
 using Python.Runtime;
+
+#if !DEBUGSKIPPYTHON
+using System.IO;
 using WallProjections.Helper;
+#endif
 
 [assembly: InternalsVisibleTo("WallProjections.Test")]
 
@@ -56,6 +59,7 @@ internal class Program
         var cts = new CancellationTokenSource();
         Task.Run(() =>
         {
+#if !DEBUGSKIPPYTHON
             PythonEngine.Initialize();
             Py.GIL();
             using var scope = Py.CreateScope();
@@ -64,6 +68,7 @@ internal class Program
             scope.Execute(scriptCompiled);
             //TODO Change to a real method
             scope.InvokeMethod("detect_buttons", PythonEventHandler.Instance.ToPython());
+#endif
         }, cts.Token);
         return cts;
     }
