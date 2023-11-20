@@ -1,10 +1,10 @@
-using System;
-using System.IO;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -14,18 +14,13 @@ namespace WallProjections.Views;
 
 public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
 {
-    private readonly IContentCache _cache;
-    private readonly IConfig _config;
+    private IContentCache _cache = new ContentCache();
+    private IConfig? _config;
 
     public MainWindow()
     {
         InitializeComponent();
         WindowState = WindowState.FullScreen;
-
-        //TODO Get rid of this hardcoded path and ContentCache
-        var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Assets", "data.zip");
-        _cache = new ContentCache();
-        _config = _cache.Load(path);
     }
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)
@@ -54,7 +49,26 @@ public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
 
         if (!key.HasValue) return;
 
-        ViewModel?.CreateDisplayViewModel(key.Value, new ContentProvider(_cache, _config));
+        var vm = ViewModel;
+        Task.Run(async () =>
+        {
+            while (_config is null)
+            {
+                var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    AllowMultiple = false,
+                });
+                if (files.Count == 0) continue;
+
+                var zipPath = files[0].Path.AbsolutePath;
+                if (!zipPath.EndsWith(".zip")) continue;
+
+                _cache = new ContentCache();
+                _config = _cache.Load(zipPath);
+            }
+
+            vm?.CreateDisplayViewModel(key.Value, new ContentProvider(_cache, _config));
+        });
 #endif
     }
 }

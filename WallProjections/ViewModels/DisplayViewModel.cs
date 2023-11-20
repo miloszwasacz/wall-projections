@@ -12,6 +12,7 @@ public sealed class DisplayViewModel : ActivatableViewModelBase, IDisplayViewMod
     //TODO Localized strings?
     private const string GenericError = @"An error occurred while loading this content.
 Please report this to the museum staff.";
+
     private const string NotFound = @"Hmm...
 Looks like this hotspot has no content.
 Please report this to the museum staff.";
@@ -29,6 +30,7 @@ Please report this to the museum staff.";
             Description = media.Description;
             if (media.ImagePath is not null)
                 //TODO Refactor to use VMProvider
+                //TODO Make ImageViewModel not throw FileNotFoundException (display a placeholder instead)
                 ImageViewModel = new ImageViewModel(media.ImagePath);
             else if (media.VideoPath is not null)
                 _videoPath = media.VideoPath;
