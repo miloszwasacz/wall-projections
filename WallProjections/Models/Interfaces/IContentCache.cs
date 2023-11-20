@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WallProjections.Models.Interfaces;
 
-public interface IContentImporter : IDisposable
+public interface IContentCache : IDisposable
 {
     /// <summary>
     /// Load a zip file of the config file and the media files.

@@ -4,11 +4,11 @@ using WallProjections.Models.Interfaces;
 namespace WallProjections.Test.Models;
 
 /// <summary>
-/// Tests for the <see cref="ContentImporter"/> class.
+/// Tests for the <see cref="ContentCache"/> class.
 /// </summary>
 [TestFixture]
 [Author(name: "Thomas Parr")]
-public class ContentImporterTest
+public class ContentCacheTest
 {
     /// <summary>
     /// Location of the zip file for testing.
@@ -16,12 +16,12 @@ public class ContentImporterTest
     private static string TestZip => Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test.zip");
 
     /// <summary>
-    /// Test that ensures the temp folder is removed after running <see cref="ContentImporter.Dispose"/>
+    /// Test that ensures the temp folder is removed after running <see cref="ContentCache.Dispose"/>
     /// </summary>
     [Test]
-    public void ContentImporterCleanupTest()
+    public void CleanupTest()
     {
-        var contentImporter = new ContentImporter();
+        var contentImporter = new ContentCache();
         var config = contentImporter.Load(TestZip);
 
         Assert.That(Directory.Exists(contentImporter.GetHotspotMediaFolder(config.GetHotspot(0)!)), Is.True);
@@ -35,37 +35,37 @@ public class ContentImporterTest
     /// Test that loaded config matches expected config information.
     /// </summary>
     [Test]
-    public void ConfigLoadTest()
+    public void LoadTest()
     {
-        IContentImporter contentImporter = new ContentImporter();
-        var config = contentImporter.Load(TestZip);
+        IContentCache contentCache = new ContentCache();
+        var config = contentCache.Load(TestZip);
         var config2 = new Config(new List<Hotspot> { new(0, 1, 2, 3) });
 
         AssertConfigsEqual(config, config2);
     }
 
     /// <summary>
-    /// Test that the <see cref="ContentImporter.Load"/> method loads media files correctly.
+    /// Test that the <see cref="ContentCache.Load"/> method loads media files correctly.
     /// </summary>
     [Test]
     public void MediaLoadTest()
     {
-        IContentImporter contentImporter = new ContentImporter();
-        var config = contentImporter.Load(TestZip);
+        IContentCache contentCache = new ContentCache();
+        var config = contentCache.Load(TestZip);
 
         Assert.Multiple(() =>
         {
             Assert.That(
-                File.Exists(Path.Combine(contentImporter.GetHotspotMediaFolder(config.GetHotspot(0)!), "0.txt")),
+                File.Exists(Path.Combine(contentCache.GetHotspotMediaFolder(config.GetHotspot(0)!), "0.txt")),
                 Is.True
             );
             Assert.That(
-                File.ReadAllText(Path.Combine(contentImporter.GetHotspotMediaFolder(config.GetHotspot(0)!), "0.txt")),
+                File.ReadAllText(Path.Combine(contentCache.GetHotspotMediaFolder(config.GetHotspot(0)!), "0.txt")),
                 Is.EqualTo("Hello World\n")
             );
         });
 
-        contentImporter.Dispose();
+        contentCache.Dispose();
     }
 
     /// <summary>

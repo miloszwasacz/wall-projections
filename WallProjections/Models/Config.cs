@@ -45,4 +45,11 @@ public class Config : IConfig
     {
         return Hotspots.Find(x => x.Id == id);
     }
+
+    public class HotspotNotFoundException : Exception
+    {
+        public HotspotNotFoundException(int id) : base($"Hotspot with ID {id} not found.")
+        {
+        }
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Avalonia.Headless.NUnit;
+using WallProjections.Models;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 
@@ -7,10 +8,17 @@ namespace WallProjections.Test.Views;
 [TestFixture]
 public class MainWindowTest
 {
-    private const string ArtifactId = "1";
-    private static readonly string[] Files = { ArtifactId + ".txt" };
+    private const int HotspotId = 1;
+
+    private static readonly Hotspot.Media Files = new(
+        new Hotspot(HotspotId),
+        HotspotId + " description",
+        HotspotId + ".png",
+        HotspotId + ".mp4"
+    );
+
     private static readonly MockViewModelProvider VmProvider = new();
-    private static readonly MockFileProvider FileProvider = new(Files);
+    private static readonly MockContentProvider ContentProvider = new(new List<Hotspot.Media> { Files });
 
     [AvaloniaTest]
     public void ViewModelTest()
@@ -38,7 +46,7 @@ public class MainWindowTest
             DataContext = vm
         };
         mainWindow.Show();
-        vm.CreateDisplayViewModel(ArtifactId, FileProvider);
+        vm.CreateDisplayViewModel(HotspotId, ContentProvider);
 
 
         Assert.Multiple(() =>

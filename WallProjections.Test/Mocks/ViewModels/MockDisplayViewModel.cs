@@ -19,9 +19,9 @@ public class MockDisplayViewModel : IDisplayViewModel
     private const string DefaultVideoPath = "Default/Video/Path.mp4";
 
     /// <summary>
-    /// The ID of an artifact the viewmodel should display data about
+    /// The ID of an hotspot the viewmodel should display data about
     /// </summary>
-    private readonly string _id;
+    private readonly int _id;
 
     /// <summary>
     /// Returns <see cref="DefaultDescription"/> + the ID that the viewmodel was constructed with
@@ -41,8 +41,8 @@ public class MockDisplayViewModel : IDisplayViewModel
     /// <summary>
     /// A mock of <see cref="DisplayViewModel"/> for injecting into <see cref="MainWindowViewModel"/>
     /// </summary>
-    /// <param name="id">The ID of an artifact the viewmodel should display data about</param>
-    public MockDisplayViewModel(string id)
+    /// <param name="id">The ID of a hotspot the viewmodel should display data about</param>
+    public MockDisplayViewModel(int id)
     {
         _id = id;
     }

@@ -12,7 +12,9 @@
 
         <TextBlock Name="Description" Grid.Column="0" Grid.Row="0"
                    Text="{Binding Description}"
-                   TextWrapping="Wrap" />
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="Wrap"
+                   TextAlignment="Start" />
 
         <Grid Name="ImageViewGrid" Grid.Column="1" Grid.Row="0"
               ColumnDefinitions="*" RowDefinitions="*, 2*, *"

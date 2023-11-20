@@ -37,4 +37,6 @@ public class Hotspot
         : this(id, new Coord(x, y, r))
     {
     }
+
+    public record Media(Hotspot Hotspot, string Description, string? ImagePath = null, string? VideoPath = null);
 }

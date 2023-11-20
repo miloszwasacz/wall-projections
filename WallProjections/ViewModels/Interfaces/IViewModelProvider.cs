@@ -15,9 +15,9 @@ public interface IViewModelProvider
     /// Creates a new <see cref="IDisplayViewModel"/> instance with the given <paramref name="id"/>
     /// </summary>
     /// <param name="id">The id of a Hotspot</param>
-    /// <param name="fileProvider">The FileProvider to look for files associated with the artifact</param>
+    /// <param name="contentProvider">The <see cref="IContentProvider"/> to look for files associated with the hotspot</param>
     /// <returns>A new <see cref="IDisplayViewModel"/> instance</returns>
-    public IDisplayViewModel GetDisplayViewModel(string id, IFileProvider fileProvider);
+    public IDisplayViewModel GetDisplayViewModel(int id, IContentProvider contentProvider);
 
     /// <summary>
     /// Creates a new <see cref="IVideoViewModel"/> instance with the given <paramref name="videoPath"/>

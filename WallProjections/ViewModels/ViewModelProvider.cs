@@ -38,18 +38,17 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// Creates a new <see cref="MainWindowViewModel"/> instance
     /// </summary>
     /// <returns>A new <see cref="MainWindowViewModel"/> instance</returns>
-    public IMainWindowViewModel GetMainWindowViewModel() =>
-        new MainWindowViewModel(this);
+    public IMainWindowViewModel GetMainWindowViewModel() => new MainWindowViewModel(this);
 
     //TODO Add Hotspot reference in the docs
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel"/> instance with the given <paramref name="id"/>
     /// </summary>
     /// <param name="id">The id of a Hotspot</param>
-    /// <param name="fileProvider">The FileProvider to look for files associated with the artifact</param>
+    /// <param name="contentProvider">The <see cref="IContentProvider"/> to look for files associated with the hotspot</param>
     /// <returns>A new <see cref="DisplayViewModel"/> instance</returns>
-    public IDisplayViewModel GetDisplayViewModel(string id, IFileProvider fileProvider) =>
-        new DisplayViewModel(this, fileProvider, id);
+    public IDisplayViewModel GetDisplayViewModel(int id, IContentProvider contentProvider) =>
+        new DisplayViewModel(this, contentProvider, id);
 
     /// <summary>
     /// Creates a new <see cref="VideoViewModel"/> instance with the given <paramref name="videoPath"/>

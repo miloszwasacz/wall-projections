@@ -1,4 +1,5 @@
-﻿using WallProjections.Test.Mocks.Models;
+﻿using WallProjections.Models;
+using WallProjections.Test.Mocks.Models;
 using WallProjections.ViewModels;
 
 namespace WallProjections.Test.ViewModels;
@@ -27,12 +28,25 @@ public class ViewModelProviderTest
     [Test]
     public void GetDisplayViewModelTest()
     {
-        const string artifactId = "test";
-        var files = new[] { "test", "test.mp4" };
-        var fileProvider = new MockFileProvider(files);
-        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(artifactId, fileProvider);
-        Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
-        Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
+        const int hotspotId = 1;
+        var files = new List<Hotspot.Media>
+        {
+            new(
+                new Hotspot(hotspotId),
+                hotspotId + " description",
+                hotspotId + ".png",
+                hotspotId + ".mp4"
+            )
+        };
+        var contentProvider = new MockContentProvider(files);
+        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(hotspotId, contentProvider);
+        Assert.Multiple(() =>
+        {
+            Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
+            //TODO Check ImageViewModel
+            // Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
+            Assert.That(displayViewModel.VideoViewModel, Is.Null);
+        });
     }
 
     [Test]

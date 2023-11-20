@@ -41,9 +41,11 @@ public class MockMainWindowViewModel : ViewModelBase, IMainWindowViewModel
     /// then sets <see cref="DisplayViewModel"/> to the new viewmodel instance
     /// </summary>
     /// <param name="id">The Id passed to <see cref="MockViewModelProvider.GetDisplayViewModel"/></param>
-    /// <param name="fileProvider">The FileProvider passed to <see cref="MockViewModelProvider.GetDisplayViewModel"/></param>
-    public void CreateDisplayViewModel(string id, IFileProvider fileProvider)
+    /// <param name="contentProvider">
+    /// The <see cref="IContentProvider"/> passed to <see cref="MockViewModelProvider.GetDisplayViewModel"/>
+    /// </param>
+    public void CreateDisplayViewModel(int id, IContentProvider contentProvider)
     {
-        DisplayViewModel = _vmProvider.GetDisplayViewModel(id, fileProvider);
+        DisplayViewModel = _vmProvider.GetDisplayViewModel(id, contentProvider);
     }
 }

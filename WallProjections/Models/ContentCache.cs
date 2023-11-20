@@ -5,7 +5,7 @@ using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Models;
 
-public sealed class ContentImporter : IContentImporter
+public sealed class ContentCache : IContentCache
 {
     private const string MediaLocation = "Media";
     private const string ConfigFileName = "config.json";

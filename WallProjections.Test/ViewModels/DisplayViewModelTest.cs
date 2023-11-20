@@ -1,4 +1,5 @@
-﻿using WallProjections.Test.Mocks.Models;
+﻿using WallProjections.Models;
+using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels;
 
@@ -8,28 +9,32 @@ namespace WallProjections.Test.ViewModels;
 [TestFixture]
 public class DisplayViewModelTest
 {
-    private const string ArtifactId = "1";
-    private const string TextPath = "test";
+    private const int HotspotId = 1;
+    private const string Text = "test";
     private const string VideoPath = "test.mp4";
-    private static string[] Files => new [] {TextPath, VideoPath};
-    private static string[] FilesNoVideo => new [] {TextPath};
+
+    private static List<Hotspot.Media> Files =>
+        new() { new Hotspot.Media(new Hotspot(HotspotId), Text, VideoPath: VideoPath) };
+
+    private static List<Hotspot.Media> FilesNoVideo => new() { new Hotspot.Media(new Hotspot(HotspotId), Text) };
     private static MockViewModelProvider ViewModelProvider => new();
     private static AssertionException MockException => new("VideoViewModel is not a MockVideoViewModel");
 
     [Test]
     public void CreationTest()
     {
-        var fileProvider = new MockFileProvider(Files);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, fileProvider, ArtifactId);
+        var contentProvider = new MockContentProvider(Files);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, HotspotId);
+        displayViewModel.Activator.Activate();
 
         Assert.Multiple(() =>
         {
-            //TODO Add proper tests for FileProvider once it is refactored
-            Assert.That(fileProvider.FileNumber, Is.EqualTo(ArtifactId));
+            //TODO Add proper tests for ContentProvider once it is refactored
+            Assert.That(contentProvider.FileNumber, Is.EqualTo(HotspotId));
 
             Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
             //TODO Add proper tests for the Description once DisplayViewModel is refactored
-            Assert.That(displayViewModel.Description, Is.EqualTo(string.Empty));
+            Assert.That(displayViewModel.Description, Is.EqualTo(Files[0].Description));
 
             var videoViewModel = displayViewModel.VideoViewModel as MockVideoViewModel ?? throw MockException;
             Assert.That(videoViewModel.VideoPath, Is.EqualTo(VideoPath));
@@ -39,26 +44,26 @@ public class DisplayViewModelTest
     [Test]
     public void CreationNoVideoTest()
     {
-        var fileProvider = new MockFileProvider(FilesNoVideo);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, fileProvider, ArtifactId);
+        var contentProvider = new MockContentProvider(FilesNoVideo);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, HotspotId);
 
         Assert.Multiple(() =>
         {
             Assert.That(displayViewModel.VideoViewModel, Is.Null);
             //TODO Add proper tests for the Description once DisplayViewModel is refactored
-            Assert.That(displayViewModel.Description, Is.EqualTo(string.Empty));
+            Assert.That(displayViewModel.Description, Is.EqualTo(FilesNoVideo[0].Description));
         });
     }
 
     [Test]
     public void ActivationTest()
     {
-        var fileProvider = new MockFileProvider(Files);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, fileProvider, ArtifactId);
-        var videoViewModel = displayViewModel.VideoViewModel as MockVideoViewModel ?? throw MockException;
+        var contentProvider = new MockContentProvider(Files);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, HotspotId);
 
         // Activate the viewmodel
         var disposable = displayViewModel.Activator.Activate();
+        var videoViewModel = displayViewModel.VideoViewModel as MockVideoViewModel ?? throw MockException;
         Assert.Multiple(() =>
         {
             Assert.That(videoViewModel.PlayCounter, Is.EqualTo(1));
@@ -94,8 +99,8 @@ public class DisplayViewModelTest
     [Test]
     public void ActivationNoVideoTest()
     {
-        var fileProvider = new MockFileProvider(FilesNoVideo);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, fileProvider, ArtifactId);
+        var contentProvider = new MockContentProvider(FilesNoVideo);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, HotspotId);
 
         // Activate the viewmodel
         var disposable = displayViewModel.Activator.Activate();
@@ -115,8 +120,9 @@ public class DisplayViewModelTest
     [Test]
     public void ActivationNoMediaPlayerTest()
     {
-        var fileProvider = new MockFileProvider(Files);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, fileProvider, ArtifactId);
+        var contentProvider = new MockContentProvider(Files);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, HotspotId);
+        displayViewModel.Activator.Activate();
         var videoViewModel = displayViewModel.VideoViewModel as MockVideoViewModel ?? throw MockException;
         videoViewModel.CanPlay = false;
 

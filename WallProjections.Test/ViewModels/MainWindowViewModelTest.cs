@@ -1,4 +1,5 @@
-﻿using WallProjections.Test.Mocks.Models;
+﻿using WallProjections.Models;
+using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels;
 
@@ -7,7 +8,7 @@ namespace WallProjections.Test.ViewModels;
 [TestFixture]
 public class MainWindowViewModelTest
 {
-    private static readonly string[] ArtifactIds = { "1", "2" };
+    private static readonly int[] HotspotIds = { 1, 2 };
 
     [Test]
     public void CreationTest()
@@ -22,19 +23,26 @@ public class MainWindowViewModelTest
     public void CreateDisplayViewModelTest()
     {
         var viewModelProvider = new MockViewModelProvider();
-        var fileProvider = new MockFileProvider(ArtifactIds);
+
+        var media = HotspotIds.Select(id => new Hotspot.Media(
+            new Hotspot(id),
+            id + " description",
+            id + ".png",
+            id + ".mp4"
+        )).ToList();
+        var contentProvider = new MockContentProvider(media);
         var mainWindowViewModel = new MainWindowViewModel(viewModelProvider);
 
         // Create a new DisplayViewModel
-        mainWindowViewModel.CreateDisplayViewModel(ArtifactIds[0], fileProvider);
+        mainWindowViewModel.CreateDisplayViewModel(HotspotIds[0], contentProvider);
         Assert.That(mainWindowViewModel.DisplayViewModel, Is.Not.Null);
         Assert.That(mainWindowViewModel.DisplayViewModel?.Description,
-            Is.EqualTo(MockDisplayViewModel.DefaultDescription + ArtifactIds[0]));
+            Is.EqualTo(MockDisplayViewModel.DefaultDescription + HotspotIds[0]));
 
         // Change the DisplayViewModel
-        mainWindowViewModel.CreateDisplayViewModel(ArtifactIds[1], fileProvider);
+        mainWindowViewModel.CreateDisplayViewModel(HotspotIds[1], contentProvider);
         Assert.That(mainWindowViewModel.DisplayViewModel, Is.Not.Null);
         Assert.That(mainWindowViewModel.DisplayViewModel?.Description,
-            Is.EqualTo(MockDisplayViewModel.DefaultDescription + ArtifactIds[1]));
+            Is.EqualTo(MockDisplayViewModel.DefaultDescription + HotspotIds[1]));
     }
 }

@@ -20,9 +20,9 @@ public class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
         _vmProvider = vmProvider;
     }
 
-    public void CreateDisplayViewModel(string id, IFileProvider fileProvider)
+    public void CreateDisplayViewModel(int id, IContentProvider contentProvider)
     {
-        DisplayViewModel = _vmProvider.GetDisplayViewModel(id, fileProvider);
+        DisplayViewModel = _vmProvider.GetDisplayViewModel(id, contentProvider);
     }
 
     //TODO Handle Python events (see f1dd495)
