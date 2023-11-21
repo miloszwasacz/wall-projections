@@ -7,7 +7,7 @@ using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
 
-public sealed class DisplayViewModel : ActivatableViewModelBase, IDisplayViewModel
+public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
 {
     //TODO Localized strings?
     private const string GenericError = @"An error occurred while loading this content.
@@ -17,66 +17,81 @@ Please report this to the museum staff.";
 Looks like this hotspot has no content.
 Please report this to the museum staff.";
 
-    private readonly IViewModelProvider _vmProvider;
-    private readonly string? _videoPath;
-    private IVideoViewModel? _videoViewModel;
+    private IConfig? _config;
 
-    public DisplayViewModel(IViewModelProvider vmProvider, IContentProvider contentProvider, int hotspotId)
+    /// <summary>
+    /// The <see cref="IContentProvider" /> used to fetch Hotspot's content files
+    /// </summary>
+    private IContentProvider? _contentProvider;
+
+    private string _description = string.Empty;
+
+    public DisplayViewModel(IViewModelProvider vmProvider)
     {
-        _vmProvider = vmProvider;
+        //TODO Refactor to use VMProvider
+        ImageViewModel = new ImageViewModel();
+        VideoViewModel = vmProvider.GetVideoViewModel();
+    }
+
+    /// <inheritdoc />
+    public IConfig Config
+    {
+        set
+        {
+            _config = value;
+            _contentProvider = new ContentProvider(ContentCache.Instance, _config);
+        }
+    }
+
+    /// <inheritdoc />
+    public string Description
+    {
+        get => _description;
+        private set => this.RaiseAndSetIfChanged(ref _description, value);
+    }
+
+    /// <inheritdoc />
+    public ImageViewModel ImageViewModel { get; }
+
+    /// <inheritdoc />
+    public IVideoViewModel VideoViewModel { get; }
+
+    /// <inheritdoc />
+    public bool LoadHotspot(int hotspotId)
+    {
+        if (_contentProvider is null) return false;
+
         try
         {
-            var media = contentProvider.GetMedia(hotspotId);
+            var media = _contentProvider.GetMedia(hotspotId);
             Description = media.Description;
+            ImageViewModel.HideImage();
+            VideoViewModel.StopVideo();
             if (media.ImagePath is not null)
                 //TODO Refactor to use VMProvider
                 //TODO Make ImageViewModel not throw FileNotFoundException (display a placeholder instead)
-                ImageViewModel = new ImageViewModel(media.ImagePath);
+                ImageViewModel.ShowImage(media.ImagePath);
             else if (media.VideoPath is not null)
-                _videoPath = media.VideoPath;
+                VideoViewModel.PlayVideo(media.VideoPath);
         }
-        catch (Exception e) when (e is Config.HotspotNotFoundException or FileNotFoundException)
+        catch (Exception e) when (e is Models.Config.HotspotNotFoundException or FileNotFoundException)
         {
+            //TODO Write to Log instead of Console
             Console.WriteLine(e);
             Description = NotFound;
         }
         catch (Exception e)
         {
+            //TODO Write to Log instead of Console
             Console.WriteLine(e);
             Description = GenericError;
         }
+
+        return true;
     }
 
-    public string Description { get; }
-
-    public bool HasImages => ImageViewModel is not null;
-    public bool HasVideos => VideoViewModel is not null && !HasImages;
-
-    public ViewModelBase? ImageViewModel { get; }
-
-    public IVideoViewModel? VideoViewModel
+    public void Dispose()
     {
-        get => _videoViewModel;
-        private set
-        {
-            if (value is null)
-                _videoViewModel?.Dispose();
-
-            this.RaiseAndSetIfChanged(ref _videoViewModel, value);
-            this.RaisePropertyChanged(nameof(HasVideos));
-        }
-    }
-
-    protected override void OnStart()
-    {
-        if (_videoPath is not null && VideoViewModel is null)
-            VideoViewModel = _vmProvider.GetVideoViewModel(_videoPath);
-
-        VideoViewModel?.PlayVideo();
-    }
-
-    protected override void OnStop()
-    {
-        VideoViewModel = null;
+        VideoViewModel.Dispose();
     }
 }

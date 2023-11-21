@@ -27,7 +27,9 @@ public class VideoViewModelInternalTest
             }
             catch (TargetInvocationException e)
             {
-                throw e.InnerException ?? throw e;
+                if (e.InnerException is not null)
+                    throw e.InnerException;
+                throw;
             }
         });
     }

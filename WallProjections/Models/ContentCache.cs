@@ -11,9 +11,23 @@ public sealed class ContentCache : IContentCache
     private const string ConfigFileName = "config.json";
 
     /// <summary>
-    /// Backing field for <see cref="TempPath"/>
+    /// The backing field for the <see cref="ContentCache" /> property
+    /// </summary>
+    private static ContentCache? _instance;
+
+    /// <summary>
+    /// The backing field for <see cref="TempPath" />
     /// </summary>
     private string? _tempPath;
+
+    private ContentCache()
+    {
+    }
+
+    /// <summary>
+    /// A global instance of <see cref="ContentCache" />
+    /// </summary>
+    public static ContentCache Instance => _instance ??= new ContentCache();
 
     /// <summary>
     /// The path to the temporary folder where the zip file is extracted
@@ -37,6 +51,20 @@ public sealed class ContentCache : IContentCache
         return config;
     }
 
+    /// <inheritdoc />
+    public string GetHotspotMediaFolder(Hotspot hotspot)
+    {
+        return Path.Combine(TempPath, MediaLocation, hotspot.Id.ToString());
+    }
+
+    /// <summary>
+    /// Cleans up the temporary folder stored in <see cref="TempPath" />.
+    /// </summary>
+    public void Dispose()
+    {
+        Directory.Delete(TempPath, true);
+    }
+
     /// <summary>
     /// Loads a config from a .json file.
     /// </summary>
@@ -56,17 +84,5 @@ public sealed class ContentCache : IContentCache
         var config = JsonSerializer.Deserialize<Config>(configEntry.Open());
         if (config is null) throw new JsonException();
         return config;
-    }
-
-    /// <inheritdoc />
-    public string GetHotspotMediaFolder(Hotspot hotspot) =>
-        Path.Combine(TempPath, MediaLocation, hotspot.Id.ToString());
-
-    /// <summary>
-    /// Cleans up the temporary folder stored in <see cref="TempPath"/>.
-    /// </summary>
-    public void Dispose()
-    {
-        Directory.Delete(TempPath, true);
     }
 }

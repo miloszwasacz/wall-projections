@@ -12,12 +12,11 @@ using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.Views;
 
-public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
+public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
-    private IContentCache _cache = new ContentCache();
     private IConfig? _config;
 
-    public MainWindow()
+    public DisplayWindow()
     {
         InitializeComponent();
         WindowState = WindowState.FullScreen;
@@ -50,25 +49,34 @@ public partial class MainWindow : ReactiveWindow<IMainWindowViewModel>
         if (!key.HasValue) return;
 
         var vm = ViewModel;
+        if (vm is null) return;
+
         Task.Run(async () =>
         {
             while (_config is null)
             {
                 var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                 {
-                    AllowMultiple = false,
+                    AllowMultiple = false
                 });
                 if (files.Count == 0) continue;
 
                 var zipPath = files[0].Path.AbsolutePath;
                 if (!zipPath.EndsWith(".zip")) continue;
 
-                _cache = new ContentCache();
-                _config = _cache.Load(zipPath);
+                _config = ContentCache.Instance.Load(zipPath);
             }
 
-            vm?.CreateDisplayViewModel(key.Value, new ContentProvider(_cache, _config));
+            vm.Config = _config;
+            vm.LoadHotspot(key.Value);
         });
 #endif
+    }
+
+    internal void OnVideoViewResize(object? sender, SizeChangedEventArgs e)
+    {
+        if (e.WidthChanged)
+            //TODO Don't use hardcoded ratio
+            VideoView.Height = e.NewSize.Width * 9 / 16;
     }
 }

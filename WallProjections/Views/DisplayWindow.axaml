@@ -1,0 +1,37 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:WallProjections.ViewModels.Interfaces"
+        xmlns:views="clr-namespace:WallProjections.Views"
+        xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WallProjections.Views.DisplayWindow"
+        x:DataType="vm:IDisplayViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="WallProjections"
+        KeyDown="OnKeyDown">
+
+    <Grid ColumnDefinitions="*, *" RowDefinitions="*, 2*, *">
+
+        <!--TODO Add styles -->
+        <TextBlock Name="Description" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
+                   Text="{Binding Description}"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="Wrap"
+                   FontSize="24"
+                   TextAlignment="Start" />
+
+        <views:ImageView Name="ImageView" Grid.Column="1" Grid.Row="1"
+                         DataContext="{Binding ImageViewModel}"
+                         IsVisible="{Binding HasImages, FallbackValue=False}" />
+
+        <!-- VideoView has to be directly in Window or it will itself open a new window -->
+        <vlc:VideoView Name="VideoView" Grid.Column="1" Grid.Row="1"
+                       DataContext="{Binding VideoViewModel}"
+                       MediaPlayer="{Binding MediaPlayer}"
+                       IsVisible="{Binding HasVideos, FallbackValue=False}"
+                       SizeChanged="OnVideoViewResize" />
+
+    </Grid>
+</Window>

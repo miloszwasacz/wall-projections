@@ -1,13 +1,18 @@
-﻿namespace WallProjections.ViewModels.Interfaces;
+﻿using System;
+using WallProjections.Models.Interfaces;
 
-public interface IDisplayViewModel
+namespace WallProjections.ViewModels.Interfaces;
+
+public interface IDisplayViewModel : IDisposable
 {
+    public IConfig Config { set; }
+
     public string Description { get; }
-    public IVideoViewModel? VideoViewModel { get; }
 
     //TODO Change to an interface
-    public ViewModelBase? ImageViewModel { get; }
+    public ImageViewModel ImageViewModel { get; }
 
-    public bool HasImages { get; }
-    public bool HasVideos { get; }
+    public IVideoViewModel VideoViewModel { get; }
+
+    public bool LoadHotspot(int hotspotId);
 }

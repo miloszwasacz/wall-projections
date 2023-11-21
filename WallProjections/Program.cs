@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.ReactiveUI;
-using WallProjections.ViewModels;
 using Python.Runtime;
-
+using WallProjections.Models;
+using WallProjections.ViewModels;
 #if !DEBUGSKIPPYTHON
 using System.IO;
 using WallProjections.Helper;
@@ -32,6 +32,7 @@ internal class Program
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         pythonThread.Cancel();
         pythonThread.Dispose();
+        ContentCache.Instance.Dispose();
         ViewModelProvider.Instance.Dispose();
     }
 

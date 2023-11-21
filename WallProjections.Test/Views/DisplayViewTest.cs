@@ -2,6 +2,7 @@
 using WallProjections.Models;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Views;
 
 namespace WallProjections.Test.Views;
 
@@ -24,7 +25,7 @@ public class DisplayViewTest
     public void ViewModelTest()
     {
         var vm = VmProvider.GetDisplayViewModel(HotspotId, ContentProvider);
-        var displayView = new WallProjections.Views.DisplayView
+        var displayView = new DisplayWindow
         {
             DataContext = vm
         };
