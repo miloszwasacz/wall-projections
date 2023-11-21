@@ -1,4 +1,6 @@
 ﻿using WallProjections.Models;
+using WallProjections.Test.Mocks.Helper;
+using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels;
 
@@ -14,15 +16,17 @@ public class DisplayViewModelTest
 
     private static List<Hotspot.Media> Files =>
         new() { new Hotspot.Media(new Hotspot(HotspotId), Text, VideoPath: VideoPath) };
-
     private static List<Hotspot.Media> FilesNoVideo => new() { new Hotspot.Media(new Hotspot(HotspotId), Text) };
+
     private static MockViewModelProvider ViewModelProvider => new();
     private static AssertionException MockException => new("VideoViewModel is not a MockVideoViewModel");
 
     [Test]
     public void CreationTest()
     {
-        var displayViewModel = new DisplayViewModel(ViewModelProvider);
+        var pythonHandler = new MockPythonEventHandler();
+        var cache = new MockContentCache();
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, cache);
 
         Assert.Multiple(() =>
         {
@@ -42,7 +46,9 @@ public class DisplayViewModelTest
     [Test]
     public void CreationNoVideoTest()
     {
-        var displayViewModel = new DisplayViewModel(ViewModelProvider);
+        var pythonHandler = new MockPythonEventHandler();
+        var cache = new MockContentCache();
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, cache);
 
         Assert.Multiple(() =>
         {

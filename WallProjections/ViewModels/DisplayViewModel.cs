@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using ReactiveUI;
-using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
@@ -25,19 +25,41 @@ Please report this to the museum staff.";
     /// </summary>
     private IContentProvider? _contentProvider;
 
+    /// <summary>
+    /// The <see cref="IPythonEventHandler" /> used to listen for Python events
+    /// </summary>
+    private readonly IPythonEventHandler _pythonEventHandler;
+
+    /// <summary>
+    /// The <see cref="IContentCache" /> used to retrieve cached content
+    /// </summary>
+    private readonly IContentCache _contentCache;
+
+    /// <summary>
+    /// The backing field for <see cref="Description" />
+    /// </summary>
     private string _description = string.Empty;
 
     /// <summary>
-    /// Creates a new <see cref="DisplayViewModel" /> with <see cref="ImageViewModel" /> and <see cref="VideoViewModel" />
-    /// fetched by <paramref name="vmProvider" />, and starts listening for <see cref="PythonEventHandler.HotspotSelected">Python events</see>
+    /// Creates a new <see cref="DisplayViewModel" /> with <see cref="ImageViewModel" />
+    /// and <see cref="VideoViewModel" /> fetched by <paramref name="vmProvider" />,
+    /// and starts listening for <see cref="IPythonEventHandler.HotspotSelected">Python events</see>
     /// </summary>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
-    public DisplayViewModel(IViewModelProvider vmProvider)
+    /// <param name="pythonEventHandler">The <see cref="IPythonEventHandler" /> used to listen for Python events</param>
+    /// <param name="contentCache">The <see cref="IContentCache" /> used to retrieve cached content</param>
+    public DisplayViewModel(
+        IViewModelProvider vmProvider,
+        IPythonEventHandler pythonEventHandler,
+        IContentCache contentCache
+    )
     {
         //TODO Refactor to use VMProvider
         ImageViewModel = new ImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
-        PythonEventHandler.Instance.HotspotSelected += OnHotspotSelected;
+        _pythonEventHandler = pythonEventHandler;
+        _pythonEventHandler.HotspotSelected += OnHotspotSelected;
+        _contentCache = contentCache;
     }
 
     /// <inheritdoc />
@@ -46,7 +68,7 @@ Please report this to the museum staff.";
         set
         {
             _config = value;
-            _contentProvider = new ContentProvider(ContentCache.Instance, _config);
+            _contentProvider = new ContentProvider(_contentCache, _config);
             this.RaisePropertyChanged(nameof(IsContentLoaded));
         }
     }
@@ -68,7 +90,7 @@ Please report this to the museum staff.";
     public IVideoViewModel VideoViewModel { get; }
 
     /// <inheritdoc />
-    public void OnHotspotSelected(object? sender, PythonEventHandler.HotspotSelectedArgs e)
+    public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e)
     {
         LoadHotspot(e.Id);
     }
@@ -109,11 +131,11 @@ Please report this to the museum staff.";
     }
 
     /// <summary>
-    /// Unsubscribes from <see cref="PythonEventHandler.HotspotSelected" /> and disposes of <see cref="VideoViewModel" />
+    /// Unsubscribes from <see cref="IPythonEventHandler.HotspotSelected" /> and disposes of <see cref="VideoViewModel" />
     /// </summary>
     public void Dispose()
     {
-        PythonEventHandler.Instance.HotspotSelected -= OnHotspotSelected;
+        _pythonEventHandler.HotspotSelected -= OnHotspotSelected;
         VideoViewModel.Dispose();
     }
 }

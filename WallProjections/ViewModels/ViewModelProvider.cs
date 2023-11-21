@@ -1,5 +1,6 @@
 ﻿using System;
 using LibVLCSharp.Shared;
+using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 
@@ -37,7 +38,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// Creates a new <see cref="DisplayViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
-    public IDisplayViewModel GetDisplayViewModel() => new DisplayViewModel(this);
+    public IDisplayViewModel GetDisplayViewModel() =>
+        new DisplayViewModel(this, PythonEventHandler.Instance, ContentCache.Instance);
 
     /// <summary>
     /// Creates a new <see cref="VideoViewModel" /> instance

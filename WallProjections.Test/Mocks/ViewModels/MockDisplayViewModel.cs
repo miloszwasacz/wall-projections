@@ -1,5 +1,5 @@
 ﻿using ReactiveUI;
-using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
@@ -85,11 +85,11 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     public IVideoViewModel VideoViewModel { get; }
 
     /// <summary>
-    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="PythonEventHandler.HotspotSelectedArgs.Id" />
+    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="IPythonEventHandler.HotspotSelectedArgs.Id" />
     /// </summary>
     /// <param name="sender">The caller of the event (not used)</param>
     /// <param name="e">The event args containing the id of a hotspot to be theoretically loaded</param>
-    public void OnHotspotSelected(object? sender, PythonEventHandler.HotspotSelectedArgs e)
+    public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e)
     {
         CurrentHotspotId = e.Id;
     }

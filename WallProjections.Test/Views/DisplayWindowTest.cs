@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using Avalonia.Input;
-using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.Views;
 using WallProjections.Views;
@@ -45,7 +45,7 @@ public class DisplayWindowTest
 
         foreach (var id in Ids)
         {
-            vm.OnHotspotSelected(null, new PythonEventHandler.HotspotSelectedArgs(id));
+            vm.OnHotspotSelected(null, new IPythonEventHandler.HotspotSelectedArgs(id));
             Assert.Multiple(() =>
             {
                 Assert.That(vm.CurrentHotspotId, Is.EqualTo(id));

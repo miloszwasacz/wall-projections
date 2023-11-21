@@ -1,5 +1,5 @@
 ﻿using System;
-using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 
@@ -38,5 +38,5 @@ public interface IDisplayViewModel : IDisposable
     /// </summary>
     /// <param name="sender">The sender of the event</param>
     /// <param name="e">Event args holding the ID of the selected <see cref="Hotspot" /></param>
-    public void OnHotspotSelected(object? sender, PythonEventHandler.HotspotSelectedArgs e);
+    public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e);
 }
