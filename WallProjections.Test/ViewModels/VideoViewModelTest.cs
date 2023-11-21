@@ -10,6 +10,12 @@ public class VideoViewModelTest
     private const string VideoPath = "test.mp4";
     private static LibVLC LibVlc => new();
 
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
+    {
+        LibVlc.Dispose();
+    }
+
     [Test]
     public void CreationTest()
     {

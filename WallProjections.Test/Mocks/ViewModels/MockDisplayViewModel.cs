@@ -1,4 +1,5 @@
-﻿using WallProjections.Helper;
+﻿using ReactiveUI;
+using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
@@ -6,19 +7,24 @@ using WallProjections.ViewModels.Interfaces;
 namespace WallProjections.Test.Mocks.ViewModels;
 
 /// <summary>
-/// A mock of <see cref="DisplayViewModel"/>
+/// A mock of <see cref="DisplayViewModel" />
 /// </summary>
-public sealed class MockDisplayViewModel : IDisplayViewModel
+public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
 {
     /// <summary>
-    /// A stub for <see cref="Description"/> for testing purposes
+    /// A stub for <see cref="Description" /> for testing purposes
     /// </summary>
     public const string DefaultDescription = "Default Description: ";
 
     /// <summary>
-    /// The backing field for <see cref="SetConfigs"/>
+    /// The backing field for <see cref="SetConfigs" />
     /// </summary>
     private readonly List<IConfig> _configs = new();
+
+    /// <summary>
+    /// The backing field for <see cref="CurrentHotspotId" />
+    /// </summary>
+    private int _currentHotspotId = -1;
 
     //TODO Add mention of ImageViewModel
     /// <summary>
@@ -35,7 +41,15 @@ public sealed class MockDisplayViewModel : IDisplayViewModel
     // /// <summary>
     // /// The ID of an hotspot the viewmodel should display data about, or <i>-1</i> if no hotspot has ever been loaded
     // /// </summary>
-    public int CurrentHotspotId { get; private set; } = -1;
+    public int CurrentHotspotId
+    {
+        get => _currentHotspotId;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _currentHotspotId, value);
+            this.RaisePropertyChanged(nameof(Description));
+        }
+    }
 
     /// <summary>
     /// The set of configs the viewmodel has been set to
@@ -43,12 +57,12 @@ public sealed class MockDisplayViewModel : IDisplayViewModel
     public IReadOnlyList<IConfig> SetConfigs => _configs;
 
     /// <summary>
-    /// The number of times <see cref="Dispose"/> has been called
+    /// The number of times <see cref="Dispose" /> has been called
     /// </summary>
     public int DisposedCount { get; private set; }
 
     /// <summary>
-    /// Adds <paramref name="value"/> to <see cref="SetConfigs"/>
+    /// Adds <paramref name="value" /> to <see cref="SetConfigs" />
     /// </summary>
     public IConfig Config
     {
@@ -56,17 +70,17 @@ public sealed class MockDisplayViewModel : IDisplayViewModel
     }
 
     /// <summary>
-    /// Returns whether <see cref="SetConfigs"/> is not empty
+    /// Returns whether <see cref="SetConfigs" /> is not empty
     /// </summary>
     public bool IsContentLoaded => _configs.Count > 0;
 
     /// <summary>
-    /// Returns <see cref="DefaultDescription"/> + the ID that the viewmodel was constructed with
+    /// Returns <see cref="DefaultDescription" /> + the ID that the viewmodel was constructed with
     /// </summary>
     public string Description => DefaultDescription + CurrentHotspotId;
 
     /// <summary>
-    /// Returns a <see cref="MockVideoViewModel"/>
+    /// Returns a <see cref="MockVideoViewModel" />
     /// </summary>
     public IVideoViewModel VideoViewModel { get; }
 
