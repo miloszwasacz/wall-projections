@@ -28,7 +28,7 @@ A project with Bristol Museum, to create interactive replicas of museum exhibits
 
 ## Stakeholders
 
-### Museum staff
+### Exhibit maintainer
 
 - Maintaining the installation
 - Make it easy enough for them to be able to maintain it, e.g. fixing errors in the projection content or calibrating the hotspots/cameras
@@ -40,7 +40,7 @@ A project with Bristol Museum, to create interactive replicas of museum exhibits
 
 ### Exhibit curator/management
 
-- The installation should be inform and educate people on that subject area
+- The installation should inform and educate people on that subject area
 
 ### Museum management
 
@@ -48,32 +48,43 @@ A project with Bristol Museum, to create interactive replicas of museum exhibits
 
 ## User stories
 
-### Museum visitor
+- As a museum visitor, I want to be able to interact with the installation, so that I can learn more about it.
+- As an exhibit maintainer, I want to set up the installation, so that it is ready for visitors to use.
+- As an exhibit maintainer, I want to be able to relocate the hotspots, so that they are in the correct place after moving the artifact or switching it for a different one.
+- As an exhibit maintainer, I want to be able to calibrate the software, so that the finger tracking is accurate.
+- As an exhibit maintainer, I want to be able to update the content that is projected, so that it reflects the information we want to convey.
 
-1. They approach the replica artefact
-2. The hotspots are projected onto the artefact?
-3. The visitor touches a hotspot on the artefact.
-4. Information regarding that part of the artefact is projected onto a nearby wall.
-5. The visitor reads/watches the information projected to learn more about the artefact.
+## Flows
 
-### Exhibit maintainer
+### Museum visitor - interact with hotspot
 
-Calibrating the camera system with the location of the hotspots:
+1. They approach the replica artefact.
+2. The visitor touches a hotspot on the artefact.
+3. Information regarding that part of the artefact is projected onto a nearby wall.
+4. The visitor reads/watches the information projected to learn more about the artefact.
 
-1. Switch on some kind of calibration mode?
-2. The hotspots are then projected
-3. Maybe like put a brightly-coloured sticker on each of the hotspot locations
-4. Press something to say that the stickers are in place
-5. Some way to test the calibration was successful (although maybe you could just use the normal mode to test it)
+### Exhibit maintainer - setup
 
-Adjusting the location of the hotspots:
+1. Install the hardware (projector, computer & camera) high-up on the wall, facing the artifact.
+2. Follow the "relocate hotspots" flow to position the hotspots in the correct place. (This would also have to include some way to add/remove hotspots.)
+3. Follow the "calibration" flow to calibrate the camera system.
+4. Follow the "update content" flow to add the content to be projected.
 
-1. Switch on some kind of hotspot location mode
-2. Put a brightly-coloured sticker on each of the desired locations for hotspots
-3. Press something to say that the stickers are in place
-4. The hotspots are projected onto the replica to check they’re in the right place (although maybe you could just use the normal mode to test it)
+### Exhibit maintainer - relocate hotspots
 
-Updating hotspot content:
+1. Switch on hotspot relocation mode.
+2. Adjust location of hotspots interactively somehow (e.g. using a mouse).
+3. Press some button to save the new locations.
+
+### Exhibit maintainer - calibration
+
+(Calibrating the camera system with the location of the hotspots.)
+
+1. Ensure the artifact is well-lit with white light. (So that the computer vision works properly.)
+2. Activate the calibration procedure from the UI.
+3. The software automatically projects some symbol in place of each hotspot, determines the location of each symbol using computer vision, and plays a beep sound to indicate that the calibration is complete.
+
+### Exhibit maintainer - update content
 
 (could use a USB stick connected to the raspberry pi or whatever to store the content)
 
