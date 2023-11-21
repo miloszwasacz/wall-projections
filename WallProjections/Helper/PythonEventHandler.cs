@@ -14,25 +14,25 @@ public class PythonEventHandler
     {
     }
 
-    public event EventHandler<PressDetectedArgs>? PressDetected;
+    public event EventHandler<HotspotSelectedArgs>? HotspotSelected;
 
-    public class PressDetectedArgs : EventArgs
+    public class HotspotSelectedArgs : EventArgs
     {
-        public int Button { get; private set; }
+        public int Id { get; }
 
-        public PressDetectedArgs(int button)
+        public HotspotSelectedArgs(int id)
         {
-            Button = button;
+            Id = id;
         }
     }
 
     // ReSharper disable once UnusedMember.Global
     /// <summary>
-    /// Called by Python when a button press is detected
+    /// Called by Python when a hotspot press is detected
     /// </summary>
-    /// <param name="button">The ID of the pressed button</param>
-    public void OnPressDetected(int button)
+    /// <param name="id">The ID of the pressed hotspot</param>
+    public void OnPressDetected(int id)
     {
-        PressDetected?.Invoke(this, new PressDetectedArgs(button));
+        HotspotSelected?.Invoke(this, new HotspotSelectedArgs(id));
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using ReactiveUI;
+using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
@@ -26,11 +27,17 @@ Please report this to the museum staff.";
 
     private string _description = string.Empty;
 
+    /// <summary>
+    /// Creates a new <see cref="DisplayViewModel" /> with <see cref="ImageViewModel" /> and <see cref="VideoViewModel" />
+    /// fetched by <paramref name="vmProvider" />, and starts listening for <see cref="PythonEventHandler.HotspotSelected">Python events</see>
+    /// </summary>
+    /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
     public DisplayViewModel(IViewModelProvider vmProvider)
     {
         //TODO Refactor to use VMProvider
         ImageViewModel = new ImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
+        PythonEventHandler.Instance.HotspotSelected += OnHotspotSelected;
     }
 
     /// <inheritdoc />
@@ -40,8 +47,12 @@ Please report this to the museum staff.";
         {
             _config = value;
             _contentProvider = new ContentProvider(ContentCache.Instance, _config);
+            this.RaisePropertyChanged(nameof(IsContentLoaded));
         }
     }
+
+    /// <inheritdoc />
+    public bool IsContentLoaded => _contentProvider is not null;
 
     /// <inheritdoc />
     public string Description
@@ -57,9 +68,18 @@ Please report this to the museum staff.";
     public IVideoViewModel VideoViewModel { get; }
 
     /// <inheritdoc />
-    public bool LoadHotspot(int hotspotId)
+    public void OnHotspotSelected(object? sender, PythonEventHandler.HotspotSelectedArgs e)
     {
-        if (_contentProvider is null) return false;
+        LoadHotspot(e.Id);
+    }
+
+    /// <summary>
+    /// Loads the content of the hotspot with the given ID if <see cref="_contentProvider" /> has been set
+    /// </summary>
+    /// <param name="hotspotId">The ID of a hotspot to fetch data about</param>
+    private void LoadHotspot(int hotspotId)
+    {
+        if (_contentProvider is null) return;
 
         try
         {
@@ -77,21 +97,23 @@ Please report this to the museum staff.";
         catch (Exception e) when (e is Models.Config.HotspotNotFoundException or FileNotFoundException)
         {
             //TODO Write to Log instead of Console
-            Console.WriteLine(e);
+            Console.Error.WriteLine(e);
             Description = NotFound;
         }
         catch (Exception e)
         {
             //TODO Write to Log instead of Console
-            Console.WriteLine(e);
+            Console.Error.WriteLine(e);
             Description = GenericError;
         }
-
-        return true;
     }
 
+    /// <summary>
+    /// Unsubscribes from <see cref="PythonEventHandler.HotspotSelected" /> and disposes of <see cref="VideoViewModel" />
+    /// </summary>
     public void Dispose()
     {
+        PythonEventHandler.Instance.HotspotSelected -= OnHotspotSelected;
         VideoViewModel.Dispose();
     }
 }

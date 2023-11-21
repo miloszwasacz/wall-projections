@@ -1,4 +1,5 @@
-﻿using WallProjections.Models.Interfaces;
+﻿using WallProjections.Helper;
+using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
 
@@ -55,6 +56,11 @@ public sealed class MockDisplayViewModel : IDisplayViewModel
     }
 
     /// <summary>
+    /// Returns whether <see cref="SetConfigs"/> is not empty
+    /// </summary>
+    public bool IsContentLoaded => _configs.Count > 0;
+
+    /// <summary>
     /// Returns <see cref="DefaultDescription"/> + the ID that the viewmodel was constructed with
     /// </summary>
     public string Description => DefaultDescription + CurrentHotspotId;
@@ -64,19 +70,18 @@ public sealed class MockDisplayViewModel : IDisplayViewModel
     /// </summary>
     public IVideoViewModel VideoViewModel { get; }
 
-    //TODO Implement mock properties
-    public ImageViewModel ImageViewModel => throw new NotImplementedException();
-
     /// <summary>
-    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="hotspotId" />
+    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="PythonEventHandler.HotspotSelectedArgs.Id" />
     /// </summary>
-    /// <param name="hotspotId">The id of a hotspot to be theoretically loaded</param>
-    /// <returns><i>False</i> if <paramref name="hotspotId" /> = <i>-1</i>, <i>True</i> otherwise</returns>
-    public bool LoadHotspot(int hotspotId)
+    /// <param name="sender">The caller of the event (not used)</param>
+    /// <param name="e">The event args containing the id of a hotspot to be theoretically loaded</param>
+    public void OnHotspotSelected(object? sender, PythonEventHandler.HotspotSelectedArgs e)
     {
-        CurrentHotspotId = hotspotId;
-        return hotspotId != -1;
+        CurrentHotspotId = e.Id;
     }
+
+    //TODO Implement mock ImageViewModel
+    public ImageViewModel ImageViewModel => throw new NotImplementedException();
 
     /// <summary>
     /// Calls <see cref="VideoViewModel.Dispose" /> on <see cref="VideoViewModel" />

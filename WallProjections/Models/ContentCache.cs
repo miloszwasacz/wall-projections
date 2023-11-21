@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
@@ -36,10 +37,10 @@ public sealed class ContentCache : IContentCache
 
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
-    /// TODO: Handle errors from trying to load from not-found/invalid zip file.
+    /// TODO Handle errors from trying to load from not-found/invalid zip file
     public IConfig Load(string zipPath)
     {
-        // Clean up existing directly if in use.
+        // Clean up existing directly if in use
         if (Directory.Exists(TempPath))
             Directory.Delete(TempPath, true);
 
@@ -62,17 +63,29 @@ public sealed class ContentCache : IContentCache
     /// </summary>
     public void Dispose()
     {
-        Directory.Delete(TempPath, true);
+        try
+        {
+            Directory.Delete(TempPath, true);
+        }
+        catch (DirectoryNotFoundException)
+        {
+            Console.WriteLine($"{TempPath} already deleted");
+        }
+        catch (Exception e)
+        {
+            //TODO Write to log file instead
+            Console.Error.WriteLine(e);
+        }
     }
 
     /// <summary>
-    /// Loads a config from a .json file.
+    /// Loads a config from a .json file
     /// </summary>
-    /// <param name="zipPath">Path to zip containing config.json.</param>
-    /// <returns>Loaded Config.</returns>
-    /// <exception cref="JsonException">Format of config file is invalid.</exception>
-    /// <exception cref="FileNotFoundException">If config file cannot be found in zip file.</exception>
-    /// TODO More effective error handling of invalid/missing config files.
+    /// <param name="zipPath">Path to zip containing config.json</param>
+    /// <returns>Loaded Config</returns>
+    /// <exception cref="JsonException">Format of config file is invalid</exception>
+    /// <exception cref="FileNotFoundException">If config file cannot be found in zip file</exception>
+    /// TODO More effective error handling of invalid/missing config files
     private static IConfig LoadConfig(string zipPath)
     {
         var zipFile = ZipFile.OpenRead(zipPath);
