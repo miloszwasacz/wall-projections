@@ -83,8 +83,8 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         if (_isDisposed)
             return;
 
-        _isDisposed = true;
         StopVideo();
+        _isDisposed = true;
         var mediaPlayer = MediaPlayer;
         MediaPlayer = null;
         mediaPlayer?.Dispose();

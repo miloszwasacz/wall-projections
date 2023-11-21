@@ -16,12 +16,24 @@ public class ContentCacheTest
     private static string TestZip => Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test.zip");
 
     /// <summary>
+    /// Test if the <see cref="ContentCache" /> class is a singleton
+    /// </summary>
+    [Test]
+    public void SingletonPatternTest()
+    {
+        var instance1 = ContentCache.Instance;
+        var instance2 = ContentCache.Instance;
+
+        Assert.That(instance2, Is.SameAs(instance1));
+    }
+
+    /// <summary>
     /// Test that ensures the temp folder is removed after running <see cref="ContentCache.Dispose"/>
     /// </summary>
     [Test]
     public void CleanupTest()
     {
-        var contentImporter = new ContentCache();
+        var contentImporter = ContentCache.Instance;
         var config = contentImporter.Load(TestZip);
 
         Assert.That(Directory.Exists(contentImporter.GetHotspotMediaFolder(config.GetHotspot(0)!)), Is.True);
@@ -37,7 +49,7 @@ public class ContentCacheTest
     [Test]
     public void LoadTest()
     {
-        IContentCache contentCache = new ContentCache();
+        IContentCache contentCache = ContentCache.Instance;
         var config = contentCache.Load(TestZip);
         var config2 = new Config(new List<Hotspot> { new(0, 1, 2, 3) });
 
@@ -50,7 +62,7 @@ public class ContentCacheTest
     [Test]
     public void MediaLoadTest()
     {
-        IContentCache contentCache = new ContentCache();
+        IContentCache contentCache = ContentCache.Instance;
         var config = contentCache.Load(TestZip);
 
         Assert.Multiple(() =>

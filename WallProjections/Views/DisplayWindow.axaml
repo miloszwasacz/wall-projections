@@ -3,7 +3,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces"
-        xmlns:views="clr-namespace:WallProjections.Views"
         xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.DisplayWindow"
@@ -22,9 +21,11 @@
                    FontSize="24"
                    TextAlignment="Start" />
 
-        <views:ImageView Name="ImageView" Grid.Column="1" Grid.Row="1"
-                         DataContext="{Binding ImageViewModel}"
-                         IsVisible="{Binding HasImages, FallbackValue=False}" />
+        <Image Name="ImageView" Grid.Column="1" Grid.Row="1"
+               DataContext="{Binding ImageViewModel}"
+               Source="{Binding Image}"
+               Stretch="Uniform"
+               IsVisible="{Binding HasImages, FallbackValue=False}" />
 
         <!-- VideoView has to be directly in Window or it will itself open a new window -->
         <vlc:VideoView Name="VideoView" Grid.Column="1" Grid.Row="1"

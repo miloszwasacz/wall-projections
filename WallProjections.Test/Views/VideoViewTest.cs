@@ -1,61 +1,81 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
+using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels;
+using WallProjections.Views;
 
 namespace WallProjections.Test.Views;
 
 [TestFixture]
 public class VideoViewTest
 {
-    private const string VideoPath = "test.mp4";
-
     [AvaloniaTest]
     public void ViewModelTest()
     {
-        var vm = ViewModelProvider.Instance.GetVideoViewModel(VideoPath);
-        var videoView = new WallProjections.Views.VideoView
+        var videoViewModel = ViewModelProvider.Instance.GetVideoViewModel();
+        var displayViewModel = new MockDisplayViewModel(videoViewModel);
+        var displayWindow = new DisplayWindow
         {
-            DataContext = vm
+            DataContext = displayViewModel
         };
+        var vm = displayViewModel.VideoViewModel;
+        var videoView = displayWindow.VideoView;
 
-        Assert.That(videoView.VideoPlayer.MediaPlayer, Is.Not.Null);
-        Assert.That(videoView.VideoPlayer.MediaPlayer, Is.SameAs(vm.MediaPlayer));
+        Assert.That(videoView.MediaPlayer, Is.Not.Null);
+        Assert.That(videoView.MediaPlayer, Is.SameAs(vm.MediaPlayer));
+        displayViewModel.Dispose();
     }
 
     [AvaloniaTest]
-    public void ResizeTest()
+    public void ResizeWidthTest()
     {
         var initSize = new Size(1920, 1080);
         var newSize = new Size(1280, initSize.Height);
-        const int expectedHeight = 720;
 
         // Initialize the view and window
-        var videoView = new WallProjections.Views.VideoView
+        var window = new DisplayWindow
         {
             Width = initSize.Width,
             Height = initSize.Height,
         };
-        var window = new Window
-        {
-            Content = videoView,
-            Width = initSize.Width,
-            Height = initSize.Height,
-        };
+        var videoView = window.VideoView;
         window.Show();
 
         // Check that the view and window are initialized correctly
-        Assert.Multiple(() =>
-        {
-            Assert.That(videoView.Bounds.Width, Is.EqualTo(initSize.Width));
-            Assert.That(videoView.Bounds.Height, Is.EqualTo(initSize.Height));
-        });
+        Assert.That(videoView.Bounds.Height, Is.EqualTo(videoView.Bounds.Width * 9 / 16));
 
         // Resize the view
         var args = new SizeChangedEventArgs(null, null, initSize, newSize);
-        videoView.OnResize(videoView, args);
+        window.OnVideoViewResize(videoView, args);
 
-        // Check that the view has corrected its height
-        Assert.That(videoView.Height, Is.EqualTo(expectedHeight));
+        // Check that the ratio is preserved
+        Assert.That(videoView.Bounds.Height, Is.EqualTo(videoView.Bounds.Width * 9 / 16));
+    }
+
+    [AvaloniaTest]
+    public void ResizeHeightTest()
+    {
+        var initSize = new Size(1920, 1080);
+        var newSize = new Size(initSize.Width, 720);
+
+        // Initialize the view and window
+        var window = new DisplayWindow
+        {
+            Width = initSize.Width,
+            Height = initSize.Height,
+        };
+        var videoView = window.VideoView;
+        window.Show();
+
+        // Check that the view and window are initialized correctly
+        Assert.That(videoView.Bounds.Height, Is.EqualTo(videoView.Bounds.Width * 9 / 16));
+
+        // Resize the view
+        var args = new SizeChangedEventArgs(null, null, initSize, newSize);
+        window.OnVideoViewResize(videoView, args);
+
+        // Check that the ratio is preserved
+        Assert.That(videoView.Bounds.Height, Is.EqualTo(videoView.Bounds.Width * 9 / 16));
     }
 }

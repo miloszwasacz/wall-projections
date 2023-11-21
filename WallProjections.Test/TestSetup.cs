@@ -1,4 +1,5 @@
-﻿using WallProjections.ViewModels;
+﻿using WallProjections.Models;
+using WallProjections.ViewModels;
 
 namespace WallProjections.Test;
 
@@ -8,7 +9,8 @@ public class TestSetup
     [OneTimeTearDown]
     public void GlobalTearDown()
     {
-        // Dispose of the global ViewModelProvider instance after all tests have run
+        // Dispose of the global singletons after all tests have run
+        ContentCache.Instance.Dispose();
         ViewModelProvider.Instance.Dispose();
     }
 }

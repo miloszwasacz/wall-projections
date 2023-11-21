@@ -10,10 +10,27 @@ namespace WallProjections.Test.Mocks.ViewModels;
 /// </summary>
 public sealed class MockVideoViewModel : IVideoViewModel
 {
+    private readonly List<string> _videoPaths = new();
+
     /// <summary>
-    /// The path of the video the viewmodel was constructed with
+    /// The backing field for <see cref="MediaPlayer"/>
     /// </summary>
-    public string VideoPath { get; }
+    private IMediaPlayer? _mediaPlayer;
+
+    /// <summary>
+    /// A mock of <see cref="VideoViewModel"/> for injecting into <see cref="DisplayViewModel"/>.
+    /// Sets <see cref="MediaPlayer"/> to <paramref name="mediaPlayer"/> if not <i>null</i>,
+    /// or a new <see cref="MockMediaPlayer"/> otherwise
+    /// </summary>
+    public MockVideoViewModel(IMediaPlayer? mediaPlayer = null)
+    {
+        _mediaPlayer = mediaPlayer ?? new MockMediaPlayer();
+    }
+
+    /// <summary>
+    /// A list of paths to the videos the viewmodel has played
+    /// </summary>
+    public IReadOnlyList<string> VideoPaths => _videoPaths;
 
     /// <summary>
     /// Determines if <see cref="MediaPlayer"/> is null or not (<i>true</i> means not <i>null</i>)
@@ -23,22 +40,17 @@ public sealed class MockVideoViewModel : IVideoViewModel
     /// <summary>
     /// The number of times <see cref="PlayVideo"/> has been called
     /// </summary>
-    public int PlayCounter { get; private set; }
+    public int PlayCount => _videoPaths.Count;
 
     /// <summary>
     /// The number of times <see cref="StopVideo"/> has been called
     /// </summary>
-    public int StopCounter { get; private set; }
+    public int StopCount { get; private set; }
 
     /// <summary>
     /// The number of times <see cref="Dispose"/> has been called
     /// </summary>
-    public int DisposeCounter { get; private set; }
-
-    /// <summary>
-    /// The backing field for <see cref="MediaPlayer"/>
-    /// </summary>
-    private readonly MockMediaPlayer _mediaPlayer = new();
+    public int DisposeCount { get; private set; }
 
     /// <summary>
     /// A mock of <see cref="WallProjections.Models.VLCMediaPlayer"/> if <see cref="CanPlay"/> is <i>true</i>,
@@ -47,21 +59,20 @@ public sealed class MockVideoViewModel : IVideoViewModel
     public IMediaPlayer? MediaPlayer => CanPlay ? _mediaPlayer : null;
 
     /// <summary>
-    /// A mock of <see cref="VideoViewModel"/> for injecting into <see cref="DisplayViewModel"/>
+    /// Returns <see cref="CanPlay" />
     /// </summary>
-    /// <param name="videoPath">The path to the video the viewmodel is supposed to play</param>
-    public MockVideoViewModel(string videoPath)
-    {
-        VideoPath = videoPath;
-    }
+    public bool HasVideos => CanPlay;
+
+    public int Volume { get; set; }
 
     /// <summary>
     /// Increases the number of times <see cref="PlayVideo"/> has been called
+    /// and adds <paramref name="path"/> to <see cref="VideoPaths"/>
     /// </summary>
     /// <returns><i>True</i> if <see cref="MediaPlayer"/> is not <i>null</i></returns>
-    public bool PlayVideo()
+    public bool PlayVideo(string path)
     {
-        PlayCounter++;
+        _videoPaths.Add(path);
         return MediaPlayer is not null;
     }
 
@@ -70,7 +81,7 @@ public sealed class MockVideoViewModel : IVideoViewModel
     /// </summary>
     public void StopVideo()
     {
-        StopCounter++;
+        StopCount++;
     }
 
     /// <summary>
@@ -79,6 +90,6 @@ public sealed class MockVideoViewModel : IVideoViewModel
     public void Dispose()
     {
         StopVideo();
-        DisposeCounter++;
+        DisposeCount++;
     }
 }

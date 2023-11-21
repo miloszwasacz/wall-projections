@@ -1,6 +1,4 @@
-﻿using WallProjections.Models;
-using WallProjections.Test.Mocks.Models;
-using WallProjections.ViewModels;
+﻿using WallProjections.ViewModels;
 
 namespace WallProjections.Test.ViewModels;
 
@@ -18,42 +16,21 @@ public class ViewModelProviderTest
     }
 
     [Test]
-    public void GetMainWindowViewModelTest()
-    {
-        var mainWindowViewModel = ViewModelProvider.Instance.GetMainWindowViewModel();
-        Assert.That(mainWindowViewModel, Is.InstanceOf<MainWindowViewModel>());
-        Assert.That(mainWindowViewModel.DisplayViewModel, Is.Null);
-    }
-
-    [Test]
     public void GetDisplayViewModelTest()
     {
-        const int hotspotId = 1;
-        var files = new List<Hotspot.Media>
-        {
-            new(
-                new Hotspot(hotspotId),
-                hotspotId + " description",
-                hotspotId + ".png",
-                hotspotId + ".mp4"
-            )
-        };
-        var contentProvider = new MockContentProvider(files);
-        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(hotspotId, contentProvider);
+        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel();
         Assert.Multiple(() =>
         {
             Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
-            //TODO Check ImageViewModel
-            // Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
-            Assert.That(displayViewModel.VideoViewModel, Is.Null);
+            Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
+            Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
         });
     }
 
     [Test]
     public void GetVideoViewModelTest()
     {
-        const string videoPath = "test.mp4";
-        var videoViewModel = ViewModelProvider.Instance.GetVideoViewModel(videoPath);
+        var videoViewModel = ViewModelProvider.Instance.GetVideoViewModel();
         Assert.That(videoViewModel, Is.InstanceOf<VideoViewModel>());
         Assert.That(videoViewModel.MediaPlayer, Is.Not.Null);
     }

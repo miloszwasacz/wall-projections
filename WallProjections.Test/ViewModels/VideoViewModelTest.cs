@@ -13,7 +13,7 @@ public class VideoViewModelTest
     [Test]
     public void CreationTest()
     {
-        var videoViewModel = new VideoViewModel(VideoPath, LibVlc, new MockMediaPlayer());
+        var videoViewModel = new VideoViewModel(LibVlc, new MockMediaPlayer());
         Assert.That(videoViewModel.MediaPlayer, Is.Not.Null);
         videoViewModel.Dispose();
         Assert.That(videoViewModel.MediaPlayer, Is.Null);
@@ -23,10 +23,10 @@ public class VideoViewModelTest
     public void PlayVideoTest()
     {
         var mediaPlayer = new MockMediaPlayer();
-        var videoViewModel = new VideoViewModel(VideoPath, LibVlc, mediaPlayer);
+        var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
         Assert.Multiple(() =>
         {
-            Assert.That(videoViewModel.PlayVideo(), Is.True);
+            Assert.That(videoViewModel.PlayVideo(VideoPath), Is.True);
             Assert.That(mediaPlayer.HasPlayedOnly(VideoPath), Is.True);
         });
         videoViewModel.Dispose();
@@ -35,9 +35,10 @@ public class VideoViewModelTest
     [Test]
     public void PlayNonExistentVideoTest()
     {
+        var path = "nonexistent.mp4";
         var mediaPlayer = new MockMediaPlayer(false);
-        var videoViewModel = new VideoViewModel("nonexistent.mp4", LibVlc, mediaPlayer);
-        Assert.That(videoViewModel.PlayVideo(), Is.False);
+        var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
+        Assert.That(videoViewModel.PlayVideo(path), Is.False);
         videoViewModel.Dispose();
     }
 
@@ -45,8 +46,8 @@ public class VideoViewModelTest
     public void StopVideoTest()
     {
         var mediaPlayer = new MockMediaPlayer();
-        var videoViewModel = new VideoViewModel(VideoPath, LibVlc, mediaPlayer);
-        videoViewModel.PlayVideo();
+        var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
+        videoViewModel.PlayVideo(VideoPath);
         videoViewModel.StopVideo();
         Assert.Multiple(() =>
         {
@@ -60,7 +61,7 @@ public class VideoViewModelTest
     public void DisposeTest()
     {
         var mediaPlayer = new MockMediaPlayer();
-        var videoViewModel = new VideoViewModel(VideoPath, LibVlc, mediaPlayer);
+        var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
         videoViewModel.Dispose();
         Assert.That(mediaPlayer.HasBeenDisposedOnce(), Is.True);
     }
@@ -69,8 +70,8 @@ public class VideoViewModelTest
     public void StopVideoAfterDisposeTest()
     {
         var mediaPlayer = new MockMediaPlayer();
-        var videoViewModel = new VideoViewModel(VideoPath, LibVlc, mediaPlayer);
-        videoViewModel.PlayVideo();
+        var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
+        videoViewModel.PlayVideo(VideoPath);
         videoViewModel.Dispose();
         Assert.Multiple(() =>
         {
@@ -83,7 +84,7 @@ public class VideoViewModelTest
     public void DisposeTwiceTest()
     {
         var mediaPlayer = new MockMediaPlayer();
-        var videoViewModel = new VideoViewModel(VideoPath, LibVlc, mediaPlayer);
+        var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
         videoViewModel.Dispose();
         videoViewModel.Dispose();
         Assert.That(mediaPlayer.HasBeenDisposedOnce(), Is.True);
