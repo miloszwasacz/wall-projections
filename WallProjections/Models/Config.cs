@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using WallProjections.Models.Interfaces;
 
@@ -38,6 +39,10 @@ public class Config : IConfig
     public Config(ImmutableList<Hotspot> hotspots)
     {
         Hotspots = hotspots;
+
+        // Because this constructor is used by the deserializer, we have to check for null values
+        if (Hotspots == null)
+            throw new JsonException();
     }
 
     /// <inheritdoc />

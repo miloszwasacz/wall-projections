@@ -17,6 +17,11 @@ public sealed class ContentCache : IContentCache
     private static ContentCache? _instance;
 
     /// <summary>
+    /// A global instance of <see cref="ContentCache" />
+    /// </summary>
+    public static ContentCache Instance => _instance ??= new ContentCache();
+
+    /// <summary>
     /// The backing field for <see cref="TempPath" />
     /// </summary>
     private string? _tempPath;
@@ -26,14 +31,9 @@ public sealed class ContentCache : IContentCache
     }
 
     /// <summary>
-    /// A global instance of <see cref="ContentCache" />
-    /// </summary>
-    public static ContentCache Instance => _instance ??= new ContentCache();
-
-    /// <summary>
     /// The path to the temporary folder where the zip file is extracted
     /// </summary>
-    private string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+    internal string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
@@ -94,8 +94,7 @@ public sealed class ContentCache : IContentCache
         if (configEntry is null)
             throw new FileNotFoundException($"{ConfigFileName} not in root of zip file.");
 
-        var config = JsonSerializer.Deserialize<Config>(configEntry.Open());
-        if (config is null) throw new JsonException();
+        var config = JsonSerializer.Deserialize<Config>(configEntry.Open()) ?? throw new JsonException();
         return config;
     }
 }
