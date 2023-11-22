@@ -1,30 +1,34 @@
 import cv2
 import mediapipe as mp
+
+from EventListener import EventListener
 from HotSpot import HotSpot
 
-hotSpots = []
+
+FINGERTIP_INDICES = (4, 8, 12, 16, 20)
+"""The indices for the thumb fingertip, index fingertip, ring fingertip, etc."""
+
+hotspots = []
+"""The global list of hotspots."""
 
 
-def media_finished():
-    for hotspot in hotSpots:
-        hotspot.deactivate()
+def run(event_listener):  # This function is called by Program.cs
+    """
+    Captures video and runs the hand-detection model to handle the hotspots.
+    """
 
-
-def detect_buttons(event_handler):  # This function is called by Program.cs
-    global hotSpots
+    global hotspots
 
     hands_model = mp.solutions.hands.Hands()
-    webcam = cv2.VideoCapture(0)
-
-    FINGERTIP_INDICES = (4, 8, 12, 16, 20)
+    video_capture = cv2.VideoCapture(0)
 
     # Load hotspots
-    hotSpots = [HotSpot(0, 0.5, 0.5, event_handler), HotSpot(1, 0.8, 0.8, event_handler)]
+    hotspots = [HotSpot(0, 0.5, 0.5, event_listener), HotSpot(1, 0.8, 0.8, event_listener)]
 
     # basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
 
-    while webcam.isOpened():
-        success, img = webcam.read()
+    while video_capture.isOpened():
+        success, img = video_capture.read()
         height, width, _ = img.shape
 
         # run model
@@ -36,20 +40,20 @@ def detect_buttons(event_handler):  # This function is called by Program.cs
             fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
                                 model_output.multi_hand_landmarks]
 
-            for hotSpot in hotSpots:
+            for hotSpot in hotspots:
                 hotspotJustActivated = hotSpot.update(fingertip_coords)
 
                 if hotspotJustActivated:
                     # make sure there's no other active hotspots
-                    for otherHotspot in hotSpots:
+                    for otherHotspot in hotspots:
                         if otherHotspot == hotSpot:
                             continue
                         otherHotspot.deactivate()
 
-                    event_handler.OnPressDetected(hotSpot.id)
+                    event_listener.on_hotspot_activated(hotSpot.id)
 
         # annotate hand landmarks and hotspot onscreen
-        for hotSpot in hotSpots:
+        for hotSpot in hotspots:
             hotSpot.draw(img, cv2, width, height)
         if model_output.multi_hand_landmarks is not None:
             for landmarks in model_output.multi_hand_landmarks:
@@ -63,15 +67,19 @@ def detect_buttons(event_handler):  # This function is called by Program.cs
         if cv2.waitKey(5) & 0xFF == ord("q"):
             break
 
-    webcam.release()
+    video_capture.release()
     cv2.destroyAllWindows()
     hands_model.close()
 
 
+def media_finished():
+    for hotspot in hotspots:
+        hotspot.deactivate()
+
+
 if __name__ == "__main__":
-    class EventHandler:
-        def OnPressDetected(self, id):
-            print("button pressed", id)
+    class MyEventListener(EventListener):
+        def on_hotspot_activated(self, hotspot_id):
+            print(f"Hotspot {hotspot_id} activated.")
 
-
-    detect_buttons(EventHandler())
+    run(MyEventListener())
