@@ -1,3 +1,4 @@
+import math
 import time
 
 BUTTON_COOLDOWN = 1.5
@@ -65,14 +66,14 @@ class HotSpot():
         self._radius = radius
         self._eventHandler = eventHandler
         self._button = _Button()
-
         self._isActivated = False
+        self._timeActivated = 0
     
     def draw(self, img, cv2, width, height):
         #Draw outer ring
         cv2.circle(img, self._onScreenXY(width, height), self._onScreenRadius(), (255, 255, 255), thickness=2)
 
-        #Draw inner ring
+        #Draw inner circle
         if self._button.getPressedAmount() != 0:
             cv2.circle(img, self._onScreenXY(width, height), self._innerRadius(), (255,255,255), thickness=-1)
 
@@ -87,7 +88,10 @@ class HotSpot():
         return int(1000*self._radius)
     
     def _innerRadius(self):
-        return int(self._onScreenRadius()*self._button.getPressedAmount())
+        radius = self._onScreenRadius()*self._button.getPressedAmount()
+        if self._isActivated:
+            radius += math.sin((time.time() - self._timeActivated) * 3) * 6 + 6
+        return int(radius)
 
     def update(self, points):
         if self._isActivated:
@@ -104,8 +108,8 @@ class HotSpot():
 
             if fingerInside:
                 if self._button.press():
-                    #if button has been pressed for long enough send event
-                    self._isActivated = True
+                    # button has been pressed for long enough
+                    self.activate()
                     return True
             else:
                 self._button.unPress()
@@ -119,6 +123,10 @@ class HotSpot():
         """
         squaredDist = (self._x - point.x)**2 + (self._y - point.y)**2
         return squaredDist <= self._radius**2
+
+    def activate(self):
+        self._timeActivated = time.time()
+        self._isActivated = True
 
     def deactivate(self):
         self._isActivated = False
