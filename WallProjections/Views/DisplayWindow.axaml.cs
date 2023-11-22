@@ -4,20 +4,21 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using WallProjections.ViewModels.Interfaces;
-#if DEBUGSKIPPYTHON
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
-using Avalonia.Data;
 using Avalonia.Platform.Storage;
-using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using System.Diagnostics.CodeAnalysis;
+#if DEBUGSKIPPYTHON
+using Avalonia.Data;
+using WallProjections.Helper;
 #endif
 
 namespace WallProjections.Views;
 
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
+    [ExcludeFromCodeCoverage] private IConfig? Config { get; set; }
+
     public DisplayWindow()
     {
         InitializeComponent();
@@ -31,15 +32,16 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             case Key.Escape:
                 var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
                 lifetime?.Shutdown();
-                break;
+                return;
             case Key.F11:
                 WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
-                break;
+                return;
         }
 
-#if DEBUGSKIPPYTHON
-        MockPythonInput(e.Key);
-#endif
+        var vm = ViewModel;
+        if (vm is null) return;
+
+        LoadConfig(vm, e.Key);
     }
 
     internal void OnVideoViewResize(object? sender, SizeChangedEventArgs e)
@@ -49,11 +51,33 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             VideoView.Height = e.NewSize.Width * 9 / 16;
     }
 
-#if DEBUGSKIPPYTHON
-    [ExcludeFromCodeCoverage] private IConfig? Config { get; set; }
-
+    //TODO Get rid of this - figure out how to set the config in the viewmodel
     [ExcludeFromCodeCoverage]
-    private void MockPythonInput(Key key)
+    private async void LoadConfig(IDisplayViewModel vm, Key key)
+    {
+        while (Config is null)
+        {
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false
+            });
+            if (files.Count == 0) continue;
+
+            var zipPath = files[0].Path.AbsolutePath;
+            if (!zipPath.EndsWith(".zip")) continue;
+
+            Config = ContentCache.Instance.Load(zipPath);
+        }
+
+        vm.Config = Config;
+#if DEBUGSKIPPYTHON
+        MockPythonInput(key);
+#endif
+    }
+
+#if DEBUGSKIPPYTHON
+    [ExcludeFromCodeCoverage]
+    private static void MockPythonInput(Key key)
     {
         var keyVal = key switch
         {
@@ -67,28 +91,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 
         if (!keyVal.HasValue) return;
 
-        var vm = ViewModel;
-        if (vm is null) return;
-
-        Task.Run(async () =>
-        {
-            while (Config is null)
-            {
-                var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-                {
-                    AllowMultiple = false
-                });
-                if (files.Count == 0) continue;
-
-                var zipPath = files[0].Path.AbsolutePath;
-                if (!zipPath.EndsWith(".zip")) continue;
-
-                Config = ContentCache.Instance.Load(zipPath);
-            }
-
-            vm.Config = Config;
-            PythonEventHandler.Instance.OnPressDetected(keyVal.Value);
-        });
+        PythonEventHandler.Instance.OnPressDetected(keyVal.Value);
     }
 #endif
 }

@@ -8,6 +8,7 @@ using Python.Runtime;
 using WallProjections.Models;
 using WallProjections.ViewModels;
 #if !DEBUGSKIPPYTHON
+using System.Diagnostics;
 using System.IO;
 using WallProjections.Helper;
 #endif
@@ -54,6 +55,7 @@ internal class Program
     /// <returns>A handle to cancel the task after the app is closed</returns>
     private static CancellationTokenSource InitializePython()
     {
+        //TODO Include this in the setup guide
         Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
 
         // Run Python in a separate thread
@@ -61,14 +63,32 @@ internal class Program
         Task.Run(() =>
         {
 #if !DEBUGSKIPPYTHON
-            PythonEngine.Initialize();
-            Py.GIL();
-            using var scope = Py.CreateScope();
-            var code = File.ReadAllText("Scripts/main.py");
-            var scriptCompiled = PythonEngine.Compile(code);
-            scope.Execute(scriptCompiled);
-            //TODO Change to a real method
-            scope.InvokeMethod("detect_buttons", PythonEventHandler.Instance.ToPython());
+            try
+            {
+                Console.WriteLine("Initializing Python...");
+                PythonEngine.Initialize();
+                Debug.WriteLine("- Initializing GIL");
+                using (Py.GIL())
+                {
+                    Debug.WriteLine("- Creating scope");
+                    using var scope = Py.CreateScope();
+                    Debug.WriteLine("- Reading script");
+                    var code = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Scripts/main.py"));
+                    Debug.WriteLine("- Compiling script");
+                    var scriptCompiled = PythonEngine.Compile(code);
+                    Debug.WriteLine("- Executing script");
+                    scope.Execute(scriptCompiled);
+                    Console.WriteLine("Initialization complete");
+                    //TODO Change to a real method
+                    scope.InvokeMethod("detect_buttons", PythonEventHandler.Instance.ToPython());
+                    Debug.WriteLine("Python method called");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e);
+                throw;
+            }
 #endif
         }, cts.Token);
         return cts;

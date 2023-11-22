@@ -164,7 +164,8 @@ public class ContentCacheTest
     /// while the temp folder is still in use
     /// </summary>
     [Test]
-    public void DisposeIOExceptionTest()
+    [Platform("Win")]
+    public void DisposeIOExceptionWindowsTest()
     {
         var contentCache = CreateInstance();
         var tempFilePath = Path.Combine(contentCache.TempPath, Path.GetRandomFileName());
@@ -177,6 +178,29 @@ public class ContentCacheTest
         Assert.That(Directory.Exists(contentCache.TempPath), Is.True);
 
         file.Close();
+
+        Assert.That(() => contentCache.Dispose(), Throws.Nothing);
+        Assert.That(Directory.Exists(contentCache.TempPath), Is.False);
+    }
+
+    // ReSharper disable once InconsistentNaming
+    /// <summary>
+    /// Test that no exception is thrown when <see cref="ContentCache.Dispose" /> is called
+    /// and the application has no write permissions to the temp folder
+    /// </summary>
+    [Test]
+    [Platform("Linux")]
+    public void DisposeIOExceptionLinuxTest()
+    {
+        var contentCache = CreateInstance();
+        contentCache.Load(TestZip);
+
+        System.Diagnostics.Process.Start("chmod", "000 " + contentCache.TempPath).WaitForExit();
+
+        Assert.That(() => contentCache.Dispose(), Throws.Nothing);
+        Assert.That(Directory.Exists(contentCache.TempPath), Is.True);
+
+        System.Diagnostics.Process.Start("chmod", "777 " + contentCache.TempPath).WaitForExit();
 
         Assert.That(() => contentCache.Dispose(), Throws.Nothing);
         Assert.That(Directory.Exists(contentCache.TempPath), Is.False);
