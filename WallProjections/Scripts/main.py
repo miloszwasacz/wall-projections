@@ -20,6 +20,8 @@ def detect_buttons(event_handler):  # This function is called by Program.cs
     # Load hotspots
     hotSpots = [HotSpot(0, 0.5, 0.5, event_handler), HotSpot(1, 0.8, 0.8, event_handler)]
 
+    # basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
+
     while webcam.isOpened():
         success, img = webcam.read()
         height, width, _ = img.shape
