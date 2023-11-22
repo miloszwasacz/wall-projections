@@ -31,12 +31,13 @@ def detect_buttons(event_handler): #This function is called by Program.cs
 
         # annotate hand landmarks and hotspot onscreen
         for hotSpot in hotSpots:
-            cv2.circle(img, hotSpot.onScreenXY(width, height), hotSpot.onScreenRadius(), hotSpot.onScreenColor(), thickness=2)
+            hotSpot.draw(img, cv2, width, height)
         if model_output.multi_hand_landmarks is not None:
             for landmarks in model_output.multi_hand_landmarks:
                 mp.solutions.drawing_utils.draw_landmarks(img, landmarks, connections=mp.solutions.hands.HAND_CONNECTIONS)
 
         cv2.imshow("Hand Tracking Testing", img)
+
 
         if cv2.waitKey(5) & 0xFF == ord("q"):
             break

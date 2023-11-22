@@ -68,22 +68,29 @@ class HotSpot():
         self._eventHandler = eventHandler
         self._button = _Button()
     
-    def onScreenXY(self, width, height):
+    def draw(self, img, cv2, width, height):
+        #Draw outer ring
+        cv2.circle(img, self._onScreenXY(width, height), self._onScreenRadius(), (255, 255, 255), thickness=2)
+
+        #Draw inner ring
+        if self._button.getPressedAmount() != 0:
+            cv2.circle(img, self._onScreenXY(width, height), self._innerRadius(), (255,255,255), thickness=-1)
+
+    def _onScreenXY(self, width, height):
+        """
+        Takes in screen resolution and outputs pixel coordinates of hotspot
+        """
+
         return (int(width*self._x), int(height*self._y))
     
-    def onScreenRadius(self):
+    def _onScreenRadius(self):
         return int(1000*self._radius)
     
-    def onScreenColor(self):
+    def _innerRadius(self):
         """
-        Returns a color RGB tuple between pressed and unpressed color depending on buttons pressedAmount
+        
         """
-        pressedAmount = self._button.getPressedAmount()
-        return(
-            int((1 - pressedAmount)* self._unpressedColor[0] + pressedAmount * self._pressesdColor[0]),
-            int((1 - pressedAmount)* self._unpressedColor[1] + pressedAmount * self._pressesdColor[1]),
-            int((1 - pressedAmount)* self._unpressedColor[2] + pressedAmount * self._pressesdColor[2]),     
-        )
+        return int(self._onScreenRadius()*self._button.getPressedAmount())
 
     def update(self, points):
         #check if any fingertips inside of HotSpot
