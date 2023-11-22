@@ -2,10 +2,6 @@ import cv2
 import mediapipe as mp
 from HotSpot import HotSpot
 
-hands_model = mp.solutions.hands.Hands()
-webcam = cv2.VideoCapture(0)
-
-FINGERTIP_INDICES = (4, 8, 12, 16, 20)
 hotSpots = []
 
 
@@ -16,6 +12,11 @@ def media_finished():
 
 def detect_buttons(event_handler):  # This function is called by Program.cs
     global hotSpots
+
+    hands_model = mp.solutions.hands.Hands()
+    webcam = cv2.VideoCapture(0)
+
+    FINGERTIP_INDICES = (4, 8, 12, 16, 20)
 
     # Load hotspots
     hotSpots = [HotSpot(0, 0.5, 0.5, event_handler), HotSpot(1, 0.8, 0.8, event_handler)]
@@ -64,6 +65,7 @@ def detect_buttons(event_handler):  # This function is called by Program.cs
 
     webcam.release()
     cv2.destroyAllWindows()
+    hands_model.close()
 
 
 if __name__ == "__main__":
