@@ -58,15 +58,15 @@ class HotSpot():
     """
     The HotSpot class represents an onscreen hotspot which a user interacts with
     """
-    def __init__(self, id, x, y, eventHandler, radius=0.03, unpressedColor=(0, 255, 0), pressedColor = (255, 0, 0)):
+    def __init__(self, id, x, y, eventHandler, radius=0.03):
         self.id = id
         self._x = x
         self._y = y
         self._radius = radius
-        self._unpressedColor = unpressedColor
-        self._pressesdColor = pressedColor
         self._eventHandler = eventHandler
         self._button = _Button()
+
+        self._isActivated = False
     
     def draw(self, img, cv2, width, height):
         #Draw outer ring
@@ -87,25 +87,30 @@ class HotSpot():
         return int(1000*self._radius)
     
     def _innerRadius(self):
-        """
-        
-        """
         return int(self._onScreenRadius()*self._button.getPressedAmount())
 
     def update(self, points):
-        #check if any fingertips inside of HotSpot
-        isPressed = False
-        for point in points:
-            if self._isPointInside(point):
-                isPressed = True
+        if self._isActivated:
+            # todo
+            pass
+
+        else:  # not activated
+            #check if any fingertips inside of HotSpot
+            fingerInside = False
+            for point in points:
+                if self._isPointInside(point):
+                    fingerInside = True
 
 
-        if isPressed:
-            if self._button.press():
-                #if button has been pressed for long enough send event
-                self._eventHandler.OnPressDetected(self.id)
-        else:
-            self._button.unPress()
+            if fingerInside:
+                if self._button.press():
+                    #if button has been pressed for long enough send event
+                    self._isActivated = True
+                    return True
+            else:
+                self._button.unPress()
+
+        return False
         
 
     def _isPointInside(self, point):
@@ -114,3 +119,6 @@ class HotSpot():
         """
         squaredDist = (self._x - point.x)**2 + (self._y - point.y)**2
         return squaredDist <= self._radius**2
+
+    def deactivate(self):
+        self._isActivated = False
