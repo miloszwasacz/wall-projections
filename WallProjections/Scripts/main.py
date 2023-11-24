@@ -2,17 +2,17 @@ import cv2
 import mediapipe as mp
 
 from EventListener import EventListener
-from HotSpot import HotSpot
+from Hotspot import Hotspot
 
 
 FINGERTIP_INDICES = (4, 8, 12, 16, 20)
 """The indices for the thumb fingertip, index fingertip, ring fingertip, etc."""
 
-hotspots = []
+hotspots: list[Hotspot] = []
 """The global list of hotspots."""
 
 
-def run(event_listener):  # This function is called by Program.cs
+def run(event_listener) -> None:  # This function is called by Program.cs
     """
     Captures video and runs the hand-detection model to handle the hotspots.
     """
@@ -22,51 +22,57 @@ def run(event_listener):  # This function is called by Program.cs
     hands_model = mp.solutions.hands.Hands()
     video_capture = cv2.VideoCapture(0)
 
-    # Load hotspots
-    hotspots = [HotSpot(0, 0.5, 0.5, event_listener), HotSpot(1, 0.8, 0.8, event_listener)]
+    hotspots = [Hotspot(0, 0.5, 0.5, event_listener), Hotspot(1, 0.8, 0.8, event_listener)]
 
     # basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
 
     while video_capture.isOpened():
-        success, img = video_capture.read()
-        height, width, _ = img.shape
+        success, video_capture_img = video_capture.read()
+        if not success:
+            print("Ignoring empty camera frame.")
+            continue
+
+        camera_height, camera_width, _ = video_capture_img.shape
 
         # run model
-        img_rbg = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        model_output = hands_model.process(img_rbg)
+        video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)
+        model_output = hands_model.process(video_capture_img_rgb)
+
+        if not hasattr(model_output, "multi_hand_landmarks"):
+            raise RuntimeError("Model output does not have multi_hand_landmarks attribute.")
 
         # detect if finger over hotspot
-        if model_output.multi_hand_landmarks:
-            fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
-                                model_output.multi_hand_landmarks]
+        fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
+                            model_output.multi_hand_landmarks]
 
-            for hotSpot in hotspots:
-                hotspotJustActivated = hotSpot.update(fingertip_coords)
+        for hotspot in hotspots:
+            hotspot_just_activated = hotspot.update(fingertip_coords)
 
-                if hotspotJustActivated:
-                    # make sure there's no other active hotspots
-                    for otherHotspot in hotspots:
-                        if otherHotspot == hotSpot:
-                            continue
-                        otherHotspot.deactivate()
+            if hotspot_just_activated:
+                # make sure there's no other active hotspots
+                for other_hotspot in hotspots:
+                    if other_hotspot == hotspot:
+                        continue
+                    other_hotspot.deactivate()
 
-                    event_listener.on_hotspot_activated(hotSpot.id)
+                event_listener.on_hotspot_activated(hotspot.id)
 
         # annotate hand landmarks and hotspot onscreen
-        for hotSpot in hotspots:
-            hotSpot.draw(img, cv2, width, height)
-        if model_output.multi_hand_landmarks is not None:
-            for landmarks in model_output.multi_hand_landmarks:
-                mp.solutions.drawing_utils.draw_landmarks(img, landmarks,
-                                                          connections=mp.solutions.hands.HAND_CONNECTIONS)
+        for hotspot in hotspots:
+            hotspot.draw(video_capture_img, cv2, camera_width, camera_height)
+        for landmarks in model_output.multi_hand_landmarks:
+            mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
+                                                      connections=mp.solutions.hands.HAND_CONNECTIONS)
 
-        cv2.imshow("Hand Tracking Testing", img)
+        cv2.imshow("Projected Hotspots", video_capture_img)
 
-        if cv2.waitKey(5) & 0xFF == ord("c"):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("c"):
             media_finished()
-        if cv2.waitKey(5) & 0xFF == ord("q"):
+        elif key == ord("q"):
             break
 
+    # clean up
     video_capture.release()
     cv2.destroyAllWindows()
     hands_model.close()
