@@ -64,6 +64,24 @@ public class VideoViewModelTest
     }
 
     [Test]
+    public void VolumeTest()
+    {
+        const int volume = 50;
+        var mediaPlayer = new MockMediaPlayer();
+        var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
+        videoViewModel.PlayVideo(VideoPath);
+
+        videoViewModel.Volume = volume;
+        Assert.Multiple(() =>
+        {
+            Assert.That(videoViewModel.Volume, Is.EqualTo(volume));
+            Assert.That(mediaPlayer.Volume, Is.EqualTo(volume));
+        });
+
+        videoViewModel.Dispose();
+    }
+
+    [Test]
     public void DisposeTest()
     {
         var mediaPlayer = new MockMediaPlayer();
@@ -73,12 +91,14 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void StopVideoAfterDisposeTest()
+    public void PlayOrStopVideoAfterDisposeTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
         videoViewModel.PlayVideo(VideoPath);
         videoViewModel.Dispose();
+        videoViewModel.PlayVideo(VideoPath);
+        videoViewModel.StopVideo();
         Assert.Multiple(() =>
         {
             Assert.That(mediaPlayer.HasStopped(), Is.True);
