@@ -23,7 +23,7 @@ public class ContentProvider : IContentProvider
     {
         var hotspot = _config.GetHotspot(hotspotId);
         if (hotspot is null)
-            throw new Config.HotspotNotFoundException(hotspotId);
+            throw new IConfig.HotspotNotFoundException(hotspotId);
 
         var path = _cache.GetHotspotMediaFolder(hotspot);
         var files = Directory.GetFiles(path);

@@ -1,3 +1,5 @@
+using System;
+
 namespace WallProjections.Models.Interfaces;
 
 public interface IConfig
@@ -13,4 +15,11 @@ public interface IConfig
     /// Number of hotspots stored in <see cref="IConfig">Config</see>.
     /// </summary>
     public int HotspotCount { get; }
+
+    public class HotspotNotFoundException : Exception
+    {
+        public HotspotNotFoundException(int id) : base($"Hotspot with ID {id} not found.")
+        {
+        }
+    }
 }

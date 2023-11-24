@@ -116,7 +116,7 @@ Please report this to the museum staff.";
             else if (media.VideoPath is not null)
                 VideoViewModel.PlayVideo(media.VideoPath);
         }
-        catch (Exception e) when (e is Models.Config.HotspotNotFoundException or FileNotFoundException)
+        catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);

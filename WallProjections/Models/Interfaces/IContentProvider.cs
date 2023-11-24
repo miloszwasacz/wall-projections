@@ -10,7 +10,7 @@ public interface IContentProvider
     /// </summary>
     /// <param name="hotspotId">The <see cref="Hotspot.Id"/> of a <see cref="Hotspot"/></param>
     /// <returns>A container with Hotspot's data</returns>
-    /// <exception cref="Config.HotspotNotFoundException">
+    /// <exception cref="IConfig.HotspotNotFoundException">
     /// The hotspot with the given <paramref name="hotspotId">ID</paramref> does not exist
     /// </exception>
     /// <exception cref="FileNotFoundException">
