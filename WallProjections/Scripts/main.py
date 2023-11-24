@@ -38,31 +38,31 @@ def run(event_listener) -> None:  # This function is called by Program.cs
         video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)
         model_output = hands_model.process(video_capture_img_rgb)
 
-        if not hasattr(model_output, "multi_hand_landmarks"):
-            raise RuntimeError("Model output does not have multi_hand_landmarks attribute.")
+        if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
+            # update hotspots
+            fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
+                                model_output.multi_hand_landmarks]
 
-        # detect if finger over hotspot
-        fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
-                            model_output.multi_hand_landmarks]
+            for hotspot in hotspots:
+                hotspot_just_activated = hotspot.update(fingertip_coords)
 
-        for hotspot in hotspots:
-            hotspot_just_activated = hotspot.update(fingertip_coords)
+                if hotspot_just_activated:
+                    # make sure there's no other active hotspots
+                    for other_hotspot in hotspots:
+                        if other_hotspot == hotspot:
+                            continue
+                        other_hotspot.deactivate()
 
-            if hotspot_just_activated:
-                # make sure there's no other active hotspots
-                for other_hotspot in hotspots:
-                    if other_hotspot == hotspot:
-                        continue
-                    other_hotspot.deactivate()
+                    event_listener.on_hotspot_activated(hotspot.id)
 
-                event_listener.on_hotspot_activated(hotspot.id)
+            # draw hand landmarks
+            for landmarks in model_output.multi_hand_landmarks:
+                mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
+                                                          connections=mp.solutions.hands.HAND_CONNECTIONS)
 
-        # annotate hand landmarks and hotspot onscreen
+        # draw hotspot
         for hotspot in hotspots:
             hotspot.draw(video_capture_img, cv2, camera_width, camera_height)
-        for landmarks in model_output.multi_hand_landmarks:
-            mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
-                                                      connections=mp.solutions.hands.HAND_CONNECTIONS)
 
         cv2.imshow("Projected Hotspots", video_capture_img)
 
