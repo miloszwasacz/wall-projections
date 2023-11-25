@@ -6,7 +6,7 @@ namespace WallProjections.Models;
 
 public class ContentProvider : IContentProvider
 {
-    private static readonly string[] ImageExtensions = { ".jpeg", ".JPEG", ".png", ".PNG", ".jpg", ".JPG" };
+    private static readonly string[] ImageExtensions = { ".jpeg", ".png", ".jpg" };
     private static readonly string[] VideoExtensions = { ".mp4", ".mov", ".mkv", ".mka", ".avi" };
 
     private readonly IContentCache _cache;

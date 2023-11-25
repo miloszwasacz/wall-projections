@@ -25,7 +25,8 @@ public class DisplayViewModelTest
     public void CreationTest()
     {
         var pythonHandler = new MockPythonEventHandler();
-        var cache = new MockContentCache();
+        //TODO Refactor this
+        var cache = new MockContentCache(null!, "temp", Files);
         var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, cache);
 
         Assert.Multiple(() =>
@@ -47,7 +48,8 @@ public class DisplayViewModelTest
     public void CreationNoVideoTest()
     {
         var pythonHandler = new MockPythonEventHandler();
-        var cache = new MockContentCache();
+        //TODO Refactor this
+        var cache = new MockContentCache(null!, "temp", FilesNoVideo);
         var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, cache);
 
         Assert.Multiple(() =>

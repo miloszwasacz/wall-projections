@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
-using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 
@@ -17,8 +16,6 @@ Please report this to the museum staff.";
     private const string NotFound = @"Hmm...
 Looks like this hotspot has no content.
 Please report this to the museum staff.";
-
-    private IConfig? _config;
 
     /// <summary>
     /// The <see cref="IContentProvider" /> used to fetch Hotspot's content files
@@ -67,8 +64,7 @@ Please report this to the museum staff.";
     {
         set
         {
-            _config = value;
-            _contentProvider = new ContentProvider(_contentCache, _config);
+            _contentProvider = _contentCache.CreateContentProvider(value);
             this.RaisePropertyChanged(nameof(IsContentLoaded));
         }
     }

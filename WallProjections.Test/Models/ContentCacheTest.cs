@@ -17,19 +17,19 @@ public class ContentCacheTest
     /// <summary>
     /// Location of the zip file for testing
     /// </summary>
-    private static string TestZip => Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test.zip");
+    private static string TestZip => Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.zip");
 
     /// <summary>
     /// Location of the zip file with no config file for testing
     /// </summary>
     private static string TestZipNoConfig =>
-        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test_no_config.zip");
+        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_no_config.zip");
 
     /// <summary>
     /// Location of the zip file with an invalid config file for testing
     /// </summary>
     private static string TestZipInvalidConfig =>
-        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets/test_invalid_config.zip");
+        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_invalid_config.zip");
 
     /// <summary>
     /// Test if the <see cref="ContentCache" /> class is a singleton
@@ -140,6 +140,18 @@ public class ContentCacheTest
         //TODO Test more media files
 
         contentCache.Dispose();
+    }
+
+    /// <summary>
+    /// Test that <see cref="ContentCache.CreateContentProvider" /> returns an instance of <see cref="IContentProvider" />
+    /// </summary>
+    [Test]
+    public void CreateContentProviderTest()
+    {
+        IContentCache contentCache = CreateInstance();
+        var config = contentCache.Load(TestZip);
+        var contentProvider = contentCache.CreateContentProvider(config);
+        Assert.That(contentProvider, Is.InstanceOf<IContentProvider>());
     }
 
     /// <summary>

@@ -58,6 +58,9 @@ public sealed class ContentCache : IContentCache
         return Path.Combine(TempPath, MediaLocation, hotspot.Id.ToString());
     }
 
+    /// <inheritdoc />
+    public IContentProvider CreateContentProvider(IConfig config) => new ContentProvider(this, config);
+
     /// <summary>
     /// Cleans up the temporary folder stored in <see cref="TempPath" />.
     /// </summary>
