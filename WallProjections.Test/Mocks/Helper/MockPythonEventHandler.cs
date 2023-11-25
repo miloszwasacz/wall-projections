@@ -20,4 +20,9 @@ public class MockPythonEventHandler : IPythonEventHandler
     {
         HotspotSelected?.Invoke(this, new IPythonEventHandler.HotspotSelectedArgs(id));
     }
+
+    /// <summary>
+    /// Returns if there are any subscribers to <see cref="HotspotSelected" />
+    /// </summary>
+    public bool HasSubscribers => HotspotSelected is not null && HotspotSelected.GetInvocationList().Length > 0;
 }

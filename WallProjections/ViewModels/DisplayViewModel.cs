@@ -10,10 +10,10 @@ namespace WallProjections.ViewModels;
 public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
 {
     //TODO Localized strings?
-    private const string GenericError = @"An error occurred while loading this content.
+    internal const string GenericError = @"An error occurred while loading this content.
 Please report this to the museum staff.";
 
-    private const string NotFound = @"Hmm...
+    internal const string NotFound = @"Hmm...
 Looks like this hotspot has no content.
 Please report this to the museum staff.";
 
@@ -51,8 +51,7 @@ Please report this to the museum staff.";
         IContentCache contentCache
     )
     {
-        //TODO Refactor to use VMProvider
-        ImageViewModel = new ImageViewModel();
+        ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
         _pythonEventHandler = pythonEventHandler;
         _pythonEventHandler.HotspotSelected += OnHotspotSelected;
@@ -80,7 +79,7 @@ Please report this to the museum staff.";
     }
 
     /// <inheritdoc />
-    public ImageViewModel ImageViewModel { get; }
+    public IImageViewModel ImageViewModel { get; }
 
     /// <inheritdoc />
     public IVideoViewModel VideoViewModel { get; }
@@ -101,12 +100,11 @@ Please report this to the museum staff.";
 
         try
         {
-            var media = _contentProvider.GetMedia(hotspotId);
-            Description = media.Description;
             ImageViewModel.HideImage();
             VideoViewModel.StopVideo();
+            var media = _contentProvider.GetMedia(hotspotId);
+            Description = media.Description;
             if (media.ImagePath is not null)
-                //TODO Refactor to use VMProvider
                 //TODO Make ImageViewModel not throw FileNotFoundException (display a placeholder instead)
                 ImageViewModel.ShowImage(media.ImagePath);
             else if (media.VideoPath is not null)

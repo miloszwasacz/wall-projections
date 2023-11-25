@@ -14,7 +14,7 @@ public class VideoViewTest
     public void ViewModelTest()
     {
         var videoViewModel = ViewModelProvider.Instance.GetVideoViewModel();
-        var displayViewModel = new MockDisplayViewModel(videoViewModel);
+        var displayViewModel = new MockDisplayViewModel(videoViewModel: videoViewModel);
         var displayWindow = new DisplayWindow
         {
             DataContext = displayViewModel
@@ -78,4 +78,6 @@ public class VideoViewTest
         // Check that the ratio is preserved
         Assert.That(videoView.Bounds.Height, Is.EqualTo(videoView.Bounds.Width * 9 / 16));
     }
+
+    //TODO Add tests for visibility
 }

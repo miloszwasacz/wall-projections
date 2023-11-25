@@ -10,6 +10,12 @@ public interface IViewModelProvider
     public IDisplayViewModel GetDisplayViewModel();
 
     /// <summary>
+    /// Creates a new <see cref="IImageViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="IImageViewModel" /> instance</returns>
+    public IImageViewModel GetImageViewModel();
+
+    /// <summary>
     /// Creates a new <see cref="IVideoViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="IVideoViewModel" /> instance</returns>

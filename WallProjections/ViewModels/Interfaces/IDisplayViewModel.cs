@@ -22,11 +22,10 @@ public interface IDisplayViewModel : IDisposable
     /// </summary>
     public string Description { get; }
 
-    //TODO Change to an interface
     /// <summary>
     /// The <see cref="ImageViewModel" /> used to display images
     /// </summary>
-    public ImageViewModel ImageViewModel { get; }
+    public IImageViewModel ImageViewModel { get; }
 
     /// <summary>
     /// The <see cref="IVideoViewModel" /> used to display videos

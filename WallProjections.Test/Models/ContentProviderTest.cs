@@ -2,6 +2,7 @@
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Models;
+using static WallProjections.Test.TestExtensions;
 
 namespace WallProjections.Test.Models;
 
@@ -19,7 +20,6 @@ public class ContentProviderTest
 
     private string _configPath = null!;
     private readonly IConfig _mockConfig = new Config(Enumerable.Range(0, 5).Select(id => new Hotspot(id)));
-    private readonly List<Hotspot.Media> _cacheMockMedia = new();
 
     private string MediaPath => Path.Combine(_configPath, ValidConfigPath, "Media");
     private string InvalidMediaPath => Path.Combine(_configPath, InvalidConfigPath, "Media");
@@ -28,11 +28,20 @@ public class ContentProviderTest
 
     private string GetDescription(int id, string descFile) => File.ReadAllText(GetFullPath(id, descFile));
 
-    private static IEnumerable<(int, string, IReadOnlyList<string>?, IReadOnlyList<string>?)> TestCases()
+    private static IEnumerable<TestCaseData<(int, string, string[], string[])>> TestCases()
     {
-        yield return (0, "0.txt", Array.Empty<string>(), Array.Empty<string>());
-        yield return (1, "1.txt", new[] { "1.png" }, new[] { "1.mp4" });
-        yield return (2, "test2.txt", new[] { "1_2.jpg", "random.jpeg" }, new[] { "2.mkv", "2_1.mov" });
+        yield return MakeTestData(
+            (0, "0.txt", Array.Empty<string>(), Array.Empty<string>()),
+            "TextOnly"
+        );
+        yield return MakeTestData(
+            (1, "1.txt", new[] { "1.png" }, new[] { "1.mp4" }),
+            "FilenamesAreIDs"
+        );
+        yield return MakeTestData(
+            (2, "test2.txt", new[] { "1_2.jpg", "random.jpeg" }, new[] { "2.mkv", "2_1.mov" }),
+            "RandomFilenames"
+        );
     }
 
     [OneTimeSetUp]
@@ -58,10 +67,10 @@ public class ContentProviderTest
 
     [Test]
     [TestCaseSource(nameof(TestCases))]
-    public void GetMediaTest((int, string, IReadOnlyList<string>, IReadOnlyList<string>) testCase)
+    public void GetMediaTest((int, string, string[], string[]) testCase)
     {
         var (id, descPath, imagePaths, videoPaths) = testCase;
-        var cache = new MockContentCache(_mockConfig, MediaPath, _cacheMockMedia);
+        var cache = new MockContentCache(_mockConfig, MediaPath);
         var provider = new ContentProvider(cache, _mockConfig);
 
         var media = provider.GetMedia(id);
@@ -83,7 +92,7 @@ public class ContentProviderTest
     [Test]
     public void GetMediaNoHotspotTest()
     {
-        var cache = new MockContentCache(_mockConfig, MediaPath, _cacheMockMedia);
+        var cache = new MockContentCache(_mockConfig, MediaPath);
         var provider = new ContentProvider(cache, _mockConfig);
 
         Assert.Throws<IConfig.HotspotNotFoundException>(() => provider.GetMedia(-1));
@@ -92,7 +101,7 @@ public class ContentProviderTest
     [Test]
     public void GetMediaNoDescriptionTest()
     {
-        var cache = new MockContentCache(_mockConfig, InvalidMediaPath, _cacheMockMedia);
+        var cache = new MockContentCache(_mockConfig, InvalidMediaPath);
         var provider = new ContentProvider(cache, _mockConfig);
 
         Assert.Throws<FileNotFoundException>(() => provider.GetMedia(1));

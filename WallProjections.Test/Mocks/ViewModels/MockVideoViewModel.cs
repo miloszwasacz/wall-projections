@@ -6,21 +6,21 @@ using WallProjections.ViewModels.Interfaces;
 namespace WallProjections.Test.Mocks.ViewModels;
 
 /// <summary>
-/// A mock of <see cref="VideoViewModel"/> for injecting into <see cref="DisplayViewModel"/>
+/// A mock of <see cref="VideoViewModel" /> for injecting into <see cref="DisplayViewModel" />
 /// </summary>
 public sealed class MockVideoViewModel : IVideoViewModel
 {
     private readonly List<string> _videoPaths = new();
 
     /// <summary>
-    /// The backing field for <see cref="MediaPlayer"/>
+    /// The backing field for <see cref="MediaPlayer" />
     /// </summary>
     private IMediaPlayer? _mediaPlayer;
 
     /// <summary>
-    /// A mock of <see cref="VideoViewModel"/> for injecting into <see cref="DisplayViewModel"/>.
-    /// Sets <see cref="MediaPlayer"/> to <paramref name="mediaPlayer"/> if not <i>null</i>,
-    /// or a new <see cref="MockMediaPlayer"/> otherwise
+    /// A mock of <see cref="VideoViewModel" /> for injecting into <see cref="DisplayViewModel" />.
+    /// Sets <see cref="MediaPlayer" /> to <paramref name="mediaPlayer" /> if not <i>null</i>,
+    /// or a new <see cref="MockMediaPlayer" /> otherwise
     /// </summary>
     public MockVideoViewModel(IMediaPlayer? mediaPlayer = null)
     {
@@ -33,27 +33,27 @@ public sealed class MockVideoViewModel : IVideoViewModel
     public IReadOnlyList<string> VideoPaths => _videoPaths;
 
     /// <summary>
-    /// Determines if <see cref="MediaPlayer"/> is null or not (<i>true</i> means not <i>null</i>)
+    /// Determines if <see cref="MediaPlayer" /> is null or not (<i>true</i> means not <i>null</i>)
     /// </summary>
-    public bool CanPlay { get; set; } = true;
+    public bool CanPlay { get; set; } = false;
 
     /// <summary>
-    /// The number of times <see cref="PlayVideo"/> has been called
+    /// The number of times <see cref="PlayVideo" /> has been called
     /// </summary>
     public int PlayCount => _videoPaths.Count;
 
     /// <summary>
-    /// The number of times <see cref="StopVideo"/> has been called
+    /// The number of times <see cref="StopVideo" /> has been called
     /// </summary>
     public int StopCount { get; private set; }
 
     /// <summary>
-    /// The number of times <see cref="Dispose"/> has been called
+    /// The number of times <see cref="Dispose" /> has been called
     /// </summary>
     public int DisposeCount { get; private set; }
 
     /// <summary>
-    /// A mock of <see cref="WallProjections.Models.VLCMediaPlayer"/> if <see cref="CanPlay"/> is <i>true</i>,
+    /// A mock of <see cref="WallProjections.Models.VLCMediaPlayer" /> if <see cref="CanPlay" /> is <i>true</i>,
     /// <i>null</i> otherwise
     /// </summary>
     public IMediaPlayer? MediaPlayer => CanPlay ? _mediaPlayer : null;
@@ -66,10 +66,10 @@ public sealed class MockVideoViewModel : IVideoViewModel
     public int Volume { get; set; }
 
     /// <summary>
-    /// Increases the number of times <see cref="PlayVideo"/> has been called
-    /// and adds <paramref name="path"/> to <see cref="VideoPaths"/>
+    /// Increases the number of times <see cref="PlayVideo" /> has been called
+    /// and adds <paramref name="path" /> to <see cref="VideoPaths" />
     /// </summary>
-    /// <returns><i>True</i> if <see cref="MediaPlayer"/> is not <i>null</i></returns>
+    /// <returns><i>True</i> if <see cref="MediaPlayer" /> is not <i>null</i></returns>
     public bool PlayVideo(string path)
     {
         _videoPaths.Add(path);
@@ -77,7 +77,7 @@ public sealed class MockVideoViewModel : IVideoViewModel
     }
 
     /// <summary>
-    /// Increases the number of times <see cref="StopVideo"/> has been called
+    /// Increases the number of times <see cref="StopVideo" /> has been called
     /// </summary>
     public void StopVideo()
     {
@@ -85,7 +85,7 @@ public sealed class MockVideoViewModel : IVideoViewModel
     }
 
     /// <summary>
-    /// Calls <see cref="StopVideo"/> and increases the number of times <see cref="Dispose"/> has been called
+    /// Calls <see cref="StopVideo" /> and increases the number of times <see cref="Dispose" /> has been called
     /// </summary>
     public void Dispose()
     {

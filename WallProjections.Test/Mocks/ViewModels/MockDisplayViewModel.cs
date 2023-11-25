@@ -26,15 +26,19 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     /// </summary>
     private int _currentHotspotId = -1;
 
-    //TODO Add mention of ImageViewModel
     /// <summary>
-    /// Initializes a new <see cref="MockDisplayViewModel" />
-    /// with <see cref="VideoViewModel" /> set to <paramref name="videoViewModel" />
-    /// (uses <see cref="MockVideoViewModel" /> if <paramref name="videoViewModel" /> is <i>null</i>)
+    /// Initializes a new <see cref="MockDisplayViewModel" /> with <see cref="ImageViewModel" /> set to
+    /// <paramref name="imageViewModel" /> and <see cref="VideoViewModel" /> set to <paramref name="videoViewModel" />
     /// </summary>
+    /// <param name="imageViewModel"><see cref="IImageViewModel" /> to use by the mock</param>
     /// <param name="videoViewModel"><see cref="IVideoViewModel" /> to use by the mock</param>
-    public MockDisplayViewModel(IVideoViewModel? videoViewModel = null)
+    /// <remarks>
+    /// Uses <see cref="MockImageViewModel" /> and <see cref="MockVideoViewModel" />
+    /// if the respective parameters are <i>null</i>
+    /// </remarks>
+    public MockDisplayViewModel(IImageViewModel? imageViewModel = null, IVideoViewModel? videoViewModel = null)
     {
+        ImageViewModel = imageViewModel ?? new MockImageViewModel();
         VideoViewModel = videoViewModel ?? new MockVideoViewModel();
     }
 
@@ -80,6 +84,11 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     public string Description => DefaultDescription + CurrentHotspotId;
 
     /// <summary>
+    /// Returns <see cref="MockImageViewModel" />
+    /// </summary>
+    public IImageViewModel ImageViewModel { get; }
+
+    /// <summary>
     /// Returns a <see cref="MockVideoViewModel" />
     /// </summary>
     public IVideoViewModel VideoViewModel { get; }
@@ -93,9 +102,6 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     {
         CurrentHotspotId = e.Id;
     }
-
-    //TODO Implement mock ImageViewModel
-    public ImageViewModel ImageViewModel => throw new NotImplementedException();
 
     /// <summary>
     /// Calls <see cref="VideoViewModel.Dispose" /> on <see cref="VideoViewModel" />

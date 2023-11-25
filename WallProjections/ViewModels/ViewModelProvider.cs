@@ -42,6 +42,12 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         new DisplayViewModel(this, PythonEventHandler.Instance, ContentCache.Instance);
 
     /// <summary>
+    /// Creates a new <see cref="ImageViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="ImageViewModel" /> instance</returns>
+    public IImageViewModel GetImageViewModel() => new ImageViewModel();
+
+    /// <summary>
     /// Creates a new <see cref="VideoViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="VideoViewModel" /> instance</returns>

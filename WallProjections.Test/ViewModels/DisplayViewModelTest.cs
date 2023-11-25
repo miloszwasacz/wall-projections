@@ -1,63 +1,208 @@
-﻿using WallProjections.Models;
+﻿using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
+using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels;
+using WallProjections.ViewModels.Interfaces;
+using static WallProjections.Test.TestExtensions;
 
 namespace WallProjections.Test.ViewModels;
 
-//TODO Improve tests once DisplayViewModel is refactored
 [TestFixture]
 public class DisplayViewModelTest
 {
     private const int HotspotId = 1;
     private const string Text = "test";
+    private const string ImagePath = "test.png";
     private const string VideoPath = "test.mp4";
 
-    private static List<Hotspot.Media> Files =>
-        new() { new Hotspot.Media(new Hotspot(HotspotId), Text, VideoPath: VideoPath) };
-    private static List<Hotspot.Media> FilesNoVideo => new() { new Hotspot.Media(new Hotspot(HotspotId), Text) };
+    #region MediaFiles
+
+    private static List<Hotspot.Media> FilesAll =>
+        new() { new Hotspot.Media(new Hotspot(HotspotId), Text, ImagePath, VideoPath) };
+
+    private static List<Hotspot.Media> FilesNoVideo =>
+        new() { new Hotspot.Media(new Hotspot(HotspotId), Text, ImagePath) };
+
+    private static List<Hotspot.Media> FilesNoImage => new()
+        { new Hotspot.Media(new Hotspot(HotspotId), Text, VideoPath: VideoPath) };
+
+    private static List<Hotspot.Media> FilesNoMedia => new() { new Hotspot.Media(new Hotspot(HotspotId), Text) };
+
+    #endregion
 
     private static MockViewModelProvider ViewModelProvider => new();
-    private static AssertionException MockException => new("VideoViewModel is not a MockVideoViewModel");
 
-    [Test]
-    public void CreationTest()
+    private static IEnumerable<TestCaseData<List<Hotspot.Media>>> CreationTestCases()
     {
-        var pythonHandler = new MockPythonEventHandler();
-        //TODO Refactor this
-        var cache = new MockContentCache(null!, "temp", Files);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, cache);
+        yield return MakeTestData(FilesAll, "AllMediaTypes");
+        yield return MakeTestData(FilesNoVideo, "NoVideo");
+        yield return MakeTestData(FilesNoImage, "NoImage");
+        yield return MakeTestData(FilesNoMedia, "NoMedia");
+    }
 
-        Assert.Multiple(() =>
-        {
-            //TODO Add proper tests for ContentProvider once it is refactored
-            // Use reflection to get the private _contentProvider field
+    private static IEnumerable<TestCaseData<(List<Hotspot.Media>, string[]?, string[]?)>> OnHotspotSelectedTestCases()
+    {
+        yield return MakeTestData<(List<Hotspot.Media>, string[]?, string[]?)>(
+            (FilesAll, new[] { ImagePath }, new[] { VideoPath }),
+            "AllMediaTypes"
+        );
+        yield return MakeTestData<(List<Hotspot.Media>, string[]?, string[]?)>(
+            (FilesNoVideo, new[] { ImagePath }, null),
+            "NoVideo"
+        );
+        yield return MakeTestData<(List<Hotspot.Media>, string[]?, string[]?)>(
+            (FilesNoImage, null, new[] { VideoPath }),
+            "NoImage"
+        );
+        yield return MakeTestData<(List<Hotspot.Media>, string[]?, string[]?)>(
+            (FilesNoMedia, null, null),
+            "NoMedia"
+        );
+    }
 
-            Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
-            Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
-            //TODO Add proper tests for the Description once DisplayViewModel is refactored
-            Assert.That(displayViewModel.Description, Is.Empty);
-
-            var videoViewModel = displayViewModel.VideoViewModel as MockVideoViewModel ?? throw MockException;
-            Assert.That(videoViewModel.VideoPaths, Is.Empty);
-        });
+    private static IEnumerable<TestCaseData<(Exception, string)>> OnHotspotSelectedExceptionTestCases()
+    {
+        yield return MakeTestData(
+            (new IConfig.HotspotNotFoundException(HotspotId) as Exception, DisplayViewModel.NotFound),
+            "HotspotNotFound"
+        );
+        yield return MakeTestData(
+            (new FileNotFoundException("File not found") as Exception, DisplayViewModel.NotFound),
+            "FileNotFound"
+        );
+        yield return MakeTestData(
+            (new Exception(), DisplayViewModel.GenericError),
+            "GenericException"
+        );
     }
 
     [Test]
-    public void CreationNoVideoTest()
+    [TestCaseSource(nameof(CreationTestCases))]
+    public void CreationTest(List<Hotspot.Media> files)
     {
         var pythonHandler = new MockPythonEventHandler();
-        //TODO Refactor this
-        var cache = new MockContentCache(null!, "temp", FilesNoVideo);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, cache);
+        var contentCache = new MockContentCache(files);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+
+        AssertJustInitialized(displayViewModel);
+        displayViewModel.Dispose();
+    }
+
+    [Test]
+    public void SetConfigTest()
+    {
+        var pythonHandler = new MockPythonEventHandler();
+        var contentCache = new MockContentCache(FilesAll);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+
+        var config = new Config(Enumerable.Empty<Hotspot>());
+        displayViewModel.Config = config;
+
+        Assert.That(displayViewModel.IsContentLoaded, Is.True);
+    }
+
+    [Test]
+    [TestCaseSource(nameof(OnHotspotSelectedTestCases))]
+    public void OnHotspotSelectedTest((List<Hotspot.Media>, string[]?, string[]?) testCase)
+    {
+        var (files, expectedImagePaths, expectedVideoPaths) = testCase;
+        var pythonHandler = new MockPythonEventHandler();
+        var contentCache = new MockContentCache(files);
+        var config = new Config(Enumerable.Empty<Hotspot>());
+
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+        displayViewModel.Config = config;
+        var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
+        var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
+
+        var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
+        Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
+        Assert.Multiple(() =>
+        {
+            Assert.That(displayViewModel.Description, Is.EqualTo(Text));
+
+            Assert.That(imageViewModel.HideCount, Is.EqualTo(1));
+            if (expectedImagePaths is not null)
+                Assert.That(imageViewModel.ImagePaths, Is.EquivalentTo(expectedImagePaths));
+            else
+                Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
+
+            Assert.That(videoViewModel.StopCount, Is.EqualTo(1));
+            if (expectedVideoPaths is not null && expectedImagePaths is null)
+                Assert.That(videoViewModel.VideoPaths, Is.EquivalentTo(expectedVideoPaths));
+            else
+                Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);
+        });
+        displayViewModel.Dispose();
+    }
+
+    [Test]
+    public void OnHotspotSelectedNoConfigTest()
+    {
+        var pythonHandler = new MockPythonEventHandler();
+        var contentCache = new MockContentCache(FilesAll);
+
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+
+        var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
+        Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
+        AssertJustInitialized(displayViewModel);
+        displayViewModel.Dispose();
+    }
+
+    [Test]
+    [TestCaseSource(nameof(OnHotspotSelectedExceptionTestCases))]
+    public void OnHotspotSelectedExceptionTest((Exception, string) testCase)
+    {
+        var (exception, expectedDescription) = testCase;
+        var pythonHandler = new MockPythonEventHandler();
+        var contentCache = new MockContentCache(exception);
+        var config = new Config(Enumerable.Empty<Hotspot>());
+
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+        displayViewModel.Config = config;
+        var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
+        var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
+
+        var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
+        Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
+        Assert.Multiple(() =>
+        {
+            Assert.That(displayViewModel.Description, Is.EqualTo(expectedDescription));
+            Assert.That(imageViewModel.HideCount, Is.EqualTo(1));
+            Assert.That(videoViewModel.StopCount, Is.EqualTo(1));
+        });
+        displayViewModel.Dispose();
+    }
+
+    [Test]
+    public void DisposeTest()
+    {
+        var pythonHandler = new MockPythonEventHandler();
+        var contentCache = new MockContentCache(FilesAll);
+
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+        var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
+        displayViewModel.Dispose();
 
         Assert.Multiple(() =>
         {
-            Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
-            Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
-            //TODO Add proper tests for the Description once DisplayViewModel is refactored
+            Assert.That(pythonHandler.HasSubscribers, Is.False);
+            Assert.That(videoViewModel.DisposeCount, Is.EqualTo(1));
+        });
+    }
+
+    private static void AssertJustInitialized(IDisplayViewModel displayViewModel)
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(displayViewModel.IsContentLoaded, Is.False);
             Assert.That(displayViewModel.Description, Is.Empty);
+            Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
+            Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);
         });
     }
 }
