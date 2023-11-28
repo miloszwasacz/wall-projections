@@ -201,7 +201,7 @@ public class ContentCacheTest
     /// and the application has no write permissions to the temp folder
     /// </summary>
     [Test]
-    [Platform("Linux")]
+    [Platform("Linux,MacOsX")]
     public void DisposeIOExceptionLinuxTest()
     {
         var contentCache = CreateInstance();
@@ -228,7 +228,7 @@ public class ContentCacheTest
     {
         var type = typeof(ContentCache);
         var res = Activator.CreateInstance(type, true) as ContentCache;
-        return res ?? throw new InvalidCastException("Could construct ContentCache");
+        return res ?? throw new InvalidCastException("Could not construct ContentCache");
     }
 
     /// <summary>

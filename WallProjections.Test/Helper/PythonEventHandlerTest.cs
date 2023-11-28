@@ -48,6 +48,6 @@ public class PythonEventHandlerTest
     {
         var type = typeof(PythonEventHandler);
         var res = Activator.CreateInstance(type, true) as PythonEventHandler;
-        return res ?? throw new InvalidCastException("Could construct PythonEventHandler");
+        return res ?? throw new InvalidCastException("Could not construct PythonEventHandler");
     }
 }
