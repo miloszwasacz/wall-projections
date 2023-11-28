@@ -1,7 +1,7 @@
 # Formatting for zip File
 ## config.json
 In the root directory of the zip file, place `config.json` with the JSON in the format:
-```json
+```json5
 {
     "Hotspots": [
         {
@@ -26,13 +26,16 @@ For each `Hotspot` in `config.json`, create a folder in `Media` with matching ID
 - `Id.txt`, where ID is `Hotspot.Id`
 
 ### And one of:
-- `Id.jpeg`
-- `Id.JPEG`
-- `Id.jpg`
-- `Id.JPG`
-- `Id.png`
-- `Id.PNG`
-- `Id.mp4`
+- Images:
+  - `Id.jpeg`
+  - `Id.jpg`
+  - `Id.png`
+- Videos:
+  - `Id.mp4`
+  - `Id.mov`
+  - `Id.mkv`
+  - `Id.mka`
+  - `Id.avi`
 
 where `Id` is `Hotspot.Id` (files can be any name but using `Id` is best for 
 readability).

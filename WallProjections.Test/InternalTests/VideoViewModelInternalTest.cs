@@ -11,11 +11,25 @@ public class VideoViewModelInternalTest
     private static AssertionException PropertyException =>
         new("VideoViewModel does not have a setter for the property");
 
+    private LibVLC _libVlc = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        _libVlc = new LibVLC();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _libVlc.Dispose();
+    }
+
     [Test]
     public void MediaPlayerSetterTest()
     {
         var mediaPlayer = new MockMediaPlayer();
-        var videoViewModel = new VideoViewModel("test.mp4", new LibVLC(), mediaPlayer);
+        var videoViewModel = new VideoViewModel(_libVlc, mediaPlayer);
         var newMediaPlayer = new MockMediaPlayer();
 
         var setter = videoViewModel.GetType().GetProperty("MediaPlayer")?.GetSetMethod(true) ?? throw PropertyException;
@@ -27,7 +41,9 @@ public class VideoViewModelInternalTest
             }
             catch (TargetInvocationException e)
             {
-                throw e.InnerException ?? throw e;
+                if (e.InnerException is not null)
+                    throw e.InnerException;
+                throw;
             }
         });
     }

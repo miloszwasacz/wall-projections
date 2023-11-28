@@ -23,6 +23,8 @@ public sealed class MockMediaPlayer : IMediaPlayer
         _fileExists = fileExists;
     }
 
+    public int Volume { get; set; }
+
     /// <summary>
     /// Adds the MRL of the given media to the list of played media
     /// </summary>

@@ -1,5 +1,4 @@
-﻿using WallProjections.Test.Mocks.Models;
-using WallProjections.ViewModels;
+﻿using WallProjections.ViewModels;
 
 namespace WallProjections.Test.ViewModels;
 
@@ -17,29 +16,21 @@ public class ViewModelProviderTest
     }
 
     [Test]
-    public void GetMainWindowViewModelTest()
-    {
-        var mainWindowViewModel = ViewModelProvider.Instance.GetMainWindowViewModel();
-        Assert.That(mainWindowViewModel, Is.InstanceOf<MainWindowViewModel>());
-        Assert.That(mainWindowViewModel.DisplayViewModel, Is.Null);
-    }
-
-    [Test]
     public void GetDisplayViewModelTest()
     {
-        const string artifactId = "test";
-        var files = new[] { "test", "test.mp4" };
-        var fileProvider = new MockFileProvider(files);
-        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(artifactId, fileProvider);
-        Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
-        Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
+        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel();
+        Assert.Multiple(() =>
+        {
+            Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
+            Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
+            Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
+        });
     }
 
     [Test]
     public void GetVideoViewModelTest()
     {
-        const string videoPath = "test.mp4";
-        var videoViewModel = ViewModelProvider.Instance.GetVideoViewModel(videoPath);
+        var videoViewModel = ViewModelProvider.Instance.GetVideoViewModel();
         Assert.That(videoViewModel, Is.InstanceOf<VideoViewModel>());
         Assert.That(videoViewModel.MediaPlayer, Is.Not.Null);
     }

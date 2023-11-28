@@ -1,10 +1,10 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace WallProjections.Models.Configuration;
+namespace WallProjections.Models;
 
 /// <summary>
-/// Stores the location of a hotspot, its size, and the content to be displayed.
+/// Stores the location and size of a hotspot
 /// </summary>
 [Serializable]
 public class Hotspot
@@ -20,10 +20,8 @@ public class Hotspot
     [JsonInclude]
     public Coord Position { get; }
 
-
-
     /// <summary>
-    /// Constructor for Hotspot
+    /// Constructor for Hotspot used by JSON deserializer
     /// </summary>
     /// <param name="id">ID used by input detection to show info.</param>
     /// <param name="position">Position of hotspot stored as <see cref="Coord"/> record.</param>
@@ -36,5 +34,9 @@ public class Hotspot
     }
 
     public Hotspot(int id, double x = default, double y = default, double r = default)
-        : this(id, new Coord(x, y, r)) {}
+        : this(id, new Coord(x, y, r))
+    {
+    }
+
+    public record Media(Hotspot Hotspot, string Description, string? ImagePath = null, string? VideoPath = null);
 }

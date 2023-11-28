@@ -6,79 +6,90 @@ using WallProjections.ViewModels.Interfaces;
 namespace WallProjections.Test.Mocks.ViewModels;
 
 /// <summary>
-/// A mock of <see cref="VideoViewModel"/> for injecting into <see cref="DisplayViewModel"/>
+/// A mock of <see cref="VideoViewModel" /> for injecting into <see cref="DisplayViewModel" />
 /// </summary>
 public sealed class MockVideoViewModel : IVideoViewModel
 {
-    /// <summary>
-    /// The path of the video the viewmodel was constructed with
-    /// </summary>
-    public string VideoPath { get; }
+    private readonly List<string> _videoPaths = new();
 
     /// <summary>
-    /// Determines if <see cref="MediaPlayer"/> is null or not (<i>true</i> means not <i>null</i>)
+    /// The backing field for <see cref="MediaPlayer" />
     /// </summary>
-    public bool CanPlay { get; set; } = true;
+    private IMediaPlayer? _mediaPlayer;
 
     /// <summary>
-    /// The number of times <see cref="PlayVideo"/> has been called
+    /// A mock of <see cref="VideoViewModel" /> for injecting into <see cref="DisplayViewModel" />.
+    /// Sets <see cref="MediaPlayer" /> to <paramref name="mediaPlayer" /> if not <i>null</i>,
+    /// or a new <see cref="MockMediaPlayer" /> otherwise
     /// </summary>
-    public int PlayCounter { get; private set; }
+    public MockVideoViewModel(IMediaPlayer? mediaPlayer = null)
+    {
+        _mediaPlayer = mediaPlayer ?? new MockMediaPlayer();
+    }
 
     /// <summary>
-    /// The number of times <see cref="StopVideo"/> has been called
+    /// A list of paths to the videos the viewmodel has played
     /// </summary>
-    public int StopCounter { get; private set; }
+    public IReadOnlyList<string> VideoPaths => _videoPaths;
 
     /// <summary>
-    /// The number of times <see cref="Dispose"/> has been called
+    /// Determines if <see cref="MediaPlayer" /> is null or not (<i>true</i> means not <i>null</i>)
     /// </summary>
-    public int DisposeCounter { get; private set; }
+    public bool CanPlay { get; set; } = false;
 
     /// <summary>
-    /// The backing field for <see cref="MediaPlayer"/>
+    /// The number of times <see cref="PlayVideo" /> has been called
     /// </summary>
-    private readonly MockMediaPlayer _mediaPlayer = new();
+    public int PlayCount => _videoPaths.Count;
 
     /// <summary>
-    /// A mock of <see cref="WallProjections.Models.VLCMediaPlayer"/> if <see cref="CanPlay"/> is <i>true</i>,
+    /// The number of times <see cref="StopVideo" /> has been called
+    /// </summary>
+    public int StopCount { get; private set; }
+
+    /// <summary>
+    /// The number of times <see cref="Dispose" /> has been called
+    /// </summary>
+    public int DisposeCount { get; private set; }
+
+    /// <summary>
+    /// A mock of <see cref="WallProjections.Models.VLCMediaPlayer" /> if <see cref="CanPlay" /> is <i>true</i>,
     /// <i>null</i> otherwise
     /// </summary>
     public IMediaPlayer? MediaPlayer => CanPlay ? _mediaPlayer : null;
 
     /// <summary>
-    /// A mock of <see cref="VideoViewModel"/> for injecting into <see cref="DisplayViewModel"/>
+    /// Returns <see cref="CanPlay" />
     /// </summary>
-    /// <param name="videoPath">The path to the video the viewmodel is supposed to play</param>
-    public MockVideoViewModel(string videoPath)
-    {
-        VideoPath = videoPath;
-    }
+    public bool HasVideos => CanPlay;
+
+    public int Volume { get; set; }
 
     /// <summary>
-    /// Increases the number of times <see cref="PlayVideo"/> has been called
+    /// Increases the number of times <see cref="PlayVideo" /> has been called
+    /// and adds <paramref name="path" /> to <see cref="VideoPaths" />
     /// </summary>
-    /// <returns><i>True</i> if <see cref="MediaPlayer"/> is not <i>null</i></returns>
-    public bool PlayVideo()
+    /// <returns><i>True</i> if <see cref="MediaPlayer" /> is not <i>null</i></returns>
+    public bool PlayVideo(string path)
     {
-        PlayCounter++;
+        _videoPaths.Add(path);
         return MediaPlayer is not null;
     }
 
     /// <summary>
-    /// Increases the number of times <see cref="StopVideo"/> has been called
+    /// Increases the number of times <see cref="StopVideo" /> has been called
     /// </summary>
     public void StopVideo()
     {
-        StopCounter++;
+        StopCount++;
     }
 
     /// <summary>
-    /// Calls <see cref="StopVideo"/> and increases the number of times <see cref="Dispose"/> has been called
+    /// Calls <see cref="StopVideo" /> and increases the number of times <see cref="Dispose" /> has been called
     /// </summary>
     public void Dispose()
     {
         StopVideo();
-        DisposeCounter++;
+        DisposeCount++;
     }
 }

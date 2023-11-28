@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Text.Json;
 using System.Text.Json.Serialization;
-using WallProjections.Models.Configuration.Interfaces;
+using WallProjections.Models.Interfaces;
 
-namespace WallProjections.Models.Configuration;
+namespace WallProjections.Models;
 
 /// <summary>
 /// Stores all user customisable configuration for the program.
@@ -12,13 +13,13 @@ namespace WallProjections.Models.Configuration;
 [Serializable]
 public class Config : IConfig
 {
-
     /// <summary>
     /// List of all hotspots (their locations and content).
     /// </summary>
     [JsonInclude]
     public ImmutableList<Hotspot> Hotspots { get; }
 
+    /// <inheritdoc />
     public int HotspotCount => Hotspots.Count;
 
     /// <summary>
@@ -38,8 +39,13 @@ public class Config : IConfig
     public Config(ImmutableList<Hotspot> hotspots)
     {
         Hotspots = hotspots;
+
+        // Because this constructor is used by the deserializer, we have to check for null values
+        if (Hotspots == null)
+            throw new JsonException();
     }
-    
+
+    /// <inheritdoc />
     public Hotspot? GetHotspot(int id)
     {
         return Hotspots.Find(x => x.Id == id);

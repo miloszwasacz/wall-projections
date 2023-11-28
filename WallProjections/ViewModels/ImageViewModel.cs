@@ -1,30 +1,34 @@
-using System.Diagnostics;
 using System.IO;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
 
-public class ImageViewModel : ViewModelBase
+public class ImageViewModel : ViewModelBase, IImageViewModel
 {
-    private string ImagePath { get; }
     private Bitmap? _imageToLoad;
-    public Bitmap? ImageToLoadPublic
+
+    public Bitmap? Image
     {
         get => _imageToLoad;
-        private set => this.RaiseAndSetIfChanged(ref _imageToLoad, value);
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _imageToLoad, value);
+            this.RaisePropertyChanged(nameof(HasImages));
+        }
     }
 
-    public ImageViewModel(string filePath)
-    {
-        ImagePath = filePath;
-        Debug.Print(ImagePath);
-        ImageToLoadPublic = ChangeImage(ImagePath);
-    }
+    public bool HasImages => Image is not null;
 
-    private Bitmap ChangeImage(string filePath)
+    public void ShowImage(string filePath)
     {
         using var fileStream = File.OpenRead(filePath);
-        return new Bitmap(fileStream);
+        Image = new Bitmap(fileStream);
+    }
+
+    public void HideImage()
+    {
+        Image = null;
     }
 }
