@@ -9,6 +9,23 @@ from Hotspot import Hotspot
 logging.basicConfig(level=logging.INFO)
 
 
+MAX_NUM_HANDS: int = 4
+"""The maximum number of hands to detect."""
+
+MIN_DETECTION_CONFIDENCE = 0.5
+"""The minimum confidence for hand detection to be considered successful.
+
+Must be between 0 and 1.
+
+See https://developers.google.com/mediapipe/solutions/vision/hand_landmarker."""
+
+MIN_TRACKING_CONFIDENCE = 0.5
+"""The minimum confidence for hand detection to be considered successful.
+
+Must be between 0 and 1.
+
+See https://developers.google.com/mediapipe/solutions/vision/hand_landmarker."""
+
 FINGERTIP_INDICES = (4, 8, 12, 16, 20)
 """The indices for the thumb fingertip, index fingertip, ring fingertip, etc. 
 
@@ -49,7 +66,9 @@ def run(event_listener) -> None:  # This function is called by Program.cs
 
     # initialise ML hand-tracking model
     logging.info("Initialising hand-tracking model...")
-    hands_model = mp.solutions.hands.Hands()
+    hands_model = mp.solutions.hands.Hands(max_num_hands=MAX_NUM_HANDS,
+                                           min_detection_confidence=MIN_DETECTION_CONFIDENCE,
+                                           min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
 
     logging.info("Initialising video capture...")
     video_capture = cv2.VideoCapture(VIDEO_CAPTURE_TARGET, VIDEO_CAPTURE_BACKEND)
