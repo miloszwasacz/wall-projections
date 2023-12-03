@@ -66,10 +66,11 @@ def run(event_listener) -> None:  # This function is called by Program.cs
 
         cv2.imshow("Projected Hotspots", video_capture_img)
 
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord("c"):
+        # development key inputs
+        key = chr(cv2.waitKey(1) & 0xFF).lower()
+        if key == "c":
             media_finished()
-        elif key == ord("q"):
+        elif key == "q":
             break
 
     # clean up
