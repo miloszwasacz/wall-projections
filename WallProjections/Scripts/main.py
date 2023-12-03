@@ -1,12 +1,40 @@
 import cv2
 import mediapipe as mp
+import logging
 
 from EventListener import EventListener
 from Hotspot import Hotspot
 
 
+logging.basicConfig(level=logging.INFO)
+
+
 FINGERTIP_INDICES = (4, 8, 12, 16, 20)
-"""The indices for the thumb fingertip, index fingertip, ring fingertip, etc."""
+"""The indices for the thumb fingertip, index fingertip, ring fingertip, etc. 
+
+This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
+
+VIDEO_CAPTURE_TARGET: int | str = 0
+"""Camera ID, video filename, image sequence filename or video stream URL to capture video from.
+
+Set to 0 to use default camera.
+
+See https://docs.opencv.org/3.4/d8/dfe/classcv_1_1VideoCapture.html#a949d90b766ba42a6a93fe23a67785951 for details."""
+
+VIDEO_CAPTURE_BACKEND: int = cv2.CAP_ANY
+"""The API backend to use for capturing video. 
+
+Use ``cv2.CAP_ANY`` to auto-detect. 
+
+See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html for more options."""
+
+VIDEO_CAPTURE_PROPERTIES: dict[int, int] = {}
+"""Extra properties to use for OpenCV video capture.
+
+Tweaking these properties could be found useful in case of any issues with capturing video.
+
+See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d and
+https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
 
 hotspots: list[Hotspot] = []
 """The global list of hotspots."""
@@ -19,23 +47,31 @@ def run(event_listener) -> None:  # This function is called by Program.cs
 
     global hotspots
 
+    # initialise ML hand-tracking model
+    logging.info("Initialising hand-tracking model...")
     hands_model = mp.solutions.hands.Hands()
-    video_capture = cv2.VideoCapture(0)
+
+    logging.info("Initialising video capture...")
+    video_capture = cv2.VideoCapture(VIDEO_CAPTURE_TARGET, VIDEO_CAPTURE_BACKEND)
+    for prop_id, prop_value in VIDEO_CAPTURE_PROPERTIES.items():
+        video_capture.set(prop_id, prop_value)
 
     hotspots = [Hotspot(0, 0.5, 0.5, event_listener), Hotspot(1, 0.8, 0.8, event_listener)]
+
+    logging.info("Initialisation done.")
 
     # basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
 
     while video_capture.isOpened():
         success, video_capture_img = video_capture.read()
         if not success:
-            print("Ignoring empty camera frame.")
+            logging.warning("Unsuccessful video read; ignoring frame.")
             continue
 
         camera_height, camera_width, _ = video_capture_img.shape
 
         # run model
-        video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)
+        video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
         model_output = hands_model.process(video_capture_img_rgb)
 
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
