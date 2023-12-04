@@ -1,5 +1,5 @@
 # Client Meeting 2 Minutes
-## Interface
+## User Interface
 - Zahid to chat internally to see what they want the interface to look like, will send us an example
 - Need a black background as it is a projection
 - Want to be able to change assets easily
