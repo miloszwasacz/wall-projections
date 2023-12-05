@@ -30,6 +30,7 @@ public class ImageViewModel : ViewModelBase, IImageViewModel
         }
         else
         {
+            //TODO change this to display a fallback image 
             Image = null;
         }
     }

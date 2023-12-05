@@ -1,3 +1,4 @@
+using Avalonia.Headless.NUnit;
 using WallProjections.ViewModels;
 
 namespace WallProjections.Test.ViewModels;
@@ -5,9 +6,10 @@ namespace WallProjections.Test.ViewModels;
 [TestFixture]
 public class ImageViewModelTest
 {
-    private const string ImagePath = "test.png";
-    
-    [Test]
+    private static string ImagePath =>
+    Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+        
+    [AvaloniaTest]
     public void HasImageTest()
     {
         var imageViewModel = new ImageViewModel();
@@ -17,7 +19,7 @@ public class ImageViewModelTest
         Assert.That(imageViewModel.HasImages, Is.False);
     }
     
-    [Test]
+    [AvaloniaTest]
     public void DisplayImageTest()
     {
         var imageViewModel = new ImageViewModel();
