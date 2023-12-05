@@ -49,12 +49,9 @@ class _Button:
         """
         time_since_last_change = time.time() - self.prev_time
         if self.finger_is_over:
-            pressed_amount = min(1.0, self.prev_pressed_amount + time_since_last_change / BUTTON_COOLDOWN)
+            return min(1.0, self.prev_pressed_amount + time_since_last_change / BUTTON_COOLDOWN)
         else:
-            pressed_amount = max(0.0, self.prev_pressed_amount - time_since_last_change / BUTTON_COOLDOWN)
-
-        return pressed_amount
-
+            return max(0.0, self.prev_pressed_amount - time_since_last_change / BUTTON_COOLDOWN)
 
 class Hotspot:
     """
@@ -87,7 +84,10 @@ class Hotspot:
         return int(width * self._x), int(height * self._y)
 
     def _onscreen_radius(self):
-        return int(1000 * self._radius)
+        """
+        Returns on screen pixel radius from "mediapipes" radius
+        """
+        return int(800 * self._radius) #Const value 800 gives a visual HotSpot with a slightly larger "hitbox" than drawn ring
 
     def _inner_radius(self):
         radius = self._onscreen_radius() * self._button.get_pressed_amount()
