@@ -23,18 +23,17 @@ public class ImageViewModelTest
     public void DisplayImageTest()
     {
         var imageViewModel = new ImageViewModel();
-        imageViewModel.ShowImage(ImagePath);
+        Assert.That(imageViewModel.ShowImage(ImagePath), Is.True);
         Assert.That(imageViewModel.Image, Is.Not.Null);
         imageViewModel.HideImage();
         Assert.That(imageViewModel.Image, Is.Null);
     }
     
-    [Test]
+    [AvaloniaTest]
     public void DisplayNonExistentImageTest()
     {
         var path = "nonexistent.png";
         var imageViewModel = new ImageViewModel();
-        imageViewModel.ShowImage(path);
-        Assert.That(imageViewModel.HasImages, Is.False);
+        Assert.That(imageViewModel.ShowImage(path), Is.False);
     }
 }
