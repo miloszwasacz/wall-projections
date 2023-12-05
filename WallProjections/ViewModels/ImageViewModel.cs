@@ -23,8 +23,15 @@ public class ImageViewModel : ViewModelBase, IImageViewModel
 
     public void ShowImage(string filePath)
     {
-        using var fileStream = File.OpenRead(filePath);
-        Image = new Bitmap(fileStream);
+        if (File.Exists(filePath))
+        {
+            using var fileStream = File.OpenRead(filePath);
+            Image = new Bitmap(fileStream);
+        }
+        else
+        {
+            Image = null;
+        }
     }
 
     public void HideImage()
