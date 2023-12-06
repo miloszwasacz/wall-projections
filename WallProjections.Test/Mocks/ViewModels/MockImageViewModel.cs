@@ -42,10 +42,12 @@ public class MockImageViewModel : IImageViewModel
     /// Increases the number of times <see cref="ShowImage" /> has been called
     /// and adds <paramref name="filePath" /> to <see cref="ImagePaths" />
     /// </summary>
-    public void ShowImage(string filePath)
+    /// <returns>True</returns>
+    public bool ShowImage(string filePath)
     {
         _imagePaths.Add(filePath);
         HasImages = true;
+        return true;
     }
 
     /// <summary>
