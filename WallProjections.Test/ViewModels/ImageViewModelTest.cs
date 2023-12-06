@@ -7,8 +7,8 @@ namespace WallProjections.Test.ViewModels;
 public class ImageViewModelTest
 {
     private static string ImagePath =>
-    Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
-        
+        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+
     [AvaloniaTest]
     public void HasImageTest()
     {
@@ -18,21 +18,25 @@ public class ImageViewModelTest
         imageViewModel.HideImage();
         Assert.That(imageViewModel.HasImages, Is.False);
     }
-    
+
     [AvaloniaTest]
     public void DisplayImageTest()
     {
         var imageViewModel = new ImageViewModel();
-        Assert.That(imageViewModel.ShowImage(ImagePath), Is.True);
-        Assert.That(imageViewModel.Image, Is.Not.Null);
+        Assert.Multiple(() =>
+            {
+                Assert.That(imageViewModel.ShowImage(ImagePath), Is.True);
+                Assert.That(imageViewModel.Image, Is.Not.Null);
+            }
+        );
         imageViewModel.HideImage();
         Assert.That(imageViewModel.Image, Is.Null);
     }
-    
+
     [AvaloniaTest]
     public void DisplayNonExistentImageTest()
     {
-        var path = "nonexistent.png";
+        const string path = "nonexistent.png";
         var imageViewModel = new ImageViewModel();
         Assert.That(imageViewModel.ShowImage(path), Is.False);
     }
