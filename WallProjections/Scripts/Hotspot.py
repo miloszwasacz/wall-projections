@@ -1,10 +1,20 @@
+from typing import NamedTuple
+from EventListener import EventListener
+
+import cv2
 import math
 import time
 
-BUTTON_COOLDOWN = 1.5
+
+BUTTON_COOLDOWN: float = 1.5
 """The number of seconds for which the finger must be over the hotspot until the 
 button activates. Once the finger leaves the hotspot, it also takes this amount
 of time to \"cool down\"."""
+
+
+class Point(NamedTuple):
+    x: float
+    y: float
 
 
 class _Button:
@@ -13,16 +23,16 @@ class _Button:
     """
 
     def __init__(self):
-        self.finger_is_over = False
+        self.finger_is_over: bool = False
         """Whether or not a finger is touching the HotSpot."""
 
-        self.prev_time = time.time()
+        self.prev_time: float = time.time()
         """The last time when `finger_is_over` switched value."""
 
-        self.prev_pressed_amount = 0
+        self.prev_pressed_amount: float = 0
         """The value of `get_pressed_amount` at the last time when `finger_is_over` switched value."""
 
-    def press(self):
+    def press(self) -> bool:
         """
         Called every frame the HotSpot is pressed,
         returns a Bool indicating if the button has been pressed for long enough.
@@ -34,7 +44,7 @@ class _Button:
 
         return self.get_pressed_amount() == 1
 
-    def un_press(self):
+    def un_press(self) -> None:
         """
         Called every frame the HotSpot is not pressed.
         """
@@ -43,7 +53,7 @@ class _Button:
             self.prev_time = time.time()
             self.finger_is_over = False
 
-    def get_pressed_amount(self):
+    def get_pressed_amount(self) -> float:
         """
         Returns a value between 0 (fully unpressed) and 1 (fully pressed.)
         """
@@ -53,49 +63,56 @@ class _Button:
         else:
             return max(0.0, self.prev_pressed_amount - time_since_last_change / BUTTON_COOLDOWN)
 
+
 class Hotspot:
     """
     Represents a hotspot. A hotspot is a circular area on the screen that can be pressed.
     """
 
-    def __init__(self, hotspot_id, x, y, event_listener, radius=0.03):
-        self.id = hotspot_id
-        self._x = x
-        self._y = y
-        self._radius = radius
-        self._event_listener = event_listener
-        self._button = _Button()
-        self._is_activated = False
-        self._time_activated = 0
+    def __init__(self, hotspot_id: int, x: float, y: float, event_listener: EventListener, radius: float = 0.03):
+        self.id: int = hotspot_id
+        self._x: float = x
+        self._y: float = y
+        self._radius: float = radius
+        self._event_listener: EventListener = event_listener
+        self._button: _Button = _Button()
+        self._is_activated: bool = False
+        self._time_activated: float = 0
 
-    def draw(self, img, cv2, width, height):
+    def draw(self, img: cv2.typing.MatLike) -> None:
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
         # Draw outer ring
-        cv2.circle(img, self._onscreen_xy(width, height), self._onscreen_radius(), (255, 255, 255), thickness=2)
+        cv2.circle(img, self._onscreen_xy(img_width, img_height), self._onscreen_radius(), (255, 255, 255),
+                   thickness=2)
 
         # Draw inner circle
         if self._button.get_pressed_amount() != 0:
-            cv2.circle(img, self._onscreen_xy(width, height), self._inner_radius(), (255, 255, 255), thickness=-1)
+            cv2.circle(img, self._onscreen_xy(img_width, img_height), self._inner_radius(), (255, 255, 255),
+                       thickness=-1)
 
-    def _onscreen_xy(self, width, height):
+    def _onscreen_xy(self, screen_width: int, screen_height: int) -> tuple[int, int]:
         """
         Takes in screen resolution and outputs pixel coordinates of hotspot
         """
 
-        return int(width * self._x), int(height * self._y)
+        return int(screen_width * self._x), int(screen_height * self._y)
 
-    def _onscreen_radius(self):
+    def _onscreen_radius(self) -> int:
         """
         Returns on screen pixel radius from "mediapipes" radius
         """
-        return int(800 * self._radius) #Const value 800 gives a visual HotSpot with a slightly larger "hitbox" than drawn ring
+        # Const value 800 gives a visual HotSpot with a slightly larger "hitbox" than drawn ring
+        return int(800 * self._radius)
 
-    def _inner_radius(self):
+    def _inner_radius(self) -> int:
         radius = self._onscreen_radius() * self._button.get_pressed_amount()
         if self._is_activated:
             radius += math.sin((time.time() - self._time_activated) * 3) * 6 + 6
         return int(radius)
 
-    def update(self, points):
+    def update(self, points: list[Point]) -> bool:
         if self._is_activated:
             pass
 
@@ -116,16 +133,16 @@ class Hotspot:
 
         return False
 
-    def _is_point_inside(self, point):
+    def _is_point_inside(self, point: Point) -> bool:
         """
         Returns true if given point is inside hotspot
         """
         squared_dist = (self._x - point.x) ** 2 + (self._y - point.y) ** 2
         return squared_dist <= self._radius ** 2
 
-    def activate(self):
+    def activate(self) -> None:
         self._time_activated = time.time()
         self._is_activated = True
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         self._is_activated = False

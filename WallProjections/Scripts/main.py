@@ -12,21 +12,21 @@ logging.basicConfig(level=logging.INFO)
 MAX_NUM_HANDS: int = 4
 """The maximum number of hands to detect."""
 
-MIN_DETECTION_CONFIDENCE = 0.5
+MIN_DETECTION_CONFIDENCE: float = 0.5
 """The minimum confidence for hand detection to be considered successful.
 
 Must be between 0 and 1.
 
 See https://developers.google.com/mediapipe/solutions/vision/hand_landmarker."""
 
-MIN_TRACKING_CONFIDENCE = 0.5
+MIN_TRACKING_CONFIDENCE: float = 0.5
 """The minimum confidence for hand detection to be considered successful.
 
 Must be between 0 and 1.
 
 See https://developers.google.com/mediapipe/solutions/vision/hand_landmarker."""
 
-FINGERTIP_INDICES = (4, 8, 12, 16, 20)
+FINGERTIP_INDICES: tuple[int, ...] = (4, 8, 12, 16, 20)
 """The indices for the thumb fingertip, index fingertip, ring fingertip, etc. 
 
 This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
@@ -57,7 +57,7 @@ hotspots: list[Hotspot] = []
 """The global list of hotspots."""
 
 
-def run(event_listener) -> None:  # This function is called by Program.cs
+def run(event_listener: EventListener) -> None:  # This function is called by Program.cs
     """
     Captures video and runs the hand-detection model to handle the hotspots.
     """
@@ -117,7 +117,7 @@ def run(event_listener) -> None:  # This function is called by Program.cs
 
         # draw hotspot
         for hotspot in hotspots:
-            hotspot.draw(video_capture_img, cv2, camera_width, camera_height)
+            hotspot.draw(video_capture_img)
 
         cv2.imshow("Projected Hotspots", video_capture_img)
 
@@ -134,7 +134,7 @@ def run(event_listener) -> None:  # This function is called by Program.cs
     hands_model.close()
 
 
-def media_finished():
+def media_finished() -> None:
     for hotspot in hotspots:
         hotspot.deactivate()
 
