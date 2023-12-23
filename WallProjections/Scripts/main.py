@@ -73,9 +73,14 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
                                            min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
 
     logging.info("Initialising video capture...")
-    video_capture = cv2.VideoCapture(VIDEO_CAPTURE_TARGET, VIDEO_CAPTURE_BACKEND)
+    video_capture = cv2.VideoCapture()
+    success = video_capture.open(VIDEO_CAPTURE_TARGET, VIDEO_CAPTURE_BACKEND)
+    if not success:
+        raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid.")
     for prop_id, prop_value in VIDEO_CAPTURE_PROPERTIES.items():
-        video_capture.set(prop_id, prop_value)
+        supported = video_capture.set(prop_id, prop_value)
+        if not supported:
+            logging.warning(f"Property id {prop_id} is not supported by video capture backend {VIDEO_CAPTURE_BACKEND}.")
 
     hotspots = [Hotspot(0, 0.5, 0.5, event_listener), Hotspot(1, 0.8, 0.8, event_listener)]
 
