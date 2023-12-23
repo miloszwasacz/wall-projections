@@ -60,6 +60,8 @@ hotspots: list[Hotspot] = []
 def run(event_listener: EventListener) -> None:  # This function is called by Program.cs
     """
     Captures video and runs the hand-detection model to handle the hotspots.
+
+    :param event_listener: Callbacks for communicating events back to the C# side.
     """
 
     global hotspots
