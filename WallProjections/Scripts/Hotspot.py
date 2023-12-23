@@ -126,14 +126,16 @@ class Hotspot:
             radius += math.sin((time.time() - self._time_activated) * 3) * 6 + 6
         return int(radius)
 
-    def update(self, points: list[Point]) -> bool:
-        if self._is_activated:
-            pass
-
-        else:  # not activated
+    def update(self, fingertip_coords: list[Point]) -> bool:
+        """
+        Needs to be called every frame to handle the hotspot.
+        :param fingertip_coords: the coordinates of each fingertip on camera.
+        :return: `True` if and only if the hotspot was activated in this call.
+        """
+        if not self._is_activated:  # don't need to do anything if already activated
             # check if any fingertips inside of hotspot
             finger_inside = False
-            for point in points:
+            for point in fingertip_coords:
                 if self._is_point_inside(point):
                     finger_inside = True
 
