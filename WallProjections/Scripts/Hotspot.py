@@ -121,10 +121,12 @@ class Hotspot:
         return int(800 * self._radius)
 
     def _inner_radius(self) -> int:
-        radius = self._onscreen_radius() * self._progress_timer.get_progress()
         if self._is_activated:
-            radius += math.sin((time.time() - self._time_activated) * 3) * 6 + 6
-        return int(radius)
+            # full hotspot, plus pulsating effect
+            return int(self._onscreen_radius() + math.sin(5*(time.time() - self._time_activated) - math.pi/2) * 5 + 5)
+        else:
+            # full to the extent of the hotspot's progress towards being activated
+            return int(self._onscreen_radius() * self._progress_timer.get_progress())
 
     def update(self, fingertip_coords: list[Point]) -> bool:
         """
