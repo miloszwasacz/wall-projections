@@ -23,8 +23,9 @@
  
 need to collect artifacts from Museum
 
-
 ## UI Possible Style
+![Alt text](PossibleUIDesign.png "Possible Style")
+
 ## Document updates
 - rewrite ReadMe
 - MacOS setup guide
