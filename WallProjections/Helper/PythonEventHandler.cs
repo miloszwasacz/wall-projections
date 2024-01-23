@@ -1,38 +1,34 @@
 ﻿using System;
+using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.Helper;
 
 /// <summary>
 /// The event handler singleton for Python interop
 /// </summary>
-public class PythonEventHandler
+public class PythonEventHandler : IPythonEventHandler
 {
+    /// <summary>
+    /// The backing field for <see cref="Instance" />
+    /// </summary>
     private static PythonEventHandler? _instance;
+
+    /// <summary>
+    /// The global instance of the event handler
+    /// </summary>
+    /// <remarks>If possible, don't use this global instance - use Dependency Injection instead</remarks>
     public static PythonEventHandler Instance => _instance ??= new PythonEventHandler();
 
     private PythonEventHandler()
     {
     }
 
-    public event EventHandler<PressDetectedArgs>? PressDetected;
+    /// <inheritdoc />
+    public event EventHandler<IPythonEventHandler.HotspotSelectedArgs>? HotspotSelected;
 
-    public class PressDetectedArgs : EventArgs
+    /// <inheritdoc />
+    public void OnPressDetected(int id)
     {
-        public int Button { get; private set; }
-
-        public PressDetectedArgs(int button)
-        {
-            Button = button;
-        }
-    }
-
-    // ReSharper disable once UnusedMember.Global
-    /// <summary>
-    /// Called by Python when a button press is detected
-    /// </summary>
-    /// <param name="button">The ID of the pressed button</param>
-    public void OnPressDetected(int button)
-    {
-        PressDetected?.Invoke(this, new PressDetectedArgs(button));
+        HotspotSelected?.Invoke(this, new IPythonEventHandler.HotspotSelectedArgs(id));
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -16,11 +17,23 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = new MainWindow
+        {
+            desktop.MainWindow = new DisplayWindow
             {
-                DataContext = new MainWindowViewModel()
+                DataContext = ViewModelProvider.Instance.GetDisplayViewModel()
             };
 
+            desktop.Exit += OnExit;
+        }
+
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    {
+        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+
+        if (desktop.MainWindow?.DataContext is IDisposable vm)
+            vm.Dispose();
     }
 }

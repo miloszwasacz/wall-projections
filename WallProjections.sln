@@ -11,16 +11,21 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		DebugSkipPython|Any CPU = DebugSkipPython|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1A103D59-8DBE-4737-B660-AF98104C4E51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1A103D59-8DBE-4737-B660-AF98104C4E51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A103D59-8DBE-4737-B660-AF98104C4E51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A103D59-8DBE-4737-B660-AF98104C4E51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A103D59-8DBE-4737-B660-AF98104C4E51}.DebugSkipPython|Any CPU.ActiveCfg = DebugSkipPython|Any CPU
+		{1A103D59-8DBE-4737-B660-AF98104C4E51}.DebugSkipPython|Any CPU.Build.0 = DebugSkipPython|Any CPU
 		{A9A29C6C-777D-400C-A6F6-1F153D381E6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9A29C6C-777D-400C-A6F6-1F153D381E6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9A29C6C-777D-400C-A6F6-1F153D381E6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9A29C6C-777D-400C-A6F6-1F153D381E6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9A29C6C-777D-400C-A6F6-1F153D381E6C}.DebugSkipPython|Any CPU.ActiveCfg = DebugSkipPython|Any CPU
+		{A9A29C6C-777D-400C-A6F6-1F153D381E6C}.DebugSkipPython|Any CPU.Build.0 = DebugSkipPython|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
