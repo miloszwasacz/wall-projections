@@ -93,6 +93,12 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     /// </summary>
     public IVideoViewModel VideoViewModel { get; }
 
+    // TODO implement HotspotViewModel
+    /// <summary>
+    /// Returns a <see cref="MockHotspotViewModel" />
+    /// </summary>
+    public IHotspotViewModel HotspotViewModel => throw new NotImplementedException();
+
     /// <summary>
     /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="IPythonEventHandler.HotspotSelectedArgs.Id" />
     /// </summary>

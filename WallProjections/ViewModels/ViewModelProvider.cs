@@ -54,6 +54,12 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     public IVideoViewModel GetVideoViewModel() => new VideoViewModel(LibVlc, new VLCMediaPlayer(LibVlc));
 
     /// <summary>
+    /// Creates a new <see cref="HotspotViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="HotspotViewModel" /> instance</returns>
+    public IHotspotViewModel GetHotspotViewModel() => new HotspotViewModel();
+    
+    /// <summary>
     /// Disposes of the <see cref="LibVlc" /> instance on resets the backing field to <i>null</i>,
     /// so that a new instance can be created if needed
     /// </summary>

@@ -31,6 +31,11 @@ public interface IDisplayViewModel : IDisposable
     /// The <see cref="IVideoViewModel" /> used to display videos
     /// </summary>
     public IVideoViewModel VideoViewModel { get; }
+    
+    /// <summary>
+    /// The <see cref="IHotspotViewModel" /> used to display videos
+    /// </summary>
+    public IHotspotViewModel HotspotViewModel { get; }
 
     /// <summary>
     /// Event callback for when a <see cref="Hotspot" /> is selected
