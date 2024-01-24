@@ -8,6 +8,7 @@ using Avalonia.Platform.Storage;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using System.Diagnostics.CodeAnalysis;
+using WallProjections.ViewModels;
 #if DEBUGSKIPPYTHON
 using Avalonia.Data;
 using WallProjections.Helper;
@@ -38,10 +39,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
                 return;
         }
 
-        var vm = ViewModel;
-        if (vm is null) return;
-
-        LoadConfig(vm, e.Key);
+        LoadConfig(e.Key);
     }
 
     internal void OnVideoViewResize(object? sender, SizeChangedEventArgs e)
@@ -53,7 +51,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 
     //TODO Get rid of this - figure out how to set the config in the viewmodel
     [ExcludeFromCodeCoverage]
-    private async void LoadConfig(IDisplayViewModel vm, Key key)
+    private async void LoadConfig(Key key)
     {
         while (Config is null)
         {
@@ -66,10 +64,10 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             var zipPath = files[0].Path.AbsolutePath;
             if (!zipPath.EndsWith(".zip")) continue;
 
-            Config = ContentCache.Instance.Load(zipPath);
+            Config = FileHandler.Instance.Load(zipPath);
         }
 
-        vm.Config = Config;
+        DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
 #if DEBUGSKIPPYTHON
         MockPythonInput(key);
 #endif

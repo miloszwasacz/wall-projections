@@ -6,27 +6,27 @@ using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Models;
 
-public sealed class ContentCache : IContentCache
+public sealed class FileHandler : IFileHandler
 {
     private const string MediaLocation = "Media";
     private const string ConfigFileName = "config.json";
 
     /// <summary>
-    /// The backing field for the <see cref="ContentCache" /> property
+    /// The backing field for the <see cref="FileHandler" /> property
     /// </summary>
-    private static ContentCache? _instance;
+    private static FileHandler? _instance;
 
     /// <summary>
-    /// A global instance of <see cref="ContentCache" />
+    /// A global instance of <see cref="FileHandler" />
     /// </summary>
-    public static ContentCache Instance => _instance ??= new ContentCache();
+    public static FileHandler Instance => _instance ??= new FileHandler();
 
     /// <summary>
     /// The backing field for <see cref="TempPath" />
     /// </summary>
     private string? _tempPath;
 
-    private ContentCache()
+    private FileHandler()
     {
     }
 
@@ -38,7 +38,7 @@ public sealed class ContentCache : IContentCache
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// TODO Handle errors from trying to load from not-found/invalid zip file
-    public IConfig Load(string zipPath)
+    public IConfig? Load(string zipPath)
     {
         // Clean up existing directly if in use
         if (Directory.Exists(TempPath))
@@ -46,20 +46,24 @@ public sealed class ContentCache : IContentCache
 
         Directory.CreateDirectory(TempPath);
 
-        ZipFile.ExtractToDirectory(zipPath, TempPath);
-
-        var config = LoadConfig(zipPath);
-        return config;
+        try
+        {
+            ZipFile.ExtractToDirectory(zipPath, TempPath);
+            var config = LoadConfig(zipPath);
+            return config;
+        }
+        catch (FileNotFoundException _)
+        {
+            return null;
+        }
     }
 
     /// <inheritdoc />
-    public string GetHotspotMediaFolder(Hotspot hotspot)
+    public bool Save(IConfig config)
     {
-        return Path.Combine(TempPath, MediaLocation, hotspot.Id.ToString());
+        //TODO Implement saving
+        throw new NotImplementedException();
     }
-
-    /// <inheritdoc />
-    public IContentProvider CreateContentProvider(IConfig config) => new ContentProvider(this, config);
 
     /// <summary>
     /// Cleans up the temporary folder stored in <see cref="TempPath" />.

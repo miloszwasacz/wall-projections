@@ -2,7 +2,6 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using WallProjections.ViewModels;
 using WallProjections.Views;
 
 namespace WallProjections;
@@ -18,10 +17,7 @@ public class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new DisplayWindow
-            {
-                DataContext = ViewModelProvider.Instance.GetDisplayViewModel()
-            };
+            desktop.MainWindow = new DisplayWindow();
 
             desktop.Exit += OnExit;
         }

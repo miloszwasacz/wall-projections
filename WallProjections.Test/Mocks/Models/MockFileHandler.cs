@@ -3,7 +3,7 @@ using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test.Mocks.Models;
 
-public sealed class MockContentCache : IContentCache
+public sealed class MockFileHandler : IFileHandler
 {
     /// <summary>
     /// The backing field for <see cref="LoadedZips" />
@@ -53,7 +53,7 @@ public sealed class MockContentCache : IContentCache
     /// </summary>
     /// <param name="config">The <see cref="IConfig"/> to be returned by <see cref="Load" /></param>
     /// <param name="mediaPath">The value to set <see cref="MediaPath" /> to</param>
-    public MockContentCache(IConfig config, string mediaPath)
+    public MockFileHandler(IConfig config, string mediaPath)
     {
         _media = new List<Hotspot.Media>();
         MediaPath = mediaPath;
@@ -61,11 +61,11 @@ public sealed class MockContentCache : IContentCache
     }
 
     /// <summary>
-    /// Creates a new <see cref="MockContentCache" /> with the given list of media files,
+    /// Creates a new <see cref="MockFileHandler" /> with the given list of media files,
     /// and empty <see cref="Config" /> and <see cref="MediaPath" />
     /// </summary>
     /// <param name="files">The list of media files provided to <see cref="CreateContentProvider" /></param>
-    public MockContentCache(List<Hotspot.Media> files)
+    public MockFileHandler(List<Hotspot.Media> files)
     {
         _media = files;
         MediaPath = "";
@@ -73,10 +73,10 @@ public sealed class MockContentCache : IContentCache
     }
 
     /// <summary>
-    /// Creates a new <see cref="MockContentCache" /> that will search through the given list of media
+    /// Creates a new <see cref="MockFileHandler" /> that will search through the given list of media
     /// </summary>
     /// <param name="exception"></param>
-    public MockContentCache(Exception exception) : this(new List<Hotspot.Media>())
+    public MockFileHandler(Exception exception) : this(new List<Hotspot.Media>())
     {
         _exception = exception;
     }
@@ -92,12 +92,10 @@ public sealed class MockContentCache : IContentCache
         return Config;
     }
 
-    /// <summary>
-    /// Combines the <see cref="MediaPath" /> with the <paramref name="hotspot" />'s ID
-    /// </summary>
-    /// <param name="hotspot">The hotspot to get the media folder for</param>
-    /// <returns>A theoretical path to the hotspot's media folder</returns>
-    public string GetHotspotMediaFolder(Hotspot hotspot) => Path.Combine(MediaPath, hotspot.Id.ToString());
+    public bool Save(IConfig config)
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     /// Creates a new <see cref="MockContentProvider" />

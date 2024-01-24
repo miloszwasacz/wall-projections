@@ -2,6 +2,7 @@
 using LibVLCSharp.Shared;
 using WallProjections.Helper;
 using WallProjections.Models;
+using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
@@ -37,9 +38,10 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> instance
     /// </summary>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
-    public IDisplayViewModel GetDisplayViewModel() =>
-        new DisplayViewModel(this, PythonEventHandler.Instance, ContentCache.Instance);
+    public IDisplayViewModel GetDisplayViewModel(IConfig config) =>
+        new DisplayViewModel(this, config, PythonEventHandler.Instance);
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance

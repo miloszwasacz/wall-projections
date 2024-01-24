@@ -5,11 +5,11 @@ using WallProjections.Models.Interfaces;
 namespace WallProjections.Test.Models;
 
 /// <summary>
-/// Tests for the <see cref="ContentCache" /> class.
+/// Tests for the <see cref="FileHandler" /> class.
 /// </summary>
 [TestFixture]
 [Author(name: "Thomas Parr")]
-public class ContentCacheTest
+public class FileHandlerTest
 {
     private const string TestTxtFile = "0.txt";
     private const string TestTxtFileContents = "Hello World\n";
@@ -32,13 +32,13 @@ public class ContentCacheTest
         Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_invalid_config.zip");
 
     /// <summary>
-    /// Test if the <see cref="ContentCache" /> class is a singleton
+    /// Test if the <see cref="FileHandler" /> class is a singleton
     /// </summary>
     [Test]
     public void SingletonPatternTest()
     {
-        var instance1 = ContentCache.Instance;
-        var instance2 = ContentCache.Instance;
+        var instance1 = FileHandler.Instance;
+        var instance2 = FileHandler.Instance;
 
         Assert.That(instance2, Is.SameAs(instance1));
     }
@@ -49,17 +49,17 @@ public class ContentCacheTest
     [Test]
     public void LoadTest()
     {
-        IContentCache contentCache = CreateInstance();
-        var config = contentCache.Load(TestZip);
+        IFileHandler fileHandler = CreateInstance();
+        var config = fileHandler.Load(TestZip);
         var config2 = new Config(new List<Hotspot> { new(0, 1, 2, 3) });
 
         AssertConfigsEqual(config, config2);
 
-        contentCache.Dispose();
+        fileHandler.Dispose();
     }
 
     /// <summary>
-    /// Test that the <see cref="ContentCache.Load" /> clears the temp folder before loading
+    /// Test that the <see cref="FileHandler.Load" /> clears the temp folder before loading
     /// </summary>
     [Test]
     public void LoadExistingDirectoryTest()
@@ -92,7 +92,7 @@ public class ContentCacheTest
     }
 
     /// <summary>
-    /// Test that the <see cref="ContentCache.Load" /> method throws an exception when the zip file does not exist
+    /// Test that the <see cref="FileHandler.Load" /> method throws an exception when the zip file does not exist
     /// </summary>
     [Test]
     public void LoadNoZipTest()
@@ -103,7 +103,7 @@ public class ContentCacheTest
     }
 
     /// <summary>
-    /// Test that the <see cref="ContentCache.Load" /> method throws an exception when the zip file does not contain a config file
+    /// Test that the <see cref="FileHandler.Load" /> method throws an exception when the zip file does not contain a config file
     /// </summary>
     [Test]
     public void LoadNoConfigTest()
@@ -113,7 +113,7 @@ public class ContentCacheTest
     }
 
     /// <summary>
-    /// Test that the <see cref="ContentCache.Load" /> method throws an exception when the config file has invalid format
+    /// Test that the <see cref="FileHandler.Load" /> method throws an exception when the config file has invalid format
     /// </summary>
     [Test]
     public void LoadInvalidConfigTest()
@@ -123,15 +123,15 @@ public class ContentCacheTest
     }
 
     /// <summary>
-    /// Test that the <see cref="ContentCache.Load" /> method loads media files correctly
+    /// Test that the <see cref="FileHandler.Load" /> method loads media files correctly
     /// </summary>
     [Test]
     public void GetHotspotMediaFolderTest()
     {
-        IContentCache contentCache = CreateInstance();
-        var config = contentCache.Load(TestZip);
+        IFileHandler fileHandler = CreateInstance();
+        var config = fileHandler.Load(TestZip);
 
-        var mediaFolder = Path.Combine(contentCache.GetHotspotMediaFolder(config.GetHotspot(0)!), TestTxtFile);
+        var mediaFolder = Path.Combine(fileHandler.GetHotspotMediaFolder(config.GetHotspot(0)!), TestTxtFile);
         Assert.Multiple(() =>
         {
             Assert.That(File.Exists(mediaFolder), Is.True);
@@ -139,23 +139,23 @@ public class ContentCacheTest
         });
         //TODO Test more media files
 
-        contentCache.Dispose();
+        fileHandler.Dispose();
     }
 
     /// <summary>
-    /// Test that <see cref="ContentCache.CreateContentProvider" /> returns an instance of <see cref="IContentProvider" />
+    /// Test that <see cref="FileHandler.CreateContentProvider" /> returns an instance of <see cref="IContentProvider" />
     /// </summary>
     [Test]
     public void CreateContentProviderTest()
     {
-        IContentCache contentCache = CreateInstance();
-        var config = contentCache.Load(TestZip);
-        var contentProvider = contentCache.CreateContentProvider(config);
+        IFileHandler fileHandler = CreateInstance();
+        var config = fileHandler.Load(TestZip);
+        var contentProvider = fileHandler.CreateContentProvider(config);
         Assert.That(contentProvider, Is.InstanceOf<IContentProvider>());
     }
 
     /// <summary>
-    /// Test that the temp folder is removed after running <see cref="ContentCache.Dispose" />
+    /// Test that the temp folder is removed after running <see cref="FileHandler.Dispose" />
     /// </summary>
     [Test]
     public void DisposeTest()
@@ -172,7 +172,7 @@ public class ContentCacheTest
 
     // ReSharper disable once InconsistentNaming
     /// <summary>
-    /// Test that no exception is thrown when <see cref="ContentCache.Dispose" /> is called
+    /// Test that no exception is thrown when <see cref="FileHandler.Dispose" /> is called
     /// while the temp folder is still in use
     /// </summary>
     [Test]
@@ -197,7 +197,7 @@ public class ContentCacheTest
 
     // ReSharper disable once InconsistentNaming
     /// <summary>
-    /// Test that no exception is thrown when <see cref="ContentCache.Dispose" /> is called
+    /// Test that no exception is thrown when <see cref="FileHandler.Dispose" /> is called
     /// and the application has no write permissions to the temp folder
     /// </summary>
     [Test]
@@ -219,15 +219,15 @@ public class ContentCacheTest
     }
 
     /// <summary>
-    /// Uses reflection to get the private constructor of <see cref="ContentCache" />,
+    /// Uses reflection to get the private constructor of <see cref="FileHandler" />,
     /// so that the global instance is not used
     /// </summary>
-    /// <returns>A new instance of <see cref="ContentCache" /></returns>
-    /// <exception cref="InvalidCastException">When the object cannot be instantiated as <see cref="ContentCache" /></exception>
-    private static ContentCache CreateInstance()
+    /// <returns>A new instance of <see cref="FileHandler" /></returns>
+    /// <exception cref="InvalidCastException">When the object cannot be instantiated as <see cref="FileHandler" /></exception>
+    private static FileHandler CreateInstance()
     {
-        var type = typeof(ContentCache);
-        var res = Activator.CreateInstance(type, true) as ContentCache;
+        var type = typeof(FileHandler);
+        var res = Activator.CreateInstance(type, true) as FileHandler;
         return res ?? throw new InvalidCastException("Could not construct ContentCache");
     }
 

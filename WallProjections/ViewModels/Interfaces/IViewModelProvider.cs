@@ -1,13 +1,15 @@
-﻿namespace WallProjections.ViewModels.Interfaces;
+﻿using WallProjections.Models.Interfaces;
+
+namespace WallProjections.ViewModels.Interfaces;
 
 public interface IViewModelProvider
 {
-    //TODO Add Hotspot reference in the docs
     /// <summary>
     /// Creates a new <see cref="IDisplayViewModel" /> instance
     /// </summary>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="IDisplayViewModel" /> instance</returns>
-    public IDisplayViewModel GetDisplayViewModel();
+    public IDisplayViewModel GetDisplayViewModel(IConfig config);
 
     /// <summary>
     /// Creates a new <see cref="IImageViewModel" /> instance

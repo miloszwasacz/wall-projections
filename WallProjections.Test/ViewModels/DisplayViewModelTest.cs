@@ -21,15 +21,15 @@ public class DisplayViewModelTest
     #region MediaFiles
 
     private static List<Hotspot.Media> FilesAll =>
-        new() { new Hotspot.Media(new Hotspot(HotspotId), Text, ImagePath, VideoPath) };
+        new() { new Hotspot.Media(Text, ImagePath, VideoPath) };
 
     private static List<Hotspot.Media> FilesNoVideo =>
-        new() { new Hotspot.Media(new Hotspot(HotspotId), Text, ImagePath) };
+        new() { new Hotspot.Media(Text, ImagePath) };
 
     private static List<Hotspot.Media> FilesNoImage => new()
-        { new Hotspot.Media(new Hotspot(HotspotId), Text, VideoPath: VideoPath) };
+        { new Hotspot.Media(Text, VideoPath: VideoPath) };
 
-    private static List<Hotspot.Media> FilesNoMedia => new() { new Hotspot.Media(new Hotspot(HotspotId), Text) };
+    private static List<Hotspot.Media> FilesNoMedia => new() { new Hotspot.Media(Text) };
 
     #endregion
 
@@ -84,24 +84,11 @@ public class DisplayViewModelTest
     public void CreationTest(List<Hotspot.Media> files)
     {
         var pythonHandler = new MockPythonEventHandler();
-        var contentCache = new MockContentCache(files);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+        var config = new Config(Enumerable.Empty<Hotspot>());
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
 
         AssertJustInitialized(displayViewModel);
         displayViewModel.Dispose();
-    }
-
-    [Test]
-    public void SetConfigTest()
-    {
-        var pythonHandler = new MockPythonEventHandler();
-        var contentCache = new MockContentCache(FilesAll);
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
-
-        var config = new Config(Enumerable.Empty<Hotspot>());
-        displayViewModel.Config = config;
-
-        Assert.That(displayViewModel.IsContentLoaded, Is.True);
     }
 
     [Test]
@@ -110,11 +97,9 @@ public class DisplayViewModelTest
     {
         var (files, expectedImagePaths, expectedVideoPaths) = testCase;
         var pythonHandler = new MockPythonEventHandler();
-        var contentCache = new MockContentCache(files);
         var config = new Config(Enumerable.Empty<Hotspot>());
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
-        displayViewModel.Config = config;
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
         var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
 
@@ -143,9 +128,9 @@ public class DisplayViewModelTest
     public void OnHotspotSelectedNoConfigTest()
     {
         var pythonHandler = new MockPythonEventHandler();
-        var contentCache = new MockContentCache(FilesAll);
+        var config = new Config(Enumerable.Empty<Hotspot>());
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
 
         var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
         Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
@@ -159,11 +144,9 @@ public class DisplayViewModelTest
     {
         var (exception, expectedDescription) = testCase;
         var pythonHandler = new MockPythonEventHandler();
-        var contentCache = new MockContentCache(exception);
         var config = new Config(Enumerable.Empty<Hotspot>());
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
-        displayViewModel.Config = config;
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
         var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
 
@@ -182,9 +165,9 @@ public class DisplayViewModelTest
     public void DisposeTest()
     {
         var pythonHandler = new MockPythonEventHandler();
-        var contentCache = new MockContentCache(FilesAll);
+        var config = new Config(Enumerable.Empty<Hotspot>());
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, pythonHandler, contentCache);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
         displayViewModel.Dispose();
 
@@ -199,7 +182,6 @@ public class DisplayViewModelTest
     {
         Assert.Multiple(() =>
         {
-            Assert.That(displayViewModel.IsContentLoaded, Is.False);
             Assert.That(displayViewModel.Description, Is.Empty);
             Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
             Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 
@@ -20,17 +21,12 @@ Please report this to the museum staff.";
     /// <summary>
     /// The <see cref="IContentProvider" /> used to fetch Hotspot's content files
     /// </summary>
-    private IContentProvider? _contentProvider;
+    private readonly IContentProvider _contentProvider;
 
     /// <summary>
     /// The <see cref="IPythonEventHandler" /> used to listen for Python events
     /// </summary>
     private readonly IPythonEventHandler _pythonEventHandler;
-
-    /// <summary>
-    /// The <see cref="IContentCache" /> used to retrieve cached content
-    /// </summary>
-    private readonly IContentCache _contentCache;
 
     /// <summary>
     /// The backing field for <see cref="Description" />
@@ -43,33 +39,20 @@ Please report this to the museum staff.";
     /// and starts listening for <see cref="IPythonEventHandler.HotspotSelected">Python events</see>
     /// </summary>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <param name="pythonEventHandler">The <see cref="IPythonEventHandler" /> used to listen for Python events</param>
-    /// <param name="contentCache">The <see cref="IContentCache" /> used to retrieve cached content</param>
     public DisplayViewModel(
         IViewModelProvider vmProvider,
-        IPythonEventHandler pythonEventHandler,
-        IContentCache contentCache
+        IConfig config,
+        IPythonEventHandler pythonEventHandler
     )
     {
         ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
         _pythonEventHandler = pythonEventHandler;
         _pythonEventHandler.HotspotSelected += OnHotspotSelected;
-        _contentCache = contentCache;
+        _contentProvider = new ContentProvider(config);
     }
-
-    /// <inheritdoc />
-    public IConfig Config
-    {
-        set
-        {
-            _contentProvider = _contentCache.CreateContentProvider(value);
-            this.RaisePropertyChanged(nameof(IsContentLoaded));
-        }
-    }
-
-    /// <inheritdoc />
-    public bool IsContentLoaded => _contentProvider is not null;
 
     /// <inheritdoc />
     public string Description
@@ -87,23 +70,22 @@ Please report this to the museum staff.";
     /// <inheritdoc />
     public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e)
     {
-        LoadHotspot(e.Id);
+        ShowHotspot(e.Id);
     }
 
     /// <summary>
     /// Loads the content of the hotspot with the given ID if <see cref="_contentProvider" /> has been set
     /// </summary>
-    /// <param name="hotspotId">The ID of a hotspot to fetch data about</param>
-    private void LoadHotspot(int hotspotId)
+    /// <param name="hotspotId">The ID of a hotspot to show</param>
+    private void ShowHotspot(int hotspotId)
     {
-        if (_contentProvider is null) return;
-
         try
         {
             ImageViewModel.HideImage();
             VideoViewModel.StopVideo();
             var media = _contentProvider.GetMedia(hotspotId);
             Description = media.Description;
+            // TODO Add support for multiple images/videos
             if (media.ImagePath is not null)
                 //TODO Make ImageViewModel not throw FileNotFoundException (display a placeholder instead)
                 ImageViewModel.ShowImage(media.ImagePath);

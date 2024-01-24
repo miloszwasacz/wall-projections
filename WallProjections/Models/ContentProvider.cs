@@ -6,15 +6,10 @@ namespace WallProjections.Models;
 
 public class ContentProvider : IContentProvider
 {
-    private static readonly string[] ImageExtensions = { ".jpeg", ".png", ".jpg" };
-    private static readonly string[] VideoExtensions = { ".mp4", ".mov", ".mkv", ".mka", ".avi" };
-
-    private readonly IContentCache _cache;
     private readonly IConfig _config;
 
-    public ContentProvider(IContentCache cache, IConfig config)
+    public ContentProvider(IConfig config)
     {
-        _cache = cache;
         _config = config;
     }
 
@@ -25,16 +20,13 @@ public class ContentProvider : IContentProvider
         if (hotspot is null)
             throw new IConfig.HotspotNotFoundException(hotspotId);
 
-        var path = _cache.GetHotspotMediaFolder(hotspot);
-        var files = Directory.GetFiles(path);
+        // TODO Include the path to the config so that the media files can use relative paths
+        // (need to update returned image/video paths)
+        var description = File.ReadAllText(hotspot.DescriptionPath);
+        //TODO Refactor to support multiple images and videos
+        var imagePath = hotspot.ImagePaths.FirstOrDefault();
+        var videoPath = hotspot.VideoPaths.FirstOrDefault();
 
-        var descriptionPath = files.FirstOrDefault(file => file.EndsWith(".txt"));
-        if (descriptionPath is null)
-            throw new FileNotFoundException("No .txt files found in hotspot folder");
-
-        var imagePath = files.FirstOrDefault(file => ImageExtensions.Any(file.EndsWith));
-        var videoPath = files.FirstOrDefault(file => VideoExtensions.Any(file.EndsWith));
-
-        return new Hotspot.Media(hotspot, File.ReadAllText(descriptionPath), imagePath, videoPath);
+        return new Hotspot.Media(description, imagePath, videoPath);
     }
 }
