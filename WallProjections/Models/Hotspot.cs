@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.IO;
 using System.Text.Json.Serialization;
 
 namespace WallProjections.Models;
@@ -28,16 +29,33 @@ public class Hotspot
     public string DescriptionPath { get; }
 
     /// <summary>
+    /// Fully expanded path to description for hotspot.
+    /// </summary>
+    public string FullDescriptionPath => Path.Combine(FileHandler.ConfigFolderPath, DescriptionPath);
+
+    /// <summary>
     /// A list of paths to images to be displayed in the hotspot.
     /// </summary>
     [JsonInclude]
     public ImmutableList<string> ImagePaths { get; }
 
     /// <summary>
+    /// List of all image paths in fully expanded form.
+    /// </summary>
+    public ImmutableList<string> FullImagePaths =>
+        ImagePaths.ConvertAll(item => Path.Combine(FileHandler.ConfigFolderPath, item));
+
+    /// <summary>
     /// A list of paths to videos to be displayed in the hotspot.
     /// </summary>
     [JsonInclude]
     public ImmutableList<string> VideoPaths { get; }
+    
+    /// <summary>
+    /// List of all video paths in fully expanded form.
+    /// </summary>
+    public ImmutableList<string> FullVideoPaths =>
+        VideoPaths.ConvertAll(item => Path.Combine(FileHandler.ConfigFolderPath, item));
 
     /// <summary>
     /// Constructor for Hotspot used by JSON deserializer

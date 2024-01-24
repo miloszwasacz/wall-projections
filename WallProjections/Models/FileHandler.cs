@@ -10,6 +10,7 @@ public sealed class FileHandler : IFileHandler
 {
     private const string MediaLocation = "Media";
     private const string ConfigFileName = "config.json";
+    private const string ConfigFolderName = "WallProjections";
 
     /// <summary>
     /// The backing field for the <see cref="FileHandler" /> property
@@ -20,6 +21,8 @@ public sealed class FileHandler : IFileHandler
     /// A global instance of <see cref="FileHandler" />
     /// </summary>
     public static FileHandler Instance => _instance ??= new FileHandler();
+    
+    public static string ConfigFolderPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigFolderName);
 
     /// <summary>
     /// The backing field for <see cref="TempPath" />
@@ -41,15 +44,15 @@ public sealed class FileHandler : IFileHandler
     public IConfig? Load(string zipPath)
     {
         // Clean up existing directly if in use
-        if (Directory.Exists(TempPath))
-            Directory.Delete(TempPath, true);
+        if (Directory.Exists(ConfigFolderPath))
+            Directory.Delete(ConfigFolderPath, true);
 
-        Directory.CreateDirectory(TempPath);
+        Directory.CreateDirectory(ConfigFolderPath);
 
         try
         {
-            ZipFile.ExtractToDirectory(zipPath, TempPath);
-            var config = LoadConfig(zipPath);
+            ZipFile.ExtractToDirectory(zipPath, ConfigFolderPath);
+            var config = LoadConfig();
             return config;
         }
         catch (FileNotFoundException _)
@@ -66,17 +69,17 @@ public sealed class FileHandler : IFileHandler
     }
 
     /// <summary>
-    /// Cleans up the temporary folder stored in <see cref="TempPath" />.
+    /// Cleans up the temporary folder stored in <see cref="ConfigFolderPath" />.
     /// </summary>
     public void Dispose()
     {
         try
         {
-            Directory.Delete(TempPath, true);
+            Directory.Delete(ConfigFolderPath, true);
         }
         catch (DirectoryNotFoundException)
         {
-            Console.WriteLine($"{TempPath} already deleted");
+            Console.WriteLine($"{ConfigFolderPath} already deleted");
         }
         catch (Exception e)
         {
@@ -86,22 +89,21 @@ public sealed class FileHandler : IFileHandler
     }
 
     /// <summary>
-    /// Loads a config from a .json file
+    /// Loads a config from the .json file imported/created in the program folder.
     /// </summary>
-    /// <param name="zipPath">Path to zip containing config.json</param>
     /// <returns>Loaded Config</returns>
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// <exception cref="FileNotFoundException">If config file cannot be found in zip file</exception>
     /// TODO More effective error handling of invalid/missing config files
-    private static IConfig LoadConfig(string zipPath)
+    private static IConfig LoadConfig()
     {
-        var zipFile = ZipFile.OpenRead(zipPath);
-        var configEntry = zipFile.GetEntry(ConfigFileName);
+        var configLocation = Path.Combine(ConfigFolderPath, ConfigFileName);
+        
+        var configFile = File.OpenRead(configLocation);
 
-        if (configEntry is null)
-            throw new FileNotFoundException($"{ConfigFileName} not in root of zip file.");
-
-        var config = JsonSerializer.Deserialize<Config>(configEntry.Open()) ?? throw new JsonException();
+        var config = JsonSerializer.Deserialize<Config>(configFile) ?? throw new JsonException();
+        
+        configFile.Close();
         return config;
     }
 }

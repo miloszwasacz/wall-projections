@@ -22,7 +22,7 @@ public class ContentProvider : IContentProvider
 
         // TODO Include the path to the config so that the media files can use relative paths
         // (need to update returned image/video paths)
-        var description = File.ReadAllText(hotspot.DescriptionPath);
+        var description = File.ReadAllText(Path.Combine(FileHandler.ConfigFolderPath, hotspot.DescriptionPath));
         //TODO Refactor to support multiple images and videos
         var imagePath = hotspot.ImagePaths.FirstOrDefault();
         var videoPath = hotspot.VideoPaths.FirstOrDefault();
