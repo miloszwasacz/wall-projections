@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -9,7 +7,7 @@ namespace WallProjections.ViewModels;
 
 public class HotspotViewModel : ViewModelBase, IHotspotViewModel
 {
-    private List<Coord> _hotspots;
+    private readonly List<Coord> _hotspots;
     private readonly IConfig? _config;
     
     public HotspotViewModel()
@@ -24,21 +22,17 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
         GetFirstHotspot();
     }
     
-    public List<Coord> Coordinates
-    {
-        get => _hotspots;
-        private set
-        {
-            this.RaiseAndSetIfChanged(ref _hotspots, value);
-        }
-    }
+    public List<Coord> Coordinates => _hotspots;
 
     private void GetFirstHotspot()
     {
-        var hotspot = _config?.GetHotspot(1);
-        if (hotspot is not null)
+        for (int i = 0; i < _config?.HotspotCount; i++)
         {
-            _hotspots.Add(hotspot.Position);
+            var hotspot = _config?.GetHotspot(i + 1);
+            if (hotspot is not null)
+            {
+                _hotspots.Add(hotspot.Position);
+            }
         }
     }
 }
