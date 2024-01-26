@@ -80,14 +80,16 @@ public sealed class FileHandler : IFileHandler
 
 
             var newDescriptionPath = $"text_{hotspot.Id}.txt";
-
+            
             // Copy in non-imported description path.
             if (Path.IsPathRooted(hotspot.DescriptionPath))
             {
                 File.Copy(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));
             }
-
-            File.Move(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));
+            else
+            {
+                File.Move(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));   
+            }   
 
             // Move already imported image files.
             newImagePaths = UpdateFiles(

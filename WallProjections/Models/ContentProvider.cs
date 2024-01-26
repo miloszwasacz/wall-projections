@@ -19,13 +19,17 @@ public class ContentProvider : IContentProvider
         var hotspot = _config.GetHotspot(hotspotId);
         if (hotspot is null)
             throw new IConfig.HotspotNotFoundException(hotspotId);
+        
+        var description = "";
 
-        // TODO Include the path to the config so that the media files can use relative paths
-        // (need to update returned image/video paths)
-        var description = File.ReadAllText(Path.Combine(FileHandler.ConfigFolderPath, hotspot.DescriptionPath));
+        if (File.Exists(hotspot.FullDescriptionPath))
+        {
+            description = File.ReadAllText(hotspot.FullDescriptionPath);
+        }
+        
         //TODO Refactor to support multiple images and videos
-        var imagePath = hotspot.ImagePaths.FirstOrDefault();
-        var videoPath = hotspot.VideoPaths.FirstOrDefault();
+        var imagePath = hotspot.FullImagePaths.FirstOrDefault();
+        var videoPath = hotspot.FullVideoPaths.FirstOrDefault();
 
         return new Hotspot.Media(description, imagePath, videoPath);
     }

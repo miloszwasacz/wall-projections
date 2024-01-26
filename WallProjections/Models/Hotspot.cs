@@ -31,7 +31,7 @@ public class Hotspot
     /// <summary>
     /// Fully expanded path to description for hotspot.
     /// </summary>
-    public string FullDescriptionPath => Path.Combine(FileHandler.ConfigFolderPath, DescriptionPath);
+    public string FullDescriptionPath => DescriptionPath is not null ? Path.Combine(FileHandler.ConfigFolderPath, DescriptionPath): "";
 
     /// <summary>
     /// A list of paths to images to be displayed in the hotspot.

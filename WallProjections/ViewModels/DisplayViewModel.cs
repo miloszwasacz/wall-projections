@@ -84,13 +84,19 @@ Please report this to the museum staff.";
             ImageViewModel.HideImage();
             VideoViewModel.StopVideo();
             var media = _contentProvider.GetMedia(hotspotId);
+            
+            Console.WriteLine($"Showing hotspot {hotspotId}, image path {media.ImagePath}, video path {media.VideoPath}, description {media.Description}");
+            
             Description = media.Description;
             // TODO Add support for multiple images/videos
-            if (media.ImagePath is not null)
+            if (media.ImagePath is not null && media.ImagePath != "")
                 //TODO Make ImageViewModel not throw FileNotFoundException (display a placeholder instead)
                 ImageViewModel.ShowImage(media.ImagePath);
-            else if (media.VideoPath is not null)
-                VideoViewModel.PlayVideo(media.VideoPath);
+            else if (media.VideoPath is not null && media.VideoPath != "")
+            {
+                Console.WriteLine($"Playing awesome video right now {media.VideoPath}");
+                VideoViewModel.PlayVideo(media.VideoPath);   
+            }
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {
