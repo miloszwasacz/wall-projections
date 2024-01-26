@@ -24,6 +24,11 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     {
         InitializeComponent();
         WindowState = WindowState.FullScreen;
+
+        if (FileHandler.IsConfigImported())
+        {
+            Config = FileHandler.LoadConfig();
+        }
     }
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)

@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Immutable;
 
 namespace WallProjections.Models.Interfaces;
 
 public interface IConfig
 {
+    public ImmutableList<Hotspot> Hotspots { get; }
+
     /// <summary>
     /// Returns hotspot if Id matches a hotspot.
     /// </summary>

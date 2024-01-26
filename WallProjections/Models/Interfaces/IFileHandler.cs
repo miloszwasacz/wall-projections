@@ -14,9 +14,10 @@ public interface IFileHandler : IDisposable
     public IConfig? Load(string zipPath);
 
     /// <summary>
-    /// Save the config file and the media files to a zip file
+    /// Save the config file and the media files to a zip file. Any media files that point to an absolute path
+    /// will be imported and the paths renamed to the new path automatically.
     /// </summary>
-    /// <param name="config"></param>
-    /// <returns></returns>
+    /// <param name="config">The new config file to save</param>
+    /// <returns>True if saved successfully</returns>
     public bool Save(IConfig config);
 }
