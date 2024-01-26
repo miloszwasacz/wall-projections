@@ -80,7 +80,7 @@ internal class Program
                     scope.Execute(scriptCompiled);
                     Console.WriteLine("Initialization complete");
                     //TODO Change to a real method
-                    scope.InvokeMethod("detect_buttons", PythonEventHandler.Instance.ToPython());
+                    scope.InvokeMethod("run", PythonEventHandler.Instance.ToPython());
                     Debug.WriteLine("Python method called");
                 }
             }
