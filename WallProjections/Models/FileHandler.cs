@@ -87,7 +87,7 @@ public sealed class FileHandler : IFileHandler
                 File.Copy(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));
             }
 
-            File.Move(hotspot.DescriptionPath);
+            File.Move(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));
 
             // Move already imported image files.
             newImagePaths = UpdateFiles(
