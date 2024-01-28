@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text.Json;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -11,7 +12,7 @@ namespace WallProjections.Test.Models;
 [Author(name: "Thomas Parr")]
 public class FileHandlerTest
 {
-    private const string TestTxtFile = "0.txt";
+    private const string TestTxtFile = "text_0.txt";
     private const string TestTxtFileContents = "Hello World\n";
 
     /// <summary>
@@ -51,9 +52,10 @@ public class FileHandlerTest
     {
         IFileHandler fileHandler = CreateInstance();
         var config = fileHandler.Load(TestZip);
-        var config2 = new Config(new List<Hotspot> { new(0, 1, 2, 3) });
+        var config2 = new Config(new List<Hotspot> { new(0, new Coord(1,2,3), "test_0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty) });
 
-        AssertConfigsEqual(config, config2);
+        Assert.That(config, Is.Not.Null);
+        AssertConfigsEqual(config!, config2);
 
         fileHandler.Dispose();
     }
@@ -64,31 +66,31 @@ public class FileHandlerTest
     [Test]
     public void LoadExistingDirectoryTest()
     {
-        var contentCache = CreateInstance();
-        var oldFilePath = Path.Combine(contentCache.TempPath, Path.GetRandomFileName());
+        var fileHandler = CreateInstance();
+        var oldFilePath = Path.Combine(FileHandler.ConfigFolderPath, Path.GetRandomFileName());
 
         #region Create temp folder and file for the test
 
-        if (Directory.Exists(contentCache.TempPath))
-            Directory.Delete(contentCache.TempPath, true);
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
 
-        Directory.CreateDirectory(contentCache.TempPath);
+        Directory.CreateDirectory(FileHandler.ConfigFolderPath);
         File.Create(oldFilePath).Close();
-        Assert.That(File.Exists(oldFilePath), Is.True, "Could not create file in temp folder for the test");
+        Assert.That(File.Exists(oldFilePath), Is.True, "Could not create file in config folder for the test");
 
         #endregion
 
-        var config = contentCache.Load(TestZip);
+        var config = fileHandler.Load(TestZip);
 
-        var mediaFolder = Path.Combine(contentCache.GetHotspotMediaFolder(config.GetHotspot(0)!), TestTxtFile);
+        var textFilePath = Path.Combine(FileHandler.ConfigFolderPath, TestTxtFile);
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(mediaFolder), Is.True);
-            Assert.That(File.ReadAllText(mediaFolder), Is.EqualTo(TestTxtFileContents));
+            Assert.That(File.Exists(textFilePath), Is.True);
+            Assert.That(File.ReadAllText(textFilePath), Is.EqualTo(TestTxtFileContents));
             Assert.That(File.Exists(oldFilePath), Is.False);
         });
 
-        contentCache.Dispose();
+        fileHandler.Dispose();
     }
 
     /// <summary>
@@ -97,9 +99,9 @@ public class FileHandlerTest
     [Test]
     public void LoadNoZipTest()
     {
-        var contentCache = CreateInstance();
+        var fileHandler = CreateInstance();
         var path = Path.GetRandomFileName() + ".zip";
-        Assert.Throws<FileNotFoundException>(() => contentCache.Load(path));
+        Assert.Throws<FileNotFoundException>(() => fileHandler.Load(path));
     }
 
     /// <summary>
@@ -108,8 +110,8 @@ public class FileHandlerTest
     [Test]
     public void LoadNoConfigTest()
     {
-        var contentCache = CreateInstance();
-        Assert.Throws<FileNotFoundException>(() => contentCache.Load(TestZipNoConfig));
+        var fileHandler = CreateInstance();
+        Assert.Throws<FileNotFoundException>(() => fileHandler.Load(TestZipNoConfig));
     }
 
     /// <summary>
@@ -118,8 +120,8 @@ public class FileHandlerTest
     [Test]
     public void LoadInvalidConfigTest()
     {
-        var contentCache = CreateInstance();
-        Assert.Throws<JsonException>(() => contentCache.Load(TestZipInvalidConfig));
+        var fileHandler = CreateInstance();
+        Assert.Throws<JsonException>(() => fileHandler.Load(TestZipInvalidConfig));
     }
 
     /// <summary>
@@ -228,7 +230,8 @@ public class FileHandlerTest
     {
         var type = typeof(FileHandler);
         var res = Activator.CreateInstance(type, true) as FileHandler;
-        return res ?? throw new InvalidCastException("Could not construct ContentCache");
+        res.
+        return res ?? throw new InvalidCastException("Could not construct FileHandler");
     }
 
     /// <summary>
@@ -248,13 +251,20 @@ public class FileHandlerTest
                 var hotspot2 = config2.GetHotspot(i);
                 Assert.That(hotspot1, Is.Not.Null, $"Hotspot {i} null on config1");
                 Assert.That(hotspot2, Is.Not.Null, $"Hotspot {i} null on config2");
+                
                 Assert.That(hotspot1!.Id, Is.EqualTo(hotspot2!.Id), $"Hotspot {i} Id not equal in configs");
+                
                 Assert.That(hotspot1.Position.X, Is.EqualTo(hotspot2.Position.X),
                     $"Hotspot {i} X position not equal in configs");
                 Assert.That(hotspot1.Position.Y, Is.EqualTo(hotspot2.Position.Y),
                     $"Hotspot {i} Y position not equal in configs");
                 Assert.That(hotspot1.Position.R, Is.EqualTo(hotspot2.Position.R),
                     $"Hotspot {i} radius not equal in configs");
+                
+                Assert.That(hotspot1.DescriptionPath, Is.EqualTo(hotspot2.DescriptionPath));
+                
+                CollectionAssert.AreEqual(hotspot1.ImagePaths, hotspot2.ImagePaths);
+                CollectionAssert.AreEqual(hotspot1.VideoPaths, hotspot2.VideoPaths);
             });
         }
     }

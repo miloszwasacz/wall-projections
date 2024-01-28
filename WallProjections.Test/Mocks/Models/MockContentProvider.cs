@@ -57,7 +57,7 @@ public class MockContentProvider : IContentProvider
             throw _exception;
 
         FileNumber = hotspotId;
-        return _media.Find(media => media.Hotspot.Id == hotspotId) ??
+        return _media.Find(media => media. == hotspotId) ??
                throw new IConfig.HotspotNotFoundException(hotspotId);
     }
 }

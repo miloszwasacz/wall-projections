@@ -9,9 +9,8 @@ using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Models;
 
-public sealed class FileHandler : IFileHandler
+public class FileHandler : IFileHandler
 {
-    private const string MediaLocation = "Media";
     private const string ConfigFileName = "config.json";
     private const string ConfigFolderName = "WallProjections";
 
@@ -27,19 +26,9 @@ public sealed class FileHandler : IFileHandler
     
     public static string ConfigFolderPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigFolderName);
 
-    /// <summary>
-    /// The backing field for <see cref="TempPath" />
-    /// </summary>
-    private string? _tempPath;
-
-    private FileHandler()
+    protected FileHandler()
     {
     }
-
-    /// <summary>
-    /// The path to the temporary folder where the zip file is extracted
-    /// </summary>
-    internal string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
