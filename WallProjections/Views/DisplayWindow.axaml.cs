@@ -31,12 +31,30 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
         switch (e.Key)
         {
             case Key.Escape:
+            {
                 var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
                 lifetime?.Shutdown();
                 return;
+            }
             case Key.F11:
+            {
                 WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
                 return;
+            }
+            case Key.E:
+            {
+                //TODO Refactor this: fetching the Config shouldn't be done in a window (maybe in App.axmal.cs?)
+                var config = Config;
+                if (config is not null)
+                {
+                    new EditorWindow
+                    {
+                        DataContext = new EditorViewModel(config)
+                    }.Show();
+                    return;
+                }
+                break;
+            }
         }
 
         LoadConfig(e.Key);

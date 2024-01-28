@@ -1,0 +1,25 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:WallProjections.ViewModels.Interfaces"
+        xmlns:views="using:WallProjections.Views.EditorUserControls"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WallProjections.Views.EditorWindow"
+        x:DataType="vm:IEditorViewModel"
+        Title="EditorWindow">
+
+    <Grid ColumnDefinitions="*, 10, 4*" RowDefinitions="*"
+          Margin="10"
+          d:ShowGridLines="True">
+
+        <views:HotspotList Grid.Column="0" Grid.Row="0"
+                           DataContext="{Binding}" />
+
+        <StackPanel Grid.Column="2" Grid.Row="0">
+            <TextBlock Text="{Binding SelectedHotspot.Title, FallbackValue=Fallback}" />
+        </StackPanel>
+
+    </Grid>
+
+</Window>

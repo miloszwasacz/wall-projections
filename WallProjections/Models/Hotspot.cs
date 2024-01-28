@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace WallProjections.Models;
 
 /// <summary>
-/// Stores the location and size of a hotspot
+/// Stores data about a hotspot -- position, title, description, and media.
 /// </summary>
 [Serializable]
 public class Hotspot
@@ -20,6 +20,12 @@ public class Hotspot
     /// </summary>
     [JsonInclude]
     public Coord Position { get; }
+
+    /// <summary>
+    /// The title of the hotspot.
+    /// </summary>
+    [JsonInclude]
+    public string Title { get; }
 
     /// <summary>
     /// Path to a text file containing the description of the hotspot.
@@ -40,19 +46,25 @@ public class Hotspot
     public ImmutableList<string> VideoPaths { get; }
 
     /// <summary>
-    /// Constructor for Hotspot used by JSON deserializer
+    /// Constructor for the Hotspot used by JSON deserializer
     /// </summary>
     /// <param name="id">ID used by input detection to show info.</param>
-    /// <param name="position">Position of hotspot stored as <see cref="Coord"/> record.</param>
-    /// <param name="descriptionPath">Path to text file containing description of hotspot.</param>
-    /// <param name="imagePaths">List of paths to images to be displayed in hotspot.</param>
-    /// <param name="videoPaths">List of paths to videos to be displayed in hotspot.</param>
-    /// <exception cref="ArgumentException">Thrown if both image + video at once, or no content defined.</exception>
+    /// <param name="position">Position of the hotspot stored as <see cref="Coord"/> record.</param>
+    /// <param name="title">Title of the hotspot.</param>
+    /// <param name="descriptionPath">Path to text file containing description of the hotspot.</param>
+    /// <param name="imagePaths">List of paths to images to be displayed in the hotspot.</param>
+    /// <param name="videoPaths">List of paths to videos to be displayed in the hotspot.</param>
     [JsonConstructor]
-    public Hotspot(int id, Coord position, string descriptionPath, ImmutableList<string> imagePaths, ImmutableList<string> videoPaths)
+    public Hotspot(int id,
+        Coord position,
+        string title,
+        string descriptionPath,
+        ImmutableList<string> imagePaths,
+        ImmutableList<string> videoPaths)
     {
         Id = id;
         Position = position;
+        Title = title;
         DescriptionPath = descriptionPath;
         ImagePaths = imagePaths;
         VideoPaths = videoPaths;
