@@ -15,7 +15,7 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
 Please report this to the museum staff.";
 
     internal const string NotFound = @"Hmm...
-Looks like this hotspot has no content.
+Looks like this hotspot has missing content.
 Please report this to the museum staff.";
 
     /// <summary>
@@ -84,9 +84,7 @@ Please report this to the museum staff.";
             ImageViewModel.HideImage();
             VideoViewModel.StopVideo();
             var media = _contentProvider.GetMedia(hotspotId);
-            
-            Console.WriteLine($"Showing hotspot {hotspotId}, image path {media.ImagePath}, video path {media.VideoPath}, description {media.Description}");
-            
+
             Description = media.Description;
             // TODO Add support for multiple images/videos
             if (media.ImagePath is not null && media.ImagePath != "")
@@ -94,8 +92,7 @@ Please report this to the museum staff.";
                 ImageViewModel.ShowImage(media.ImagePath);
             else if (media.VideoPath is not null && media.VideoPath != "")
             {
-                Console.WriteLine($"Playing awesome video right now {media.VideoPath}");
-                VideoViewModel.PlayVideo(media.VideoPath);   
+                VideoViewModel.PlayVideo(media.VideoPath);
             }
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)

@@ -19,14 +19,14 @@ public class ContentProvider : IContentProvider
         var hotspot = _config.GetHotspot(hotspotId);
         if (hotspot is null)
             throw new IConfig.HotspotNotFoundException(hotspotId);
-        
-        var description = "";
 
-        if (File.Exists(hotspot.FullDescriptionPath))
+        if (!File.Exists(hotspot.FullDescriptionPath))
         {
-            description = File.ReadAllText(hotspot.FullDescriptionPath);
+            throw new FileNotFoundException("No description file", hotspot.DescriptionPath);
         }
-        
+
+        var description = File.ReadAllText(hotspot.FullDescriptionPath);
+
         //TODO Refactor to support multiple images and videos
         var imagePath = hotspot.FullImagePaths.FirstOrDefault();
         var videoPath = hotspot.FullVideoPaths.FirstOrDefault();
