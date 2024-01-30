@@ -1,0 +1,26 @@
+<annotation>
+	<folder>train</folder>
+	<filename>img21.jpeg</filename>
+	<path>/home/sergi/Drive/School/Second year/SEP calibration data/calibration_model_dataset/train/img21.jpeg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>1280</width>
+		<height>720</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>calibration_symbol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>504</xmin>
+			<ymin>225</ymin>
+			<xmax>606</xmax>
+			<ymax>320</ymax>
+		</bndbox>
+	</object>
+</annotation>
