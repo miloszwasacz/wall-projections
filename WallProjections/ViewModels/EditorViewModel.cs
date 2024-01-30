@@ -9,7 +9,7 @@ using WallProjections.ViewModels.Interfaces;
 namespace WallProjections.ViewModels;
 
 /// <inheritdoc cref="IEditorViewModel" />
-public class EditorViewModel: ViewModelBase, IEditorViewModel
+public class EditorViewModel : ViewModelBase, IEditorViewModel
 {
     /// <summary>
     /// The backing field for <see cref="SelectedHotspot" />.
@@ -23,8 +23,27 @@ public class EditorViewModel: ViewModelBase, IEditorViewModel
     public IEditorViewModel.IHotspotViewModel? SelectedHotspot
     {
         get => _selectedHotspot;
-        set => this.RaiseAndSetIfChanged(ref _selectedHotspot, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedHotspot, value);
+            if (value is not null)
+            {
+                ImageEditor.Media = value.Images;
+                VideoEditor.Media = value.Videos;
+            }
+            else
+            {
+                ImageEditor.Media = new ObservableCollection<IThumbnailViewModel>();
+                VideoEditor.Media = new ObservableCollection<IThumbnailViewModel>();
+            }
+        }
     }
+
+    /// <inheritdoc />
+    public IMediaEditorViewModel ImageEditor { get; } = new MediaEditorViewModel("Images");
+
+    /// <inheritdoc />
+    public IMediaEditorViewModel VideoEditor { get; } = new MediaEditorViewModel("Videos");
 
     /// <inheritdoc />
     public void AddHotspot()
@@ -74,16 +93,10 @@ public class EditorViewModel: ViewModelBase, IEditorViewModel
         public string Description { get; set; }
 
         /// <inheritdoc />
-        public string? DescriptionPath { get; set; }
+        public ObservableCollection<IThumbnailViewModel> Images { get; }
 
         /// <inheritdoc />
-        public ObservableCollection<string> ImagePaths { get; }
-
-        /// <inheritdoc />
-        public ObservableCollection<string> VideoPaths { get; }
-
-        /// <inheritdoc />
-        public bool IsDescriptionInFile { get; set; }
+        public ObservableCollection<IThumbnailViewModel> Videos { get; }
 
         /// <summary>
         /// Creates a new empty <see cref="HotspotViewModel" /> with the provided <paramref name="id" />.
@@ -94,9 +107,8 @@ public class EditorViewModel: ViewModelBase, IEditorViewModel
             Id = id;
             Title = "";
             Description = "";
-            ImagePaths = new ObservableCollection<string>();
-            VideoPaths = new ObservableCollection<string>();
-            IsDescriptionInFile = false;
+            Images = new ObservableCollection<IThumbnailViewModel>();
+            Videos = new ObservableCollection<IThumbnailViewModel>();
         }
 
         /// <summary>
@@ -110,9 +122,17 @@ public class EditorViewModel: ViewModelBase, IEditorViewModel
             Title = hotspot.Title;
             //TODO Add error handling
             Description = File.ReadAllText(hotspot.DescriptionPath);
-            ImagePaths = new ObservableCollection<string>(hotspot.ImagePaths);
-            VideoPaths = new ObservableCollection<string>(hotspot.VideoPaths);
-            IsDescriptionInFile = false;
+
+            var images = hotspot.ImagePaths
+                .Select((path, i) => new ImageThumbnailViewModel(path, GetRow(i), GetColumn(i)));
+            var videos = hotspot.VideoPaths
+                .Select((path, i) => new VideoThumbnailViewModel(path, GetRow(i), GetColumn(i)));
+            Images = new ObservableCollection<IThumbnailViewModel>(images);
+            Videos = new ObservableCollection<IThumbnailViewModel>(videos);
+            return;
+
+            int GetRow(int index) => index / IMediaEditorViewModel.ColumnCount;
+            int GetColumn(int index) => index % IMediaEditorViewModel.ColumnCount;
         }
     }
 }

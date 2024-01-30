@@ -3,22 +3,45 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces"
-        xmlns:views="using:WallProjections.Views.EditorUserControls"
+        xmlns:views="using:WallProjections.Views"
+        xmlns:editor="using:WallProjections.Views.EditorUserControls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.EditorWindow"
         x:DataType="vm:IEditorViewModel"
         Title="EditorWindow">
 
-    <Grid ColumnDefinitions="*, 10, 4*" RowDefinitions="*"
+    <Grid ColumnDefinitions="*, 10, 3*, 10, 2*" RowDefinitions="*, 10, *"
           Margin="10"
           d:ShowGridLines="True">
 
-        <views:HotspotList Grid.Column="0" Grid.Row="0"
-                           DataContext="{Binding}" />
+        <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
+              ColumnDefinitions="*" RowDefinitions="*, 10, Auto">
 
-        <StackPanel Grid.Column="2" Grid.Row="0">
-            <TextBlock Text="{Binding SelectedHotspot.Title, FallbackValue=Fallback}" />
-        </StackPanel>
+            <editor:HotspotList Grid.Column="0" Grid.Row="0"
+                                DataContext="{Binding}" />
+
+            <Button Grid.Column="0" Grid.Row="2"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Command="{Binding AddHotspot}">
+                Add Hotspot
+            </Button>
+
+        </Grid>
+
+        <editor:MediaEditor Grid.Column="4" Grid.Row="0"
+                            DataContext="{Binding ImageEditor}"
+                            OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
+
+        <editor:MediaEditor Grid.Column="4" Grid.Row="2"
+                            DataContext="{Binding VideoEditor}"
+                            OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
+
+        <views:Toast Name="ExplorerErrorToast"
+                     Grid.Column="0" Grid.Row="0"
+                     Grid.ColumnSpan="5" Grid.RowSpan="3"
+                     Margin="10"
+                     Text="Could not open the File Explorer" />
 
     </Grid>
 

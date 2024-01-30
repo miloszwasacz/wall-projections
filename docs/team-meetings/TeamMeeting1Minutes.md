@@ -1,29 +1,29 @@
 # Team Meeting Minutes 1
 ## Things to do for Beta 
 ### C# 
-- Editor (Thomas)
+- Editor (Thomas + Miłosz)
   - Python to send image to editor so it knows information about the hotspots
 - Hotspot Display (Sonny)
 - Style UI (Sonny)
 
-### Messages (Miloz + Daniel)
+### Messages (Miłosz + Daniel)
 - using function calls
-  - onHotspotPress()
-  - onHotspotUnpress()
-  - editor messages to work out when we have something on the editor
+  - `onHotspotPress()`
+  - `onHotspotUnpress()`
+  - Editor messages to work out when we have something on the editor
  
 ### Python (Daniel + Sergi)
 - Calibration
-  - starting with mouse calibration before maybe moving onto an approach using fingers
-  - plan to make an initial strip down version using the new message calls
-  - see if there are any calibration libaries
+  - Starting with mouse calibration before maybe moving onto an approach using fingers
+  - Plan to make an initial strip down version using the new message calls
+  - See if there are any calibration libraries
 - Write more tests
-  - tests done by feeding photos with fingers in them
+  - Tests done by feeding photos with fingers in them
 
 ## UI Possible Style
 ![Alt text](PossibleUIDesign.png "Possible Style")
 
 ## Document updates
-- rewrite ReadMe
-- MacOS setup guide
-- Dev guide 
+- Rewrite [README.md](../../README.md)
+  - User setup guide
+  - Development guide 

@@ -7,58 +7,34 @@
              x:Class="WallProjections.Views.EditorUserControls.HotspotList"
              x:DataType="vm:IEditorViewModel">
 
-    <UserControl.Resources>
+    <Border BorderBrush="LightGray"
+            BorderThickness="2"
+            CornerRadius="8">
 
-        <!--TODO Adjust the colors according to the theme -->
-        <LinearGradientBrush x:Key="ListTop"
-                             StartPoint="0,0" EndPoint="0,10">
-            <GradientStop Offset="0" Color="White" />
-            <GradientStop Offset="1" Color="Transparent" />
-        </LinearGradientBrush>
-
-        <LinearGradientBrush x:Key="ListBottom"
-                             StartPoint="0,0" EndPoint="0,10">
-            <GradientStop Offset="0" Color="Transparent" />
-            <GradientStop Offset="1" Color="White" />
-        </LinearGradientBrush>
-
-    </UserControl.Resources>
-
-    <Grid ColumnDefinitions="*" RowDefinitions="10, *, 10, 10, Auto">
-
-        <ListBox Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
-                 Background="Transparent"
-                 ItemsSource="{Binding Hotspots}"
+        <ListBox ItemsSource="{Binding Hotspots}"
                  SelectedItem="{Binding SelectedHotspot}"
                  SelectionMode="Single, AlwaysSelected"
-                 Padding="0 10">
+                 CornerRadius="7"
+                 ClipToBounds="True">
 
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
+
                         <TextBlock IsVisible="{Binding !IsFallback }"
                                    Text="{Binding Title}" />
+
                         <TextBlock IsVisible="{Binding IsFallback}"
                                    FontFamily="static"
                                    FontStyle="Oblique"
                                    Text="{Binding FallbackTitle}" />
+
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
+
         </ListBox>
 
-        <Border Grid.Column="0" Grid.Row="0"
-                BorderBrush="{StaticResource ListTop}"
-                BorderThickness="0 10 0 0" />
-        <Border Grid.Column="0" Grid.Row="2"
-                BorderBrush="{StaticResource ListBottom}"
-                BorderThickness="0 0 0 10" />
+    </Border>
 
-        <Button Grid.Column="0" Grid.Row="4"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center"
-                Command="{Binding AddHotspot}">
-            Add Hotspot
-        </Button>
-    </Grid>
 </UserControl>

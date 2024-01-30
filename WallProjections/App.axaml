@@ -11,5 +11,6 @@
 
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://WallProjections/Views/Toast.axaml" />
     </Application.Styles>
 </Application>

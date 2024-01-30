@@ -1,0 +1,42 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:WallProjections.Views">
+    <Design.PreviewWith>
+        <controls:Toast />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|Toast">
+        <!-- Set Defaults -->
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <!--TODO Make colors change depending on the Theme -->
+        <Setter Property="Background" Value="WhiteSmoke" />
+        <Setter Property="BorderBrush" Value="Gainsboro" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BoxShadow" Value="5 5 10 0 DarkGray" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="IsVisible" Value="False" />
+        <Setter Property="Template">
+            <ControlTemplate>
+
+                <Border
+                    HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                    VerticalAlignment="{Binding VerticalAlignment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                    Background="{Binding Background, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                    BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                    BorderThickness="{Binding BorderThickness, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                    CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                    BoxShadow="{Binding BoxShadow, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                    Padding="{Binding Padding, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
+
+                </Border>
+
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

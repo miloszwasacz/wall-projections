@@ -20,6 +20,16 @@ public interface IEditorViewModel
     public IHotspotViewModel? SelectedHotspot { get; set; }
 
     /// <summary>
+    /// A <see cref="IMediaEditorViewModel" /> for managing images.
+    /// </summary>
+    public IMediaEditorViewModel ImageEditor { get; }
+
+    /// <summary>
+    /// A <see cref="IMediaEditorViewModel" /> for managing videos.
+    /// </summary>
+    public IMediaEditorViewModel VideoEditor { get; }
+
+    /// <summary>
     /// Adds a new hotspot and selects it.
     /// </summary>
     public void AddHotspot();
@@ -37,34 +47,26 @@ public interface IEditorViewModel
         public string Title { get; set; }
 
         /// <summary>
-        /// Description of the hotspot as plain text. The final description
-        /// is either this or the contents of <see cref="DescriptionPath"/>,
-        /// depending on the value of <see cref="IsDescriptionInFile"/>.
+        /// Description of the hotspot as plain text.
+        /// <br /><br />
+        /// The contents can be imported from a file.
         /// </summary>
         public string Description { get; set; }
 
-        //TODO Maybe load the description from a file instead of linking it to a path?
         /// <summary>
-        /// <inheritdoc cref="Hotspot.DescriptionPath"/>
-        /// Can be <i>null</i> if the description is not a file <i>(see <see cref="IHotspotViewModel.Description" />)</i>.
+        /// A list of paths to images to be displayed in the hotspot wrapped in <see cref="IThumbnailViewModel"/>s.
         /// </summary>
-        public string? DescriptionPath { get; set; }
-
-        /// <inheritdoc cref="Hotspot.ImagePaths"/>
-        public ObservableCollection<string> ImagePaths { get; }
-
-        /// <inheritdoc cref="Hotspot.VideoPaths"/>
-        public ObservableCollection<string> VideoPaths { get; }
+        public ObservableCollection<IThumbnailViewModel> Images { get; }
 
         /// <summary>
-        /// Determines whether the final description is plain text or contents of a file.
+        /// A list of paths to videos to be displayed in the hotspot wrapped in <see cref="IThumbnailViewModel"/>s.
         /// </summary>
-        public bool IsDescriptionInFile { get; set; }
+        public ObservableCollection<IThumbnailViewModel> Videos { get; }
 
         /// <summary>
         /// A fallback title for the hotspot, used when the title is empty.
         /// </summary>
-        public string FallbackTitle => $"Hotspot{Id}";
+        public string FallbackTitle => $"Hotspot {Id}";
 
         /// <summary>
         /// Determines whether the title is empty and should be replaced with a fallback.
