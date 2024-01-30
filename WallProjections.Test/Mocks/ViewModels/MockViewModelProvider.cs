@@ -1,4 +1,5 @@
-﻿using WallProjections.ViewModels.Interfaces;
+﻿using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
@@ -8,7 +9,7 @@ public class MockViewModelProvider : IViewModelProvider
     /// Creates a new <see cref="MockDisplayViewModel"/>
     /// </summary>
     /// <returns>A new <see cref="MockDisplayViewModel"/></returns>
-    public IDisplayViewModel GetDisplayViewModel() => new MockDisplayViewModel();
+    public IDisplayViewModel GetDisplayViewModel(IConfig config) => new MockDisplayViewModel();
 
     /// <summary>
     /// Creates a new <see cref="MockImageViewModel" /> instance

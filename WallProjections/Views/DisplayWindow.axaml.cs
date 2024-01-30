@@ -69,7 +69,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             var zipPath = files[0].Path.AbsolutePath;
             if (!zipPath.EndsWith(".zip")) continue;
 
-            Config = FileHandler.Instance.Load(zipPath);
+            Config = new FileHandler().Load(zipPath);
         }
 
         DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);

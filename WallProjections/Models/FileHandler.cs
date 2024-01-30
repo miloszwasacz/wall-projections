@@ -13,20 +13,9 @@ public class FileHandler : IFileHandler
 {
     private const string ConfigFileName = "config.json";
     private const string ConfigFolderName = "WallProjections";
-
-    /// <summary>
-    /// The backing field for the <see cref="FileHandler" /> property
-    /// </summary>
-    private static FileHandler? _instance;
-
-    /// <summary>
-    /// A global instance of <see cref="FileHandler" />
-    /// </summary>
-    public static FileHandler Instance => _instance ??= new FileHandler();
-    
     public static string ConfigFolderPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigFolderName);
 
-    protected FileHandler()
+    public FileHandler()
     {
     }
 

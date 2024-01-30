@@ -10,7 +10,7 @@ public class TestSetup
     public void GlobalTearDown()
     {
         // Dispose of the global singletons after all tests have run
-        FileHandler.Instance.Dispose();
+        new FileHandler().Dispose();
         ViewModelProvider.Instance.Dispose();
     }
 }

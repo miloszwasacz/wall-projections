@@ -21,15 +21,15 @@ public class DisplayViewModelTest
     #region MediaFiles
 
     private static List<Hotspot.Media> FilesAll =>
-        new() { new Hotspot.Media(Text, ImagePath, VideoPath) };
+        new() { new Hotspot.Media(0, Text, ImagePath, VideoPath) };
 
     private static List<Hotspot.Media> FilesNoVideo =>
-        new() { new Hotspot.Media(Text, ImagePath) };
+        new() { new Hotspot.Media(0, Text, ImagePath) };
 
     private static List<Hotspot.Media> FilesNoImage => new()
-        { new Hotspot.Media(Text, VideoPath: VideoPath) };
+        { new Hotspot.Media(0,Text, VideoPath: VideoPath) };
 
-    private static List<Hotspot.Media> FilesNoMedia => new() { new Hotspot.Media(Text) };
+    private static List<Hotspot.Media> FilesNoMedia => new() { new Hotspot.Media(0, Text) };
 
     #endregion
 

@@ -31,6 +31,6 @@ public class ContentProvider : IContentProvider
         var imagePath = hotspot.FullImagePaths.FirstOrDefault();
         var videoPath = hotspot.FullVideoPaths.FirstOrDefault();
 
-        return new Hotspot.Media(description, imagePath, videoPath);
+        return new Hotspot.Media(hotspotId, description, imagePath, videoPath);
     }
 }

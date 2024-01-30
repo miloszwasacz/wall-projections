@@ -48,7 +48,7 @@ public class ConfigTest
         {
             Assert.That(hotspot1, Is.Not.Null);
             Assert.That(hotspot1!.Id, Is.EqualTo(1));
-            Assert.That(hotspot1!.ImagePaths[0], Is.EqualTo("image_1_0"));
+            Assert.That(hotspot1!.ImagePaths[0], Is.EqualTo("image_1_0.jpg"));
         });
         
         Assert.Multiple(() =>

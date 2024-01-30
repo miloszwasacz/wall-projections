@@ -1,4 +1,5 @@
-﻿using WallProjections.ViewModels;
+﻿using WallProjections.Models;
+using WallProjections.ViewModels;
 
 namespace WallProjections.Test.ViewModels;
 
@@ -18,7 +19,7 @@ public class ViewModelProviderTest
     [Test]
     public void GetDisplayViewModelTest()
     {
-        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel();
+        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(new Config(new List<Hotspot>()));
         Assert.Multiple(() =>
         {
             Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
