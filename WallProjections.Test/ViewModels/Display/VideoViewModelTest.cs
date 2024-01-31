@@ -1,8 +1,8 @@
 ﻿using LibVLCSharp.Shared;
 using WallProjections.Test.Mocks.Models;
-using WallProjections.ViewModels;
+using WallProjections.ViewModels.Display;
 
-namespace WallProjections.Test.ViewModels;
+namespace WallProjections.Test.ViewModels.Display;
 
 [TestFixture]
 public class VideoViewModelTest

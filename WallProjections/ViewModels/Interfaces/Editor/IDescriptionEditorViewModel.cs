@@ -1,4 +1,4 @@
-﻿namespace WallProjections.ViewModels.Interfaces;
+﻿namespace WallProjections.ViewModels.Interfaces.Editor;
 
 /// <summary>
 /// A viewmodel for editing the title and description of a hotspot.

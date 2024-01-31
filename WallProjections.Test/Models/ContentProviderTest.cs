@@ -2,7 +2,6 @@
 using System.IO.Compression;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
-using WallProjections.Test.Mocks.Models;
 using static WallProjections.Test.TestExtensions;
 
 namespace WallProjections.Test.Models;
@@ -24,6 +23,7 @@ public class ContentProviderTest
     private readonly IConfig _mockConfig = new Config(Enumerable.Range(0, 5).Select(id => new Hotspot(
         id,
         new Coord(1, 1, 1),
+        $"Hotspot {id}",
         "0.txt",
         ImmutableList.Create("1.png"),
         ImmutableList.Create("1.mp4")

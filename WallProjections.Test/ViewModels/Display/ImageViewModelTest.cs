@@ -1,7 +1,7 @@
 using Avalonia.Headless.NUnit;
-using WallProjections.ViewModels;
+using WallProjections.ViewModels.Display;
 
-namespace WallProjections.Test.ViewModels;
+namespace WallProjections.Test.ViewModels.Display;
 
 [TestFixture]
 public class ImageViewModelTest

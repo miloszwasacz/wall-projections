@@ -1,7 +1,7 @@
 ﻿using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Models;
-using WallProjections.ViewModels;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Interfaces.Display;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 

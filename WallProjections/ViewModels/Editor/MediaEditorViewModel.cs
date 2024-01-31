@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using ReactiveUI;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.Editor;
 
 /// <inheritdoc cref="IMediaEditorViewModel" />
 public class MediaEditorViewModel : ViewModelBase, IMediaEditorViewModel

@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.Helper;
 

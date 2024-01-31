@@ -1,4 +1,5 @@
 ﻿using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Interfaces.Display;
 
 namespace WallProjections.ViewModels.Interfaces;
 

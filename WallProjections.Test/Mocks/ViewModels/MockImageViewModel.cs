@@ -1,8 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using WallProjections.ViewModels;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Interfaces.Display;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 

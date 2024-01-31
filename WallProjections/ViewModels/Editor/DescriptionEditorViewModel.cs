@@ -1,7 +1,7 @@
 ﻿using ReactiveUI;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.Editor;
 
 /// <inheritdoc cref="IDescriptionEditorViewModel" />
 public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewModel

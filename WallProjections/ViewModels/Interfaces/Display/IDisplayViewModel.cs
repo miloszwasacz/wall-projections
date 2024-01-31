@@ -2,8 +2,11 @@
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 
-namespace WallProjections.ViewModels.Interfaces;
+namespace WallProjections.ViewModels.Interfaces.Display;
 
+/// <summary>
+/// A viewmodel for displaying all the information about a <see cref="Hotspot" />
+/// </summary>
 public interface IDisplayViewModel : IDisposable
 {
     /// <summary>

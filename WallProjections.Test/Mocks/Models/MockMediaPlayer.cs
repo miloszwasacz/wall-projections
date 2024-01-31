@@ -1,11 +1,12 @@
 ﻿using LibVLCSharp.Shared;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Display;
 
 namespace WallProjections.Test.Mocks.Models;
 
 /// <summary>
-/// A mock of <see cref="VLCMediaPlayer"/> for injecting into <see cref="WallProjections.ViewModels.VideoViewModel"/>
+/// A mock of <see cref="VLCMediaPlayer"/> for injecting into <see cref="VideoViewModel"/>
 /// </summary>
 public sealed class MockMediaPlayer : IMediaPlayer
 {
@@ -15,7 +16,7 @@ public sealed class MockMediaPlayer : IMediaPlayer
     private int _disposedCount;
 
     /// <summary>
-    /// A mock of <see cref="VLCMediaPlayer"/> for injecting into <see cref="WallProjections.ViewModels.VideoViewModel"/>
+    /// A mock of <see cref="VLCMediaPlayer"/> for injecting into <see cref="VideoViewModel"/>
     /// </summary>
     /// <param name="fileExists">Determines the return value of <see cref="MockMediaPlayer.Play"/></param>
     public MockMediaPlayer(bool fileExists = true)

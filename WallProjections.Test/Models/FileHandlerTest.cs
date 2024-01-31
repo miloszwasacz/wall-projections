@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text.Json;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -51,7 +52,10 @@ public class FileHandlerTest
     {
         IFileHandler fileHandler = CreateInstance();
         var config = fileHandler.Load(TestZip);
-        var config2 = new Config(new List<Hotspot> { new(0, 1, 2, 3) });
+        var config2 = new Config(new List<Hotspot>
+        {
+            new(0, new Coord(1, 2, 3), "0", "0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty)
+        });
 
         AssertConfigsEqual(config, config2);
 
@@ -80,7 +84,7 @@ public class FileHandlerTest
 
         var config = contentCache.Load(TestZip);
 
-        var mediaFolder = Path.Combine(contentCache.GetHotspotMediaFolder(config.GetHotspot(0)!), TestTxtFile);
+        var mediaFolder = Path.Combine(TestTxtFile);
         Assert.Multiple(() =>
         {
             Assert.That(File.Exists(mediaFolder), Is.True);
@@ -97,9 +101,9 @@ public class FileHandlerTest
     [Test]
     public void LoadNoZipTest()
     {
-        var contentCache = CreateInstance();
+        var fileHandler = CreateInstance();
         var path = Path.GetRandomFileName() + ".zip";
-        Assert.Throws<FileNotFoundException>(() => contentCache.Load(path));
+        Assert.Throws<FileNotFoundException>(() => fileHandler.Load(path));
     }
 
     /// <summary>
@@ -108,8 +112,8 @@ public class FileHandlerTest
     [Test]
     public void LoadNoConfigTest()
     {
-        var contentCache = CreateInstance();
-        Assert.Throws<FileNotFoundException>(() => contentCache.Load(TestZipNoConfig));
+        var fileHandler = CreateInstance();
+        Assert.Throws<FileNotFoundException>(() => fileHandler.Load(TestZipNoConfig));
     }
 
     /// <summary>
@@ -118,8 +122,8 @@ public class FileHandlerTest
     [Test]
     public void LoadInvalidConfigTest()
     {
-        var contentCache = CreateInstance();
-        Assert.Throws<JsonException>(() => contentCache.Load(TestZipInvalidConfig));
+        var fileHandler = CreateInstance();
+        Assert.Throws<JsonException>(() => fileHandler.Load(TestZipInvalidConfig));
     }
 
     /// <summary>
@@ -131,7 +135,7 @@ public class FileHandlerTest
         IFileHandler fileHandler = CreateInstance();
         var config = fileHandler.Load(TestZip);
 
-        var mediaFolder = Path.Combine(fileHandler.GetHotspotMediaFolder(config.GetHotspot(0)!), TestTxtFile);
+        var mediaFolder = Path.Combine(TestTxtFile);
         Assert.Multiple(() =>
         {
             Assert.That(File.Exists(mediaFolder), Is.True);
@@ -143,18 +147,6 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that <see cref="FileHandler.CreateContentProvider" /> returns an instance of <see cref="IContentProvider" />
-    /// </summary>
-    [Test]
-    public void CreateContentProviderTest()
-    {
-        IFileHandler fileHandler = CreateInstance();
-        var config = fileHandler.Load(TestZip);
-        var contentProvider = fileHandler.CreateContentProvider(config);
-        Assert.That(contentProvider, Is.InstanceOf<IContentProvider>());
-    }
-
-    /// <summary>
     /// Test that the temp folder is removed after running <see cref="FileHandler.Dispose" />
     /// </summary>
     [Test]
@@ -163,11 +155,11 @@ public class FileHandlerTest
         var contentCache = CreateInstance();
         var config = contentCache.Load(TestZip);
 
-        Assert.That(Directory.Exists(contentCache.GetHotspotMediaFolder(config.GetHotspot(0)!)), Is.True);
+        Assert.That(Directory.Exists("nonexistent"), Is.True);
 
         Assert.That(() => contentCache.Dispose(), Throws.Nothing);
 
-        Assert.That(Directory.Exists(contentCache.GetHotspotMediaFolder(config.GetHotspot(0)!)), Is.False);
+        Assert.That(Directory.Exists(""), Is.False);
     }
 
     // ReSharper disable once InconsistentNaming

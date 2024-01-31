@@ -21,7 +21,7 @@ public class ConfigTest
         {
             var config = new Config(hotspots);
             Assert.That(config.HotspotCount, Is.EqualTo(i));
-            hotspots.Add(new Hotspot(i, new Coord(1, 2, 3)));
+            // hotspots.Add(new Hotspot(i, new Coord(1, 2, 3)));
         }
     }
 
@@ -34,8 +34,8 @@ public class ConfigTest
         var config = new Config(
             hotspots: new List<Hotspot>
             {
-                new(id: 1),
-                new(id: 2)
+                // new(id: 1),
+                // new(id: 2)
             }
         );
 

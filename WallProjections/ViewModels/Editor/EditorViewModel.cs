@@ -5,9 +5,9 @@ using ReactiveUI;
 using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.Editor;
 
 /// <inheritdoc cref="IEditorViewModel{T}" />
 public class EditorViewModel : ViewModelBase, IEditorViewModel

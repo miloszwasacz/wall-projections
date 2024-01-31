@@ -3,12 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
-using WallProjections.ViewModels.Interfaces;
 using Avalonia.Platform.Storage;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using WallProjections.ViewModels;
+using WallProjections.ViewModels.Editor;
+using WallProjections.ViewModels.Interfaces.Display;
 #if DEBUGSKIPPYTHON
 using Avalonia.Data;
 using WallProjections.Helper;
@@ -53,6 +54,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
                     }.Show();
                     return;
                 }
+
                 break;
             }
         }

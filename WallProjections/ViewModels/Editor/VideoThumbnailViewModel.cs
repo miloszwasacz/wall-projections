@@ -2,9 +2,9 @@
 using System.IO;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.Editor;
 
 /// <summary>
 /// A viewmodel for an item in <see cref="IMediaEditorViewModel" /> for displaying

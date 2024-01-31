@@ -3,15 +3,24 @@ using System.IO;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using ReactiveUI;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Display;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.Display;
 
+/// <inheritdoc cref="IImageViewModel" />
 public class ImageViewModel : ViewModelBase, IImageViewModel
 {
+    /// <summary>
+    /// The backing field for <see cref="Image" />
+    /// </summary>
     private Bitmap? _imageToLoad;
-    
-    private static readonly Uri FallbackImagePath = new("avares://WallProjections/Assets/fallback.png"); 
+
+    /// <summary>
+    /// The path to the fallback image
+    /// </summary>
+    private static readonly Uri FallbackImagePath = new("avares://WallProjections/Assets/fallback.png");
+
+    /// <inheritdoc />
     public Bitmap? Image
     {
         get => _imageToLoad;
@@ -22,8 +31,10 @@ public class ImageViewModel : ViewModelBase, IImageViewModel
         }
     }
 
+    /// <inheritdoc />
     public bool HasImages => Image is not null;
 
+    /// <inheritdoc />
     public bool ShowImage(string filePath)
     {
         if (!File.Exists(filePath))
@@ -31,11 +42,13 @@ public class ImageViewModel : ViewModelBase, IImageViewModel
             Image = new Bitmap(AssetLoader.Open(FallbackImagePath));
             return false;
         }
+
         using var fileStream = File.OpenRead(filePath);
         Image = new Bitmap(fileStream);
         return true;
     }
 
+    /// <inheritdoc />
     public void HideImage()
     {
         Image = null;

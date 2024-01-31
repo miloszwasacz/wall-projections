@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel;
 using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Editor;
 
-namespace WallProjections.ViewModels.Interfaces;
+namespace WallProjections.ViewModels.Interfaces.Editor;
 
 /// <summary>
 /// A viewmodel for editing data about a <see cref="IConfig" />.

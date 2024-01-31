@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using WallProjections.Models;
 
-namespace WallProjections.ViewModels.Interfaces;
+namespace WallProjections.ViewModels.Interfaces.Editor;
 
 /// <summary>
 /// A viewmodel for editing data about a <see cref="Hotspot" />.

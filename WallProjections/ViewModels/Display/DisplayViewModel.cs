@@ -5,9 +5,11 @@ using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Display;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.Display;
 
+/// <inheritdoc cref="IDisplayViewModel" />
 public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
 {
     //TODO Localized strings?

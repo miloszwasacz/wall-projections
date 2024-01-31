@@ -8,7 +8,7 @@ public class MockContentProvider : IContentProvider
     /// <summary>
     /// The list of media to search through in <see cref="GetMedia" />
     /// </summary>
-    private readonly List<Hotspot.Media> _media;
+    private readonly Dictionary<int, Hotspot.Media> _media;
 
     /// <summary>
     /// The exception to throw when <see cref="GetMedia" /> is called
@@ -26,7 +26,7 @@ public class MockContentProvider : IContentProvider
     /// when <see cref="GetMedia" /> is called
     /// </summary>
     /// <param name="result"></param>
-    public MockContentProvider(List<Hotspot.Media> result)
+    public MockContentProvider(Dictionary<int, Hotspot.Media> result)
     {
         _media = result;
     }
@@ -35,7 +35,7 @@ public class MockContentProvider : IContentProvider
     /// Creates a new <see cref="MockContentProvider" /> that throws an exception when <see cref="GetMedia" /> is called
     /// </summary>
     /// <param name="exception"></param>
-    public MockContentProvider(Exception exception) : this(new List<Hotspot.Media>())
+    public MockContentProvider(Exception exception) : this(new Dictionary<int, Hotspot.Media>())
     {
         _exception = exception;
     }
@@ -57,7 +57,10 @@ public class MockContentProvider : IContentProvider
             throw _exception;
 
         FileNumber = hotspotId;
-        return _media.Find(media => media.Hotspot.Id == hotspotId) ??
-               throw new IConfig.HotspotNotFoundException(hotspotId);
+        var found = _media.TryGetValue(hotspotId, out var media);
+        if (!found)
+            throw new IConfig.HotspotNotFoundException(hotspotId);
+
+        return media!;
     }
 }

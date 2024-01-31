@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace WallProjections.ViewModels.Interfaces;
+namespace WallProjections.ViewModels.Interfaces.Editor;
 
 /// <summary>
 /// A viewmodel for the management of media associated with a hotspot.

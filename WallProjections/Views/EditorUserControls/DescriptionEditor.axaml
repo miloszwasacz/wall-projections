@@ -1,7 +1,7 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:WallProjections.Views.EditorUserControls"
-        xmlns:vm="using:WallProjections.ViewModels.Interfaces">
+        xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor">
     <Design.PreviewWith>
         <controls:DescriptionEditor />
     </Design.PreviewWith>

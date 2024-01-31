@@ -2,13 +2,12 @@
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
-using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
-using WallProjections.ViewModels;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Interfaces.Display;
 using static WallProjections.Test.TestExtensions;
 
-namespace WallProjections.Test.ViewModels;
+namespace WallProjections.Test.ViewModels.Display;
 
 [TestFixture]
 public class DisplayViewModelTest

@@ -14,7 +14,7 @@ public sealed class MockFileHandler : IFileHandler
     /// The media list passed to the <see cref="MockContentProvider" />'s constructor
     /// when <see cref="CreateContentProvider" /> is called
     /// </summary>
-    private readonly List<Hotspot.Media> _media;
+    private readonly Dictionary<int, Hotspot.Media> _media;
 
     /// <summary>
     /// The exception passed to the <see cref="MockContentProvider" />'s constructor
@@ -55,7 +55,7 @@ public sealed class MockFileHandler : IFileHandler
     /// <param name="mediaPath">The value to set <see cref="MediaPath" /> to</param>
     public MockFileHandler(IConfig config, string mediaPath)
     {
-        _media = new List<Hotspot.Media>();
+        _media = new Dictionary<int, Hotspot.Media>();
         MediaPath = mediaPath;
         Config = config;
     }
@@ -65,7 +65,7 @@ public sealed class MockFileHandler : IFileHandler
     /// and empty <see cref="Config" /> and <see cref="MediaPath" />
     /// </summary>
     /// <param name="files">The list of media files provided to <see cref="CreateContentProvider" /></param>
-    public MockFileHandler(List<Hotspot.Media> files)
+    public MockFileHandler(Dictionary<int, Hotspot.Media> files)
     {
         _media = files;
         MediaPath = "";
@@ -76,7 +76,7 @@ public sealed class MockFileHandler : IFileHandler
     /// Creates a new <see cref="MockFileHandler" /> that will search through the given list of media
     /// </summary>
     /// <param name="exception"></param>
-    public MockFileHandler(Exception exception) : this(new List<Hotspot.Media>())
+    public MockFileHandler(Exception exception) : this(new Dictionary<int, Hotspot.Media>())
     {
         _exception = exception;
     }

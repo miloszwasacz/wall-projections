@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using Avalonia.Media.Imaging;
 
-namespace WallProjections.ViewModels.Interfaces;
+namespace WallProjections.ViewModels.Interfaces.Editor;
 
 /// <summary>
 /// A viewmodel for an item in <see cref="IMediaEditorViewModel" /> for displaying

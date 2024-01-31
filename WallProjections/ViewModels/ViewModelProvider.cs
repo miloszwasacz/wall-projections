@@ -3,7 +3,9 @@ using LibVLCSharp.Shared;
 using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Display;
 
 namespace WallProjections.ViewModels;
 

@@ -2,15 +2,31 @@
 using LibVLCSharp.Shared;
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Display;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.Display;
 
+/// <inheritdoc cref="IVideoViewModel" />
 public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 {
+    /// <summary>
+    /// The <see cref="LibVLC" /> object used to play the videos
+    /// </summary>
     private readonly LibVLC _libVlc;
+
+    /// <summary>
+    /// Whether or not this <see cref="VideoViewModel" /> has been disposed
+    /// </summary>
     private bool _isDisposed;
+
+    /// <summary>
+    /// Whether or not a video is currently playing
+    /// </summary>
     private bool _isPlaying;
+
+    /// <summary>
+    /// The backing field for <see cref="MediaPlayer" />
+    /// </summary>
     private IMediaPlayer? _mediaPlayer;
 
     public VideoViewModel(LibVLC libVlc, IMediaPlayer mediaPlayer)
@@ -39,6 +55,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         }
     }
 
+    /// <inheritdoc />
     public bool HasVideos
     {
         get => _isPlaying;
@@ -49,6 +66,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         }
     }
 
+    /// <inheritdoc />
     public int Volume
     {
         get => HasVideos ? MediaPlayer?.Volume ?? 0 : 0;
@@ -59,6 +77,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         }
     }
 
+    /// <inheritdoc />
     public bool PlayVideo(string path)
     {
         if (_isDisposed) return false;
@@ -70,6 +89,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         return success ?? false;
     }
 
+    /// <inheritdoc />
     public void StopVideo()
     {
         if (_isDisposed) return;

@@ -2,7 +2,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.Views.EditorUserControls;
 
