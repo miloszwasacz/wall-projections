@@ -10,12 +10,12 @@
         x:DataType="vm:IEditorViewModel"
         Title="EditorWindow">
 
-    <Grid ColumnDefinitions="*, 10, 3*, 10, 2*" RowDefinitions="*, 10, *"
-          Margin="10"
+    <Grid ColumnDefinitions="*, 15, 3*, 15, 2*" RowDefinitions="*, 15, *"
+          Margin="15"
           d:ShowGridLines="True">
 
         <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
-              ColumnDefinitions="*" RowDefinitions="*, 10, Auto">
+              ColumnDefinitions="*" RowDefinitions="*, 15, Auto">
 
             <editor:HotspotList Grid.Column="0" Grid.Row="0"
                                 DataContext="{Binding}" />
@@ -29,6 +29,10 @@
 
         </Grid>
 
+        <editor:DescriptionEditor Grid.Column="2" Grid.Row="0" Grid.RowSpan="3"
+                                  Spacing="15"
+                                  DataContext="{Binding DescriptionEditor}" />
+
         <editor:MediaEditor Grid.Column="4" Grid.Row="0"
                             DataContext="{Binding ImageEditor}"
                             OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
@@ -40,7 +44,6 @@
         <views:Toast Name="ExplorerErrorToast"
                      Grid.Column="0" Grid.Row="0"
                      Grid.ColumnSpan="5" Grid.RowSpan="3"
-                     Margin="10"
                      Text="Could not open the File Explorer" />
 
     </Grid>

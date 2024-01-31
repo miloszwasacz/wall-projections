@@ -11,6 +11,9 @@
 
     <Application.Styles>
         <FluentTheme />
+
+        <!-- Templated Controls -->
         <StyleInclude Source="avares://WallProjections/Views/Toast.axaml" />
+        <StyleInclude Source="avares://WallProjections/Views/EditorUserControls/DescriptionEditor.axaml" />
     </Application.Styles>
 </Application>

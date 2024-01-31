@@ -18,15 +18,17 @@
                  ClipToBounds="True">
 
             <ListBox.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:IEditorHotspotViewModel">
                     <StackPanel>
 
-                        <TextBlock IsVisible="{Binding !IsFallback }"
+                        <TextBlock IsVisible="{Binding !IsFallback}"
+                                   TextTrimming="CharacterEllipsis"
                                    Text="{Binding Title}" />
 
                         <TextBlock IsVisible="{Binding IsFallback}"
                                    FontFamily="static"
                                    FontStyle="Oblique"
+                                   TextTrimming="CharacterEllipsis"
                                    Text="{Binding FallbackTitle}" />
 
                     </StackPanel>

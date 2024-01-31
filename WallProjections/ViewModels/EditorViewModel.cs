@@ -2,30 +2,40 @@
 using System.IO;
 using System.Linq;
 using ReactiveUI;
+using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.ViewModels;
 
-/// <inheritdoc cref="IEditorViewModel" />
+/// <inheritdoc cref="IEditorViewModel{T}" />
 public class EditorViewModel : ViewModelBase, IEditorViewModel
 {
     /// <summary>
     /// The backing field for <see cref="SelectedHotspot" />.
     /// </summary>
-    private IEditorViewModel.IHotspotViewModel? _selectedHotspot;
+    private EditorHotspotViewModel? _selectedHotspot;
+
+    /// <summary>
+    /// The backing field for <see cref="DescriptionEditor" />.
+    /// </summary>
+    private readonly DescriptionEditorViewModel _descriptionEditor = new();
 
     /// <inheritdoc />
-    public ObservableCollection<IEditorViewModel.IHotspotViewModel> Hotspots { get; }
+    public ObservableHotspotCollection<EditorHotspotViewModel> Hotspots { get; }
 
     /// <inheritdoc />
-    public IEditorViewModel.IHotspotViewModel? SelectedHotspot
+    public EditorHotspotViewModel? SelectedHotspot
     {
         get => _selectedHotspot;
         set
         {
+            // Skip changes to SelectedItem if the collection is only updating because of PropertyChanged on an item
+            if (Hotspots.IsItemUpdating) return;
+
             this.RaiseAndSetIfChanged(ref _selectedHotspot, value);
+            _descriptionEditor.Hotspot = value;
             if (value is not null)
             {
                 ImageEditor.Media = value.Images;
@@ -38,6 +48,9 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             }
         }
     }
+
+    /// <inheritdoc />
+    public IDescriptionEditorViewModel DescriptionEditor => _descriptionEditor;
 
     /// <inheritdoc />
     public IMediaEditorViewModel ImageEditor { get; } = new MediaEditorViewModel("Images");
@@ -56,7 +69,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
                 newId++;
         }
 
-        var newHotspot = new HotspotViewModel(newId);
+        var newHotspot = new EditorHotspotViewModel(newId);
         Hotspots.Add(newHotspot);
         SelectedHotspot = newHotspot;
     }
@@ -66,7 +79,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// </summary>
     public EditorViewModel()
     {
-        Hotspots = new ObservableCollection<IEditorViewModel.IHotspotViewModel>();
+        Hotspots = new ObservableHotspotCollection<EditorHotspotViewModel>();
     }
 
     /// <summary>
@@ -75,22 +88,40 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <param name="config">The <see cref="IConfig" /> providing initial state of the editor.</param>
     public EditorViewModel(IConfig config)
     {
-        Hotspots = new ObservableCollection<IEditorViewModel.IHotspotViewModel>(
-            config.Hotspots.Select(hotspot => new HotspotViewModel(hotspot)));
+        Hotspots = new ObservableHotspotCollection<EditorHotspotViewModel>(
+            config.Hotspots.Select(hotspot => new EditorHotspotViewModel(hotspot)));
         SelectedHotspot = Hotspots.FirstOrDefault();
     }
 
-    /// <inheritdoc cref="IEditorViewModel.IHotspotViewModel" />
-    private class HotspotViewModel : ViewModelBase, IEditorViewModel.IHotspotViewModel
+    /// <inheritdoc cref="IEditorHotspotViewModel" />
+    public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
     {
+        /// <summary>
+        /// The backing field for <see cref="Title" />.
+        /// </summary>
+        private string _title;
+
+        /// <summary>
+        /// The backing field for <see cref="Description" />.
+        /// </summary>
+        private string _description;
+
         /// <inheritdoc />
         public int Id { get; }
 
         /// <inheritdoc />
-        public string Title { get; set; }
+        public string Title
+        {
+            get => _title;
+            set => this.RaiseAndSetIfChanged(ref _title, value);
+        }
 
         /// <inheritdoc />
-        public string Description { get; set; }
+        public string Description
+        {
+            get => _description;
+            set => this.RaiseAndSetIfChanged(ref _description, value);
+        }
 
         /// <inheritdoc />
         public ObservableCollection<IThumbnailViewModel> Images { get; }
@@ -99,29 +130,29 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         public ObservableCollection<IThumbnailViewModel> Videos { get; }
 
         /// <summary>
-        /// Creates a new empty <see cref="HotspotViewModel" /> with the provided <paramref name="id" />.
+        /// Creates a new empty <see cref="EditorHotspotViewModel" /> with the provided <paramref name="id" />.
         /// </summary>
         /// <param name="id">ID of the new hotspot.</param>
-        public HotspotViewModel(int id)
+        public EditorHotspotViewModel(int id)
         {
             Id = id;
-            Title = "";
-            Description = "";
+            _title = "";
+            _description = "";
             Images = new ObservableCollection<IThumbnailViewModel>();
             Videos = new ObservableCollection<IThumbnailViewModel>();
         }
 
         /// <summary>
-        /// Creates a new <see cref="HotspotViewModel" /> with initial data loaded
+        /// Creates a new <see cref="EditorHotspotViewModel" /> with initial data loaded
         /// from the provided <paramref name="hotspot" />.
         /// </summary>
         /// <param name="hotspot">The base hotspot.</param>
-        public HotspotViewModel(Hotspot hotspot)
+        public EditorHotspotViewModel(Hotspot hotspot)
         {
             Id = hotspot.Id;
-            Title = hotspot.Title;
+            _title = hotspot.Title;
             //TODO Add error handling
-            Description = File.ReadAllText(hotspot.DescriptionPath);
+            _description = File.ReadAllText(hotspot.DescriptionPath);
 
             var images = hotspot.ImagePaths
                 .Select((path, i) => new ImageThumbnailViewModel(path, GetRow(i), GetColumn(i)));
