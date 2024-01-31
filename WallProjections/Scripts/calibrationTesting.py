@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 from cv2 import aruco
 
-projected_coords = [[450,500],[450,800], [1300, 550], [1350,850]]
+projected_coords = [[450,500],[450,700], [700,700], [1300, 550], [1350,700] ,[200, 200]]
 
 def get_frame():
 
@@ -35,15 +35,15 @@ def drawArucoFrame():
     aruco1 = cv2.imread("WallProjections/Scripts/aruco1.png")
     aruco2 = cv2.imread("WallProjections/Scripts/aruco2.png")
     aruco3 = cv2.imread("WallProjections/Scripts/aruco3.png")
-    # aruco4 = cv2.imread("core/calibration/aruco4.png")
-    # aruco5 = cv2.imread("core/calibration/aruco5.png")
+    aruco4 = cv2.imread("WallProjections/Scripts/aruco4.png")
+    aruco5 = cv2.imread("WallProjections/Scripts/aruco5.png")
 
     arucoFrame[projected_coords[0][1]:projected_coords[0][1]+aruco0.shape[0], projected_coords[0][0]:projected_coords[0][0]+aruco0.shape[1]] = aruco0
     arucoFrame[projected_coords[1][1]:projected_coords[1][1]+aruco1.shape[0], projected_coords[1][0]:projected_coords[1][0]+aruco1.shape[1]] = aruco1
     arucoFrame[projected_coords[2][1]:projected_coords[2][1]+aruco2.shape[0], projected_coords[2][0]:projected_coords[2][0]+aruco2.shape[1]] = aruco2
     arucoFrame[projected_coords[3][1]:projected_coords[3][1]+aruco3.shape[0], projected_coords[3][0]:projected_coords[3][0]+aruco3.shape[1]] = aruco3
-    # arucoFrame[projected_coords[4][1]:projected_coords[4][1]+aruco4.shape[0], projected_coords[4][0]:projected_coords[4][0]+aruco4.shape[1]] = aruco4
-    # arucoFrame[projected_coords[5][1]:projected_coords[5][1]+aruco5.shape[0], projected_coords[5][0]:projected_coords[5][0]+aruco5.shape[1]] = aruco5
+    arucoFrame[projected_coords[4][1]:projected_coords[4][1]+aruco4.shape[0], projected_coords[4][0]:projected_coords[4][0]+aruco4.shape[1]] = aruco4
+    arucoFrame[projected_coords[5][1]:projected_coords[5][1]+aruco5.shape[0], projected_coords[5][0]:projected_coords[5][0]+aruco5.shape[1]] = aruco5
 
     return arucoFrame 
 
@@ -55,12 +55,12 @@ def findArucoMarkers(img, markerSize=4, totalMarkers=250,draw=True):
     bboxs, ids, _ = aruco.detectMarkers(imgGray, arucoDict, parameters=arucoParam)
     # print(ids,bboxs)
     coords = []
-    if (ids is None):
-        print("0 aruco patterns detected out of 4")
-    elif(ids.size != 4):
-        print("%s aruco patterns detected out of 4" % ids.size)
+    if(ids is None):
+        print("0 aruco patterns detected, at least 4 required for calibration")
+    if(ids.size < 4):
+        print("%s aruco patterns detected, at least 4 required for calibration" % ids.size)
     else:
-        print("%s aruco patterns detected out of 4" % ids.size)
+        print("Success! %s aruco patterns detected" % ids.size)
         #converting NumPy arrays into a int list + sort aruco patterns in order
         ids = [i[0] for i in ids.tolist()]
         coords = [bboxs[i][0][0].tolist() for i in range(len(ids))]
@@ -74,7 +74,7 @@ def findArucoMarkers(img, markerSize=4, totalMarkers=250,draw=True):
 
 background = drawArucoFrame()
 cv2.imshow('Pool',background)
-cv2.waitKey(300)
+cv2.waitKey(800)
 
 frame = get_frame()
 coords = findArucoMarkers(frame)
