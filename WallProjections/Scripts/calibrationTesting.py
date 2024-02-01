@@ -28,14 +28,18 @@ def get_frame():
     
     return frame
 
-def drawAurco(aurcoDict, idCoordDict):
-    arucoFrame=np.full((1080,1920), 255,np.uint8) #generate empty background
-    for key in idCoordDict:
-        arucoImage = aruco.generateImageMarker(aurcoDict, key, 100, borderBits= 1) 
-        topLeftCoord = idCoordDict[key]
-        arucoFrame[topLeftCoord[0]:topLeftCoord[0]+arucoImage.shape[0], topLeftCoord[1]:topLeftCoord[1]+arucoImage.shape[1]] = arucoImage
-    return arucoFrame
 
+#given ArUco dictionary and an id to coordinate dictionary, will draw the ArUco's at corrisponding coords.
+def drawAurco(arucoDict, idCoordDict):
+    background=np.full((1080,1920), 255,np.uint8) #generate empty background
+    for key in idCoordDict:
+        arucoImage = aruco.generateImageMarker(arucoDict, key, 100, borderBits= 1) #fetch ArUco
+        topLeftCoord = idCoordDict[key]
+        #replace pixels in background with ArUco image
+        background[topLeftCoord[0]:topLeftCoord[0]+arucoImage.shape[0], topLeftCoord[1]:topLeftCoord[1]+arucoImage.shape[1]] = arucoImage
+    return background
+
+#temp function that generates an id to coordinate dictionary for a 6x12 grid
 def genIdCoordDict():
     idCoordDict = {}
     k = 0
@@ -45,36 +49,42 @@ def genIdCoordDict():
             k = k+1 
     return idCoordDict
 
-def findArucoMarkers(img, markerSize=4, totalMarkers=250,draw=True):
-    imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    key = getattr(aruco,f'DICT_{markerSize}X{markerSize}_{totalMarkers}')
-    arucoDict = aruco.getPredefinedDictionary(key)
+
+#
+def findArucoMarkers(img, arucoDict, displayResults = False):
     arucoParam = aruco.DetectorParameters()
-    bboxs, ids, _ = aruco.detectMarkers(imgGray, arucoDict, parameters=arucoParam)
-    coords = []
+    corners, ids, _ = aruco.detectMarkers(img, arucoDict, parameters=arucoParam)
+    idCoordDict = {}
     if(ids is None):
         print("0 aruco patterns detected, at least 4 required for calibration")
-    if(ids.size < 4):
+    elif(ids.size < 4):
         print("%s aruco patterns detected, at least 4 required for calibration" % ids.size)
     else:
         print("Success! %s aruco patterns detected" % ids.size)
-        #converting NumPy arrays into a int list + sort aruco patterns in order
-        ids = [i[0] for i in ids.tolist()]
-        coords = [bboxs[i][0][0].tolist() for i in range(len(ids))]
-        coords = [[int(a),int(b)] for a,b in coords]
-        sorted_pairs = sorted(zip(ids, coords))
-        tuples = zip(*sorted_pairs)
-        ids, coords = [ list(tuple) for tuple in  tuples]
-        # print(ids)
-    # print("coords : ", coords)
-    return tuples
+        for i in range(ids.size):
+            idCoordDict[ids[i][0]] = (int(corners[i][0][0][0]), int(corners[i][0][0][1]))
+    
+    if displayResults == True:
+        cv2.imshow('Identified Aruco Markers', aruco.drawDetectedMarkers(frame, corners, ids))
+        cv2.waitKey(5000)
+    return idCoordDict
 
-idCoordDict = genIdCoordDict()
-aurcoDict = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
 
-cv2.imshow('Pool',drawAurco(aurcoDict, idCoordDict))
+
+projectedIdCoordDict = genIdCoordDict()
+arucoDict = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
+
+cv2.imshow('Pool',drawAurco(arucoDict, projectedIdCoordDict))
 cv2.waitKey(800)
 
 frame = get_frame()
-coords = findArucoMarkers(frame)
-print(coords)
+camereaIdCoordDict = findArucoMarkers(frame, arucoDict)
+
+
+
+
+for key in projectedIdCoordDict:
+    if key in camereaIdCoordDict:
+        print(key, "projected coords:", projectedIdCoordDict[key], ",camera coords:", camereaIdCoordDict[key])
+    else:
+        print(key, "projected coords:", projectedIdCoordDict[key], ", camerea coords: NOT FOUND")
