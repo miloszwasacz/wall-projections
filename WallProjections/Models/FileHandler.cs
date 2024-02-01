@@ -185,9 +185,13 @@ public class FileHandler : IFileHandler
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// <exception cref="FileNotFoundException">If config file cannot be found in zip file</exception>
     /// TODO More effective error handling of invalid/missing config files
-    public static IConfig LoadConfig()
+    public static IConfig LoadConfig(string configLocation = null)
     {
-        var configLocation = Path.Combine(ConfigFolderPath, ConfigFileName);
+        if (configLocation is null)
+        {
+            configLocation = Path.Combine(ConfigFolderPath, ConfigFileName);
+        }
+
         FileStream configFile;
         try
         {
