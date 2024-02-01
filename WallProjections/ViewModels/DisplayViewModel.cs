@@ -42,6 +42,7 @@ Please report this to the museum staff.";
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <param name="pythonEventHandler">The <see cref="IPythonEventHandler" /> used to listen for Python events</param>
+    /// <param name="contentProvider">Allows a custom <see cref="IContentProvider"/> to be used.</param>
     public DisplayViewModel(
         IViewModelProvider vmProvider,
         IConfig config,
@@ -87,16 +88,19 @@ Please report this to the museum staff.";
             VideoViewModel.StopVideo();
             var media = _contentProvider.GetMedia(hotspotId);
 
-            Console.WriteLine($"Description {media.Description}");
+            if (media is null)
+            {
+                throw new IConfig.HotspotNotFoundException(hotspotId);
+            }
 
             Description = media.Description;
             // TODO Add support for multiple images/videos
             if (!media.ImagePaths.IsEmpty)
                 //TODO Make ImageViewModel not throw FileNotFoundException (display a placeholder instead)
-                ImageViewModel.ShowImage(media.ImagePaths.FirstOrDefault());
+                ImageViewModel.ShowImage(media.ImagePaths.FirstOrDefault()!);
             else if (!media.VideoPaths.IsEmpty)
             {
-                VideoViewModel.PlayVideo(media.VideoPaths.FirstOrDefault());
+                VideoViewModel.PlayVideo(media.VideoPaths.FirstOrDefault()!);
             }
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)

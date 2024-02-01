@@ -80,6 +80,6 @@ public class Hotspot
     public record Media(
         int Id,
         string Description,
-        ImmutableList<string> ImagePaths = null,
-        ImmutableList<string> VideoPaths = null);
+        ImmutableList<string> ImagePaths,
+        ImmutableList<string> VideoPaths);
 }

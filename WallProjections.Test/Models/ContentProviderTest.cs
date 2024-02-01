@@ -2,7 +2,6 @@
 using System.IO.Compression;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
-using WallProjections.Test.Mocks.Models;
 using static WallProjections.Test.TestExtensions;
 
 namespace WallProjections.Test.Models;

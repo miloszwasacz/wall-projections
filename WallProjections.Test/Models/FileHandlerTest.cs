@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text.Json;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -68,7 +69,7 @@ public class FileHandlerTest
 
         #endregion
 
-        var config = fileHandler.Load(TestZip);
+        fileHandler.Load(TestZip);
 
         var textFilePath = Path.Combine(FileHandler.ConfigFolderPath, TestTxtFile);
         Assert.Multiple(() =>
@@ -119,7 +120,7 @@ public class FileHandlerTest
     public void GetHotspotMediaTest()
     {
         IFileHandler fileHandler = new FileHandler();
-        var config = fileHandler.Load(TestZip);
+        fileHandler.Load(TestZip);
 
 
         var txtFilePath = Path.Combine(FileHandler.ConfigFolderPath, TestTxtFile);
@@ -134,25 +135,13 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that <see cref="FileHandler.CreateContentProvider" /> returns an instance of <see cref="IContentProvider" />
-    /// </summary>
-    [Test]
-    public void CreateContentProviderTest()
-    {
-        IFileHandler fileHandler = new FileHandler();
-        var config = fileHandler.Load(TestZip);
-        var contentProvider = new ContentProvider(config);
-        Assert.That(contentProvider, Is.InstanceOf<IContentProvider>());
-    }
-
-    /// <summary>
     /// Test that the temp folder is removed after running <see cref="FileHandler.Dispose" />
     /// </summary>
     [Test]
     public void DisposeTest()
     {
         var fileHandler = new FileHandler();
-        var config = fileHandler.Load(TestZip);
+        fileHandler.Load(TestZip);
 
         Assert.That(Directory.Exists(FileHandler.ConfigFolderPath), Is.True);
 
@@ -198,12 +187,12 @@ public class FileHandlerTest
         var fileHandler = new FileHandler();
         fileHandler.Load(TestZip);
 
-        System.Diagnostics.Process.Start("chmod", "000 " + FileHandler.ConfigFolderPath).WaitForExit();
+        Process.Start("chmod", "000 " + FileHandler.ConfigFolderPath).WaitForExit();
 
         Assert.That(() => fileHandler.Dispose(), Throws.Nothing);
         Assert.That(Directory.Exists(FileHandler.ConfigFolderPath), Is.True);
 
-        System.Diagnostics.Process.Start("chmod", "777 " + FileHandler.ConfigFolderPath).WaitForExit();
+        Process.Start("chmod", "777 " + FileHandler.ConfigFolderPath).WaitForExit();
 
         Assert.That(() => fileHandler.Dispose(), Throws.Nothing);
         Assert.That(Directory.Exists(FileHandler.ConfigFolderPath), Is.False);

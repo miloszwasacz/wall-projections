@@ -138,9 +138,9 @@ public class DisplayViewModelTest
     public void CreationTest(ImmutableList<Hotspot.Media> hotspots)
     {
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(hotspots.ConvertAll(hotspot =>
+        var config = new Config(hotspots.ConvertAll(item =>
             new Hotspot(
-                hotspot.Id,
+                item.Id,
                 new Coord(0,0,0),
                 "test.txt",
                 ImmutableList<string>.Empty,
@@ -158,9 +158,9 @@ public class DisplayViewModelTest
     {
         var hotspot = hotspots[0];
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(hotspots.ConvertAll(hotspot =>
+        var config = new Config(hotspots.ConvertAll(item =>
             new Hotspot(
-                hotspot.Id,
+                item.Id,
                 new Coord(0,0,0),
                 "test.txt",
                 ImmutableList<string>.Empty,
@@ -178,16 +178,21 @@ public class DisplayViewModelTest
             Assert.That(displayViewModel.Description, Is.EqualTo(Text));
 
             Assert.That(imageViewModel.HideCount, Is.EqualTo(1));
-            if (hotspot.ImagePaths is not null)
-                Assert.That(imageViewModel.ImagePaths, Is.SubsetOf(hotspot.ImagePaths));
-            else
+            Assert.That(imageViewModel.ImagePaths, Is.SubsetOf(hotspot.ImagePaths));
+
+            if (hotspot.ImagePaths.IsEmpty)
+            {
                 Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
+            }
+
 
             Assert.That(videoViewModel.StopCount, Is.EqualTo(1));
-            if (hotspot.VideoPaths is not null && hotspot.ImagePaths is null)
-                Assert.That(videoViewModel.VideoPaths, Is.SubsetOf(hotspot.VideoPaths));
-            else
+            Assert.That(videoViewModel.VideoPaths, Is.SubsetOf(hotspot.VideoPaths));
+
+            if (hotspot.VideoPaths.IsEmpty)
+            {
                 Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);
+            }
         });
         displayViewModel.Dispose();
     }

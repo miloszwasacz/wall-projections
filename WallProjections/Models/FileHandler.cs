@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
@@ -15,14 +14,10 @@ public class FileHandler : IFileHandler
     private const string ConfigFolderName = "WallProjections";
     public static string ConfigFolderPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigFolderName);
 
-    public FileHandler()
-    {
-    }
-
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// TODO Handle errors from trying to load from not-found/invalid zip file
-    public IConfig? Load(string zipPath)
+    public IConfig Load(string zipPath)
     {
         // Clean up existing directory if in use
         if (Directory.Exists(ConfigFolderPath))
@@ -30,18 +25,10 @@ public class FileHandler : IFileHandler
 
         Directory.CreateDirectory(ConfigFolderPath);
 
-        try
-        {
-            ZipFile.ExtractToDirectory(zipPath, ConfigFolderPath);
-            Console.WriteLine("File extracted to {0}", ConfigFolderPath);
-            var config = LoadConfig();
-            return config;
-        }
-        catch (FileNotFoundException e)
-        {
-            Console.WriteLine(e);
-            throw e;
-        }
+        ZipFile.ExtractToDirectory(zipPath, ConfigFolderPath);
+        Console.WriteLine("File extracted to {0}", ConfigFolderPath);
+        var config = LoadConfig();
+        return config;
     }
 
     /// <inheritdoc />
@@ -116,8 +103,10 @@ public class FileHandler : IFileHandler
 
         var newConfig = new Config(newHotspots);
 
-        var serializerOptions = new JsonSerializerOptions();
-        serializerOptions.WriteIndented = true;
+        var serializerOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true
+        };
 
         var configString = JsonSerializer.Serialize(newConfig, serializerOptions);
 
@@ -186,12 +175,9 @@ public class FileHandler : IFileHandler
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// <exception cref="FileNotFoundException">If config file cannot be found in zip file</exception>
     /// TODO More effective error handling of invalid/missing config files
-    public static IConfig LoadConfig(string configLocation = null)
+    public static IConfig LoadConfig(string? configLocation = null)
     {
-        if (configLocation is null)
-        {
-            configLocation = Path.Combine(ConfigFolderPath, ConfigFileName);
-        }
+        configLocation ??= Path.Combine(ConfigFolderPath, ConfigFileName);
 
         FileStream configFile;
         try
