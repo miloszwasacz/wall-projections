@@ -21,34 +21,59 @@ public class ContentProviderTest
 
     private string _configPath = null!;
 
-    private readonly IConfig _mockConfig = new Config(Enumerable.Range(0, 5).Select(id => new Hotspot(
-        id,
-        new Coord(1, 1, 1),
-        "0.txt",
-        ImmutableList.Create("1.png"),
-        ImmutableList.Create("1.mp4")
-    )));
+    private readonly IConfig _mockConfig = new Config(new List<Hotspot>
+    {
+        new(
+            0,
+            new Coord(0,0,0),
+            "text_0.txt",
+            ImmutableList<string>.Empty,
+            ImmutableList<string>.Empty
+            ),
+        new(
+            1,
+            new Coord(0,0,0),
+            "text_1.txt",
+            new List<string>{ "image_1_0.png" }.ToImmutableList(),
+            new List<string>{ "video_1_0.mp4" }.ToImmutableList()
+            ),
+        new(
+            2,
+            new Coord(0,0,0),
+            "text_2.txt",
+            new List<string>{ "image_2_0.jpg", "image_2_1.jpeg" }.ToImmutableList(),
+            new List<string>{ "video_2_0.mkv", "video_2_1.mov" }.ToImmutableList()
+            )
+    });
 
-    private string MediaPath => Path.Combine(_configPath, ValidConfigPath, "Media");
-    private string InvalidMediaPath => Path.Combine(_configPath, InvalidConfigPath, "Media");
+    // Enumerable.Range(0, 5).Select(id => new Hotspot(
+    //     id,
+    // new Coord(1, 1, 1),
+    //     "text_0.txt",
+    // ImmutableList.Create("image_1_0.png"),
+    // ImmutableList.Create("video_1_0.mp4")
+    // ))
 
-    private string GetFullPath(int id, string file) => Path.Combine(MediaPath, id.ToString(), file);
+    private string MediaPath => Path.Combine(_configPath, ValidConfigPath);
+    private string InvalidMediaPath => Path.Combine(_configPath, InvalidConfigPath);
 
-    private string GetDescription(int id, string descFile) => File.ReadAllText(GetFullPath(id, descFile));
+    private string GetFullPath(string file) => Path.Combine(MediaPath, file);
+
+    private string GetDescription(string descFile) => File.ReadAllText(GetFullPath(descFile));
 
     private static IEnumerable<TestCaseData<(int, string, string[], string[])>> TestCases()
     {
         yield return MakeTestData(
-            (0, "0.txt", Array.Empty<string>(), Array.Empty<string>()),
+            (0, "text_0.txt", Array.Empty<string>(), Array.Empty<string>()),
             "TextOnly"
         );
         yield return MakeTestData(
-            (1, "1.txt", new[] { "1.png" }, new[] { "1.mp4" }),
+            (1, "text_1.txt", new[] { "image_1_0.png" }, new[] { "video_1_0.mp4" }),
             "FilenamesAreIDs"
         );
         yield return MakeTestData(
-            (2, "test2.txt", new[] { "1_2.jpg", "random.jpeg" }, new[] { "2.mkv", "2_1.mov" }),
-            "RandomFilenames"
+            (2, "text_2.txt", new[] { "image_2_0.jpg", "image_2_1.jpeg" }, new[] { "video_2_0.mkv", "video_2_1.mov" }),
+            "Multiple Files"
         );
     }
 
@@ -78,20 +103,20 @@ public class ContentProviderTest
     public void GetMediaTest((int, string, string[], string[]) testCase)
     {
         var (id, descPath, imagePaths, videoPaths) = testCase;
-        var provider = new ContentProvider(_mockConfig);
+        var provider = new ContentProvider(_mockConfig, Path.Combine(_configPath, ValidConfigPath));
 
         var media = provider.GetMedia(id);
-        var expectedDescription = GetDescription(id, descPath);
+        var expectedDescription = GetDescription(descPath);
         Assert.Multiple(() =>
         {
             Assert.That(media.Description, Is.EqualTo(expectedDescription));
             Assert.That(
-                imagePaths.Select(path => GetFullPath(id, path)),
-                media.ImagePath is not null ? Has.Member(GetFullPath(id, media.ImagePath)) : Is.Empty
+                imagePaths.Select(path => GetFullPath(path)),
+                media.ImagePath is not null ? Has.Member(GetFullPath(media.ImagePath)) : Is.Empty
             );
             Assert.That(
-                videoPaths.Select(path => GetFullPath(id, path)),
-                media.VideoPath is not null ? Has.Member(GetFullPath(id, media.VideoPath)) : Is.Empty
+                videoPaths.Select(path => GetFullPath(path)),
+                media.VideoPath is not null ? Has.Member(GetFullPath(media.VideoPath)) : Is.Empty
             );
         });
     }
@@ -99,7 +124,7 @@ public class ContentProviderTest
     [Test]
     public void GetMediaNoHotspotTest()
     {
-        var provider = new ContentProvider(_mockConfig);
+        var provider = new ContentProvider(_mockConfig, ValidConfigPath);
 
         Assert.Throws<IConfig.HotspotNotFoundException>(() => provider.GetMedia(-1));
     }
@@ -107,7 +132,7 @@ public class ContentProviderTest
     [Test]
     public void GetMediaNoDescriptionTest()
     {
-        var provider = new ContentProvider(_mockConfig);
+        var provider = new ContentProvider(_mockConfig, ValidConfigPath);
 
         Assert.Throws<FileNotFoundException>(() => provider.GetMedia(1));
     }
