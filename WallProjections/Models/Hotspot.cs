@@ -77,5 +77,9 @@ public class Hotspot
     }
 
     // TODO Add support for multiple images/videos
-    public record Media(int Id, string Description, string? ImagePath = null, string? VideoPath = null);
+    public record Media(
+        int Id,
+        string Description,
+        ImmutableList<string> ImagePaths = null,
+        ImmutableList<string> VideoPaths = null);
 }

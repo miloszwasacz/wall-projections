@@ -26,9 +26,9 @@ public class MockContentProvider : IContentProvider
     /// when <see cref="GetMedia" /> is called
     /// </summary>
     /// <param name="result"></param>
-    public MockContentProvider(List<Hotspot.Media> result)
+    public MockContentProvider(IEnumerable<Hotspot.Media> result)
     {
-        _media = result;
+        _media = new List<Hotspot.Media>(result);
     }
 
     /// <summary>

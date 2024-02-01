@@ -37,9 +37,10 @@ public class FileHandler : IFileHandler
             var config = LoadConfig();
             return config;
         }
-        catch (FileNotFoundException _)
+        catch (FileNotFoundException e)
         {
-            return null;
+            Console.WriteLine(e);
+            throw e;
         }
     }
 

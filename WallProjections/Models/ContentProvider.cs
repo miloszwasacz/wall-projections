@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using WallProjections.Models.Interfaces;
@@ -35,21 +36,12 @@ public class ContentProvider : IContentProvider
         var description = File.ReadAllText(fullDescriptionPath);
 
         //TODO Refactor to support multiple images and videos
-        string imagePath = null;
-        string videoPath = null;
+        ImmutableList<string> imagePaths = _folderPath == "" ? hotspot.FullImagePaths
+                : hotspot.ImagePaths.ConvertAll(path => Path.Combine(_folderPath, path));
 
-        if (!hotspot.ImagePaths.IsEmpty)
-        {
-            imagePath = _folderPath == "" ? hotspot.FullImagePaths.FirstOrDefault()
-                : Path.Combine(_folderPath, hotspot.ImagePaths.FirstOrDefault()) ;
-        }
+        ImmutableList<string> videoPaths = _folderPath == "" ? hotspot.FullVideoPaths
+            : hotspot.VideoPaths.ConvertAll(path => Path.Combine(_folderPath, path));
 
-        if (!hotspot.VideoPaths.IsEmpty)
-        {
-            videoPath = _folderPath == "" ? hotspot.FullVideoPaths.FirstOrDefault()
-                : Path.Combine(_folderPath, hotspot.VideoPaths.FirstOrDefault());
-        }
-
-        return new Hotspot.Media(hotspotId, description, imagePath, videoPath);
+        return new Hotspot.Media(hotspotId, description, imagePaths, videoPaths);
     }
 }

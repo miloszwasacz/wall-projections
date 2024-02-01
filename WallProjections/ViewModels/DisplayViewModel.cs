@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
@@ -44,14 +45,15 @@ Please report this to the museum staff.";
     public DisplayViewModel(
         IViewModelProvider vmProvider,
         IConfig config,
-        IPythonEventHandler pythonEventHandler
+        IPythonEventHandler pythonEventHandler,
+        IContentProvider? contentProvider = null
     )
     {
         ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
         _pythonEventHandler = pythonEventHandler;
         _pythonEventHandler.HotspotSelected += OnHotspotSelected;
-        _contentProvider = new ContentProvider(config);
+        _contentProvider = contentProvider ?? new ContentProvider(config);
     }
 
     /// <inheritdoc />
@@ -85,14 +87,16 @@ Please report this to the museum staff.";
             VideoViewModel.StopVideo();
             var media = _contentProvider.GetMedia(hotspotId);
 
+            Console.WriteLine($"Description {media.Description}");
+
             Description = media.Description;
             // TODO Add support for multiple images/videos
-            if (media.ImagePath is not null && media.ImagePath != "")
+            if (!media.ImagePaths.IsEmpty)
                 //TODO Make ImageViewModel not throw FileNotFoundException (display a placeholder instead)
-                ImageViewModel.ShowImage(media.ImagePath);
-            else if (media.VideoPath is not null && media.VideoPath != "")
+                ImageViewModel.ShowImage(media.ImagePaths.FirstOrDefault());
+            else if (!media.VideoPaths.IsEmpty)
             {
-                VideoViewModel.PlayVideo(media.VideoPath);
+                VideoViewModel.PlayVideo(media.VideoPaths.FirstOrDefault());
             }
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)

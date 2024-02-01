@@ -40,7 +40,7 @@ public class FileHandlerTest
     {
         IFileHandler fileHandler = new FileHandler();
         var config = fileHandler.Load(TestZip);
-        var config2 = new Config(new List<Hotspot> { new(0, new Coord(1,2,3), "test_0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty) });
+        var config2 = new Config(new List<Hotspot> { new(0, new Coord(1,2,3), "text_0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty) });
 
         Assert.That(config, Is.Not.Null);
         AssertConfigsEqual(config!, config2);

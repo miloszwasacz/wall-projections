@@ -46,14 +46,6 @@ public class ContentProviderTest
             )
     });
 
-    // Enumerable.Range(0, 5).Select(id => new Hotspot(
-    //     id,
-    // new Coord(1, 1, 1),
-    //     "text_0.txt",
-    // ImmutableList.Create("image_1_0.png"),
-    // ImmutableList.Create("video_1_0.mp4")
-    // ))
-
     private string MediaPath => Path.Combine(_configPath, ValidConfigPath);
     private string InvalidMediaPath => Path.Combine(_configPath, InvalidConfigPath);
 
@@ -111,12 +103,10 @@ public class ContentProviderTest
         {
             Assert.That(media.Description, Is.EqualTo(expectedDescription));
             Assert.That(
-                imagePaths.Select(path => GetFullPath(path)),
-                media.ImagePath is not null ? Has.Member(GetFullPath(media.ImagePath)) : Is.Empty
+                imagePaths.Select(GetFullPath).ToImmutableList(), Is.EqualTo(media.ImagePaths)
             );
             Assert.That(
-                videoPaths.Select(path => GetFullPath(path)),
-                media.VideoPath is not null ? Has.Member(GetFullPath(media.VideoPath)) : Is.Empty
+                videoPaths.Select(GetFullPath).ToImmutableList(), Is.EqualTo(media.VideoPaths)
             );
         });
     }
