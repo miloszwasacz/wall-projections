@@ -36,9 +36,9 @@ def drawArucos(projectedCoords : Dict[int, Tuple[int, int]], arucoDict : aruco.D
     image=np.full((1080,1920), 255,np.uint8) #generate empty background
     for iD in projectedCoords: #id is the name of a built in function in python, so use iD
         arucoImage = aruco.generateImageMarker(arucoDict, iD, 100, borderBits= 1) #fetch ArUco
-        topLeftCoord = projectedCoords[iD]
+        topLeftCorner = projectedCoords[iD]
         #replace pixels in background with ArUco image
-        image[topLeftCoord[0]:topLeftCoord[0]+arucoImage.shape[0], topLeftCoord[1]:topLeftCoord[1]+arucoImage.shape[1]] = arucoImage
+        image[topLeftCorner[0]:topLeftCorner[0]+arucoImage.shape[0], topLeftCorner[1]:topLeftCorner[1]+arucoImage.shape[1]] = arucoImage
     return image
 
 def detectArucos(img : np.ndarray, arucoDict : aruco.Dictionary, displayResults = False) -> Dict[int, Tuple[int, int]]:
@@ -48,25 +48,44 @@ def detectArucos(img : np.ndarray, arucoDict : aruco.Dictionary, displayResults 
     :param displayResults: displays the img with detected ArUcos highlighted
 
     """
-    corners, ids, _ = aruco.detectMarkers(img, arucoDict, parameters=aruco.DetectorParameters)
+    corners, ids, _ = aruco.detectMarkers(img, arucoDict, parameters=aruco.DetectorParameters())
     
     if displayResults == True:
         cv2.imshow("Labled Aruco Markers", aruco.drawDetectedMarkers(img, corners, ids))
         cv2.waitKey(3000)
     
-    id2Coords = {}
+    detectedCoords = {}
     if ids is None:
-        return id2Coords
+        return detectedCoords
     for i in range(ids.size):
         iD = ids[i][0]
-        corner = (int(corners[i][0][0][0]), int(corners[i][0][0][1]))
-        id2Coords[iD] = corner
-    return id2Coords
+        topLeftCorner = (int(corners[i][0][0][0]), int(corners[i][0][0][1]))
+        detectedCoords[iD] = topLeftCorner
+    return detectedCoords
 
 
+def getTransformationMatrix(fromCoords : Dict[int, Tuple[int, int]], toCoords : Dict[int, Tuple[int, int]]) -> np.ndarray:
+    """
+    Returns a transformation matrix from the coords stored in one dictionary to another
+    """
+    
+
+
+    fromArray = []
+    toArray = []
+    for iD in fromCoords:
+        if iD in toCoords: #if iD in both dictionaries
+            fromArray.append(fromCoords[iD])
+            toArray.append(toCoords[iD])
+
+    if len(fromArray) < 4:
+        print(len(fromArray), "matching coords found, at least 4 are required for calibration.")
+        return
+
+    return cv2.getPerspectiveTransform(fromArray, toArray)
 
 if __name__ == "__main__":
-    #generate an id2Coord dictionary
+    #generate an example projectCoords dictionary
     projectedCoords = {}
     k = 0
     for i in range(6):
@@ -79,3 +98,7 @@ if __name__ == "__main__":
 
     cv2.imshow("Calibration", drawArucos(projectedCoords, arucoDict))
     cv2.waitKey(800)
+
+    cameraCoords = detectArucos(takePhoto(), arucoDict)
+
+    print(getTransformationMatrix(cameraCoords, projectedCoords))
