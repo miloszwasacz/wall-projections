@@ -28,31 +28,54 @@ def takePhoto() -> np.ndarray:
     
     return image
 
-def drawArucos(id2Coords : Dict[int, Tuple[int, int]], id2Arucos : aruco.Dictionary) -> np.ndarray:
+def drawArucos(projectedCoords : Dict[int, Tuple[int, int]], arucoDict : aruco.Dictionary) -> np.ndarray:
     """
     Takes in a dictionary of coordinates and of ArUcos, 
     and returns a white image with an ArUco drawn at each coordinate
     """
     image=np.full((1080,1920), 255,np.uint8) #generate empty background
-    for key in id2Coords: #id is the name of a built in function in python, so used var name key.
-        arucoImage = aruco.generateImageMarker(id2Arucos, key, 100, borderBits= 1) #fetch ArUco
-        topLeftCoord = id2Coords[key]
+    for iD in projectedCoords: #id is the name of a built in function in python, so use iD
+        arucoImage = aruco.generateImageMarker(arucoDict, iD, 100, borderBits= 1) #fetch ArUco
+        topLeftCoord = projectedCoords[iD]
         #replace pixels in background with ArUco image
         image[topLeftCoord[0]:topLeftCoord[0]+arucoImage.shape[0], topLeftCoord[1]:topLeftCoord[1]+arucoImage.shape[1]] = arucoImage
     return image
 
+def detectArucos(img : np.ndarray, arucoDict : aruco.Dictionary, displayResults = False) -> Dict[int, Tuple[int, int]]:
+    """
+    Detects ArUcos in an image and returns a dictionary of ids to coords to the top left corner
+
+    :param displayResults: displays the img with detected ArUcos highlighted
+
+    """
+    corners, ids, _ = aruco.detectMarkers(img, arucoDict, parameters=aruco.DetectorParameters)
+    
+    if displayResults == True:
+        cv2.imshow("Labled Aruco Markers", aruco.drawDetectedMarkers(img, corners, ids))
+        cv2.waitKey(3000)
+    
+    id2Coords = {}
+    if ids is None:
+        return id2Coords
+    for i in range(ids.size):
+        iD = ids[i][0]
+        corner = (int(corners[i][0][0][0]), int(corners[i][0][0][1]))
+        id2Coords[iD] = corner
+    return id2Coords
+
+
 
 if __name__ == "__main__":
     #generate an id2Coord dictionary
-    id2Coords = {}
+    projectedCoords = {}
     k = 0
     for i in range(6):
         for j  in range(12):
-            id2Coords[k] = (25+(150*i), 25+(150*j))
+            projectedCoords[k] = (25+(150*i), 25+(150*j))
             k = k+1 
     
-    id2Arucos = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
+    arucoDict = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
 
 
-    cv2.imshow("Calibration", drawArucos(id2Coords, id2Arucos))
+    cv2.imshow("Calibration", drawArucos(projectedCoords, arucoDict))
     cv2.waitKey(800)
