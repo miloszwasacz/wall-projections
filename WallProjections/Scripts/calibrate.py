@@ -95,10 +95,14 @@ if __name__ == "__main__":
     
     arucoDict = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
 
+    cv2.namedWindow("Calibration", cv2.WINDOW_FULLSCREEN)
 
     cv2.imshow("Calibration", drawArucos(projectedCoords, arucoDict))
     cv2.waitKey(800)
 
     cameraCoords = detectArucos(takePhoto(), arucoDict, displayResults=True)
 
-    print(getTransformationMatrix(cameraCoords, projectedCoords))
+    camera2ProjectorMatrix = getTransformationMatrix(cameraCoords, projectedCoords)
+
+    print(camera2ProjectorMatrix)
+    #cv2.warpPerspective() to use matrix 

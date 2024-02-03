@@ -1,70 +1,22 @@
-import cv2
-import mediapipe as mp
-import logging
-from abc import ABC, abstractmethod
-from typing import NamedTuple
-import numpy as np
-from EventListener import *
-from Hotspot import *
 from calibrate import *
+from main import *
+import numpy as np
+import cv2
+from cv2 import aruco
+from typing import Dict, Tuple
 
 
+hotspots: list[Hotspot] = []
+"""The global list of hotspots."""
 
-logging.basicConfig(level=logging.INFO)
+def transformFingertips(fingertips, matrix):
+    newFingertips = []
+    for fingertip in fingertips:
+        newFingertips.append(cv2.warpPerspective(np.array(fingertip), matrix, (1080,1920)))
+    
+    return newFingertips
 
-
-MAX_NUM_HANDS: int = 4
-"""The maximum number of hands to detect."""
-
-MIN_DETECTION_CONFIDENCE: float = 0.5
-"""The minimum confidence for hand detection to be considered successful.
-
-Must be between 0 and 1.
-
-See https://developers.google.com/mediapipe/solutions/vision/hand_landmarker."""
-
-MIN_TRACKING_CONFIDENCE: float = 0.5
-"""The minimum confidence for hand detection to be considered successful.
-
-Must be between 0 and 1.
-
-See https://developers.google.com/mediapipe/solutions/vision/hand_landmarker."""
-
-FINGERTIP_INDICES: tuple[int, ...] = (4, 8, 12, 16, 20)
-"""The indices for the thumb fingertip, index fingertip, ring fingertip, etc. 
-
-This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
-
-VIDEO_CAPTURE_TARGET: int | str = 0
-"""Camera ID, video filename, image sequence filename or video stream URL to capture video from.
-
-Set to 0 to use default camera.
-
-See https://docs.opencv.org/3.4/d8/dfe/classcv_1_1VideoCapture.html#a949d90b766ba42a6a93fe23a67785951 for details."""
-
-VIDEO_CAPTURE_BACKEND: int = cv2.CAP_ANY
-"""The API backend to use for capturing video. 
-
-Use ``cv2.CAP_ANY`` to auto-detect. 
-
-See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html for more options."""
-
-VIDEO_CAPTURE_PROPERTIES: dict[int, int] = {}
-"""Extra properties to use for OpenCV video capture.
-
-Tweaking these properties could be found useful in case of any issues with capturing video.
-
-See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d and
-https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
-
-BUTTON_COOLDOWN: float = 1.5
-"""The number of seconds for which the finger must be over the hotspot until the 
-button activates. Once the finger leaves the hotspot, it also takes this amount
-of time to \"cool down\"."""
-
-
-
-def run(event_listener: EventListener) -> None:  # This function is called by Program.cs
+def run2(event_listener: EventListener, transformMatrix) -> None:  # This function is called by Program.cs
     """
     Captures video and runs the hand-detection model to handle the hotspots.
 
@@ -94,7 +46,6 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
     logging.info("Initialisation done.")
 
     # basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
-    cv2.namedWindow("Projected Hotspots", cv2.WINDOW_FULLSCREEN)
 
     while video_capture.isOpened():
         success, video_capture_img = video_capture.read()
@@ -108,14 +59,14 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
         video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
         model_output = hands_model.process(video_capture_img_rgb)
 
-
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
             fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
                                 model_output.multi_hand_landmarks]
 
+            transformedFingertips = transformFingertips(fingertip_coords, transformMatrix)
             for hotspot in hotspots:
-                hotspot_just_activated = hotspot.update(fingertip_coords)
+                hotspot_just_activated = hotspot.update(transformedFingertips)
 
                 if hotspot_just_activated:
                     # make sure there's no other active hotspots
@@ -126,12 +77,13 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 
                     event_listener.OnPressDetected(hotspot.id)
 
-            # # draw hand landmarks
-            # for landmarks in model_output.multi_hand_landmarks:
-            #     mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
-            #                                               connections=mp.solutions.hands.HAND_CONNECTIONS)
+            # draw hand landmarks
+            for landmarks in model_output.multi_hand_landmarks:
+                mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
+                                                          connections=mp.solutions.hands.HAND_CONNECTIONS)
 
-        image=np.full((1080,1920), 255,np.uint8) #generate empty background
+        # draw hotspot
+        image=np.full((1080,1920), 0,np.uint8) #generate empty background
         # draw hotspot
         for hotspot in hotspots:
             hotspot.draw(image)
@@ -156,9 +108,28 @@ def media_finished() -> None:
         hotspot.deactivate()
 
 
+
 if __name__ == "__main__":
+    #generate an example projectCoords dictionary
+    projectedCoords = {}
+    k = 0
+    for i in range(6):
+        for j  in range(12):
+            projectedCoords[k] = (25+(150*i), 25+(150*j))
+            k = k+1 
+    
+    arucoDict = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
+
+    cv2.namedWindow("Calibration", cv2.WINDOW_FULLSCREEN)
+    cv2.imshow("Calibration", drawArucos(projectedCoords, arucoDict))
+    cv2.waitKey(800)
+
+    cameraCoords = detectArucos(takePhoto(), arucoDict, displayResults=False)
+
+    camera2ProjectorMatrix = getTransformationMatrix(cameraCoords, projectedCoords)
+
     class MyEventListener(EventListener):
         def OnPressDetected(self, hotspot_id):
             print(f"Hotspot {hotspot_id} activated.")
 
-    run(MyEventListener())
+    run2(MyEventListener(), camera2ProjectorMatrix)
