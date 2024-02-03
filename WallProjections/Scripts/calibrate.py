@@ -41,7 +41,7 @@ def drawArucos(projectedCoords : Dict[int, Tuple[int, int]], arucoDict : aruco.D
         image[topLeftCorner[0]:topLeftCorner[0]+arucoImage.shape[0], topLeftCorner[1]:topLeftCorner[1]+arucoImage.shape[1]] = arucoImage
     return image
 
-def detectArucos(img : np.ndarray, arucoDict : aruco.Dictionary, displayResults = False) -> Dict[int, Tuple[int, int]]:
+def detectArucos(img : np.ndarray, arucoDict : aruco.Dictionary, displayResults = False) -> Dict[int, Tuple[np.float32, np.float32]]:
     """
     Detects ArUcos in an image and returns a dictionary of ids to coords to the top left corner
 
@@ -59,7 +59,7 @@ def detectArucos(img : np.ndarray, arucoDict : aruco.Dictionary, displayResults 
         return detectedCoords
     for i in range(ids.size):
         iD = ids[i][0]
-        topLeftCorner = (int(corners[i][0][0][0]), int(corners[i][0][0][1]))
+        topLeftCorner = (corners[i][0][0][0], corners[i][0][0][1])
         detectedCoords[iD] = topLeftCorner
     return detectedCoords
 
@@ -68,9 +68,6 @@ def getTransformationMatrix(fromCoords : Dict[int, Tuple[int, int]], toCoords : 
     """
     Returns a transformation matrix from the coords stored in one dictionary to another
     """
-    
-
-
     fromArray = []
     toArray = []
     for iD in fromCoords:
@@ -81,8 +78,11 @@ def getTransformationMatrix(fromCoords : Dict[int, Tuple[int, int]], toCoords : 
     if len(fromArray) < 4:
         print(len(fromArray), "matching coords found, at least 4 are required for calibration.")
         return
+    
+    fromNpArray = np.array(fromArray, dtype=np.float32)
+    toNpArray = np.array(toArray, dtype=np.float32)
 
-    return cv2.getPerspectiveTransform(fromArray, toArray)
+    return cv2.findHomography(fromNpArray, toNpArray)
 
 if __name__ == "__main__":
     #generate an example projectCoords dictionary
@@ -99,6 +99,6 @@ if __name__ == "__main__":
     cv2.imshow("Calibration", drawArucos(projectedCoords, arucoDict))
     cv2.waitKey(800)
 
-    cameraCoords = detectArucos(takePhoto(), arucoDict)
+    cameraCoords = detectArucos(takePhoto(), arucoDict, displayResults=True)
 
     print(getTransformationMatrix(cameraCoords, projectedCoords))
