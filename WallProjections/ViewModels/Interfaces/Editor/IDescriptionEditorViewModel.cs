@@ -21,9 +21,7 @@ public interface IDescriptionEditorViewModel
     public bool IsEnabled { get; }
 
     /// <summary>
-    /// Imports the hotspot's description from a file. The contents of the file
-    /// are put directly into <see cref="Description" />.
+    /// A viewmodel for importing hotspot's title and description from a file.
     /// </summary>
-    /// <param name="path">A path to the file containing the description.</param>
-    public void ImportFromFile(string path);
+    public IImportViewModel Importer { get; }
 }

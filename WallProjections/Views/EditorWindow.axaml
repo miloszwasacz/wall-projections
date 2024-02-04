@@ -31,7 +31,8 @@
 
         <editor:DescriptionEditor Grid.Column="2" Grid.Row="0" Grid.RowSpan="3"
                                   Spacing="15"
-                                  DataContext="{Binding DescriptionEditor}" />
+                                  DataContext="{Binding DescriptionEditor}"
+                                  ImportDescription="DescriptionEditor_OnImportDescription" />
 
         <editor:MediaEditor Grid.Column="4" Grid.Row="0"
                             DataContext="{Binding ImageEditor}"

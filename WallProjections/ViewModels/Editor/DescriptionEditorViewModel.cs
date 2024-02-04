@@ -36,8 +36,10 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
         get => _hotspot?.Title ?? "";
         set
         {
-            if (_hotspot != null)
-                _hotspot.Title = value;
+            if (_hotspot is null) return;
+
+            _hotspot.Title = value;
+            this.RaisePropertyChanged();
         }
     }
 
@@ -52,8 +54,10 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
         get => _hotspot?.Description ?? "";
         set
         {
-            if (_hotspot != null)
-                _hotspot.Description = value;
+            if (_hotspot is null) return;
+
+            _hotspot.Description = value;
+            this.RaisePropertyChanged();
         }
     }
 
@@ -63,8 +67,14 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
     public bool IsEnabled => _hotspot is not null;
 
     /// <inheritdoc />
-    public void ImportFromFile(string path)
+    public IImportViewModel Importer { get; }
+
+    /// <summary>
+    /// Creates a new <see cref="DescriptionEditorViewModel" />.
+    /// </summary>
+    public DescriptionEditorViewModel()
     {
-        throw new System.NotImplementedException("Importing description from a file");
+        //TODO Change to use ViewModelProvider
+        Importer = new ImportViewModel(this);
     }
 }
