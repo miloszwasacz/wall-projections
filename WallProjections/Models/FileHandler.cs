@@ -34,7 +34,13 @@ public class FileHandler : IFileHandler
     /// <inheritdoc />
     public bool Save(IConfig config)
     {
-        //TODO Implement saving
+        // Check if directory already exists. If not, create it.
+        if (!Directory.Exists(ConfigFolderPath))
+        {
+            Directory.CreateDirectory(ConfigFolderPath);
+        }
+
+
         var hotspots = config.Hotspots;
         var newHotspots = new List<Hotspot>();
 
@@ -54,14 +60,14 @@ public class FileHandler : IFileHandler
             }
             else
             {
-                File.Move(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));   
+                File.Move(Path.Combine(ConfigFolderPath, hotspot.DescriptionPath), Path.Combine(ConfigFolderPath, newDescriptionPath));
             }   
 
             // Move already imported image files.
             newImagePaths = UpdateFiles(
                 path => !Path.IsPathRooted(path),
                 File.Move,
-                newImagePaths,
+                hotspot.ImagePaths,
                 "image",
                 hotspot.Id.ToString() );
 
@@ -132,17 +138,21 @@ public class FileHandler : IFileHandler
         for (var i = 0; i < oldPaths.Count; i++)
         {
             var oldPath = oldPaths[i];
-            var newFileName = Path.GetFileName(oldPath);
+            var newPath = oldPath;
             if (filter(oldPath))
             {
+                var newFileName = Path.GetFileName(oldPath);
                 var extension = Path.GetExtension(oldPath);
-                newFileName = $"{type}_{id}_{i}.{extension}";
+                newFileName = $"{type}_{id}_{i}{extension}";
+                oldPath = Path.Combine(ConfigFolderPath, oldPath);
 
                 fileUpdateFunc(oldPath,
                     Path.Combine(ConfigFolderPath, newFileName));
+
+                newPath = newFileName;
             }
 
-            newPaths.Insert(i, newFileName);
+            newPaths.Insert(i, newPath);
         }
 
         return newPaths;

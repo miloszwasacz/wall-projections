@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Net;
 using System.Text.Json;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -196,6 +197,448 @@ public class FileHandlerTest
 
         Assert.That(() => fileHandler.Dispose(), Throws.Nothing);
         Assert.That(Directory.Exists(FileHandler.ConfigFolderPath), Is.False);
+    }
+
+    /// <summary>
+    /// Test that config is correctly saved in already existing empty config folder.
+    /// </summary>
+    [Test]
+    public void SaveBasicConfig()
+    {
+        #region Ensure Config Folder Reset
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(FileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(FileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(FileHandler.ConfigFolderPath));
+        }
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var config = new Config(ImmutableList<Hotspot>.Empty);
+
+        fileHandler.Save(config);
+
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
+
+        var newConfig = FileHandler.LoadConfig();
+
+        AssertConfigsEqual(config, newConfig);
+        fileHandler.Dispose();
+    }
+
+    /// <summary>
+    /// Test that config is correctly saved without previously existing config folder.
+    /// </summary>
+    [Test]
+    public void SaveBasicConfigNoFolder()
+    {
+        #region Ensure Config Folder Deleted
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(FileHandler.ConfigFolderPath));
+        }
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var config = new Config(ImmutableList<Hotspot>.Empty);
+
+        fileHandler.Save(config);
+
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
+
+        var newConfig = FileHandler.LoadConfig();
+
+        AssertConfigsEqual(config, newConfig);
+        fileHandler.Dispose();
+    }
+
+    /// <summary>
+    /// Test that config with a single hotspot with description is saved correctly with file imported.
+    /// </summary>
+    [Test]
+    public void SaveConfigWithDescription()
+    {
+        #region Ensure Config Folder Reset
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(FileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(FileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(FileHandler.ConfigFolderPath));
+        }
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var config = new Config(new List<Hotspot>
+        {
+            new(0, new Coord(0,0,0), textFilePath, ImmutableList<string>.Empty, ImmutableList<string>.Empty)
+        });
+
+        fileHandler.Save(config);
+
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt")));
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0, new Coord(0, 0, 0), "text_0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty)
+        });
+
+        var loadedConfig = FileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        fileHandler.Dispose();
+    }
+
+    /// <summary>
+    /// Test that config with a single hotspot with description and image is saved correctly.
+    /// </summary>
+    [Test]
+    public void SaveConfigWithDescriptionPlusImage()
+    {
+        #region Ensure Config Folder Reset
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(FileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(FileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(FileHandler.ConfigFolderPath));
+        }
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0,0,0),
+                textFilePath,
+                new List<string> { imageFilePath }.ToImmutableList(),
+                ImmutableList<string>.Empty )
+        });
+
+        fileHandler.Save(config);
+
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt")));
+
+        // File copied into the config folder.
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "image_0_0.png")));
+
+        // Original file not deleted.
+        Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png")));
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                "text_0.txt",
+                new List<string>{ "image_0_0.png" }.ToImmutableList(),
+                ImmutableList<string>.Empty )
+        });
+
+        var loadedConfig = FileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        fileHandler.Dispose();
+    }
+
+        /// <summary>
+    /// Test that config with a single hotspot with description and image is saved correctly.
+    /// </summary>
+    [Test]
+    public void SaveConfigWithTwoImages()
+    {
+        #region Ensure Config Folder Reset
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(FileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(FileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(FileHandler.ConfigFolderPath));
+        }
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+        var imageFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image_2.jpg");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0,0,0),
+                textFilePath,
+                new List<string> { imageFilePath, imageFilePath2 }.ToImmutableList(),
+                ImmutableList<string>.Empty )
+        });
+
+        fileHandler.Save(config);
+
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt")));
+
+        // File copied into the config folder.
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "image_0_0.png")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "image_0_1.jpg")));
+
+        // Original file not deleted.
+        Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png")));
+        Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image_2.jpg")));
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                "text_0.txt",
+                new List<string>{ "image_0_0.png", "image_0_1.jpg" }.ToImmutableList(),
+                ImmutableList<string>.Empty )
+        });
+
+        var loadedConfig = FileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        fileHandler.Dispose();
+    }
+
+    /// <summary>
+    /// Test that config with a single hotspot with description and video is saved correctly with files imported.
+    /// </summary>
+    [Test]
+    public void SaveConfigWithDescriptionPlusVideo()
+    {
+        #region Ensure Config Folder Reset
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(FileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(FileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(FileHandler.ConfigFolderPath));
+        }
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0,0,0),
+                textFilePath,
+                ImmutableList<string>.Empty,
+                new List<string>{ videoFilePath }.ToImmutableList() )
+        });
+
+        fileHandler.Save(config);
+
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt")));
+
+        // File copied into the config folder.
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "video_0_0.mp4")));
+
+        // Original file not deleted.
+        Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4")));
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                new List<string>{ "video_0_0.mp4" }.ToImmutableList() )
+        });
+
+        var loadedConfig = FileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        fileHandler.Dispose();
+    }
+
+    /// <summary>
+    /// Test that config with a two hotspots is saved correctly with files imported.
+    /// </summary>
+    [Test]
+    public void SaveConfigWithTwoHotspots()
+    {
+        #region Ensure Config Folder Reset
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(FileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(FileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(FileHandler.ConfigFolderPath));
+        }
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var textFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_2.txt");
+        var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+        var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0,0,0),
+                textFilePath,
+                new List<string>{ imageFilePath }.ToImmutableList(),
+                new List<string>{ videoFilePath }.ToImmutableList() ),
+            new (1,
+                new Coord(0,0,0),
+                textFilePath2,
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        fileHandler.Save(config);
+
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt")));
+
+        // File copied into the config folder.
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "video_0_0.mp4")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "image_0_0.png")));
+
+        // Original files not deleted.
+        Assert.That(File.Exists(textFilePath));
+        Assert.That(File.Exists(textFilePath2));
+        Assert.That(File.Exists(imageFilePath));
+        Assert.That(File.Exists(videoFilePath));
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        savedTextFileContents = File.ReadAllText(Path.Combine(FileHandler.ConfigFolderPath, "text_1.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a second test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                "text_0.txt",
+                new List<string>{ "image_0_0.png" }.ToImmutableList(),
+                new List<string>{ "video_0_0.mp4" }.ToImmutableList() ),
+            new(1,
+                new Coord(0, 0, 0),
+                "text_1.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty )
+        });
+
+        var loadedConfig = FileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        fileHandler.Dispose();
+    }
+
+    /// <summary>
+    /// Test that config with relative files already imported is saved correctly.
+    /// </summary>
+    [Test]
+    public void SaveConfigWithRelativeFiles()
+    {
+        #region Ensure Config Folder Reset
+        if (Directory.Exists(FileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(FileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(FileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(FileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(FileHandler.ConfigFolderPath));
+        }
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var textFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_2.txt");
+        var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+        var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0,0,0),
+                textFilePath,
+                new List<string>{ imageFilePath }.ToImmutableList(),
+                new List<string>{ videoFilePath }.ToImmutableList() ),
+            new (1,
+                new Coord(0,0,0),
+                textFilePath2,
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        fileHandler.Save(config);
+
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                 ImmutableList<string>.Empty),
+            new(1,
+                new Coord(0, 0, 0),
+                "text_1.txt",
+                new List<string>{ "image_0_0.png" }.ToImmutableList(),
+                new List<string>{ "video_0_0.mp4" }.ToImmutableList() )
+        });
+
+        fileHandler.Save(newConfig);
+
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "text_0.txt")));
+
+        // File copied into the config folder.
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "video_1_0.mp4")));
+        Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "image_1_0.png")));
+
+        // Original files removed from the config folder.
+        Assert.That(!File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "video_0_0.mp4")));
+        Assert.That(!File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "image_0_0.png")));
+
+        newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty),
+            new(1,
+                new Coord(0, 0, 0),
+                "text_1.txt",
+                new List<string> { "image_1_0.png" }.ToImmutableList(),
+                new List<string> { "video_1_0.mp4" }.ToImmutableList())
+        });
+
+        var loadedConfig = FileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        fileHandler.Dispose();
     }
 
     /// <summary>
