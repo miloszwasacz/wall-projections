@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -33,14 +34,18 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
         switch (e.Key)
         {
             case Key.Escape:
-                var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
                 lifetime?.Shutdown();
                 return;
             case Key.F11:
                 WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
+                return;
+            case Key.D:
+                new FileHandler().Dispose();
+                lifetime?.Shutdown();
                 return;
         }
 

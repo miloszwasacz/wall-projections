@@ -32,7 +32,6 @@ public class ContentProvider : IContentProvider
             throw new FileNotFoundException($"No description file at {fullDescriptionPath}", hotspot.DescriptionPath);
         }
 
-        Console.WriteLine($"Full description path {fullDescriptionPath}");
         var description = File.ReadAllText(fullDescriptionPath);
 
         //TODO Refactor to support multiple images and videos
