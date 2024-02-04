@@ -133,7 +133,7 @@ class Hotspot:
         self._is_activated: bool = False
         self._time_activated: float = 0
 
-    def draw(self, img: cv2.typing.MatLike) -> None:
+    def draw(self, img) -> None:
         img_width = img.shape[1]
         img_height = img.shape[0]
 
