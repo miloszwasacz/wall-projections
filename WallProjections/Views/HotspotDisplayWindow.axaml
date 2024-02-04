@@ -7,16 +7,46 @@
         x:Class="WallProjections.Views.HotspotDisplayWindow"
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
-    <Canvas Background="Black">
-        <Ellipse Fill="White" Width="{Binding Coordinates[0].R}" Height="{Binding Coordinates[0].R}" Canvas.Left="{Binding Coordinates[0].X}" Canvas.Top="{Binding Coordinates[0].Y}"/>
+    <!-- <Canvas Background="Black"> -->
+        <!--TODO change radius to diameter -->
+        <!-- <Ellipse Fill="White" Width="{Binding Coordinates[0].R}" Height="{Binding Coordinates[0].R}" Canvas.Left="{Binding Coordinates[0].X}" Canvas.Top="{Binding Coordinates[0].Y}"/> -->
+        <!--TODO change the position of the circle and implement non hard coded values-->
+        <!--TODO add multiple circles-->
+        <Window.Styles>
+            <Style Selector="Rectangle.red">
+                <Setter Property="Height" Value="100"/>
+                <Setter Property="Width" Value="100"/>
+                <Setter Property="Fill" Value="White"/>
+                <Setter Property="RadiusX" Value="50"/>
+                <Setter Property="RadiusY" Value="50"/>
+                <Style.Animations>
+                    <Animation Duration="0:0:1" Delay="0:0:3" PlaybackDirection="AlternateReverse" IterationCount="INFINITE"> 
+                        <KeyFrame Cue="0%">
+                            <Setter Property="Height" Value="125"/>
+                            <Setter Property="Width" Value="125"/>
+                            <Setter Property="RadiusX" Value="62.5"/>
+                            <Setter Property="RadiusY" Value="62.5"/>
+                        </KeyFrame>
+                        <KeyFrame Cue="100%">
+                            <Setter Property="Height" Value="100"/>
+                            <Setter Property="Width" Value="100"/>
+                            <Setter Property="RadiusX" Value="50"/>
+                            <Setter Property="RadiusY" Value="50"/>
+                        </KeyFrame>
+                    </Animation>
+                </Style.Animations>
+            </Style>
+            
+        </Window.Styles>
 
-        <ItemsControl ItemsSource="{Binding Coordinates}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Ellipse Fill="White" Width="{Binding R}" Height="{Binding R}" Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </Canvas>
+        <Rectangle Classes="red"/>
 </Window>
+        <!-- <ItemsControl ItemsSource="{Binding Coordinates}"> -->
+        <!--     <ItemsControl.ItemTemplate> -->
+        <!--         <DataTemplate> -->
+        <!--             <Ellipse Fill="White" Width="{Binding R}" Height="{Binding R}" Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/> -->
+        <!--         </DataTemplate> -->
+        <!--     </ItemsControl.ItemTemplate> -->
+        <!-- </ItemsControl> -->
+    <!-- </Canvas> -->
 
