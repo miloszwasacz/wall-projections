@@ -18,7 +18,8 @@
               ColumnDefinitions="*" RowDefinitions="*, 15, Auto">
 
             <editor:HotspotList Grid.Column="0" Grid.Row="0"
-                                DataContext="{Binding}" />
+                                DataContext="{Binding}"
+                                DeleteHotspot="HotspotList_OnDeleteHotspot" />
 
             <Button Grid.Column="0" Grid.Row="2"
                     HorizontalAlignment="Stretch"

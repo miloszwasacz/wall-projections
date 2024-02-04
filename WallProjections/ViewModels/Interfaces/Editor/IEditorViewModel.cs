@@ -41,6 +41,12 @@ public interface IEditorViewModel<T>
     /// Adds a new hotspot and selects it.
     /// </summary>
     public void AddHotspot();
+
+    /// <summary>
+    /// Deletes the given hotspot.
+    /// </summary>
+    /// <param name="hotspot">The hotspot to delete.</param>
+    public void DeleteHotspot(T hotspot);
 }
 
 /// <summary>

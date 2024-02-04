@@ -74,6 +74,13 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         SelectedHotspot = newHotspot;
     }
 
+    /// <inheritdoc />
+    public void DeleteHotspot(EditorHotspotViewModel hotspot)
+    {
+        Hotspots.Remove(hotspot);
+        SelectedHotspot = Hotspots.FirstOrDefault();
+    }
+
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" />, not linked to any existing <see cref="IConfig" />.
     /// </summary>

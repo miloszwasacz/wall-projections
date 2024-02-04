@@ -1,0 +1,46 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:WallProjections.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WallProjections.Views.ConfirmationDialog"
+        x:DataType="vm:ConfirmationDialogViewModel"
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="WidthAndHeight"
+        ShowInTaskbar="False"
+        CanResize="False"
+        Icon="{Binding Icon}"
+        Title="{Binding Title}">
+
+    <!--TODO Style this and children properly -->
+    <StackPanel Spacing="20"
+                Margin="20">
+
+        <TextBlock MaxWidth="256"
+                   TextWrapping="Wrap"
+                   Text="{Binding Message}" />
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="10">
+
+            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Click="Confirm_OnClick">
+
+                <TextBlock Text="{Binding ConfirmButtonText}" />
+
+            </Button>
+
+            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Click="Cancel_OnClick">
+
+                <TextBlock Text="{Binding CancelButtonText}" />
+
+            </Button>
+
+        </StackPanel>
+
+    </StackPanel>
+
+</Window>

@@ -1,13 +1,23 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.Views.EditorUserControls;
 using ImportWarningDialog = WallProjections.Views.EditorUserControls.ImportWarningDialog;
 
 namespace WallProjections.Views;
 
 public partial class EditorWindow : Window
 {
+    /// <summary>
+    /// The path to the warning icon.
+    /// </summary>
+    private static readonly Uri WarningIconPath = new("avares://WallProjections/Assets/warning-icon.ico");
+
+    /// <summary>
+    /// Whether any dialog is currently shown.
+    /// </summary>
     private bool _isDialogShown;
 
     public EditorWindow()
@@ -64,6 +74,30 @@ public partial class EditorWindow : Window
         {
             DataContext = importer
         };
+        _isDialogShown = true;
+        await dialog.ShowDialog(this);
+        _isDialogShown = false;
+    }
+
+    /// <summary>
+    /// Shows a <see cref="ConfirmationDialog">dialog</see> to confirm the deletion of a hotspot.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private async void HotspotList_OnDeleteHotspot(object? sender, HotspotList.DeleteArgs e)
+    {
+        if (_isDialogShown) return;
+
+        if (DataContext is not IEditorViewModel vm) return;
+
+        var dialog = new ConfirmationDialog(
+            "Delete Hotspot",
+            WarningIconPath,
+            "Are you sure you want to delete this hotspot? All associated data will be lost.",
+            "Delete"
+        );
+        dialog.Confirm += (_, _) => vm.DeleteHotspot(e.Hotspot);
+
         _isDialogShown = true;
         await dialog.ShowDialog(this);
         _isDialogShown = false;
