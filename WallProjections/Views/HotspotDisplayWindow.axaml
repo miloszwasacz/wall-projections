@@ -8,7 +8,6 @@
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
     
-    <!-- TODO change radius to diameter -->
     <!-- TODO input values into style so varying sizes-->
     <!-- TODO have event to trigger animations -->
     <!-- TODO expand from center -->
@@ -18,12 +17,6 @@
                 <Setter Property="Fill" Value="White"/>
                 <Style.Animations>
                     <Animation Duration="0:0:1" PlaybackDirection="AlternateReverse" IterationCount="INFINITE"> 
-                        <KeyFrame Cue="0%">
-                            <Setter Property="Height" Value="125"/>
-                            <Setter Property="Width" Value="125"/>
-                            <Setter Property="RadiusX" Value="62.5"/>
-                            <Setter Property="RadiusY" Value="62.5"/>
-                        </KeyFrame>
                         <KeyFrame Cue="100%">
                             <Setter Property="Height" Value="100"/>
                             <Setter Property="Width" Value="100"/>
@@ -39,7 +32,12 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Canvas Background="Black">
-                        <Rectangle Classes="white" Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" HorizontalAlignment="Center"/>   
+                        <Rectangle Classes="white" 
+                                   Height="{Binding D}" 
+                                   Width="{Binding D}" 
+                                   RadiusX="{Binding R}" 
+                                   RadiusY="{Binding R}" 
+                                   Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/>
                     </Canvas>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

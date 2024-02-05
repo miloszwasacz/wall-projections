@@ -5,5 +5,5 @@ namespace WallProjections.ViewModels.Interfaces;
 
 public interface IHotspotViewModel
 {
-    public List<Coord> Coordinates { get; }
+    public List<HotCoord> Coordinates { get; }
 }
