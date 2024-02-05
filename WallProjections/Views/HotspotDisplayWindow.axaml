@@ -8,17 +8,16 @@
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
     
-    <!--TODO change radius to diameter -->
-        <!--TODO implement non hard coded values-->
+    <!-- TODO change radius to diameter -->
+    <!-- TODO input values into style so varying sizes-->
+    <!-- TODO have event to trigger animations -->
+    <!-- TODO expand from center -->
+    
         <Window.Styles>
             <Style Selector="Rectangle.white">
-                <Setter Property="Height" Value="100"/>
-                <Setter Property="Width" Value="100"/>
                 <Setter Property="Fill" Value="White"/>
-                <Setter Property="RadiusX" Value="50"/>
-                <Setter Property="RadiusY" Value="50"/>
                 <Style.Animations>
-                    <Animation Duration="0:0:1" Delay="0:0:3" PlaybackDirection="AlternateReverse" IterationCount="INFINITE"> 
+                    <Animation Duration="0:0:1" PlaybackDirection="AlternateReverse" IterationCount="INFINITE"> 
                         <KeyFrame Cue="0%">
                             <Setter Property="Height" Value="125"/>
                             <Setter Property="Width" Value="125"/>
@@ -36,24 +35,14 @@
             </Style>
         </Window.Styles>
     
-    
-        <Canvas Background="Black">
-            <ItemsControl ItemsSource="{Binding Coordinates}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Rectangle Classes="white" Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/>            
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </Canvas>
-        
+        <ItemsControl ItemsSource="{Binding Coordinates}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Canvas Background="Black">
+                        <Rectangle Classes="white" Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" HorizontalAlignment="Center"/>   
+                    </Canvas>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 </Window>
-        <!-- <ItemsControl ItemsSource="{Binding Coordinates}"> -->
-        <!--     <ItemsControl.ItemTemplate> -->
-        <!--         <DataTemplate> -->
-        <!--             <Ellipse Fill="White" Width="{Binding R}" Height="{Binding R}" Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/> -->
-        <!--         </DataTemplate> -->
-        <!--     </ItemsControl.ItemTemplate> -->
-        <!-- </ItemsControl> -->
-    <!-- </Canvas> -->
 
