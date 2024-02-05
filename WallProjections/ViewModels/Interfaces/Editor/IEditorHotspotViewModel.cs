@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Avalonia.Platform.Storage;
 using WallProjections.Models;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
@@ -41,4 +43,20 @@ public interface IEditorHotspotViewModel
     /// Determines whether the title is empty and should be replaced with a fallback.
     /// </summary>
     public bool IsFallback => Title.Trim() == "";
+
+    /// <summary>
+    /// Adds images to <see cref="Images" />.
+    /// </summary>
+    /// <param name="files">
+    /// An iterator of image files that are converted to <see cref="IThumbnailViewModel" />s and added to the hotspot.
+    /// </param>
+    public void AddImages(IEnumerable<IStorageFile> files);
+
+    /// <summary>
+    /// Adds videos to <see cref="Videos" />.
+    /// </summary>
+    /// <param name="files">
+    /// An iterator of video files that are converted to <see cref="IThumbnailViewModel" />s and added to the hotspot.
+    /// </param>
+    public void AddVideos(IEnumerable<IStorageFile> files);
 }

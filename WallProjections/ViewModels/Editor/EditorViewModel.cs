@@ -1,6 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Avalonia.Platform.Storage;
+using DynamicData;
 using ReactiveUI;
 using WallProjections.Helper;
 using WallProjections.Models;
@@ -162,15 +166,70 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             _description = File.ReadAllText(hotspot.DescriptionPath);
 
             var images = hotspot.ImagePaths
-                .Select((path, i) => new ImageThumbnailViewModel(path, GetRow(i), GetColumn(i)));
+                .Select((path, i) => new ImageThumbnailViewModel(path, GetMediaRow(i), GetMediaColumn(i)));
             var videos = hotspot.VideoPaths
-                .Select((path, i) => new VideoThumbnailViewModel(path, GetRow(i), GetColumn(i)));
+                .Select((path, i) => new VideoThumbnailViewModel(path, GetMediaRow(i), GetMediaColumn(i)));
             Images = new ObservableCollection<IThumbnailViewModel>(images);
             Videos = new ObservableCollection<IThumbnailViewModel>(videos);
-            return;
-
-            int GetRow(int index) => index / IMediaEditorViewModel.ColumnCount;
-            int GetColumn(int index) => index % IMediaEditorViewModel.ColumnCount;
         }
+
+        /// <inheritdoc />
+        public void AddImages(IEnumerable<IStorageFile> files)
+        {
+            Images.AddRange(
+                GetIThumbnailViewModels(
+                    files,
+                    Images.Count,
+                    (path, row, column) => new ImageThumbnailViewModel(path, row, column)
+                )
+            );
+        }
+
+        /// <inheritdoc />
+        public void AddVideos(IEnumerable<IStorageFile> files)
+        {
+            Videos.AddRange(
+                GetIThumbnailViewModels(
+                    files,
+                    Videos.Count,
+                    (path, row, column) => new VideoThumbnailViewModel(path, row, column)
+                )
+            );
+        }
+
+        /// <summary>
+        /// Maps <paramref name="files" /> to <see cref="IThumbnailViewModel" />s
+        /// using the provided <paramref name="factory" />.
+        /// </summary>
+        /// <param name="files">The files to map.</param>
+        /// <param name="indexOffset">
+        /// An offset added to the index of each file (used for correct placement in the grid).
+        /// </param>
+        /// <param name="factory">The factory used to create <see cref="IThumbnailViewModel" />s.</param>
+        /// <returns>An iterator of <see cref="IThumbnailViewModel" />s.</returns>
+        private static IEnumerable<IThumbnailViewModel> GetIThumbnailViewModels(
+            IEnumerable<IStorageFile> files,
+            int indexOffset,
+            Func<string, int, int, IThumbnailViewModel> factory
+        ) => files.Select((file, i) =>
+        {
+            var path = file.Path.AbsolutePath;
+            var index = i + indexOffset;
+            var row = GetMediaRow(index);
+            var column = GetMediaColumn(index);
+            return factory(path, row, column);
+        });
+
+        /// <summary>
+        /// Returns the row of the grid where the media item at the given <paramref name="index" /> is.
+        /// </summary>
+        /// <returns><paramref name="index" /> divided by <see cref="IMediaEditorViewModel.ColumnCount" /></returns>
+        private static int GetMediaRow(int index) => index / IMediaEditorViewModel.ColumnCount;
+
+        /// <summary>
+        /// Returns the column of the grid where the media item at the given <paramref name="index" /> is.
+        /// </summary>
+        /// <returns><paramref name="index" /> modulo <see cref="IMediaEditorViewModel.ColumnCount" /></returns>
+        private static int GetMediaColumn(int index) => index % IMediaEditorViewModel.ColumnCount;
     }
 }

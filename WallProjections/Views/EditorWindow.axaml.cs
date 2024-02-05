@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.Views.EditorUserControls;
 using ImportWarningDialog = WallProjections.Views.EditorUserControls.ImportWarningDialog;
@@ -103,5 +105,55 @@ public partial class EditorWindow : Window
         _isDialogShown = false;
     }
 
+    /// <summary>
+    /// Opens a file picker to import images.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void ImageEditor_OnAddMedia(object? sender, RoutedEventArgs e)
+    {
+        FetchMediaFiles(
+            new[] { FilePickerFileTypes.ImageAll },
+            (vm, files) => vm.SelectedHotspot?.AddImages(files)
+        );
+    }
+
+    /// <summary>
+    /// Opens a file picker to import videos.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void VideoEditor_OnAddMedia(object? sender, RoutedEventArgs e)
+    {
+        FetchMediaFiles(
+            new[] { IContentProvider.FilePickerVideoType },
+            (vm, files) => vm.SelectedHotspot?.AddVideos(files)
+        );
+    }
+
     //ReSharper restore UnusedParameter.Local
+
+    /// <summary>
+    /// Opens a file picker to import media files. Then, performs the <paramref name="action" /> on the selected files.
+    /// </summary>
+    /// <param name="filter">A file type filter <i>(see <see cref="FilePickerOpenOptions.FileTypeFilter" />)</i>.</param>
+    /// <param name="action">
+    /// An action to perform on the selected files using the viewmodel from the <see cref="EditorWindow.DataContext" />.
+    /// </param>
+    private async void FetchMediaFiles(
+        IReadOnlyList<FilePickerFileType> filter,
+        Action<IEditorViewModel, IReadOnlyList<IStorageFile>> action
+    )
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select a media files to import...",
+            AllowMultiple = true,
+            FileTypeFilter = filter
+        });
+
+        action(vm, files);
+    }
 }

@@ -9,11 +9,27 @@ namespace WallProjections.Views.EditorUserControls;
 public partial class MediaEditor : UserControl
 {
     /// <summary>
+    /// A routed event that is raised when the user wants to add media.
+    /// </summary>
+    /// <seealso cref="AddMedia" />
+    private static readonly RoutedEvent<RoutedEventArgs> AddMediaEvent =
+        RoutedEvent.Register<MediaEditor, RoutedEventArgs>(nameof(AddMedia), RoutingStrategies.Bubble);
+
+    /// <summary>
     /// A routed event that is raised when opening the explorer fails.
     /// </summary>
     /// <seealso cref="OpenExplorerFailed" />
     private static readonly RoutedEvent<RoutedEventArgs> OpenExplorerFailedEvent =
         RoutedEvent.Register<MediaEditor, RoutedEventArgs>(nameof(OpenExplorerFailed), RoutingStrategies.Bubble);
+
+    /// <summary>
+    /// An event that is raised when the user wants to add media.
+    /// </summary>
+    public event EventHandler<RoutedEventArgs> AddMedia
+    {
+        add => AddHandler(AddMediaEvent, value);
+        remove => RemoveHandler(AddMediaEvent, value);
+    }
 
     /// <summary>
     /// An event that is raised when opening the explorer fails.
@@ -29,7 +45,8 @@ public partial class MediaEditor : UserControl
         InitializeComponent();
     }
 
-    // ReSharper disable once UnusedParameter.Local
+    // ReSharper disable UnusedParameter.Local
+
     /// <summary>
     /// A callback for when the open explorer button is clicked.
     /// <br /><br />
@@ -47,4 +64,16 @@ public partial class MediaEditor : UserControl
         if (!result)
             RaiseEvent(new RoutedEventArgs(OpenExplorerFailedEvent, this));
     }
+
+    /// <summary>
+    /// A callback for when the add media button is clicked.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void AddMedia_OnClick(object? sender, RoutedEventArgs e)
+    {
+        RaiseEvent(new RoutedEventArgs(AddMediaEvent, this));
+    }
+
+    // ReSharper restore UnusedParameter.Local
 }
