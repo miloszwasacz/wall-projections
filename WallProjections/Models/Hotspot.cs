@@ -11,6 +11,7 @@ namespace WallProjections.Models;
 [Serializable]
 public class Hotspot
 {
+    [JsonIgnore]
     private readonly string FilePath;
 
     /// <summary>
