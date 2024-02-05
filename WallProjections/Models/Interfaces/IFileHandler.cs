@@ -14,10 +14,19 @@ public interface IFileHandler : IDisposable
     public IConfig? Load(string zipPath);
 
     /// <summary>
+    /// Loads the config.json file from the config folder.
+    /// </summary>
+    /// <returns>Loaded <see cref="IConfig"/></returns>
+    public IConfig LoadConfig();
+
+    /// <summary>
     /// Save the config file and the media files to a zip file. Any media files that point to an absolute path
     /// will be imported and the paths renamed to the new path automatically.
     /// </summary>
     /// <param name="config">The new config file to save</param>
     /// <returns>True if saved successfully</returns>
     public bool Save(IConfig config);
+
+
+    public bool IsConfigImported();
 }

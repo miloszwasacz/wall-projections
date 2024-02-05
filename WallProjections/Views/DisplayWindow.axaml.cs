@@ -1,4 +1,3 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -20,10 +19,12 @@ namespace WallProjections.Views;
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
     [ExcludeFromCodeCoverage] private IConfig? Config { get; set; }
+    [ExcludeFromCodeCoverage] private IFileHandler FileHandler { get; }
 
     public DisplayWindow()
     {
         InitializeComponent();
+        FileHandler = new FileHandler();
         WindowState = WindowState.FullScreen;
 
         if (FileHandler.IsConfigImported())

@@ -33,7 +33,6 @@ internal class Program
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         pythonThread.Cancel();
         pythonThread.Dispose();
-        // FileHandler.Instance.Dispose();
         ViewModelProvider.Instance.Dispose();
     }
 

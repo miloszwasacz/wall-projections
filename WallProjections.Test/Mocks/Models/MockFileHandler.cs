@@ -62,7 +62,7 @@ public sealed class MockFileHandler : IFileHandler
 
     /// <summary>
     /// Creates a new <see cref="MockFileHandler" /> with the given list of media files,
-    /// and empty <see cref="Config" /> and <see cref="MediaPath" />
+    /// and empty <see cref="IConfig" /> and <see cref="MediaPath" />
     /// </summary>
     /// <param name="files">The list of media files provided to <see cref="CreateContentProvider" /></param>
     public MockFileHandler(List<Hotspot.Media> files)
@@ -85,11 +85,29 @@ public sealed class MockFileHandler : IFileHandler
     /// Adds the <paramref name="zipPath" /> to the list of loaded zips and returns the <see cref="Config" />
     /// </summary>
     /// <param name="zipPath">The theoretical path to the zip file containing media files</param>
-    /// <returns><see cref="Config" /></returns>
+    /// <returns><see cref="IConfig" /></returns>
     public IConfig Load(string zipPath)
     {
         _loadedZips.Add(zipPath);
         return Config;
+    }
+
+    /// <summary>
+    /// Returns the currently stored <see cref="UConfig"/>
+    /// </summary>
+    /// <returns>Stored <see cref="IConfig"/></returns>
+    public IConfig LoadConfig()
+    {
+        return Config;
+    }
+
+    /// <summary>
+    /// Returns if <see cref="Config"/> is loaded
+    /// </summary>
+    /// <returns>Always true as <see cref="IConfig"/> defined in constructor</returns>
+    public bool IsConfigImported()
+    {
+        return true;
     }
 
     public bool Save(IConfig config)

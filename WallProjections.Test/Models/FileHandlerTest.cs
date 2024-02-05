@@ -222,7 +222,7 @@ public class FileHandlerTest
 
         Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
 
-        var newConfig = FileHandler.LoadConfig();
+        var newConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(config, newConfig);
         fileHandler.Dispose();
@@ -249,7 +249,7 @@ public class FileHandlerTest
 
         Assert.That(File.Exists(Path.Combine(FileHandler.ConfigFolderPath, "config.json")));
 
-        var newConfig = FileHandler.LoadConfig();
+        var newConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(config, newConfig);
         fileHandler.Dispose();
@@ -292,7 +292,7 @@ public class FileHandlerTest
             new(0, new Coord(0, 0, 0), "text_0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty)
         });
 
-        var loadedConfig = FileHandler.LoadConfig();
+        var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
         fileHandler.Dispose();
@@ -351,7 +351,7 @@ public class FileHandlerTest
                 ImmutableList<string>.Empty )
         });
 
-        var loadedConfig = FileHandler.LoadConfig();
+        var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
         fileHandler.Dispose();
@@ -413,7 +413,7 @@ public class FileHandlerTest
                 ImmutableList<string>.Empty )
         });
 
-        var loadedConfig = FileHandler.LoadConfig();
+        var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
         fileHandler.Dispose();
@@ -472,7 +472,7 @@ public class FileHandlerTest
                 new List<string>{ "video_0_0.mp4" }.ToImmutableList() )
         });
 
-        var loadedConfig = FileHandler.LoadConfig();
+        var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
         fileHandler.Dispose();
@@ -550,7 +550,7 @@ public class FileHandlerTest
                 ImmutableList<string>.Empty )
         });
 
-        var loadedConfig = FileHandler.LoadConfig();
+        var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
         fileHandler.Dispose();
@@ -635,7 +635,7 @@ public class FileHandlerTest
                 new List<string> { "video_1_0.mp4" }.ToImmutableList())
         });
 
-        var loadedConfig = FileHandler.LoadConfig();
+        var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
         fileHandler.Dispose();
