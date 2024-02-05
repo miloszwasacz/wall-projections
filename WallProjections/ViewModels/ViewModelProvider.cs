@@ -29,8 +29,6 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     public static ViewModelProvider Instance => _viewModelProvider ??= new ViewModelProvider();
 
-    private DisplayViewModel? _displayViewModel;
-
     /// <summary>
     /// A global instance of <see cref="LibVLC" /> to use for <see cref="LibVLCSharp" /> library
     /// </summary>
@@ -44,7 +42,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
     public IDisplayViewModel GetDisplayViewModel(IConfig config) =>
-        _displayViewModel ??= new DisplayViewModel(this, config, PythonEventHandler.Instance);
+        new DisplayViewModel(this, config, PythonEventHandler.Instance);
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance

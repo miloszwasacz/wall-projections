@@ -75,9 +75,11 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             if (!zipPath.EndsWith(".zip")) continue;
 
             Config = new FileHandler().Load(zipPath);
+
+            DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
         }
 
-        DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
+
 #if DEBUGSKIPPYTHON
         MockPythonInput(key);
 #endif
