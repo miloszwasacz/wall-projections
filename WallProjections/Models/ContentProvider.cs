@@ -9,12 +9,10 @@ namespace WallProjections.Models;
 public class ContentProvider : IContentProvider
 {
     private readonly IConfig _config;
-    private readonly string _folderPath;
 
-    public ContentProvider(IConfig config, string folderPath = "")
+    public ContentProvider(IConfig config)
     {
         _config = config;
-        _folderPath = folderPath;
     }
 
     /// <inheritdoc />
@@ -24,8 +22,7 @@ public class ContentProvider : IContentProvider
         if (hotspot is null)
             throw new IConfig.HotspotNotFoundException(hotspotId);
 
-        var fullDescriptionPath = _folderPath == "" ? hotspot.FullDescriptionPath
-            : Path.Combine(_folderPath, hotspot.DescriptionPath) ;
+        var fullDescriptionPath = hotspot.FullDescriptionPath;
 
         if (!File.Exists(fullDescriptionPath))
         {
@@ -35,11 +32,9 @@ public class ContentProvider : IContentProvider
         var description = File.ReadAllText(fullDescriptionPath);
 
         //TODO Refactor to support multiple images and videos
-        ImmutableList<string> imagePaths = _folderPath == "" ? hotspot.FullImagePaths
-                : hotspot.ImagePaths.ConvertAll(path => Path.Combine(_folderPath, path));
+        ImmutableList<string> imagePaths = hotspot.FullImagePaths;
 
-        ImmutableList<string> videoPaths = _folderPath == "" ? hotspot.FullVideoPaths
-            : hotspot.VideoPaths.ConvertAll(path => Path.Combine(_folderPath, path));
+        ImmutableList<string> videoPaths = hotspot.FullVideoPaths;
 
         return new Hotspot.Media(hotspotId, description, imagePaths, videoPaths);
     }

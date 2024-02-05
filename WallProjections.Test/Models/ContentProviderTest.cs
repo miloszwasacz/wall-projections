@@ -20,30 +20,8 @@ public class ContentProviderTest
 
     private string _configPath = null!;
 
-    private readonly IConfig _mockConfig = new Config(new List<Hotspot>
-    {
-        new(
-            0,
-            new Coord(0,0,0),
-            "text_0.txt",
-            ImmutableList<string>.Empty,
-            ImmutableList<string>.Empty
-            ),
-        new(
-            1,
-            new Coord(0,0,0),
-            "text_1.txt",
-            new List<string>{ "image_1_0.png" }.ToImmutableList(),
-            new List<string>{ "video_1_0.mp4" }.ToImmutableList()
-            ),
-        new(
-            2,
-            new Coord(0,0,0),
-            "text_2.txt",
-            new List<string>{ "image_2_0.jpg", "image_2_1.jpeg" }.ToImmutableList(),
-            new List<string>{ "video_2_0.mkv", "video_2_1.mov" }.ToImmutableList()
-            )
-    });
+    private IConfig _mockValidConfig = null!;
+    private IConfig _mockInvalidConfig = null;
 
     private string MediaPath => Path.Combine(_configPath, ValidConfigPath);
     private string InvalidMediaPath => Path.Combine(_configPath, InvalidConfigPath);
@@ -80,6 +58,54 @@ public class ContentProviderTest
         var invalid = Path.Combine(_configPath, InvalidConfigPath);
         Directory.CreateDirectory(invalid);
         ZipFile.ExtractToDirectory(TestInvalidZipPath, invalid);
+
+        _mockValidConfig = new Config(new List<Hotspot>
+        {
+            new(
+                0,
+                new Coord(0,0,0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty,
+                Path.Combine(_configPath, ValidConfigPath)
+            ),
+            new(
+                1,
+                new Coord(0,0,0),
+                "text_1.txt",
+                new List<string>{ "image_1_0.png" }.ToImmutableList(),
+                new List<string>{ "video_1_0.mp4" }.ToImmutableList(),
+                Path.Combine(_configPath, ValidConfigPath)
+            ),
+            new(
+                2,
+                new Coord(0,0,0),
+                "text_2.txt",
+                new List<string>{ "image_2_0.jpg", "image_2_1.jpeg" }.ToImmutableList(),
+                new List<string>{ "video_2_0.mkv", "video_2_1.mov" }.ToImmutableList(),
+                Path.Combine(_configPath, ValidConfigPath)
+            )
+        });
+
+        _mockInvalidConfig = new Config(new List<Hotspot>
+        {
+            new(
+                0,
+                new Coord(0,0,0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty,
+                Path.Combine(_configPath, InvalidConfigPath)
+            ),
+            new(
+                1,
+                new Coord(0,0,0),
+                "text_1.txt",
+                new List<string>{ "image_1_0.png" }.ToImmutableList(),
+                ImmutableList<string>.Empty,
+                Path.Combine(_configPath, InvalidConfigPath)
+            )
+        });
     }
 
     [OneTimeTearDown]
@@ -94,7 +120,7 @@ public class ContentProviderTest
     public void GetMediaTest((int, string, string[], string[]) testCase)
     {
         var (id, descPath, imagePaths, videoPaths) = testCase;
-        var provider = new ContentProvider(_mockConfig, Path.Combine(_configPath, ValidConfigPath));
+        var provider = new ContentProvider(_mockValidConfig);
 
         var media = provider.GetMedia(id);
         var expectedDescription = GetDescription(descPath);
@@ -113,7 +139,7 @@ public class ContentProviderTest
     [Test]
     public void GetMediaNoHotspotTest()
     {
-        var provider = new ContentProvider(_mockConfig, ValidConfigPath);
+        var provider = new ContentProvider(_mockInvalidConfig);
 
         Assert.Throws<IConfig.HotspotNotFoundException>(() => provider.GetMedia(-1));
     }
@@ -121,7 +147,7 @@ public class ContentProviderTest
     [Test]
     public void GetMediaNoDescriptionTest()
     {
-        var provider = new ContentProvider(_mockConfig, ValidConfigPath);
+        var provider = new ContentProvider(_mockInvalidConfig);
 
         Assert.Throws<FileNotFoundException>(() => provider.GetMedia(1));
     }

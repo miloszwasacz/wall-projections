@@ -11,6 +11,8 @@ namespace WallProjections.Models;
 [Serializable]
 public class Hotspot
 {
+    private readonly string FilePath;
+
     /// <summary>
     /// ID of the hotspot. Used by input to tell UI which hotspot info to show.
     /// </summary>
@@ -31,7 +33,8 @@ public class Hotspot
     /// <summary>
     /// Fully expanded path to description for hotspot.
     /// </summary>
-    public string FullDescriptionPath => DescriptionPath is not null ? Path.Combine(FileHandler.ConfigFolderPath, DescriptionPath): "";
+    public string FullDescriptionPath => DescriptionPath is not null ?
+        Path.Combine(FilePath, DescriptionPath): "";
 
     /// <summary>
     /// A list of paths to images to be displayed in the hotspot.
@@ -43,7 +46,7 @@ public class Hotspot
     /// List of all image paths in fully expanded form.
     /// </summary>
     public ImmutableList<string> FullImagePaths =>
-        ImagePaths.ConvertAll(item => Path.Combine(FileHandler.ConfigFolderPath, item));
+        ImagePaths.ConvertAll(item => Path.Combine(FilePath, item));
 
     /// <summary>
     /// A list of paths to videos to be displayed in the hotspot.
@@ -55,7 +58,7 @@ public class Hotspot
     /// List of all video paths in fully expanded form.
     /// </summary>
     public ImmutableList<string> FullVideoPaths =>
-        VideoPaths.ConvertAll(item => Path.Combine(FileHandler.ConfigFolderPath, item));
+        VideoPaths.ConvertAll(item => Path.Combine(FilePath, item));
 
     /// <summary>
     /// Constructor for Hotspot used by JSON deserializer
@@ -65,15 +68,45 @@ public class Hotspot
     /// <param name="descriptionPath">Path to text file containing description of hotspot.</param>
     /// <param name="imagePaths">List of paths to images to be displayed in hotspot.</param>
     /// <param name="videoPaths">List of paths to videos to be displayed in hotspot.</param>
-    /// <exception cref="ArgumentException">Thrown if both image + video at once, or no content defined.</exception>
-    [JsonConstructor]
-    public Hotspot(int id, Coord position, string descriptionPath, ImmutableList<string> imagePaths, ImmutableList<string> videoPaths)
+    /// <param name="filePath">Custom path to files.</param>
+    public Hotspot(
+        int id,
+        Coord position,
+        string descriptionPath,
+        ImmutableList<string> imagePaths,
+        ImmutableList<string> videoPaths,
+        string filePath)
     {
         Id = id;
         Position = position;
         DescriptionPath = descriptionPath;
         ImagePaths = imagePaths;
         VideoPaths = videoPaths;
+        FilePath = filePath;
+    }
+
+    /// <summary>
+    /// Constructor for Hotspot used by JSON deserializer
+    /// </summary>
+    /// <param name="id">ID used by input detection to show info.</param>
+    /// <param name="position">Position of hotspot stored as <see cref="Coord"/> record.</param>
+    /// <param name="descriptionPath">Path to text file containing description of hotspot.</param>
+    /// <param name="imagePaths">List of paths to images to be displayed in hotspot.</param>
+    /// <param name="videoPaths">List of paths to videos to be displayed in hotspot.</param>
+    [JsonConstructor]
+    public Hotspot(
+        int id,
+        Coord position,
+        string descriptionPath,
+        ImmutableList<string> imagePaths,
+        ImmutableList<string> videoPaths)
+    {
+        Id = id;
+        Position = position;
+        DescriptionPath = descriptionPath;
+        ImagePaths = imagePaths;
+        VideoPaths = videoPaths;
+        FilePath = FileHandler.ConfigFolderPath;
     }
 
     // TODO Add support for multiple images/videos
