@@ -42,7 +42,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
     public IDisplayViewModel GetDisplayViewModel(IConfig config) =>
-        new DisplayViewModel(this, config, PythonEventHandler.Instance);
+        new DisplayViewModel(this, new ContentProvider(config), PythonEventHandler.Instance);
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance

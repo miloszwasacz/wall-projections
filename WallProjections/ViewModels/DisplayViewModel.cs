@@ -45,16 +45,15 @@ Please report this to the museum staff.";
     /// <param name="contentProvider">Allows a custom <see cref="IContentProvider"/> to be used.</param>
     public DisplayViewModel(
         IViewModelProvider vmProvider,
-        IConfig config,
-        IPythonEventHandler pythonEventHandler,
-        IContentProvider? contentProvider = null
+        IContentProvider contentProvider,
+        IPythonEventHandler pythonEventHandler
     )
     {
         ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
         _pythonEventHandler = pythonEventHandler;
         _pythonEventHandler.HotspotSelected += OnHotspotSelected;
-        _contentProvider = contentProvider ?? new ContentProvider(config);
+        _contentProvider = contentProvider;
     }
 
     /// <inheritdoc />
@@ -87,11 +86,6 @@ Please report this to the museum staff.";
             ImageViewModel.HideImage();
             VideoViewModel.StopVideo();
             var media = _contentProvider.GetMedia(hotspotId);
-
-            if (media is null)
-            {
-                throw new IConfig.HotspotNotFoundException(hotspotId);
-            }
 
             Description = media.Description;
             // TODO Add support for multiple images/videos

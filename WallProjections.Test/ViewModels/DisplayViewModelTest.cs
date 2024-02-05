@@ -138,15 +138,9 @@ public class DisplayViewModelTest
     public void CreationTest(ImmutableList<Hotspot.Media> hotspots)
     {
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(hotspots.ConvertAll(item =>
-            new Hotspot(
-                item.Id,
-                new Coord(0,0,0),
-                "test.txt",
-                ImmutableList<string>.Empty,
-                ImmutableList<string>.Empty))
-        );
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler, new MockContentProvider(hotspots));
+        var contentProvider = new MockContentProvider(hotspots);
+
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
 
         AssertJustInitialized(displayViewModel);
         displayViewModel.Dispose();
@@ -158,16 +152,9 @@ public class DisplayViewModelTest
     {
         var hotspot = hotspots[0];
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(hotspots.ConvertAll(item =>
-            new Hotspot(
-                item.Id,
-                new Coord(0,0,0),
-                "test.txt",
-                ImmutableList<string>.Empty,
-                ImmutableList<string>.Empty))
-        );
+        var contentProvider = new MockContentProvider(hotspots);
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler, new MockContentProvider(hotspots));
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
         var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
 
@@ -202,8 +189,9 @@ public class DisplayViewModelTest
     {
         var pythonHandler = new MockPythonEventHandler();
         var config = new Config(Enumerable.Empty<Hotspot>());
+        var contentProvider = new MockContentProvider(ImmutableList<Hotspot.Media>.Empty);
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
 
         var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
         AssertJustInitialized(displayViewModel);
@@ -228,7 +216,7 @@ public class DisplayViewModelTest
         var config = new Config(Enumerable.Empty<Hotspot>());
         var contentProvider = new MockContentProvider(exception);
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler, contentProvider);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
         var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
 
@@ -251,8 +239,9 @@ public class DisplayViewModelTest
     {
         var pythonHandler = new MockPythonEventHandler();
         var config = new Config(Enumerable.Empty<Hotspot>());
+        var contentProvider = new ContentProvider(config);
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
         displayViewModel.Dispose();
 
