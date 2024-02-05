@@ -7,13 +7,11 @@
         x:Class="WallProjections.Views.HotspotDisplayWindow"
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
-    <!-- <Canvas Background="Black"> -->
-        <!--TODO change radius to diameter -->
-        <!-- <Ellipse Fill="White" Width="{Binding Coordinates[0].R}" Height="{Binding Coordinates[0].R}" Canvas.Left="{Binding Coordinates[0].X}" Canvas.Top="{Binding Coordinates[0].Y}"/> -->
-        <!--TODO change the position of the circle and implement non hard coded values-->
-        <!--TODO add multiple circles-->
+    
+    <!--TODO change radius to diameter -->
+        <!--TODO implement non hard coded values-->
         <Window.Styles>
-            <Style Selector="Rectangle.red">
+            <Style Selector="Rectangle.white">
                 <Setter Property="Height" Value="100"/>
                 <Setter Property="Width" Value="100"/>
                 <Setter Property="Fill" Value="White"/>
@@ -36,10 +34,19 @@
                     </Animation>
                 </Style.Animations>
             </Style>
-            
         </Window.Styles>
-
-        <Rectangle Classes="red"/>
+    
+    
+        <Canvas Background="Black">
+            <ItemsControl ItemsSource="{Binding Coordinates}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Rectangle Classes="white" Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/>            
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Canvas>
+        
 </Window>
         <!-- <ItemsControl ItemsSource="{Binding Coordinates}"> -->
         <!--     <ItemsControl.ItemTemplate> -->
