@@ -1,20 +1,14 @@
-﻿# This workflow will build a .NET project
+# This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET CI
+name: .NET Coverage
 
 on:
-  push:
   pull_request:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macOS-latest ]
-
-    runs-on: ${{ matrix.os }}
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Setup .NET
@@ -30,15 +24,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget
 
-      - name: Install LibVLCSharp dependencies
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: sudo apt install -y libvlc-dev vlc
-
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --no-restore -c DebugSkipPython
+        run: dotnet build --no-restore
 
-      - name: Test
-        run: dotnet test --no-build -c DebugSkipPython --verbosity normal
+      - name: Test & generate Code Coverage report
+        run: >
+          dotnet test --no-build --verbosity normal \
+              --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory TestResults
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./TestResults
+          verbose: true
