@@ -3,51 +3,61 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces"
+        xmlns:models="using:WallProjections.Models"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.HotspotDisplayWindow"
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
     
-    <!-- TODO have event to trigger animations -->
-    <!-- TODO expand from center -->
-    <!-- TODO expand circles by 25% on activation-->
-    
-        <Window.Styles>
-            <Style Selector="Rectangle.white">
-                <Setter Property="Fill" Value="White"/>
-                <Style.Animations>
-                    <Animation Duration="0:0:1" PlaybackDirection="AlternateReverse" IterationCount="INFINITE"> 
-                        <KeyFrame Cue="100%">
-                            <Setter Property="Height" Value="100"/>
-                            <Setter Property="Width" Value="100"/>
-                            <Setter Property="RadiusX" Value="50"/>
-                            <Setter Property="RadiusY" Value="50"/>
-                        </KeyFrame>
-                    </Animation>
-                </Style.Animations>
-            </Style>
-        </Window.Styles>
-    
-        <ItemsControl ItemsSource="{Binding Coordinates}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Canvas Background="Black">
-                        <Rectangle Classes="white" 
-                                   Height="{Binding D}" 
-                                   Width="{Binding D}" 
-                                   RadiusX="{Binding R}" 
-                                   RadiusY="{Binding R}" 
-                                   IsVisible="{Binding Vis}"
-                                   Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/>
-                        <Rectangle Height="{Binding D}" 
-                                   Width="{Binding D}" 
-                                   RadiusX="{Binding R}" 
-                                   RadiusY="{Binding R}"
-                                   Fill="Gray"
-                                   Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/>
-                    </Canvas>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-</Window>
+    <!-- TODO make visible upon DisplayHotspots event-->
 
+    <Window.Styles>
+        <Style Selector="Ellipse.triggered" x:DataType="models:HotCoord">
+            <Style.Animations>
+                <Animation Duration="0:0:1" PlaybackDirection="AlternateReverse" IterationCount="INFINITE">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="(ScaleTransform.ScaleX)" Value="1" />
+                        <Setter Property="(ScaleTransform.ScaleY)" Value="1" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="(ScaleTransform.ScaleX)" Value="1.25" />
+                        <Setter Property="(ScaleTransform.ScaleY)" Value="1.25" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </Window.Styles>
+
+
+    <ItemsControl ItemsSource="{Binding Coordinates}">
+
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <Canvas Background="Transparent" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <Ellipse Height="{Binding D}"
+                         Width="{Binding D}"
+                         Fill="White"
+                         Classes.triggered="{Binding Vis}">
+
+                    <Ellipse.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform />
+                        </TransformGroup>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+        
+        <ItemsControl.Styles>
+            <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:HotCoord">
+                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                <Setter Property="Canvas.Left" Value="{Binding X}" />
+            </Style>
+        </ItemsControl.Styles>
+    </ItemsControl>
+</Window>
