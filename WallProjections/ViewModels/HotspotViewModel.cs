@@ -14,9 +14,11 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
         _config = new Config(
             hotspots: new List<Hotspot>
             {
-                new(id: 1, x: 100, y: 100, r: 70),
+                new(id: 1, x: 100, y: 100, r: 30),
                 new(id: 2, x: 300, y: 200, r: 40),
-                new(id: 3, x: 40, y: 400, r: 80)
+                new(id: 3, x: 700, y: 210, r: 35),
+                new(id: 4, x: 650, y: 400, r: 45),
+                new(id: 5, x: 40, y: 400, r: 45)
             });
         Coordinates = GetHotspots();
     }
@@ -31,10 +33,36 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
             var hotspot = _config?.GetHotspot(i + 1);
             if (hotspot is null) continue;
             var pos = hotspot.Position;
-            var hotCord = new HotCoord(pos.X, pos.Y, pos.R, pos.R * 2);
+            var hotCord = new HotCoord(i+1, pos.X, pos.Y, pos.R, pos.R * 2, true);
             coord.Add(hotCord);
         }
 
         return coord;
+    }
+
+    public void ActivateHotspot(int id)
+    {
+        var alteredCoords = new List<HotCoord>();
+        foreach (var coord in Coordinates)
+        {
+            if (coord.Vis)
+            {
+                var newCoord = new HotCoord(coord.ID, coord.X, coord.Y, coord.R, coord.D, false);
+                alteredCoords.Add(newCoord);
+                Coordinates.Remove(coord);
+            }
+
+            if (coord.ID != id) continue;
+            {
+                var newCoord = new HotCoord(coord.ID, coord.X, coord.Y, coord.R, coord.D, true);
+                alteredCoords.Add(newCoord);
+                Coordinates.Remove(coord);
+            }
+        }
+
+        foreach (var coord in alteredCoords)
+        {
+            Coordinates.Add(coord);
+        }
     }
 }

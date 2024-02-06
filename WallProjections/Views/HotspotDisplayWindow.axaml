@@ -37,6 +37,13 @@
                                    Width="{Binding D}" 
                                    RadiusX="{Binding R}" 
                                    RadiusY="{Binding R}" 
+                                   IsVisible="{Binding Vis}"
+                                   Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/>
+                        <Rectangle Height="{Binding D}" 
+                                   Width="{Binding D}" 
+                                   RadiusX="{Binding R}" 
+                                   RadiusY="{Binding R}"
+                                   Fill="Gray"
                                    Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"/>
                     </Canvas>
                 </DataTemplate>
