@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using Avalonia.Controls.Selection;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
@@ -53,4 +54,29 @@ public enum MediaEditorType
 {
     Images,
     Videos
+}
+
+/// <summary>
+/// Extension methods for <see cref="MediaEditorType" />.
+/// </summary>
+public static class MediaEditorTypeExtensions
+{
+    /// <summary>
+    /// The name of the media type.
+    /// </summary>
+    public static string Name(this MediaEditorType type) => type switch
+    {
+        MediaEditorType.Images => "Images",
+        MediaEditorType.Videos => "Videos",
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
+    };
+
+    /// <summary>
+    /// The label of the media type based on the number of media items.
+    /// </summary>
+    public static string NumberBasedLabel(this MediaEditorType type, int count)
+    {
+        var res = type.Name().ToLower();
+        return count == 1 ? res[..^1] : res;
+    }
 }

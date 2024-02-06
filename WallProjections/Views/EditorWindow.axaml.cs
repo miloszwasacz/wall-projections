@@ -182,11 +182,23 @@ public partial class EditorWindow : Window
     /// </summary>
     /// <param name="type">The type of media to remove.</param>
     /// <param name="args">The event arguments holding the media to remove.</param>
-    private void RemoveMedia(MediaEditorType type, MediaEditor.RemoveMediaArgs args)
+    private async void RemoveMedia(MediaEditorType type, MediaEditor.RemoveMediaArgs args)
     {
-        //TODO Add a confirmation dialog
+        if (_isDialogShown) return;
+
         if (DataContext is not IEditorViewModel vm) return;
 
-        vm.RemoveMedia(type, args.Media);
+        var media = args.Media;
+        var dialog = new ConfirmationDialog(
+            $"Remove {type.Name()}",
+            WarningIconPath,
+            $"Are you sure you want to remove {media.Length} {type.NumberBasedLabel(media.Length)}? This action cannot be undone.",
+            "Remove"
+        );
+        dialog.Confirm += (_, _) => vm.RemoveMedia(type, media);
+
+        _isDialogShown = true;
+        await dialog.ShowDialog(this);
+        _isDialogShown = false;
     }
 }
