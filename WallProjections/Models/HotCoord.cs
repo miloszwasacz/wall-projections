@@ -1,3 +1,3 @@
 namespace WallProjections.Models;
 
-public record HotCoord(int ID, double X, double Y, double R, double D, bool Vis);
+public record HotCoord(int Id, double X, double Y, double R, double D, bool Vis);

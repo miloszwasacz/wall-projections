@@ -8,9 +8,9 @@
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
     
-    <!-- TODO input values into style so varying sizes-->
     <!-- TODO have event to trigger animations -->
     <!-- TODO expand from center -->
+    <!-- TODO expand circles by 25% on activation-->
     
         <Window.Styles>
             <Style Selector="Rectangle.white">

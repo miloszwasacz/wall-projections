@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DynamicData;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -33,7 +34,7 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
             var hotspot = _config?.GetHotspot(i + 1);
             if (hotspot is null) continue;
             var pos = hotspot.Position;
-            var hotCord = new HotCoord(i+1, pos.X, pos.Y, pos.R, pos.R * 2, true);
+            var hotCord = new HotCoord(i+1, pos.X, pos.Y, pos.R, pos.R * 2, false);
             coord.Add(hotCord);
         }
 
@@ -41,23 +42,30 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     }
 
     public void ActivateHotspot(int id)
+    //TODO refactor ActivateHotspot 
     {
         var alteredCoords = new List<HotCoord>();
+        var removedCoords = new List<HotCoord>();
         foreach (var coord in Coordinates)
         {
             if (coord.Vis)
             {
-                var newCoord = new HotCoord(coord.ID, coord.X, coord.Y, coord.R, coord.D, false);
+                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, false);
                 alteredCoords.Add(newCoord);
-                Coordinates.Remove(coord);
+                removedCoords.Add(coord);
             }
 
-            if (coord.ID != id) continue;
+            if (coord.Id != id) continue;
             {
-                var newCoord = new HotCoord(coord.ID, coord.X, coord.Y, coord.R, coord.D, true);
+                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, true);
                 alteredCoords.Add(newCoord);
-                Coordinates.Remove(coord);
+                removedCoords.Add(coord);
             }
+        }
+
+        foreach (var coord in removedCoords)
+        {
+            Coordinates.Remove(coord);
         }
 
         foreach (var coord in alteredCoords)
