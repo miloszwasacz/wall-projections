@@ -23,12 +23,12 @@ public sealed class MockFileHandler : IFileHandler
     private readonly Exception? _exception;
 
     /// <summary>
-    /// The <see cref="IConfig" /> to be returned by <see cref="Load" />
+    /// The <see cref="IConfig" /> to be returned by <see cref="Import" />
     /// </summary>
     public IConfig Config { get; set; }
 
     /// <summary>
-    /// A list of all the zip files that have been loaded using <see cref="Load" />
+    /// A list of all the zip files that have been loaded using <see cref="Import" />
     /// </summary>
     public IReadOnlyList<string> LoadedZips => _loadedZips;
 
@@ -38,7 +38,7 @@ public sealed class MockFileHandler : IFileHandler
     public string MediaPath { get; set; }
 
     /// <summary>
-    /// The number of times <see cref="Load" /> has been called
+    /// The number of times <see cref="Import" /> has been called
     /// </summary>
     public int LoadCount => _loadedZips.Count;
 
@@ -51,7 +51,7 @@ public sealed class MockFileHandler : IFileHandler
     /// Creates a new mock cache that has the given <paramref name="mediaPath" /> and <paramref name="config" />
     /// and no media files
     /// </summary>
-    /// <param name="config">The <see cref="IConfig"/> to be returned by <see cref="Load" /></param>
+    /// <param name="config">The <see cref="IConfig"/> to be returned by <see cref="Import" /></param>
     /// <param name="mediaPath">The value to set <see cref="MediaPath" /> to</param>
     public MockFileHandler(IConfig config, string mediaPath)
     {
@@ -86,7 +86,7 @@ public sealed class MockFileHandler : IFileHandler
     /// </summary>
     /// <param name="zipPath">The theoretical path to the zip file containing media files</param>
     /// <returns><see cref="IConfig" /></returns>
-    public IConfig Load(string zipPath)
+    public IConfig Import(string zipPath)
     {
         _loadedZips.Add(zipPath);
         return Config;

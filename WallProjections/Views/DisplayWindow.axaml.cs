@@ -44,10 +44,6 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             case Key.F11:
                 WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
                 return;
-            case Key.D:
-                new FileHandler().Dispose();
-                lifetime?.Shutdown();
-                return;
         }
 
         LoadConfig(e.Key);
@@ -75,7 +71,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             var zipPath = files[0].Path.AbsolutePath;
             if (!zipPath.EndsWith(".zip")) continue;
 
-            Config = new FileHandler().Load(zipPath);
+            Config = new FileHandler().Import(zipPath);
 
             DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
         }

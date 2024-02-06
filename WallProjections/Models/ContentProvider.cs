@@ -24,17 +24,9 @@ public class ContentProvider : IContentProvider
 
         var fullDescriptionPath = hotspot.FullDescriptionPath;
 
-        if (!File.Exists(fullDescriptionPath))
-        {
-            throw new FileNotFoundException($"No description file at {fullDescriptionPath}", hotspot.DescriptionPath);
-        }
-
         var description = File.ReadAllText(fullDescriptionPath);
-
-        //TODO Refactor to support multiple images and videos
-        ImmutableList<string> imagePaths = hotspot.FullImagePaths;
-
-        ImmutableList<string> videoPaths = hotspot.FullVideoPaths;
+        var imagePaths = hotspot.FullImagePaths;
+        var videoPaths = hotspot.FullVideoPaths;
 
         return new Hotspot.Media(hotspotId, description, imagePaths, videoPaths);
     }

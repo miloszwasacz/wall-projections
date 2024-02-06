@@ -2,6 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Text.Json.Serialization;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Models;
 
@@ -61,31 +62,7 @@ public class Hotspot
     public ImmutableList<string> FullVideoPaths =>
         VideoPaths.ConvertAll(item => Path.Combine(FilePath, item));
 
-    /// <summary>
-    /// Constructor for Hotspot used by JSON deserializer
-    /// </summary>
-    /// <param name="id">ID used by input detection to show info.</param>
-    /// <param name="position">Position of hotspot stored as <see cref="Coord"/> record.</param>
-    /// <param name="descriptionPath">Path to text file containing description of hotspot.</param>
-    /// <param name="imagePaths">List of paths to images to be displayed in hotspot.</param>
-    /// <param name="videoPaths">List of paths to videos to be displayed in hotspot.</param>
-    /// <param name="filePath">Custom path to files.</param>
-    public Hotspot(
-        int id,
-        Coord position,
-        string descriptionPath,
-        ImmutableList<string> imagePaths,
-        ImmutableList<string> videoPaths,
-        string filePath)
-    {
-        Id = id;
-        Position = position;
-        DescriptionPath = descriptionPath;
-        ImagePaths = imagePaths;
-        VideoPaths = videoPaths;
-        FilePath = filePath;
-    }
-
+    // ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
     /// <summary>
     /// Constructor for Hotspot used by JSON deserializer
     /// </summary>
@@ -107,8 +84,9 @@ public class Hotspot
         DescriptionPath = descriptionPath;
         ImagePaths = imagePaths;
         VideoPaths = videoPaths;
-        FilePath = FileHandler.ConfigFolderPath;
+        FilePath = IFileHandler.ConfigFolderPath;
     }
+    // ReSharper restore NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
 
     // TODO Add support for multiple images/videos
     public record Media(

@@ -5,19 +5,17 @@ using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
 using WallProjections.Models.Interfaces;
+using static WallProjections.Models.Interfaces.IFileHandler;
 
 namespace WallProjections.Models;
 
 public class FileHandler : IFileHandler
 {
-    private const string ConfigFileName = "config.json";
-    private const string ConfigFolderName = "WallProjections";
-    public static string ConfigFolderPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigFolderName);
 
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// TODO Handle errors from trying to load from not-found/invalid zip file
-    public IConfig Load(string zipPath)
+    public IConfig Import(string zipPath)
     {
         // Clean up existing directory if in use
         if (Directory.Exists(ConfigFolderPath))
@@ -49,51 +47,46 @@ public class FileHandler : IFileHandler
             var newImagePaths = new List<string>(hotspot.ImagePaths);
             var newVideoPaths = new List<string>(hotspot.VideoPaths);
 
-
-
             var newDescriptionPath = $"text_{hotspot.Id}.txt";
-            
+
             // Copy in non-imported description path.
-            if (Path.IsPathRooted(hotspot.DescriptionPath))
-            {
+            if (!hotspot.DescriptionPath.IsInConfig())
                 File.Copy(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));
-            }
             else
-            {
-                File.Move(Path.Combine(ConfigFolderPath, hotspot.DescriptionPath), Path.Combine(ConfigFolderPath, newDescriptionPath));
-            }   
+                File.Move(Path.Combine(ConfigFolderPath, hotspot.DescriptionPath),
+                    Path.Combine(ConfigFolderPath, newDescriptionPath));
 
             // Move already imported image files.
             newImagePaths = UpdateFiles(
-                path => !Path.IsPathRooted(path),
+                PathExtensions.IsInConfig,
                 File.Move,
                 hotspot.ImagePaths,
                 "image",
-                hotspot.Id.ToString() );
+                hotspot.Id.ToString());
 
             // Import non-imported image files.
             newImagePaths = UpdateFiles(
-                Path.IsPathRooted,
+                PathExtensions.IsNotInConfig,
                 File.Copy,
                 newImagePaths,
                 "image",
-                hotspot.Id.ToString() );
+                hotspot.Id.ToString());
 
             // Move already imported video files.
             newVideoPaths = UpdateFiles(
-                path => !Path.IsPathRooted(path),
+                PathExtensions.IsInConfig,
                 File.Move,
                 newVideoPaths,
                 "video",
-                hotspot.Id.ToString() );
+                hotspot.Id.ToString());
 
             // Import non-imported video files.
             newVideoPaths = UpdateFiles(
-                Path.IsPathRooted,
+                PathExtensions.IsNotInConfig,
                 File.Copy,
                 newVideoPaths,
                 "video",
-                hotspot.Id.ToString() );
+                hotspot.Id.ToString());
 
             var newHotspot = new Hotspot(
                 hotspot.Id,
@@ -101,20 +94,23 @@ public class FileHandler : IFileHandler
                 newDescriptionPath,
                 newImagePaths.ToImmutableList(),
                 newVideoPaths.ToImmutableList()
-                );
+            );
 
             newHotspots.Add(newHotspot);
-
         }
 
         var newConfig = new Config(newHotspots);
 
+#if DEBUG || DEBUGSKIPPYTHON
         var serializerOptions = new JsonSerializerOptions
         {
             WriteIndented = true
         };
 
         var configString = JsonSerializer.Serialize(newConfig, serializerOptions);
+#else
+        var configString = JsonSerializer.Serialize(newConfig);
+#endif
 
         var configFile = new StreamWriter(Path.Combine(ConfigFolderPath, ConfigFileName));
         configFile.Write(configString);
@@ -131,7 +127,8 @@ public class FileHandler : IFileHandler
     /// <param name="oldPaths">All the old paths to be processed to new paths.</param>
     /// <param name="type">The type of file (image, video) to be updated.</param>
     /// <param name="id">The id of the hotspot for the new file name.</param>
-    private static List<string> UpdateFiles (Predicate<string> filter, Action<string, string> fileUpdateFunc, IList<string> oldPaths, string type, string id)
+    private static List<string> UpdateFiles(Predicate<string> filter, Action<string, string> fileUpdateFunc,
+        IList<string> oldPaths, string type, string id)
     {
         var newPaths = new List<string>();
 
@@ -159,26 +156,6 @@ public class FileHandler : IFileHandler
     }
 
     /// <summary>
-    /// Cleans up the temporary folder stored in <see cref="ConfigFolderPath" />.
-    /// </summary>
-    public void Dispose()
-    {
-        try
-        {
-            Directory.Delete(ConfigFolderPath, true);
-        }
-        catch (DirectoryNotFoundException)
-        {
-            Console.WriteLine($"{ConfigFolderPath} already deleted");
-        }
-        catch (Exception e)
-        {
-            //TODO Write to log file instead
-            Console.Error.WriteLine(e);
-        }
-    }
-
-    /// <summary>
     /// Loads a config from the .json file imported/created in the program folder.
     /// </summary>
     /// <returns>Loaded Config</returns>
@@ -202,7 +179,7 @@ public class FileHandler : IFileHandler
 
         var config = JsonSerializer.Deserialize<Config>(configFile)
                      ?? throw new JsonException("Config format invalid");
-        
+
         configFile.Close();
         return config;
     }
@@ -215,4 +192,12 @@ public class FileHandler : IFileHandler
     {
         return File.Exists(Path.Combine(ConfigFolderPath, ConfigFileName));
     }
+}
+
+internal static class PathExtensions
+{
+    public static bool IsInConfig(this string path) =>
+        path.StartsWith(ConfigFolderPath, StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsNotInConfig(this string path) => !path.IsInConfig();
 }

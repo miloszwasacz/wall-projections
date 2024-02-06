@@ -3,15 +3,21 @@ using System.IO;
 
 namespace WallProjections.Models.Interfaces;
 
-public interface IFileHandler : IDisposable
+public interface IFileHandler
 {
+    public const string ConfigFileName = "config.json";
+    public const string ConfigFolderName = "WallProjections";
+
+    public static string ConfigFolderPath =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigFolderName);
+
     /// <summary>
-    /// Load a zip file of the config file and the media files
+    /// Import a zip file of the config file and the media files
     /// </summary>
     /// <param name="zipPath">Path to the zip file</param>
     /// <returns>A config at the specified path, if any exist</returns>
     /// <exception cref="FileNotFoundException">If zip file or config file could not be found</exception>
-    public IConfig? Load(string zipPath);
+    public IConfig? Import(string zipPath);
 
     /// <summary>
     /// Loads the config.json file from the config folder.
@@ -27,6 +33,27 @@ public interface IFileHandler : IDisposable
     /// <returns>True if saved successfully</returns>
     public bool Save(IConfig config);
 
+    /// <summary>
+    /// Removes all files and the folder<see cref="ConfigFolderPath" />.
+    /// </summary>
+    public static void DeleteConfigFolder()
+    {
+        try
+        {
+            Directory.Delete(ConfigFolderPath, true);
+        }
+        catch (DirectoryNotFoundException)
+        {
+            Console.WriteLine($"{ConfigFolderPath} already deleted");
+        }
+        catch (Exception e)
+        {
+            //TODO Write to log file instead
+            Console.Error.WriteLine(e);
+        }
+    }
 
+
+    // TODO: Remove this
     public bool IsConfigImported();
 }

@@ -35,7 +35,6 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <remarks>Only instantiated if needed</remarks>
     private LibVLC LibVlc => _libVlc ??= new LibVLC();
 
-    /// TODO: Maybe improve the way the <see cref="DisplayViewModel"/> is cached.
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> instance
     /// </summary>
