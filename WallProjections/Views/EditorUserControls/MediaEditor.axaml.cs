@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -16,6 +18,13 @@ public partial class MediaEditor : UserControl
         RoutedEvent.Register<MediaEditor, RoutedEventArgs>(nameof(AddMedia), RoutingStrategies.Bubble);
 
     /// <summary>
+    /// A routed event that is raised when the user wants to remove media.
+    /// </summary>
+    /// <seealso cref="RemoveMedia" />
+    private static readonly RoutedEvent<RemoveMediaArgs> RemoveMediaEvent =
+        RoutedEvent.Register<MediaEditor, RemoveMediaArgs>(nameof(RemoveMedia), RoutingStrategies.Bubble);
+
+    /// <summary>
     /// A routed event that is raised when opening the explorer fails.
     /// </summary>
     /// <seealso cref="OpenExplorerFailed" />
@@ -29,6 +38,15 @@ public partial class MediaEditor : UserControl
     {
         add => AddHandler(AddMediaEvent, value);
         remove => RemoveHandler(AddMediaEvent, value);
+    }
+
+    /// <summary>
+    /// An event that is raised when the user wants to remove media.
+    /// </summary>
+    public event EventHandler<RemoveMediaArgs> RemoveMedia
+    {
+        add => AddHandler(RemoveMediaEvent, value);
+        remove => RemoveHandler(RemoveMediaEvent, value);
     }
 
     /// <summary>
@@ -75,5 +93,38 @@ public partial class MediaEditor : UserControl
         RaiseEvent(new RoutedEventArgs(AddMediaEvent, this));
     }
 
+    /// <summary>
+    /// A callback for when the remove media button is clicked.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void RemoveMedia_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IMediaEditorViewModel vm) return;
+
+        RaiseEvent(new RemoveMediaArgs(this, vm.SelectedMedia.SelectedItems));
+    }
+
     // ReSharper restore UnusedParameter.Local
+
+    /// <summary>
+    /// Arguments for the <see cref="RemoveMedia" /> event.
+    /// </summary>
+    public class RemoveMediaArgs : RoutedEventArgs
+    {
+        /// <summary>
+        /// A list of media to remove.
+        /// </summary>
+        public IThumbnailViewModel[] Media { get; }
+
+        /// <inheritdoc cref="RemoveMediaArgs" />
+        /// <seealso cref="MediaEditor.RemoveMedia_OnClick" />
+        public RemoveMediaArgs(
+            object? source,
+            IEnumerable<IThumbnailViewModel?> media
+        ) : base(RemoveMediaEvent, source)
+        {
+            Media = media.OfType<IThumbnailViewModel>().ToArray();
+        }
+    }
 }

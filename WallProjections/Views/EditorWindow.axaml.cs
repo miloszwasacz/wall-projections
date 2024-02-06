@@ -114,7 +114,7 @@ public partial class EditorWindow : Window
     {
         FetchMediaFiles(
             new[] { FilePickerFileTypes.ImageAll },
-            (vm, files) => vm.SelectedHotspot?.AddImages(files)
+            (vm, files) => vm.SelectedHotspot?.AddMedia(MediaEditorType.Images, files)
         );
     }
 
@@ -127,8 +127,28 @@ public partial class EditorWindow : Window
     {
         FetchMediaFiles(
             new[] { IContentProvider.FilePickerVideoType },
-            (vm, files) => vm.SelectedHotspot?.AddVideos(files)
+            (vm, files) => vm.AddMedia(MediaEditorType.Videos, files)
         );
+    }
+
+    /// <summary>
+    /// Removes media from the <see cref="IEditorHotspotViewModel.Images" /> collection.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e">The event arguments holding the media to remove.</param>
+    private void ImagesEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e)
+    {
+        RemoveMedia(MediaEditorType.Images, e);
+    }
+
+    /// <summary>
+    /// Removes media from the <see cref="IEditorHotspotViewModel.Videos" /> collection.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments holding the media to remove.</param>
+    private void VideoEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e)
+    {
+        RemoveMedia(MediaEditorType.Videos, e);
     }
 
     //ReSharper restore UnusedParameter.Local
@@ -155,5 +175,18 @@ public partial class EditorWindow : Window
         });
 
         action(vm, files);
+    }
+
+    /// <summary>
+    /// Removes media from the currently selected hotspot.
+    /// </summary>
+    /// <param name="type">The type of media to remove.</param>
+    /// <param name="args">The event arguments holding the media to remove.</param>
+    private void RemoveMedia(MediaEditorType type, MediaEditor.RemoveMediaArgs args)
+    {
+        //TODO Add a confirmation dialog
+        if (DataContext is not IEditorViewModel vm) return;
+
+        vm.RemoveMedia(type, args.Media);
     }
 }

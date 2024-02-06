@@ -38,11 +38,13 @@
         <editor:MediaEditor Grid.Column="4" Grid.Row="0"
                             DataContext="{Binding ImageEditor}"
                             AddMedia="ImageEditor_OnAddMedia"
+                            RemoveMedia="ImagesEditor_OnRemoveMedia"
                             OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
 
         <editor:MediaEditor Grid.Column="4" Grid.Row="2"
                             DataContext="{Binding VideoEditor}"
                             AddMedia="VideoEditor_OnAddMedia"
+                            RemoveMedia="VideoEditor_OnRemoveMedia"
                             OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
 
         <views:Toast Name="ExplorerErrorToast"

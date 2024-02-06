@@ -2,6 +2,7 @@
 using System.IO;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using ReactiveUI;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels.Editor;
@@ -17,11 +18,29 @@ public class VideoThumbnailViewModel : ViewModelBase, IThumbnailViewModel
     /// </summary>
     private static readonly Uri VideoThumbnailPath = new("avares://WallProjections/Assets/video_placeholder.png");
 
-    /// <inheritdoc />
-    public int Row { get; }
+    /// <summary>
+    /// The backing field for <see cref="Row" />.
+    /// </summary>
+    private int _row;
+
+    /// <summary>
+    /// The backing field for <see cref="Column" />.
+    /// </summary>
+    private int _column;
 
     /// <inheritdoc />
-    public int Column { get; }
+    public int Row
+    {
+        get => _row;
+        set => this.RaiseAndSetIfChanged(ref _row, value);
+    }
+
+    /// <inheritdoc />
+    public int Column
+    {
+        get => _column;
+        set => this.RaiseAndSetIfChanged(ref _column, value);
+    }
 
     /// <inheritdoc />
     public string FilePath { get; }

@@ -14,12 +14,12 @@ public interface IThumbnailViewModel
     /// <summary>
     /// The row of the thumbnail in the grid.
     /// </summary>
-    public int Row { get; }
+    public int Row { get; set; }
 
     /// <summary>
     /// The column of the thumbnail in the grid.
     /// </summary>
-    public int Column { get; }
+    public int Column { get; set; }
 
     /// <summary>
     /// The full path to the associated file.

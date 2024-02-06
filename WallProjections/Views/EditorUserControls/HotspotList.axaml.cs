@@ -43,7 +43,7 @@ public partial class HotspotList : UserControl
         var control = sender as Control;
         if (control?.Tag is not EditorViewModel.EditorHotspotViewModel hotspot) return;
 
-        RaiseEvent(new DeleteArgs(DeleteHotspotEvent, this, hotspot));
+        RaiseEvent(new DeleteArgs(this, hotspot));
     }
 
     //ReSharper restore UnusedParameter.Local
@@ -61,10 +61,9 @@ public partial class HotspotList : UserControl
         /// <inheritdoc cref="DeleteArgs" />
         /// <seealso cref="HotspotList.Delete_OnClick" />
         public DeleteArgs(
-            RoutedEvent? routedEvent,
             object? source,
             EditorViewModel.EditorHotspotViewModel hotspot
-        ) : base(routedEvent, source)
+        ) : base(DeleteHotspotEvent, source)
         {
             Hotspot = hotspot;
         }

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using Avalonia.Platform.Storage;
 using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Editor;
@@ -47,6 +49,22 @@ public interface IEditorViewModel<T>
     /// </summary>
     /// <param name="hotspot">The hotspot to delete.</param>
     public void DeleteHotspot(T hotspot);
+
+    /// <summary>
+    /// Adds media of the given <paramref name="type" /> to <see cref="SelectedHotspot" />.
+    /// </summary>
+    /// <param name="type">The <see cref="MediaEditorType">type</see> of media to add.</param>
+    /// <param name="files">
+    /// An iterator of image files that are converted to <see cref="IThumbnailViewModel" />s and added to the hotspot.
+    /// </param>
+    public void AddMedia(MediaEditorType type, IEnumerable<IStorageFile> files);
+
+    /// <summary>
+    /// Removes appropriate media from <see cref="SelectedHotspot" />.
+    /// </summary>
+    /// <param name="type">The <see cref="MediaEditorType">type</see> of media to remove.</param>
+    /// <param name="media">The media to remove from the hotspot.</param>
+    public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media);
 }
 
 /// <summary>

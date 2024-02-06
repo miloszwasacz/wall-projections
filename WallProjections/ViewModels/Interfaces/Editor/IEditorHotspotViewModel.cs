@@ -45,18 +45,18 @@ public interface IEditorHotspotViewModel
     public bool IsFallback => Title.Trim() == "";
 
     /// <summary>
-    /// Adds images to <see cref="Images" />.
+    /// Adds media to the appropriate collection (<see cref="Images" /> or <see cref="Videos" />).
     /// </summary>
+    /// <param name="type">The <see cref="MediaEditorType">type</see> of media to add.</param>
     /// <param name="files">
     /// An iterator of image files that are converted to <see cref="IThumbnailViewModel" />s and added to the hotspot.
     /// </param>
-    public void AddImages(IEnumerable<IStorageFile> files);
+    public void AddMedia(MediaEditorType type, IEnumerable<IStorageFile> files);
 
     /// <summary>
-    /// Adds videos to <see cref="Videos" />.
+    /// Removes media from the appropriate collection (<see cref="Images" /> or <see cref="Videos" />).
     /// </summary>
-    /// <param name="files">
-    /// An iterator of video files that are converted to <see cref="IThumbnailViewModel" />s and added to the hotspot.
-    /// </param>
-    public void AddVideos(IEnumerable<IStorageFile> files);
+    /// <param name="type">The <see cref="MediaEditorType">type</see> of media to remove.</param>
+    /// <param name="media">The media to remove from the hotspot.</param>
+    public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media);
 }

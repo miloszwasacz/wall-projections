@@ -85,6 +85,25 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         SelectedHotspot = Hotspots.FirstOrDefault();
     }
 
+    /// <inheritdoc />
+    public void AddMedia(MediaEditorType type, IEnumerable<IStorageFile> files)
+    {
+        SelectedHotspot?.AddMedia(type, files);
+    }
+
+    /// <inheritdoc />
+    public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media)
+    {
+        var selectedMedia = type switch
+        {
+            MediaEditorType.Images => ImageEditor.SelectedMedia,
+            MediaEditorType.Videos => VideoEditor.SelectedMedia,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+        SelectedHotspot?.RemoveMedia(type, media);
+        selectedMedia.Clear();
+    }
+
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" />, not linked to any existing <see cref="IConfig" />.
     /// </summary>
@@ -174,27 +193,45 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         }
 
         /// <inheritdoc />
-        public void AddImages(IEnumerable<IStorageFile> files)
+        public void AddMedia(MediaEditorType type, IEnumerable<IStorageFile> files)
         {
-            Images.AddRange(
-                GetIThumbnailViewModels(
-                    files,
-                    Images.Count,
-                    (path, row, column) => new ImageThumbnailViewModel(path, row, column)
-                )
-            );
+            switch (type)
+            {
+                case MediaEditorType.Images:
+                    Images.AddRange(
+                        GetIThumbnailViewModels(
+                            files,
+                            Images.Count,
+                            (path, row, column) => new ImageThumbnailViewModel(path, row, column)
+                        )
+                    );
+                    break;
+                case MediaEditorType.Videos:
+                    Videos.AddRange(
+                        GetIThumbnailViewModels(
+                            files,
+                            Videos.Count,
+                            (path, row, column) => new VideoThumbnailViewModel(path, row, column)
+                        )
+                    );
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type");
+            }
         }
 
         /// <inheritdoc />
-        public void AddVideos(IEnumerable<IStorageFile> files)
+        public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media)
         {
-            Videos.AddRange(
-                GetIThumbnailViewModels(
-                    files,
-                    Videos.Count,
-                    (path, row, column) => new VideoThumbnailViewModel(path, row, column)
-                )
-            );
+            var mediaList = type switch
+            {
+                MediaEditorType.Images => Images,
+                MediaEditorType.Videos => Videos,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
+            };
+
+            mediaList.RemoveMany(media);
+            ReindexMedia(mediaList);
         }
 
         /// <summary>
@@ -219,6 +256,21 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             var column = GetMediaColumn(index);
             return factory(path, row, column);
         });
+
+        /// <summary>
+        /// Updates the <see cref="IThumbnailViewModel.Row" /> and <see cref="IThumbnailViewModel.Column" />
+        /// of the media items in the given <paramref name="media" /> collection.
+        /// </summary>
+        /// <param name="media">The collection of media items to reindex.</param>
+        private static void ReindexMedia(IReadOnlyList<IThumbnailViewModel> media)
+        {
+            for (var i = 0; i < media.Count; i++)
+            {
+                var thumbnail = media[i];
+                thumbnail.Row = GetMediaRow(i);
+                thumbnail.Column = GetMediaColumn(i);
+            }
+        }
 
         /// <summary>
         /// Returns the row of the grid where the media item at the given <paramref name="index" /> is.
