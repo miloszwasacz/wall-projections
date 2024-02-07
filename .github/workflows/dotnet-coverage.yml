@@ -1,10 +1,9 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
 name: .NET Coverage
 
 on:
   pull_request:
+#    branches:
+#      - dev
 
 jobs:
   build:
@@ -23,6 +22,9 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget
+
+      - name: Install LibVLCSharp dependencies
+        run: sudo apt install -y libvlc-dev vlc
 
       - name: Restore dependencies
         run: dotnet restore

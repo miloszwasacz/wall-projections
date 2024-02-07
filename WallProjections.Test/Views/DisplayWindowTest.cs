@@ -86,6 +86,7 @@ public class DisplayWindowTest
     }
 
     [AvaloniaTest]
+    [NonParallelizable]
     public void QuitTest()
     {
         var lifetime = new MockDesktopLifetime();

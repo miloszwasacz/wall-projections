@@ -63,12 +63,16 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             const sha = process.env.GITHUB_SHA
-            await github.rest.git.updateRef({
-              owner,
-              repo,
-              ref: `tags/latest`,
-              sha,
-            })
+            try {
+              await github.rest.git.updateRef({
+                owner,
+                repo,
+                ref: `tags/latest`,
+                sha,
+              })
+            } catch (error) {
+              console.log('Tag `latest` does not exist')
+            }
 
       - name: Generate changelog
         id: changelog
