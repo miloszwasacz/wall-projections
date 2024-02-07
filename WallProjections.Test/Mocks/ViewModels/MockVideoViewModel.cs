@@ -15,7 +15,7 @@ public sealed class MockVideoViewModel : IVideoViewModel
     /// <summary>
     /// The backing field for <see cref="MediaPlayer" />
     /// </summary>
-    private IMediaPlayer? _mediaPlayer;
+    private readonly IMediaPlayer? _mediaPlayer;
 
     /// <summary>
     /// A mock of <see cref="VideoViewModel" /> for injecting into <see cref="DisplayViewModel" />.

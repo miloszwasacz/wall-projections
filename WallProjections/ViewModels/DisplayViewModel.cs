@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
-using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 
@@ -40,9 +39,8 @@ Please report this to the museum staff.";
     /// and starts listening for <see cref="IPythonEventHandler.HotspotSelected">Python events</see>
     /// </summary>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
-    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
+    /// <param name="contentProvider">A <see cref="IContentProvider"/> for fetching data about hotspots.</param>
     /// <param name="pythonEventHandler">The <see cref="IPythonEventHandler" /> used to listen for Python events</param>
-    /// <param name="contentProvider">Allows a custom <see cref="IContentProvider"/> to be used.</param>
     public DisplayViewModel(
         IViewModelProvider vmProvider,
         IContentProvider contentProvider,
@@ -51,9 +49,9 @@ Please report this to the museum staff.";
     {
         ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
+        _contentProvider = contentProvider;
         _pythonEventHandler = pythonEventHandler;
         _pythonEventHandler.HotspotSelected += OnHotspotSelected;
-        _contentProvider = contentProvider;
     }
 
     /// <inheritdoc />

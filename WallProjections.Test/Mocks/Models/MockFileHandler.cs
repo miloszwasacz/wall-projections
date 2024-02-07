@@ -43,11 +43,6 @@ public sealed class MockFileHandler : IFileHandler
     public int LoadCount => _loadedZips.Count;
 
     /// <summary>
-    /// The number of times <see cref="Dispose" /> has been called
-    /// </summary>
-    public int DisposeCount { get; private set; }
-
-    /// <summary>
     /// Creates a new mock cache that has the given <paramref name="mediaPath" /> and <paramref name="config" />
     /// and no media files
     /// </summary>
@@ -93,7 +88,7 @@ public sealed class MockFileHandler : IFileHandler
     }
 
     /// <summary>
-    /// Returns the currently stored <see cref="UConfig"/>
+    /// Returns the currently stored <see cref="IConfig"/>
     /// </summary>
     /// <returns>Stored <see cref="IConfig"/></returns>
     public IConfig LoadConfig()
@@ -124,12 +119,4 @@ public sealed class MockFileHandler : IFileHandler
     /// <returns>A new <see cref="MockContentProvider" /></returns>
     public IContentProvider CreateContentProvider(IConfig config) =>
         _exception is null ? new MockContentProvider(_media) : new MockContentProvider(_exception);
-
-    /// <summary>
-    /// Increases the number of times <see cref="Dispose" /> has been called
-    /// </summary>
-    public void Dispose()
-    {
-        DisposeCount++;
-    }
 }

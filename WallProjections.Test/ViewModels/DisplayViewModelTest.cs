@@ -17,10 +17,14 @@ public class DisplayViewModelTest
     private const int HotspotId = 1;
     private const string Text = "test";
 
-    private static readonly ImmutableList<string> ImagePaths = new List<string>{ "test.png", "test2.jpg" }.ToImmutableList();
+    private static readonly ImmutableList<string> ImagePaths =
+        new List<string> { "test.png", "test2.jpg" }.ToImmutableList();
+
     private static ImmutableList<string> ImagePath => ImagePaths.GetRange(0, 1);
 
-    private static readonly ImmutableList<string> VideoPaths = new List<string> { "test.mp4", "test2.mkv" }.ToImmutableList();
+    private static readonly ImmutableList<string> VideoPaths =
+        new List<string> { "test.mp4", "test2.mkv" }.ToImmutableList();
+
     private static ImmutableList<string> VideoPath => VideoPaths.GetRange(0, 1);
 
     #region MediaFiles
@@ -28,7 +32,7 @@ public class DisplayViewModelTest
     private static ImmutableList<Hotspot.Media> FilesAll =>
         new List<Hotspot.Media>
         {
-            new (1,
+            new(1,
                 Text,
                 ImagePaths,
                 VideoPaths
@@ -38,7 +42,7 @@ public class DisplayViewModelTest
     private static ImmutableList<Hotspot.Media> FilesSingle =>
         new List<Hotspot.Media>
         {
-            new (1,
+            new(1,
                 Text,
                 ImagePath,
                 VideoPath
@@ -48,7 +52,7 @@ public class DisplayViewModelTest
     private static ImmutableList<Hotspot.Media> FilesNoVideo =>
         new List<Hotspot.Media>
         {
-            new (1,
+            new(1,
                 Text,
                 ImagePaths,
                 ImmutableList<string>.Empty
@@ -58,7 +62,7 @@ public class DisplayViewModelTest
     private static ImmutableList<Hotspot.Media> FilesNoImage =>
         new List<Hotspot.Media>
         {
-            new (1,
+            new(1,
                 Text,
                 ImmutableList<string>.Empty,
                 VideoPath
@@ -68,7 +72,7 @@ public class DisplayViewModelTest
     private static ImmutableList<Hotspot.Media> FilesNoMedia =>
         new List<Hotspot.Media>
         {
-            new (1,
+            new(1,
                 Text,
                 ImmutableList<string>.Empty,
                 ImmutableList<string>.Empty
@@ -188,7 +192,6 @@ public class DisplayViewModelTest
     public void OnHotspotSelectedNoConfigTest()
     {
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(Enumerable.Empty<Hotspot>());
         var contentProvider = new MockContentProvider(ImmutableList<Hotspot.Media>.Empty);
 
         var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
@@ -213,7 +216,6 @@ public class DisplayViewModelTest
     {
         var (exception, expectedDescription) = testCase;
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(Enumerable.Empty<Hotspot>());
         var contentProvider = new MockContentProvider(exception);
 
         var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);

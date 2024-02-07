@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.Json;
 using WallProjections.Models.Interfaces;
 using static WallProjections.Models.Interfaces.IFileHandler;
@@ -11,7 +12,6 @@ namespace WallProjections.Models;
 
 public class FileHandler : IFileHandler
 {
-
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// TODO Handle errors from trying to load from not-found/invalid zip file
@@ -30,70 +30,86 @@ public class FileHandler : IFileHandler
     }
 
     /// <inheritdoc />
+    /// <exception>
+    /// Can throw the same exceptions as <see cref="Directory.CreateDirectory" />,
+    /// <see cref="File.Copy(string, string)" />, and <see cref="File.Move(string, string, bool)" />.
+    /// </exception>
     public bool SaveConfig(IConfig config)
     {
         // Check if directory already exists. If not, create it.
         if (!Directory.Exists(ConfigFolderPath))
-        {
             Directory.CreateDirectory(ConfigFolderPath);
-        }
-
 
         var hotspots = config.Hotspots;
         var newHotspots = new List<Hotspot>();
 
         foreach (var hotspot in hotspots)
         {
-            var newImagePaths = new List<string>(hotspot.ImagePaths);
-            var newVideoPaths = new List<string>(hotspot.VideoPaths);
-
             var newDescriptionPath = $"text_{hotspot.Id}.txt";
 
             // Copy in non-imported description path.
             if (!hotspot.DescriptionPath.IsInConfig())
                 File.Copy(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));
             else
-                File.Move(Path.Combine(ConfigFolderPath, hotspot.DescriptionPath),
-                    Path.Combine(ConfigFolderPath, newDescriptionPath));
+            {
+                File.Move(
+                    Path.Combine(ConfigFolderPath, hotspot.DescriptionPath),
+                    Path.Combine(ConfigFolderPath, newDescriptionPath)
+                );
+            }
 
             // Move already imported image files.
-            newImagePaths = UpdateFiles(
+            var newImagePaths = UpdateFiles(
                 PathExtensions.IsInConfig,
                 File.Move,
                 hotspot.ImagePaths,
                 "image",
-                hotspot.Id.ToString());
+                hotspot.Id
+            ).Concat(UpdateFiles(
+                PathExtensions.IsNotInConfig,
+                File.Copy,
+                hotspot.ImagePaths,
+                "image",
+                hotspot.Id
+            )).ToImmutableList();
 
             // Import non-imported image files.
-            newImagePaths = UpdateFiles(
-                PathExtensions.IsNotInConfig,
-                File.Copy,
-                newImagePaths,
-                "image",
-                hotspot.Id.ToString());
+            // newImagePaths.AddRange(UpdateFiles(
+            // PathExtensions.IsNotInConfig,
+            // File.Copy,
+            // hotspot.ImagePaths,
+            // "image",
+            // hotspot.Id));
 
             // Move already imported video files.
-            newVideoPaths = UpdateFiles(
+            var newVideoPaths = UpdateFiles(
                 PathExtensions.IsInConfig,
                 File.Move,
-                newVideoPaths,
+                hotspot.VideoPaths,
                 "video",
-                hotspot.Id.ToString());
-
-            // Import non-imported video files.
-            newVideoPaths = UpdateFiles(
+                hotspot.Id
+            ).Concat(UpdateFiles(
                 PathExtensions.IsNotInConfig,
                 File.Copy,
-                newVideoPaths,
+                hotspot.VideoPaths,
                 "video",
-                hotspot.Id.ToString());
+                hotspot.Id
+            )).ToImmutableList();
+
+            // Import non-imported video files.
+            // newVideoPaths.AddRange(UpdateFiles(
+            // PathExtensions.IsNotInConfig,
+            // File.Copy,
+            // hotspot.VideoPaths,
+            // "video",
+            // hotspot.Id));
 
             var newHotspot = new Hotspot(
                 hotspot.Id,
                 hotspot.Position,
                 newDescriptionPath,
-                newImagePaths.ToImmutableList(),
-                newVideoPaths.ToImmutableList()
+                newImagePaths,
+                newVideoPaths
             );
 
             newHotspots.Add(newHotspot);
@@ -102,19 +118,16 @@ public class FileHandler : IFileHandler
         var newConfig = new Config(newHotspots);
 
 #if DEBUG || DEBUGSKIPPYTHON
-        var serializerOptions = new JsonSerializerOptions
+        var configString = JsonSerializer.Serialize(newConfig, new JsonSerializerOptions
         {
             WriteIndented = true
-        };
-
-        var configString = JsonSerializer.Serialize(newConfig, serializerOptions);
+        });
 #else
         var configString = JsonSerializer.Serialize(newConfig);
 #endif
 
-        var configFile = new StreamWriter(Path.Combine(ConfigFolderPath, ConfigFileName));
+        using var configFile = new StreamWriter(Path.Combine(ConfigFolderPath, ConfigFileName));
         configFile.Write(configString);
-        configFile.Close();
 
         return true;
     }
@@ -124,34 +137,26 @@ public class FileHandler : IFileHandler
     /// </summary>
     /// <param name="filter">Decides if file will be processed.</param>
     /// <param name="fileUpdateFunc">The function run to update the location of the file.</param>
-    /// <param name="oldPaths">All the old paths to be processed to new paths.</param>
+    /// <param name="filePaths">All the old paths to be processed to new paths.</param>
     /// <param name="type">The type of file (image, video) to be updated.</param>
     /// <param name="id">The id of the hotspot for the new file name.</param>
-    private static List<string> UpdateFiles(Predicate<string> filter, Action<string, string, bool> fileUpdateFunc,
-        IList<string> oldPaths, string type, string id)
-    {
-        var newPaths = new List<string>();
-
-        for (var i = 0; i < oldPaths.Count; i++)
+    private static IEnumerable<string> UpdateFiles(
+        Func<string, bool> filter,
+        Action<string, string, bool> fileUpdateFunc,
+        IEnumerable<string> filePaths,
+        string type,
+        int id
+    ) => filePaths
+        .Where(filter)
+        .Select((path, i) =>
         {
-            var oldPath = oldPaths[i];
-            var newPath = oldPath;
-            if (Path.IsPathRooted(oldPath) && filter(oldPath))
-            {
-                var extension = Path.GetExtension(oldPath);
-                var newFileName = $"{type}_{id}_{i}{extension}";
+            var extension = Path.GetExtension(path);
+            var newFileName = $"{type}_{id}_{i}{extension}";
 
-                fileUpdateFunc(oldPath,
-                    Path.Combine(ConfigFolderPath, newFileName), true);
+            fileUpdateFunc(path, Path.Combine(ConfigFolderPath, newFileName), true);
 
-                newPath = newFileName;
-            }
-
-            newPaths.Insert(i, newPath);
-        }
-
-        return newPaths;
-    }
+            return newFileName;
+        });
 
     /// <summary>
     /// Loads a config from the .json file imported/created in the program folder.
@@ -164,22 +169,9 @@ public class FileHandler : IFileHandler
     {
         var configLocation = Path.Combine(ConfigFolderPath, ConfigFileName);
 
-        FileStream configFile;
-        try
-        {
-            configFile = File.OpenRead(configLocation);
-        }
-        catch (FileNotFoundException e)
-        {
-            Console.WriteLine(e);
-            throw new FileNotFoundException("No config imported", configLocation);
-        }
-
-        var config = JsonSerializer.Deserialize<Config>(configFile)
-                     ?? throw new JsonException("Config format invalid");
-
-        configFile.Close();
-        return config;
+        using var configFile = File.OpenRead(configLocation);
+        return JsonSerializer.Deserialize<Config>(configFile) ??
+               throw new JsonException("Config format invalid");
     }
 
     /// <summary>
@@ -192,10 +184,22 @@ public class FileHandler : IFileHandler
     }
 }
 
+/// <summary>
+/// Extension methods for media file paths.
+/// </summary>
 internal static class PathExtensions
 {
-    public static bool IsInConfig(this string path) =>
-        path.StartsWith(ConfigFolderPath, StringComparison.OrdinalIgnoreCase);
+    /// <summary>
+    /// Checks if the file is in the <see cref="IFileHandler.ConfigFolderPath">config folder</see>.
+    /// </summary>
+    /// <param name="path">Path to the file.</param>
+    /// <seealso cref="IsNotInConfig" />
+    public static bool IsInConfig(this string path) => path.StartsWith(ConfigFolderPath) && File.Exists(path);
 
-    public static bool IsNotInConfig(this string path) => !path.IsInConfig();
+    /// <summary>
+    /// Checks if the file is not in the <see cref="IFileHandler.ConfigFolderPath">config folder</see>.
+    /// </summary>
+    /// <param name="path">Path to the file.</param>
+    /// <seealso cref="IsInConfig" />
+    public static bool IsNotInConfig(this string path) => !path.IsInConfig() && File.Exists(path);
 }

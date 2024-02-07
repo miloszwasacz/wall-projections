@@ -37,7 +37,7 @@ public class VideoViewTest
         var window = new DisplayWindow
         {
             Width = initSize.Width,
-            Height = initSize.Height,
+            Height = initSize.Height
         };
         var videoView = window.VideoView;
         window.Show();
@@ -63,7 +63,7 @@ public class VideoViewTest
         var window = new DisplayWindow
         {
             Width = initSize.Width,
-            Height = initSize.Height,
+            Height = initSize.Height
         };
         var videoView = window.VideoView;
         window.Show();

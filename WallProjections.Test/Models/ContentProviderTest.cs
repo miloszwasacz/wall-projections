@@ -22,7 +22,7 @@ public class ContentProviderTest
     private string _configPath = null!;
 
     private IConfig _mockValidConfig = null!;
-    private IConfig _mockInvalidConfig = null;
+    private IConfig _mockInvalidConfig = null!;
 
     private string MediaPath => Path.Combine(_configPath, ValidConfigPath);
     private string InvalidMediaPath => Path.Combine(_configPath, InvalidConfigPath);
@@ -160,7 +160,8 @@ public class ContentProviderTest
     /// <param name="position"></param>
     /// <param name="descriptionPath"></param>
     /// <param name="imagePaths"></param>
-    /// <param name="descriptionPath"></param>
+    /// <param name="videoPaths"></param>
+    /// <param name="filePath"></param>
     /// <returns></returns>
     private static Hotspot NewTestHotspot(
         int id,
@@ -175,7 +176,11 @@ public class ContentProviderTest
         Assert.That(hotspot, Is.Not.Null);
 
         // Use reflection to update file path of hotspots.
-        var hotspotFilePathField = typeof(Hotspot).GetField("_filePath", BindingFlags.Instance | BindingFlags.NonPublic);
+        const string fieldName = "_filePath";
+        var hotspotFilePathField = typeof(Hotspot).GetField(
+            fieldName,
+            BindingFlags.Instance | BindingFlags.NonPublic
+        ) ?? throw new MissingFieldException(nameof(Hotspot), fieldName);
         hotspotFilePathField.SetValue(hotspot, filePath);
 
         return hotspot;

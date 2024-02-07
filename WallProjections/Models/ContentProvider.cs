@@ -1,15 +1,19 @@
-using System;
-using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Models;
 
 public class ContentProvider : IContentProvider
 {
+    /// <summary>
+    /// The <see cref="IConfig"/> for fetching data about the artifact.
+    /// </summary>
     private readonly IConfig _config;
 
+    /// <summary>
+    /// Create a new <see cref="ContentProvider"/> with the given <see cref="IConfig"/>.
+    /// </summary>
+    /// <param name="config">The <see cref="IConfig"/> for fetching data obout the artifact.</param>
     public ContentProvider(IConfig config)
     {
         _config = config;

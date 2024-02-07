@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using Python.Runtime;
-using WallProjections.Models;
 using WallProjections.ViewModels;
 #if !DEBUGSKIPPYTHON
 using System.Diagnostics;

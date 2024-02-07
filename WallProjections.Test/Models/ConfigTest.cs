@@ -22,7 +22,8 @@ public class ConfigTest
         {
             var config = new Config(hotspots);
             Assert.That(config.HotspotCount, Is.EqualTo(i));
-            hotspots.Add(new Hotspot(i, new Coord(1, 2, 3), "", ImmutableList<string>.Empty, ImmutableList<string>.Empty));
+            hotspots.Add(new Hotspot(i, new Coord(1, 2, 3), "", ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty));
         }
     }
 
@@ -35,7 +36,8 @@ public class ConfigTest
         var config = new Config(
             hotspots: new List<Hotspot>
             {
-                new(1, new Coord(0, 0, 0), "", new List<string>{"image_1_0.jpg"}.ToImmutableList(), ImmutableList<string>.Empty),
+                new(1, new Coord(0, 0, 0), "", new List<string> { "image_1_0.jpg" }.ToImmutableList(),
+                    ImmutableList<string>.Empty),
                 new(2, new Coord(0, 0, 0), "text_2.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty)
             }
         );
@@ -44,23 +46,20 @@ public class ConfigTest
         var hotspot2 = config.GetHotspot(2);
         var hotspot3 = config.GetHotspot(3);
 
+        Assert.That(hotspot1, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(hotspot1, Is.Not.Null);
             Assert.That(hotspot1!.Id, Is.EqualTo(1));
-            Assert.That(hotspot1!.ImagePaths[0], Is.EqualTo("image_1_0.jpg"));
+            Assert.That(hotspot1.ImagePaths[0], Is.EqualTo("image_1_0.jpg"));
         });
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(hotspot2, Is.Not.Null);
             Assert.That(hotspot2!.Id, Is.EqualTo(2));
             Assert.That(hotspot2.DescriptionPath, Is.EqualTo("text_2.txt"));
         });
-        
-        Assert.Multiple((() =>
-        {
-            Assert.That(hotspot3, Is.Null);
-        }));
+
+        Assert.Multiple(() => { Assert.That(hotspot3, Is.Null); });
     }
 }
