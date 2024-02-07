@@ -556,10 +556,10 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that config with relative files already imported is saved correctly.
+    /// Test that config with files already imported is saved correctly.
     /// </summary>
     [Test]
-    public void SaveConfigWithRelativeFiles()
+    public void SaveConfigWithImportedFiles()
     {
         #region Ensure Config Folder Reset
         if (Directory.Exists(IFileHandler.ConfigFolderPath))
@@ -597,14 +597,14 @@ public class FileHandlerTest
         {
             new(0,
                 new Coord(0, 0, 0),
-                "text_0.txt",
+                Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"),
                 ImmutableList<string>.Empty,
                  ImmutableList<string>.Empty),
             new(1,
                 new Coord(0, 0, 0),
-                "text_1.txt",
-                new List<string>{ "image_0_0.png" }.ToImmutableList(),
-                new List<string>{ "video_0_0.mp4" }.ToImmutableList() )
+                Path.Combine(IFileHandler.ConfigFolderPath,"text_1.txt"),
+                new List<string>{ Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png") }.ToImmutableList(),
+                new List<string>{ Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4") }.ToImmutableList() )
         });
 
         fileHandler.Save(newConfig);

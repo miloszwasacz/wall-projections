@@ -127,7 +127,7 @@ public class FileHandler : IFileHandler
     /// <param name="oldPaths">All the old paths to be processed to new paths.</param>
     /// <param name="type">The type of file (image, video) to be updated.</param>
     /// <param name="id">The id of the hotspot for the new file name.</param>
-    private static List<string> UpdateFiles(Predicate<string> filter, Action<string, string> fileUpdateFunc,
+    private static List<string> UpdateFiles(Predicate<string> filter, Action<string, string, bool> fileUpdateFunc,
         IList<string> oldPaths, string type, string id)
     {
         var newPaths = new List<string>();
@@ -136,15 +136,13 @@ public class FileHandler : IFileHandler
         {
             var oldPath = oldPaths[i];
             var newPath = oldPath;
-            if (filter(oldPath))
+            if (Path.IsPathRooted(oldPath) && filter(oldPath))
             {
-                var newFileName = Path.GetFileName(oldPath);
                 var extension = Path.GetExtension(oldPath);
-                newFileName = $"{type}_{id}_{i}{extension}";
-                oldPath = Path.Combine(ConfigFolderPath, oldPath);
+                var newFileName = $"{type}_{id}_{i}{extension}";
 
                 fileUpdateFunc(oldPath,
-                    Path.Combine(ConfigFolderPath, newFileName));
+                    Path.Combine(ConfigFolderPath, newFileName), true);
 
                 newPath = newFileName;
             }

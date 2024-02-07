@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.IO.Compression;
+using System.Reflection;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using static WallProjections.Test.TestExtensions;
@@ -61,49 +62,49 @@ public class ContentProviderTest
 
         _mockValidConfig = new Config(new List<Hotspot>
         {
-            new(
+            NewTestHotspot(
                 0,
-                new Coord(0,0,0),
+                new Coord(0, 0, 0),
                 "text_0.txt",
                 ImmutableList<string>.Empty,
                 ImmutableList<string>.Empty,
-                Path.Combine(_configPath, ValidConfigPath)
+                MediaPath
             ),
-            new(
+            NewTestHotspot(
                 1,
-                new Coord(0,0,0),
+                new Coord(0, 0, 0),
                 "text_1.txt",
-                new List<string>{ "image_1_0.png" }.ToImmutableList(),
-                new List<string>{ "video_1_0.mp4" }.ToImmutableList(),
-                Path.Combine(_configPath, ValidConfigPath)
+                new List<string> { "image_1_0.png" }.ToImmutableList(),
+                new List<string> { "video_1_0.mp4" }.ToImmutableList(),
+                MediaPath
             ),
-            new(
+            NewTestHotspot(
                 2,
-                new Coord(0,0,0),
+                new Coord(0, 0, 0),
                 "text_2.txt",
-                new List<string>{ "image_2_0.jpg", "image_2_1.jpeg" }.ToImmutableList(),
-                new List<string>{ "video_2_0.mkv", "video_2_1.mov" }.ToImmutableList(),
-                Path.Combine(_configPath, ValidConfigPath)
+                new List<string> { "image_2_0.jpg", "image_2_1.jpeg" }.ToImmutableList(),
+                new List<string> { "video_2_0.mkv", "video_2_1.mov" }.ToImmutableList(),
+                MediaPath
             )
         });
 
         _mockInvalidConfig = new Config(new List<Hotspot>
         {
-            new(
+            NewTestHotspot(
                 0,
-                new Coord(0,0,0),
+                new Coord(0, 0, 0),
                 "text_0.txt",
                 ImmutableList<string>.Empty,
                 ImmutableList<string>.Empty,
-                Path.Combine(_configPath, InvalidConfigPath)
+                InvalidMediaPath
             ),
-            new(
+            NewTestHotspot(
                 1,
-                new Coord(0,0,0),
+                new Coord(0, 0, 0),
                 "text_1.txt",
-                new List<string>{ "image_1_0.png" }.ToImmutableList(),
+                new List<string> { "image_1_0.png" }.ToImmutableList(),
                 ImmutableList<string>.Empty,
-                Path.Combine(_configPath, InvalidConfigPath)
+                InvalidMediaPath
             )
         });
     }
@@ -150,5 +151,31 @@ public class ContentProviderTest
         var provider = new ContentProvider(_mockInvalidConfig);
 
         Assert.Throws<FileNotFoundException>(() => provider.GetMedia(1));
+    }
+
+    /// <summary>
+    /// Returns <see cref="Hotspot"/> with filepath updated to test path.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="position"></param>
+    /// <param name="descriptionPath"></param>
+    /// <param name="imagePaths"></param>
+    /// <param name="descriptionPath"></param>
+    /// <returns></returns>
+    private static Hotspot NewTestHotspot(
+        int id,
+        Coord position,
+        string descriptionPath,
+        ImmutableList<string> imagePaths,
+        ImmutableList<string> videoPaths,
+        string filePath)
+    {
+        var hotspot = new Hotspot(id, position, descriptionPath, imagePaths, videoPaths);
+
+        // Use reflection to update file path of hotspots.
+        var hotspotFilePathField = typeof(Hotspot).GetField("FilePath", BindingFlags.Instance | BindingFlags.NonPublic);
+        hotspotFilePathField.SetValue(hotspot, filePath);
+
+        return hotspot;
     }
 }
