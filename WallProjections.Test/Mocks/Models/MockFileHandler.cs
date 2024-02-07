@@ -14,7 +14,7 @@ public sealed class MockFileHandler : IFileHandler
     /// The media list passed to the <see cref="MockContentProvider" />'s constructor
     /// when <see cref="CreateContentProvider" /> is called
     /// </summary>
-    private readonly Dictionary<int, Hotspot.Media> _media;
+    private readonly List<Hotspot.Media> _media;
 
     /// <summary>
     /// The exception passed to the <see cref="MockContentProvider" />'s constructor
@@ -23,12 +23,12 @@ public sealed class MockFileHandler : IFileHandler
     private readonly Exception? _exception;
 
     /// <summary>
-    /// The <see cref="IConfig" /> to be returned by <see cref="Load" />
+    /// The <see cref="IConfig" /> to be returned by <see cref="ImportConfig" />
     /// </summary>
     public IConfig Config { get; set; }
 
     /// <summary>
-    /// A list of all the zip files that have been loaded using <see cref="Load" />
+    /// A list of all the zip files that have been loaded using <see cref="ImportConfig" />
     /// </summary>
     public IReadOnlyList<string> LoadedZips => _loadedZips;
 
@@ -38,34 +38,29 @@ public sealed class MockFileHandler : IFileHandler
     public string MediaPath { get; set; }
 
     /// <summary>
-    /// The number of times <see cref="Load" /> has been called
+    /// The number of times <see cref="ImportConfig" /> has been called
     /// </summary>
     public int LoadCount => _loadedZips.Count;
-
-    /// <summary>
-    /// The number of times <see cref="Dispose" /> has been called
-    /// </summary>
-    public int DisposeCount { get; private set; }
 
     /// <summary>
     /// Creates a new mock cache that has the given <paramref name="mediaPath" /> and <paramref name="config" />
     /// and no media files
     /// </summary>
-    /// <param name="config">The <see cref="IConfig"/> to be returned by <see cref="Load" /></param>
+    /// <param name="config">The <see cref="IConfig"/> to be returned by <see cref="ImportConfig" /></param>
     /// <param name="mediaPath">The value to set <see cref="MediaPath" /> to</param>
     public MockFileHandler(IConfig config, string mediaPath)
     {
-        _media = new Dictionary<int, Hotspot.Media>();
+        _media = new List<Hotspot.Media>();
         MediaPath = mediaPath;
         Config = config;
     }
 
     /// <summary>
     /// Creates a new <see cref="MockFileHandler" /> with the given list of media files,
-    /// and empty <see cref="Config" /> and <see cref="MediaPath" />
+    /// and empty <see cref="IConfig" /> and <see cref="MediaPath" />
     /// </summary>
     /// <param name="files">The list of media files provided to <see cref="CreateContentProvider" /></param>
-    public MockFileHandler(Dictionary<int, Hotspot.Media> files)
+    public MockFileHandler(List<Hotspot.Media> files)
     {
         _media = files;
         MediaPath = "";
@@ -76,7 +71,7 @@ public sealed class MockFileHandler : IFileHandler
     /// Creates a new <see cref="MockFileHandler" /> that will search through the given list of media
     /// </summary>
     /// <param name="exception"></param>
-    public MockFileHandler(Exception exception) : this(new Dictionary<int, Hotspot.Media>())
+    public MockFileHandler(Exception exception) : this(new List<Hotspot.Media>())
     {
         _exception = exception;
     }
@@ -85,14 +80,32 @@ public sealed class MockFileHandler : IFileHandler
     /// Adds the <paramref name="zipPath" /> to the list of loaded zips and returns the <see cref="Config" />
     /// </summary>
     /// <param name="zipPath">The theoretical path to the zip file containing media files</param>
-    /// <returns><see cref="Config" /></returns>
-    public IConfig Load(string zipPath)
+    /// <returns><see cref="IConfig" /></returns>
+    public IConfig ImportConfig(string zipPath)
     {
         _loadedZips.Add(zipPath);
         return Config;
     }
 
-    public bool Save(IConfig config)
+    /// <summary>
+    /// Returns the currently stored <see cref="IConfig"/>
+    /// </summary>
+    /// <returns>Stored <see cref="IConfig"/></returns>
+    public IConfig LoadConfig()
+    {
+        return Config;
+    }
+
+    /// <summary>
+    /// Returns if <see cref="Config"/> is loaded
+    /// </summary>
+    /// <returns>Always true as <see cref="IConfig"/> defined in constructor</returns>
+    public bool IsConfigImported()
+    {
+        return true;
+    }
+
+    public bool SaveConfig(IConfig config)
     {
         throw new NotImplementedException();
     }
@@ -106,12 +119,4 @@ public sealed class MockFileHandler : IFileHandler
     /// <returns>A new <see cref="MockContentProvider" /></returns>
     public IContentProvider CreateContentProvider(IConfig config) =>
         _exception is null ? new MockContentProvider(_media) : new MockContentProvider(_exception);
-
-    /// <summary>
-    /// Increases the number of times <see cref="Dispose" /> has been called
-    /// </summary>
-    public void Dispose()
-    {
-        DisposeCount++;
-    }
 }

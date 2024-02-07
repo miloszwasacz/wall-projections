@@ -10,12 +10,7 @@ public class MockViewModelProvider : IViewModelProvider
     /// Creates a new <see cref="MockDisplayViewModel"/>
     /// </summary>
     /// <returns>A new <see cref="MockDisplayViewModel"/></returns>
-    public IDisplayViewModel GetDisplayViewModel(IConfig config)
-    {
-        var mockDisplayViewModel = new MockDisplayViewModel();
-        mockDisplayViewModel.Config = config;
-        return mockDisplayViewModel;
-    }
+    public IDisplayViewModel GetDisplayViewModel(IConfig config) => new MockDisplayViewModel();
 
     /// <summary>
     /// Creates a new <see cref="MockImageViewModel" /> instance

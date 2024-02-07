@@ -1,107 +1,206 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.Json;
 using WallProjections.Models.Interfaces;
+using static WallProjections.Models.Interfaces.IFileHandler;
 
 namespace WallProjections.Models;
 
-public sealed class FileHandler : IFileHandler
+public class FileHandler : IFileHandler
 {
-    private const string MediaLocation = "Media";
-    private const string ConfigFileName = "config.json";
-
-    /// <summary>
-    /// The backing field for the <see cref="FileHandler" /> property
-    /// </summary>
-    private static FileHandler? _instance;
-
-    /// <summary>
-    /// A global instance of <see cref="FileHandler" />
-    /// </summary>
-    public static FileHandler Instance => _instance ??= new FileHandler();
-
-    /// <summary>
-    /// The backing field for <see cref="TempPath" />
-    /// </summary>
-    private string? _tempPath;
-
-    private FileHandler()
-    {
-    }
-
-    /// <summary>
-    /// The path to the temporary folder where the zip file is extracted
-    /// </summary>
-    internal string TempPath => _tempPath ??= Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// TODO Handle errors from trying to load from not-found/invalid zip file
-    public IConfig? Load(string zipPath)
+    public IConfig ImportConfig(string zipPath)
     {
-        // Clean up existing directly if in use
-        if (Directory.Exists(TempPath))
-            Directory.Delete(TempPath, true);
+        // Clean up existing directory if in use
+        if (Directory.Exists(ConfigFolderPath))
+            Directory.Delete(ConfigFolderPath, true);
 
-        Directory.CreateDirectory(TempPath);
+        Directory.CreateDirectory(ConfigFolderPath);
 
-        try
-        {
-            ZipFile.ExtractToDirectory(zipPath, TempPath);
-            var config = LoadConfig(zipPath);
-            return config;
-        }
-        catch (FileNotFoundException _)
-        {
-            return null;
-        }
+        ZipFile.ExtractToDirectory(zipPath, ConfigFolderPath);
+        Console.WriteLine("File extracted to {0}", ConfigFolderPath);
+        var config = LoadConfig();
+        return config;
     }
 
     /// <inheritdoc />
-    public bool Save(IConfig config)
+    /// <exception>
+    /// Can throw the same exceptions as <see cref="Directory.CreateDirectory" />,
+    /// <see cref="File.Copy(string, string)" />, and <see cref="File.Move(string, string, bool)" />.
+    /// </exception>
+    public bool SaveConfig(IConfig config)
     {
-        //TODO Implement saving
-        throw new NotImplementedException();
+        // Check if directory already exists. If not, create it.
+        if (!Directory.Exists(ConfigFolderPath))
+            Directory.CreateDirectory(ConfigFolderPath);
+
+        var hotspots = config.Hotspots;
+        var newHotspots = new List<Hotspot>();
+
+        foreach (var hotspot in hotspots)
+        {
+            var newDescriptionPath = $"text_{hotspot.Id}.txt";
+
+            // Copy in non-imported description path.
+            if (!hotspot.DescriptionPath.IsInConfig())
+                File.Copy(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));
+            else
+            {
+                File.Move(
+                    Path.Combine(ConfigFolderPath, hotspot.DescriptionPath),
+                    Path.Combine(ConfigFolderPath, newDescriptionPath)
+                );
+            }
+
+            // Move already imported image files.
+            var newImagePaths = UpdateFiles(
+                PathExtensions.IsInConfig,
+                File.Move,
+                hotspot.ImagePaths,
+                "image",
+                hotspot.Id
+            ).Concat(UpdateFiles(
+                PathExtensions.IsNotInConfig,
+                File.Copy,
+                hotspot.ImagePaths,
+                "image",
+                hotspot.Id
+            )).ToImmutableList();
+
+            // Import non-imported image files.
+            // newImagePaths.AddRange(UpdateFiles(
+            // PathExtensions.IsNotInConfig,
+            // File.Copy,
+            // hotspot.ImagePaths,
+            // "image",
+            // hotspot.Id));
+
+            // Move already imported video files.
+            var newVideoPaths = UpdateFiles(
+                PathExtensions.IsInConfig,
+                File.Move,
+                hotspot.VideoPaths,
+                "video",
+                hotspot.Id
+            ).Concat(UpdateFiles(
+                PathExtensions.IsNotInConfig,
+                File.Copy,
+                hotspot.VideoPaths,
+                "video",
+                hotspot.Id
+            )).ToImmutableList();
+
+            // Import non-imported video files.
+            // newVideoPaths.AddRange(UpdateFiles(
+            // PathExtensions.IsNotInConfig,
+            // File.Copy,
+            // hotspot.VideoPaths,
+            // "video",
+            // hotspot.Id));
+
+            var newHotspot = new Hotspot(
+                hotspot.Id,
+                hotspot.Position,
+                hotspot.Title,
+                newDescriptionPath,
+                newImagePaths,
+                newVideoPaths
+            );
+
+            newHotspots.Add(newHotspot);
+        }
+
+        var newConfig = new Config(newHotspots);
+
+#if DEBUG || DEBUGSKIPPYTHON
+        var configString = JsonSerializer.Serialize(newConfig, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+#else
+        var configString = JsonSerializer.Serialize(newConfig);
+#endif
+
+        using var configFile = new StreamWriter(Path.Combine(ConfigFolderPath, ConfigFileName));
+        configFile.Write(configString);
+
+        return true;
     }
 
     /// <summary>
-    /// Cleans up the temporary folder stored in <see cref="TempPath" />.
+    /// Moves and updates paths for files that match filter.
     /// </summary>
-    public void Dispose()
-    {
-        try
+    /// <param name="filter">Decides if file will be processed.</param>
+    /// <param name="fileUpdateFunc">The function run to update the location of the file.</param>
+    /// <param name="filePaths">All the old paths to be processed to new paths.</param>
+    /// <param name="type">The type of file (image, video) to be updated.</param>
+    /// <param name="id">The id of the hotspot for the new file name.</param>
+    private static IEnumerable<string> UpdateFiles(
+        Func<string, bool> filter,
+        Action<string, string, bool> fileUpdateFunc,
+        IEnumerable<string> filePaths,
+        string type,
+        int id
+    ) => filePaths
+        .Where(filter)
+        .Select((path, i) =>
         {
-            Directory.Delete(TempPath, true);
-        }
-        catch (DirectoryNotFoundException)
-        {
-            Console.WriteLine($"{TempPath} already deleted");
-        }
-        catch (Exception e)
-        {
-            //TODO Write to log file instead
-            Console.Error.WriteLine(e);
-        }
-    }
+            var extension = Path.GetExtension(path);
+            var newFileName = $"{type}_{id}_{i}{extension}";
+
+            fileUpdateFunc(path, Path.Combine(ConfigFolderPath, newFileName), true);
+
+            return newFileName;
+        });
 
     /// <summary>
-    /// Loads a config from a .json file
+    /// Loads a config from the .json file imported/created in the program folder.
     /// </summary>
-    /// <param name="zipPath">Path to zip containing config.json</param>
     /// <returns>Loaded Config</returns>
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// <exception cref="FileNotFoundException">If config file cannot be found in zip file</exception>
     /// TODO More effective error handling of invalid/missing config files
-    private static IConfig LoadConfig(string zipPath)
+    public IConfig LoadConfig()
     {
-        var zipFile = ZipFile.OpenRead(zipPath);
-        var configEntry = zipFile.GetEntry(ConfigFileName);
+        var configLocation = Path.Combine(ConfigFolderPath, ConfigFileName);
 
-        if (configEntry is null)
-            throw new FileNotFoundException($"{ConfigFileName} not in root of zip file.");
-
-        var config = JsonSerializer.Deserialize<Config>(configEntry.Open()) ?? throw new JsonException();
-        return config;
+        using var configFile = File.OpenRead(configLocation);
+        return JsonSerializer.Deserialize<Config>(configFile) ??
+               throw new JsonException("Config format invalid");
     }
+
+    /// <summary>
+    /// Checks if config has already been imported into the app folder.
+    /// </summary>
+    /// <returns>True if config imported, false otherwise.</returns>
+    public bool IsConfigImported()
+    {
+        return File.Exists(Path.Combine(ConfigFolderPath, ConfigFileName));
+    }
+}
+
+/// <summary>
+/// Extension methods for media file paths.
+/// </summary>
+internal static class PathExtensions
+{
+    /// <summary>
+    /// Checks if the file is in the <see cref="IFileHandler.ConfigFolderPath">config folder</see>.
+    /// </summary>
+    /// <param name="path">Path to the file.</param>
+    /// <seealso cref="IsNotInConfig" />
+    public static bool IsInConfig(this string path) => path.StartsWith(ConfigFolderPath) && File.Exists(path);
+
+    /// <summary>
+    /// Checks if the file is not in the <see cref="IFileHandler.ConfigFolderPath">config folder</see>.
+    /// </summary>
+    /// <param name="path">Path to the file.</param>
+    /// <seealso cref="IsInConfig" />
+    public static bool IsNotInConfig(this string path) => !path.IsInConfig() && File.Exists(path);
 }

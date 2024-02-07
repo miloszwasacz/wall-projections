@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
-using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
@@ -17,7 +17,7 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
 Please report this to the museum staff.";
 
     internal const string NotFound = @"Hmm...
-Looks like this hotspot has no content.
+Looks like this hotspot has missing content.
 Please report this to the museum staff.";
 
     /// <summary>
@@ -41,19 +41,19 @@ Please report this to the museum staff.";
     /// and starts listening for <see cref="IPythonEventHandler.HotspotSelected">Python events</see>
     /// </summary>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
-    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
+    /// <param name="contentProvider">A <see cref="IContentProvider"/> for fetching data about hotspots.</param>
     /// <param name="pythonEventHandler">The <see cref="IPythonEventHandler" /> used to listen for Python events</param>
     public DisplayViewModel(
         IViewModelProvider vmProvider,
-        IConfig config,
+        IContentProvider contentProvider,
         IPythonEventHandler pythonEventHandler
     )
     {
         ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
+        _contentProvider = contentProvider;
         _pythonEventHandler = pythonEventHandler;
         _pythonEventHandler.HotspotSelected += OnHotspotSelected;
-        _contentProvider = new ContentProvider(config);
     }
 
     /// <inheritdoc />
@@ -86,13 +86,13 @@ Please report this to the museum staff.";
             ImageViewModel.HideImage();
             VideoViewModel.StopVideo();
             var media = _contentProvider.GetMedia(hotspotId);
+
             Description = media.Description;
             // TODO Add support for multiple images/videos
-            if (media.ImagePath is not null)
-                //TODO Make ImageViewModel not throw FileNotFoundException (display a placeholder instead)
-                ImageViewModel.ShowImage(media.ImagePath);
-            else if (media.VideoPath is not null)
-                VideoViewModel.PlayVideo(media.VideoPath);
+            if (!media.ImagePaths.IsEmpty)
+                ImageViewModel.ShowImage(media.ImagePaths.First());
+            else if (!media.VideoPaths.IsEmpty)
+                VideoViewModel.PlayVideo(media.VideoPaths.First());
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {

@@ -1,14 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="XPlat Code coverage">
-        <Configuration>
-          <Format>lcov</Format>
-          <SingleHit>false</SingleHit>
-          <IncludeTestAssembly>false</IncludeTestAssembly>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
+    <DataCollectionRunSettings>
+        <DataCollectors>
+            <DataCollector friendlyName="XPlat Code coverage">
+                <Configuration>
+                    <Format>lcov</Format>
+                    <SingleHit>false</SingleHit>
+                    <IncludeTestAssembly>false</IncludeTestAssembly>
+                    <ModulePaths>
+                        <Exclude>
+                            <ModulePath>*.CompiledAvaloniaXaml.*</ModulePath>
+                            <ModulePath>*.Avalonia.Generators.*</ModulePath>
+                        </Exclude>
+                    </ModulePaths>
+                </Configuration>
+            </DataCollector>
+        </DataCollectors>
+    </DataCollectionRunSettings>
 </RunSettings>

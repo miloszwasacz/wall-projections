@@ -41,7 +41,7 @@ public class VideoViewModelTest
     [Test]
     public void PlayNonExistentVideoTest()
     {
-        var path = "nonexistent.mp4";
+        const string path = "nonexistent.mp4";
         var mediaPlayer = new MockMediaPlayer(false);
         var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
         Assert.That(videoViewModel.PlayVideo(path), Is.False);

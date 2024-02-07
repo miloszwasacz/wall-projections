@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text.Json;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -12,8 +13,9 @@ namespace WallProjections.Test.Models;
 [Author(name: "Thomas Parr")]
 public class FileHandlerTest
 {
-    private const string TestTxtFile = "0.txt";
+    private const string TestTxtFile = "text_0.txt";
     private const string TestTxtFileContents = "Hello World\n";
+    private static string HotspotTitle(int id) => $"Hotspot {id}";
 
     /// <summary>
     /// Location of the zip file for testing
@@ -33,194 +35,694 @@ public class FileHandlerTest
         Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_invalid_config.zip");
 
     /// <summary>
-    /// Test if the <see cref="FileHandler" /> class is a singleton
-    /// </summary>
-    [Test]
-    public void SingletonPatternTest()
-    {
-        var instance1 = FileHandler.Instance;
-        var instance2 = FileHandler.Instance;
-
-        Assert.That(instance2, Is.SameAs(instance1));
-    }
-
-    /// <summary>
     /// Test that loaded config matches expected config information
     /// </summary>
     [Test]
-    public void LoadTest()
+    [NonParallelizable]
+    public void ImportConfigTest()
     {
-        IFileHandler fileHandler = CreateInstance();
-        var config = fileHandler.Load(TestZip);
+        IFileHandler fileHandler = new FileHandler();
+        var config = fileHandler.ImportConfig(TestZip);
         var config2 = new Config(new List<Hotspot>
         {
-            new(0, new Coord(1, 2, 3), "0", "0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty)
+            new(0,
+                new Coord(1, 2, 3),
+                HotspotTitle(0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
         });
 
-        AssertConfigsEqual(config, config2);
+        Assert.That(config, Is.Not.Null);
+        AssertConfigsEqual(config!, config2);
 
-        fileHandler.Dispose();
+        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Load" /> clears the temp folder before loading
+    /// Test that the <see cref="FileHandler.ImportConfig" /> clears the temp folder before loading
     /// </summary>
     [Test]
-    public void LoadExistingDirectoryTest()
+    [NonParallelizable]
+    public void ImportConfigExistingDirectoryTest()
     {
-        var contentCache = CreateInstance();
-        var oldFilePath = Path.Combine(contentCache.TempPath, Path.GetRandomFileName());
+        var fileHandler = new FileHandler();
+        var oldFilePath = Path.Combine(IFileHandler.ConfigFolderPath, Path.GetRandomFileName());
 
-        #region Create temp folder and file for the test
+        #region Create folder and file for the test
 
-        if (Directory.Exists(contentCache.TempPath))
-            Directory.Delete(contentCache.TempPath, true);
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
 
-        Directory.CreateDirectory(contentCache.TempPath);
+        Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
         File.Create(oldFilePath).Close();
-        Assert.That(File.Exists(oldFilePath), Is.True, "Could not create file in temp folder for the test");
+        Assert.That(File.Exists(oldFilePath), Is.True, "Could not create file in config folder for the test");
 
         #endregion
 
-        var config = contentCache.Load(TestZip);
+        fileHandler.ImportConfig(TestZip);
 
-        var mediaFolder = Path.Combine(TestTxtFile);
+        var textFilePath = Path.Combine(IFileHandler.ConfigFolderPath, TestTxtFile);
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(mediaFolder), Is.True);
-            Assert.That(File.ReadAllText(mediaFolder), Is.EqualTo(TestTxtFileContents));
+            Assert.That(File.Exists(textFilePath), Is.True);
+            Assert.That(File.ReadAllText(textFilePath), Is.EqualTo(TestTxtFileContents));
             Assert.That(File.Exists(oldFilePath), Is.False);
         });
 
-        contentCache.Dispose();
+        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Load" /> method throws an exception when the zip file does not exist
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws an exception when the zip file does not exist
     /// </summary>
     [Test]
-    public void LoadNoZipTest()
+    [NonParallelizable]
+    public void ImportConfigNoZipTest()
     {
-        var fileHandler = CreateInstance();
+        var fileHandler = new FileHandler();
         var path = Path.GetRandomFileName() + ".zip";
-        Assert.Throws<FileNotFoundException>(() => fileHandler.Load(path));
+        Assert.Throws<FileNotFoundException>(() => fileHandler.ImportConfig(path));
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Load" /> method throws an exception when the zip file does not contain a config file
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws an exception when the zip file does not contain a config file
     /// </summary>
     [Test]
-    public void LoadNoConfigTest()
+    [NonParallelizable]
+    public void ImportConfigNoConfigTest()
     {
-        var fileHandler = CreateInstance();
-        Assert.Throws<FileNotFoundException>(() => fileHandler.Load(TestZipNoConfig));
+        var fileHandler = new FileHandler();
+        Assert.Throws<FileNotFoundException>(() => fileHandler.ImportConfig(TestZipNoConfig));
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Load" /> method throws an exception when the config file has invalid format
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws an exception when the config file has invalid format
     /// </summary>
     [Test]
-    public void LoadInvalidConfigTest()
+    [NonParallelizable]
+    public void ImportConfigInvalidConfigTest()
     {
-        var fileHandler = CreateInstance();
-        Assert.Throws<JsonException>(() => fileHandler.Load(TestZipInvalidConfig));
+        var fileHandler = new FileHandler();
+        Assert.Throws<JsonException>(() => fileHandler.ImportConfig(TestZipInvalidConfig));
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Load" /> method loads media files correctly
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method loads media files correctly
     /// </summary>
     [Test]
-    public void GetHotspotMediaFolderTest()
+    [NonParallelizable]
+    public void GetHotspotMediaTest()
     {
-        IFileHandler fileHandler = CreateInstance();
-        var config = fileHandler.Load(TestZip);
+        IFileHandler fileHandler = new FileHandler();
+        fileHandler.ImportConfig(TestZip);
 
-        var mediaFolder = Path.Combine(TestTxtFile);
+        var txtFilePath = Path.Combine(IFileHandler.ConfigFolderPath, TestTxtFile);
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(mediaFolder), Is.True);
-            Assert.That(File.ReadAllText(mediaFolder), Is.EqualTo(TestTxtFileContents));
+            Assert.That(File.Exists(txtFilePath), Is.True);
+            Assert.That(File.ReadAllText(txtFilePath), Is.EqualTo(TestTxtFileContents));
         });
         //TODO Test more media files
 
-        fileHandler.Dispose();
+        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
-    /// Test that the temp folder is removed after running <see cref="FileHandler.Dispose" />
+    /// Test that the temp folder is removed after running <see cref="IFileHandler.DeleteConfigFolder" />
     /// </summary>
     [Test]
-    public void DisposeTest()
+    [NonParallelizable]
+    public void DeleteConfigFolderTest()
     {
-        var contentCache = CreateInstance();
-        var config = contentCache.Load(TestZip);
+        var fileHandler = new FileHandler();
+        fileHandler.ImportConfig(TestZip);
 
-        Assert.That(Directory.Exists("nonexistent"), Is.True);
+        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True);
 
-        Assert.That(() => contentCache.Dispose(), Throws.Nothing);
+        Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
 
-        Assert.That(Directory.Exists(""), Is.False);
+        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.False);
     }
 
     // ReSharper disable once InconsistentNaming
     /// <summary>
-    /// Test that no exception is thrown when <see cref="FileHandler.Dispose" /> is called
+    /// Test that no exception is thrown when <see cref="IFileHandler.DeleteConfigFolder" /> is called
     /// while the temp folder is still in use
     /// </summary>
     [Test]
+    [NonParallelizable]
     [Platform("Win")]
-    public void DisposeIOExceptionWindowsTest()
+    public void DeleteConfigFolderIOExceptionWindowsTest()
     {
-        var contentCache = CreateInstance();
-        var tempFilePath = Path.Combine(contentCache.TempPath, Path.GetRandomFileName());
+        var fileHandler = new FileHandler();
+        var tempFilePath = Path.Combine(IFileHandler.ConfigFolderPath, Path.GetRandomFileName());
 
-        contentCache.Load(TestZip);
+        fileHandler.ImportConfig(TestZip);
 
         var file = File.Create(tempFilePath);
 
-        Assert.That(() => contentCache.Dispose(), Throws.Nothing);
-        Assert.That(Directory.Exists(contentCache.TempPath), Is.True);
+        Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
+        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True);
 
         file.Close();
 
-        Assert.That(() => contentCache.Dispose(), Throws.Nothing);
-        Assert.That(Directory.Exists(contentCache.TempPath), Is.False);
+        Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
+        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.False);
     }
 
     // ReSharper disable once InconsistentNaming
     /// <summary>
-    /// Test that no exception is thrown when <see cref="FileHandler.Dispose" /> is called
+    /// Test that no exception is thrown when <see cref="IFileHandler.DeleteConfigFolder" /> is called
     /// and the application has no write permissions to the temp folder
     /// </summary>
     [Test]
+    [NonParallelizable]
     [Platform("Linux,MacOsX")]
-    public void DisposeIOExceptionLinuxTest()
+    public void DeleteConfigFolderIOExceptionLinuxTest()
     {
-        var contentCache = CreateInstance();
-        contentCache.Load(TestZip);
+        var fileHandler = new FileHandler();
+        fileHandler.ImportConfig(TestZip);
 
-        System.Diagnostics.Process.Start("chmod", "000 " + contentCache.TempPath).WaitForExit();
+        Process.Start("chmod", "000 " + IFileHandler.ConfigFolderPath).WaitForExit();
 
-        Assert.That(() => contentCache.Dispose(), Throws.Nothing);
-        Assert.That(Directory.Exists(contentCache.TempPath), Is.True);
+        Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
+        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True);
 
-        System.Diagnostics.Process.Start("chmod", "777 " + contentCache.TempPath).WaitForExit();
+        Process.Start("chmod", "777 " + IFileHandler.ConfigFolderPath).WaitForExit();
 
-        Assert.That(() => contentCache.Dispose(), Throws.Nothing);
-        Assert.That(Directory.Exists(contentCache.TempPath), Is.False);
+        Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
+        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.False);
     }
 
     /// <summary>
-    /// Uses reflection to get the private constructor of <see cref="FileHandler" />,
-    /// so that the global instance is not used
+    /// Test that config is correctly saved in already existing empty config folder.
     /// </summary>
-    /// <returns>A new instance of <see cref="FileHandler" /></returns>
-    /// <exception cref="InvalidCastException">When the object cannot be instantiated as <see cref="FileHandler" /></exception>
-    private static FileHandler CreateInstance()
+    [Test]
+    [NonParallelizable]
+    public void SaveConfigBasicTest()
     {
-        var type = typeof(FileHandler);
-        var res = Activator.CreateInstance(type, true) as FileHandler;
-        return res ?? throw new InvalidCastException("Could not construct ContentCache");
+        #region Ensure Config Folder Reset
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+        }
+
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var config = new Config(ImmutableList<Hotspot>.Empty);
+
+        fileHandler.SaveConfig(config);
+
+        Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+
+        var newConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(config, newConfig);
+        IFileHandler.DeleteConfigFolder();
+    }
+
+    /// <summary>
+    /// Test that config is correctly saved without previously existing config folder.
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void SaveConfigBasicNoFolderTest()
+    {
+        #region Ensure Config Folder Deleted
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+        }
+
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var config = new Config(ImmutableList<Hotspot>.Empty);
+
+        fileHandler.SaveConfig(config);
+
+        Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+
+        var newConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(config, newConfig);
+        IFileHandler.DeleteConfigFolder();
+    }
+
+    /// <summary>
+    /// Test that config with a single hotspot with description is saved correctly with file imported.
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void SaveConfigDescriptionTest()
+    {
+        #region Ensure Config Folder Reset
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+        }
+
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var config = new Config(new List<Hotspot>
+        {
+            new(0, new Coord(0, 0, 0), "Hotspot 0", textFilePath, ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        fileHandler.SaveConfig(config);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+        });
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        var loadedConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        IFileHandler.DeleteConfigFolder();
+    }
+
+    /// <summary>
+    /// Test that config with a single hotspot with description and image is saved correctly.
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void SaveConfigDescriptionPlusImageTest()
+    {
+        #region Ensure Config Folder Reset
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+        }
+
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                textFilePath,
+                new List<string> { imageFilePath }.ToImmutableList(),
+                ImmutableList<string>.Empty)
+        });
+
+        fileHandler.SaveConfig(config);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+
+            // File copied into the config folder.
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
+
+            // Original file not deleted.
+            Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets",
+                "test_image.png")));
+        });
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                "text_0.txt",
+                new List<string> { "image_0_0.png" }.ToImmutableList(),
+                ImmutableList<string>.Empty)
+        });
+
+        var loadedConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        IFileHandler.DeleteConfigFolder();
+    }
+
+    /// <summary>
+    /// Test that config with a single hotspot with description and image is saved correctly.
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void SaveConfigTwoImagesTest()
+    {
+        #region Ensure Config Folder Reset
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+        }
+
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+        var imageFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image_2.jpg");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                textFilePath,
+                new List<string> { imageFilePath, imageFilePath2 }.ToImmutableList(),
+                ImmutableList<string>.Empty)
+        });
+
+        fileHandler.SaveConfig(config);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+
+            // File copied into the config folder.
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_1.jpg")));
+
+            // Original file not deleted.
+            Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets",
+                "test_image.png")));
+            Assert.That(
+                File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image_2.jpg")));
+        });
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                "text_0.txt",
+                new List<string> { "image_0_0.png", "image_0_1.jpg" }.ToImmutableList(),
+                ImmutableList<string>.Empty)
+        });
+
+        var loadedConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        IFileHandler.DeleteConfigFolder();
+    }
+
+    /// <summary>
+    /// Test that config with a single hotspot with description and video is saved correctly with files imported.
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void SaveConfigDescriptionPlusVideoTest()
+    {
+        #region Ensure Config Folder Reset
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+        }
+
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                textFilePath,
+                ImmutableList<string>.Empty,
+                new List<string> { videoFilePath }.ToImmutableList())
+        });
+
+        fileHandler.SaveConfig(config);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+
+            // File copied into the config folder.
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4")));
+
+            // Original file not deleted.
+            Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets",
+                "test_video.mp4")));
+        });
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                new List<string> { "video_0_0.mp4" }.ToImmutableList())
+        });
+
+        var loadedConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        IFileHandler.DeleteConfigFolder();
+    }
+
+    /// <summary>
+    /// Test that config with a two hotspots is saved correctly with files imported.
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void SaveConfigTwoHotspotsTest()
+    {
+        #region Ensure Config Folder Reset
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+        }
+
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var textFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_2.txt");
+        var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+        var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                textFilePath,
+                new List<string> { imageFilePath }.ToImmutableList(),
+                new List<string> { videoFilePath }.ToImmutableList()),
+            new(1,
+                new Coord(0, 0, 0),
+                HotspotTitle(1),
+                textFilePath2,
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        fileHandler.SaveConfig(config);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+
+            // File copied into the config folder.
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
+
+            // Original files not deleted.
+            Assert.That(File.Exists(textFilePath));
+            Assert.That(File.Exists(textFilePath2));
+            Assert.That(File.Exists(imageFilePath));
+            Assert.That(File.Exists(videoFilePath));
+        });
+
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
+
+        savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_1.txt"));
+        Assert.That(savedTextFileContents, Is.EqualTo("This is a second test file.\r\n"));
+
+        // Config is transformed by saving to have relative paths.
+        var newConfig = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                "text_0.txt",
+                new List<string> { "image_0_0.png" }.ToImmutableList(),
+                new List<string> { "video_0_0.mp4" }.ToImmutableList()),
+            new(1,
+                new Coord(0, 0, 0),
+                HotspotTitle(1),
+                "text_1.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        var loadedConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(newConfig, loadedConfig);
+        IFileHandler.DeleteConfigFolder();
+    }
+
+    /// <summary>
+    /// Test that config with files already imported is saved correctly.
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void SaveConfigImportedFilesTest()
+    {
+        #region Ensure Config Folder Reset
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+        }
+
+        #endregion
+
+        var fileHandler = new FileHandler();
+        var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+        var textFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_2.txt");
+        var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
+        var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
+
+        var config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                textFilePath,
+                new List<string> { imageFilePath }.ToImmutableList(),
+                new List<string> { videoFilePath }.ToImmutableList()),
+            new(1,
+                new Coord(0, 0, 0),
+                HotspotTitle(1),
+                textFilePath2,
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        fileHandler.SaveConfig(config);
+
+        config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"),
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty),
+            new(1,
+                new Coord(0, 0, 0),
+                HotspotTitle(1),
+                Path.Combine(IFileHandler.ConfigFolderPath, "text_1.txt"),
+                new List<string> { Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png") }.ToImmutableList(),
+                new List<string> { Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4") }.ToImmutableList())
+        });
+
+        fileHandler.SaveConfig(config);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+
+            // File copied into the config folder.
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "video_1_0.mp4")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_1_0.png")));
+
+            // Original files removed from the config folder.
+            Assert.That(!File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4")));
+            Assert.That(!File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
+        });
+
+        config = new Config(new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                HotspotTitle(0),
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty),
+            new(1,
+                new Coord(0, 0, 0),
+                HotspotTitle(1),
+                "text_1.txt",
+                new List<string> { "image_1_0.png" }.ToImmutableList(),
+                new List<string> { "video_1_0.mp4" }.ToImmutableList())
+        });
+
+        var loadedConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(config, loadedConfig);
+        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -240,13 +742,22 @@ public class FileHandlerTest
                 var hotspot2 = config2.GetHotspot(i);
                 Assert.That(hotspot1, Is.Not.Null, $"Hotspot {i} null on config1");
                 Assert.That(hotspot2, Is.Not.Null, $"Hotspot {i} null on config2");
+
                 Assert.That(hotspot1!.Id, Is.EqualTo(hotspot2!.Id), $"Hotspot {i} Id not equal in configs");
+
                 Assert.That(hotspot1.Position.X, Is.EqualTo(hotspot2.Position.X),
                     $"Hotspot {i} X position not equal in configs");
                 Assert.That(hotspot1.Position.Y, Is.EqualTo(hotspot2.Position.Y),
                     $"Hotspot {i} Y position not equal in configs");
                 Assert.That(hotspot1.Position.R, Is.EqualTo(hotspot2.Position.R),
                     $"Hotspot {i} radius not equal in configs");
+
+                Assert.That(hotspot1.Title, Is.EqualTo(hotspot2.Title));
+
+                Assert.That(hotspot1.DescriptionPath, Is.EqualTo(hotspot2.DescriptionPath));
+
+                CollectionAssert.AreEqual(hotspot1.ImagePaths, hotspot2.ImagePaths);
+                CollectionAssert.AreEqual(hotspot1.VideoPaths, hotspot2.VideoPaths);
             });
         }
     }

@@ -20,11 +20,17 @@ namespace WallProjections.Views;
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
     [ExcludeFromCodeCoverage] private IConfig? Config { get; set; }
+    [ExcludeFromCodeCoverage] private IFileHandler FileHandler { get; }
 
     public DisplayWindow()
     {
         InitializeComponent();
+        FileHandler = new FileHandler();
         WindowState = WindowState.FullScreen;
+
+        if (!FileHandler.IsConfigImported()) return;
+        Config = FileHandler.LoadConfig();
+        DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
     }
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)
@@ -84,10 +90,12 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             var zipPath = files[0].Path.AbsolutePath;
             if (!zipPath.EndsWith(".zip")) continue;
 
-            Config = FileHandler.Instance.Load(zipPath);
+            Config = new FileHandler().ImportConfig(zipPath);
+
+            DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
         }
 
-        DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
+
 #if DEBUGSKIPPYTHON
         MockPythonInput(key);
 #endif

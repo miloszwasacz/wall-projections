@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using WallProjections.Models;
+﻿using WallProjections.Models;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display;
 
@@ -21,11 +20,7 @@ public class ViewModelProviderTest
     [Test]
     public void GetDisplayViewModelTest()
     {
-        var config = new Config(new List<Hotspot>
-        {
-            new(0, new Coord(1, 2, 3), "0", "0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty)
-        });
-        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(config);
+        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(new Config(new List<Hotspot>()));
         Assert.Multiple(() =>
         {
             Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());

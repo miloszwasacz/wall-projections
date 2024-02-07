@@ -1,7 +1,9 @@
-﻿using WallProjections.Helper.Interfaces;
+﻿using System.Collections.Immutable;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
+using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Interfaces.Display;
@@ -13,51 +15,114 @@ namespace WallProjections.Test.ViewModels.Display;
 public class DisplayViewModelTest
 {
     private const int HotspotId = 1;
+    private const string Title = "Test";
     private const string Text = "test";
-    private const string ImagePath = "test.png";
-    private const string VideoPath = "test.mp4";
+
+    private static readonly ImmutableList<string> ImagePaths =
+        new List<string> { "test.png", "test2.jpg" }.ToImmutableList();
+
+    private static ImmutableList<string> ImagePath => ImagePaths.GetRange(0, 1);
+
+    private static readonly ImmutableList<string> VideoPaths =
+        new List<string> { "test.mp4", "test2.mkv" }.ToImmutableList();
+
+    private static ImmutableList<string> VideoPath => VideoPaths.GetRange(0, 1);
 
     #region MediaFiles
 
-    private static List<Hotspot.Media> FilesAll =>
-        new() { new Hotspot.Media(Text, ImagePath, VideoPath) };
+    private static ImmutableList<Hotspot.Media> FilesAll =>
+        new List<Hotspot.Media>
+        {
+            new(1,
+                Title,
+                Text,
+                ImagePaths,
+                VideoPaths
+            )
+        }.ToImmutableList();
 
-    private static List<Hotspot.Media> FilesNoVideo =>
-        new() { new Hotspot.Media(Text, ImagePath) };
+    private static ImmutableList<Hotspot.Media> FilesSingle =>
+        new List<Hotspot.Media>
+        {
+            new(1,
+                Title,
+                Text,
+                ImagePath,
+                VideoPath
+            )
+        }.ToImmutableList();
 
-    private static List<Hotspot.Media> FilesNoImage => new()
-        { new Hotspot.Media(Text, VideoPath: VideoPath) };
+    private static ImmutableList<Hotspot.Media> FilesNoVideo =>
+        new List<Hotspot.Media>
+        {
+            new(1,
+                Title,
+                Text,
+                ImagePaths,
+                ImmutableList<string>.Empty
+            )
+        }.ToImmutableList();
 
-    private static List<Hotspot.Media> FilesNoMedia => new() { new Hotspot.Media(Text) };
+    private static ImmutableList<Hotspot.Media> FilesNoImage =>
+        new List<Hotspot.Media>
+        {
+            new(1,
+                Title,
+                Text,
+                ImmutableList<string>.Empty,
+                VideoPath
+            )
+        }.ToImmutableList();
+
+    private static ImmutableList<Hotspot.Media> FilesNoMedia =>
+        new List<Hotspot.Media>
+        {
+            new(1,
+                Title,
+                Text,
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty
+            )
+        }.ToImmutableList();
 
     #endregion
 
     private static MockViewModelProvider ViewModelProvider => new();
 
-    private static IEnumerable<TestCaseData<List<Hotspot.Media>>> CreationTestCases()
+    private static IEnumerable<TestCaseData<ImmutableList<Hotspot.Media>>> CreationTestCases()
     {
         yield return MakeTestData(FilesAll, "AllMediaTypes");
+        yield return MakeTestData(FilesSingle, "SingleMedia");
         yield return MakeTestData(FilesNoVideo, "NoVideo");
         yield return MakeTestData(FilesNoImage, "NoImage");
         yield return MakeTestData(FilesNoMedia, "NoMedia");
     }
 
-    private static IEnumerable<TestCaseData<(List<Hotspot.Media>, string[]?, string[]?)>> OnHotspotSelectedTestCases()
+    /// <summary>
+    /// Test data for <see cref="DisplayViewModel"/>. Contains <see cref="Config"/> definition, and
+    /// expected description, expected image files, and expected video files.
+    /// </summary>
+    /// <returns></returns>
+    private static IEnumerable<TestCaseData<ImmutableList<Hotspot.Media>>> OnHotspotSelectedTestCases()
     {
-        yield return MakeTestData<(List<Hotspot.Media>, string[]?, string[]?)>(
-            (FilesAll, new[] { ImagePath }, new[] { VideoPath }),
+        yield return MakeTestData(
+            FilesAll,
             "AllMediaTypes"
         );
-        yield return MakeTestData<(List<Hotspot.Media>, string[]?, string[]?)>(
-            (FilesNoVideo, new[] { ImagePath }, null),
+        yield return MakeTestData(
+            FilesSingle,
+            "SingleMedia"
+        );
+        yield return MakeTestData(
+            FilesNoVideo,
             "NoVideo"
         );
-        yield return MakeTestData<(List<Hotspot.Media>, string[]?, string[]?)>(
-            (FilesNoImage, null, new[] { VideoPath }),
+        yield return MakeTestData(
+            FilesNoImage,
             "NoImage"
         );
-        yield return MakeTestData<(List<Hotspot.Media>, string[]?, string[]?)>(
-            (FilesNoMedia, null, null),
+        yield return MakeTestData(
+            FilesNoMedia,
             "NoMedia"
         );
     }
@@ -80,11 +145,12 @@ public class DisplayViewModelTest
 
     [Test]
     [TestCaseSource(nameof(CreationTestCases))]
-    public void CreationTest(List<Hotspot.Media> files)
+    public void CreationTest(ImmutableList<Hotspot.Media> hotspots)
     {
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(Enumerable.Empty<Hotspot>());
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
+        var contentProvider = new MockContentProvider(hotspots);
+
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
 
         AssertJustInitialized(displayViewModel);
         displayViewModel.Dispose();
@@ -92,13 +158,13 @@ public class DisplayViewModelTest
 
     [Test]
     [TestCaseSource(nameof(OnHotspotSelectedTestCases))]
-    public void OnHotspotSelectedTest((List<Hotspot.Media>, string[]?, string[]?) testCase)
+    public void OnHotspotSelectedTest(ImmutableList<Hotspot.Media> hotspots)
     {
-        var (files, expectedImagePaths, expectedVideoPaths) = testCase;
+        var hotspot = hotspots[0];
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(Enumerable.Empty<Hotspot>());
+        var contentProvider = new MockContentProvider(hotspots);
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
         var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
 
@@ -109,16 +175,21 @@ public class DisplayViewModelTest
             Assert.That(displayViewModel.Description, Is.EqualTo(Text));
 
             Assert.That(imageViewModel.HideCount, Is.EqualTo(1));
-            if (expectedImagePaths is not null)
-                Assert.That(imageViewModel.ImagePaths, Is.EquivalentTo(expectedImagePaths));
-            else
+            Assert.That(imageViewModel.ImagePaths, Is.SubsetOf(hotspot.ImagePaths));
+
+            if (hotspot.ImagePaths.IsEmpty)
+            {
                 Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
+            }
+
 
             Assert.That(videoViewModel.StopCount, Is.EqualTo(1));
-            if (expectedVideoPaths is not null && expectedImagePaths is null)
-                Assert.That(videoViewModel.VideoPaths, Is.EquivalentTo(expectedVideoPaths));
-            else
+            Assert.That(videoViewModel.VideoPaths, Is.SubsetOf(hotspot.VideoPaths));
+
+            if (hotspot.VideoPaths.IsEmpty)
+            {
                 Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);
+            }
         });
         displayViewModel.Dispose();
     }
@@ -127,13 +198,21 @@ public class DisplayViewModelTest
     public void OnHotspotSelectedNoConfigTest()
     {
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(Enumerable.Empty<Hotspot>());
+        var contentProvider = new MockContentProvider(ImmutableList<Hotspot.Media>.Empty);
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
 
         var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
-        Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
         AssertJustInitialized(displayViewModel);
+        Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(displayViewModel.Description, Is.EqualTo(DisplayViewModel.NotFound));
+            Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
+            Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);
+        });
+
         displayViewModel.Dispose();
     }
 
@@ -143,13 +222,16 @@ public class DisplayViewModelTest
     {
         var (exception, expectedDescription) = testCase;
         var pythonHandler = new MockPythonEventHandler();
-        var config = new Config(Enumerable.Empty<Hotspot>());
+        var contentProvider = new MockContentProvider(exception);
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
         var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
 
         var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
+
+        AssertJustInitialized(displayViewModel);
+
         Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
         Assert.Multiple(() =>
         {
@@ -165,8 +247,9 @@ public class DisplayViewModelTest
     {
         var pythonHandler = new MockPythonEventHandler();
         var config = new Config(Enumerable.Empty<Hotspot>());
+        var contentProvider = new ContentProvider(config);
 
-        var displayViewModel = new DisplayViewModel(ViewModelProvider, config, pythonHandler);
+        var displayViewModel = new DisplayViewModel(ViewModelProvider, contentProvider, pythonHandler);
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
         displayViewModel.Dispose();
 
