@@ -40,7 +40,7 @@ jobs:
               --sc -o $HOME/build/WallProjections --verbosity normal
 
       - name: Zip
-        run: zip -r ${{ inputs.target }} $HOME/build/WallProjections
+        run: zip -r WallProjections-${{ inputs.target }}.zip $HOME/build/WallProjections
 
       - name: Archive production artifact
         uses: actions/upload-artifact@v4
