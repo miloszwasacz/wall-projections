@@ -14,16 +14,7 @@ on:
         default: true
 
 jobs:
-  publish:
-    strategy:
-      matrix:
-        target: [ win-x64, osx-x64, osx-arm64, linux-x64, linux-arm ]
-    uses: ./.github/workflows/dotnet-publish.yml
-    with:
-      target: ${{ matrix.target }}
-
   release:
-    needs: publish
     runs-on: ubuntu-latest
     steps:
       - name: Download published artifact
