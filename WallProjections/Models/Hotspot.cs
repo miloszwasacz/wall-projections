@@ -12,12 +12,16 @@ namespace WallProjections.Models;
 [Serializable]
 public class Hotspot
 {
+    /// <summary>
+    /// Path to the folder containing the imported media files and config.
+    /// </summary>
     [JsonIgnore]
-    private readonly string FilePath;
+    private readonly string _filePath;
 
     /// <summary>
     /// ID of the hotspot. Used by input to tell UI which hotspot info to show.
     /// </summary>
+    [JsonInclude]
     public int Id { get; }
 
     /// <summary>
@@ -35,8 +39,8 @@ public class Hotspot
     /// <summary>
     /// Fully expanded path to description for hotspot.
     /// </summary>
-    public string FullDescriptionPath => DescriptionPath is not null ?
-        Path.Combine(FilePath, DescriptionPath): "";
+    [JsonIgnore]
+    public string FullDescriptionPath => Path.Combine(_filePath, DescriptionPath);
 
     /// <summary>
     /// A list of paths to images to be displayed in the hotspot.
@@ -47,8 +51,9 @@ public class Hotspot
     /// <summary>
     /// List of all image paths in fully expanded form.
     /// </summary>
+    [JsonIgnore]
     public ImmutableList<string> FullImagePaths =>
-        ImagePaths.ConvertAll(item => Path.Combine(FilePath, item));
+        ImagePaths.ConvertAll(item => Path.Combine(_filePath, item));
 
     /// <summary>
     /// A list of paths to videos to be displayed in the hotspot.
@@ -59,8 +64,9 @@ public class Hotspot
     /// <summary>
     /// List of all video paths in fully expanded form.
     /// </summary>
+    [JsonIgnore]
     public ImmutableList<string> FullVideoPaths =>
-        VideoPaths.ConvertAll(item => Path.Combine(FilePath, item));
+        VideoPaths.ConvertAll(item => Path.Combine(_filePath, item));
 
     // ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
     /// <summary>
@@ -71,6 +77,7 @@ public class Hotspot
     /// <param name="descriptionPath">Path to text file containing description of hotspot.</param>
     /// <param name="imagePaths">List of paths to images to be displayed in hotspot.</param>
     /// <param name="videoPaths">List of paths to videos to be displayed in hotspot.</param>
+    /// <exception cref="ArgumentNullException">If any parameters are not defined.</exception>
     [JsonConstructor]
     public Hotspot(
         int id,
@@ -80,15 +87,14 @@ public class Hotspot
         ImmutableList<string> videoPaths)
     {
         Id = id;
-        Position = position;
-        DescriptionPath = descriptionPath;
-        ImagePaths = imagePaths;
-        VideoPaths = videoPaths;
-        FilePath = IFileHandler.ConfigFolderPath;
+        Position = position ?? throw new ArgumentNullException(nameof(position), "Position cannot be null");
+        DescriptionPath = descriptionPath ?? throw new ArgumentNullException(nameof(descriptionPath), "DescriptionPath cannot be null");
+        ImagePaths = imagePaths ?? throw new ArgumentNullException(nameof(imagePaths), "ImagePaths cannot be null");
+        VideoPaths = videoPaths ?? throw new ArgumentNullException(nameof(videoPaths), "VideoPaths cannot be null");
+        _filePath = IFileHandler.ConfigFolderPath;
     }
     // ReSharper restore NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
 
-    // TODO Add support for multiple images/videos
     public record Media(
         int Id,
         string Description,

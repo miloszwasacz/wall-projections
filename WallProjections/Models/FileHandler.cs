@@ -15,7 +15,7 @@ public class FileHandler : IFileHandler
     /// <inheritdoc />
     /// <exception cref="JsonException">Format of config file is invalid</exception>
     /// TODO Handle errors from trying to load from not-found/invalid zip file
-    public IConfig Import(string zipPath)
+    public IConfig ImportConfig(string zipPath)
     {
         // Clean up existing directory if in use
         if (Directory.Exists(ConfigFolderPath))
@@ -30,7 +30,7 @@ public class FileHandler : IFileHandler
     }
 
     /// <inheritdoc />
-    public bool Save(IConfig config)
+    public bool SaveConfig(IConfig config)
     {
         // Check if directory already exists. If not, create it.
         if (!Directory.Exists(ConfigFolderPath))

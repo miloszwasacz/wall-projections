@@ -40,7 +40,7 @@ public class FileHandlerTest
     public void LoadTest()
     {
         IFileHandler fileHandler = new FileHandler();
-        var config = fileHandler.Import(TestZip);
+        var config = fileHandler.ImportConfig(TestZip);
         var config2 = new Config(new List<Hotspot> { new(0, new Coord(1,2,3), "text_0.txt", ImmutableList<string>.Empty, ImmutableList<string>.Empty) });
 
         Assert.That(config, Is.Not.Null);
@@ -50,7 +50,7 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Import" /> clears the temp folder before loading
+    /// Test that the <see cref="FileHandler.ImportConfig" /> clears the temp folder before loading
     /// </summary>
     [Test]
     public void LoadExistingDirectoryTest()
@@ -69,7 +69,7 @@ public class FileHandlerTest
 
         #endregion
 
-        fileHandler.Import(TestZip);
+        fileHandler.ImportConfig(TestZip);
 
         var textFilePath = Path.Combine(IFileHandler.ConfigFolderPath, TestTxtFile);
         Assert.Multiple(() =>
@@ -83,44 +83,44 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Import" /> method throws an exception when the zip file does not exist
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws an exception when the zip file does not exist
     /// </summary>
     [Test]
     public void LoadNoZipTest()
     {
         var fileHandler = new FileHandler();
         var path = Path.GetRandomFileName() + ".zip";
-        Assert.Throws<FileNotFoundException>(() => fileHandler.Import(path));
+        Assert.Throws<FileNotFoundException>(() => fileHandler.ImportConfig(path));
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Import" /> method throws an exception when the zip file does not contain a config file
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws an exception when the zip file does not contain a config file
     /// </summary>
     [Test]
     public void LoadNoConfigTest()
     {
         var fileHandler = new FileHandler();
-        Assert.Throws<FileNotFoundException>(() => fileHandler.Import(TestZipNoConfig));
+        Assert.Throws<FileNotFoundException>(() => fileHandler.ImportConfig(TestZipNoConfig));
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Import" /> method throws an exception when the config file has invalid format
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws an exception when the config file has invalid format
     /// </summary>
     [Test]
     public void LoadInvalidConfigTest()
     {
         var fileHandler = new FileHandler();
-        Assert.Throws<JsonException>(() => fileHandler.Import(TestZipInvalidConfig));
+        Assert.Throws<JsonException>(() => fileHandler.ImportConfig(TestZipInvalidConfig));
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.Import" /> method loads media files correctly
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method loads media files correctly
     /// </summary>
     [Test]
     public void GetHotspotMediaTest()
     {
         IFileHandler fileHandler = new FileHandler();
-        fileHandler.Import(TestZip);
+        fileHandler.ImportConfig(TestZip);
 
 
         var txtFilePath = Path.Combine(IFileHandler.ConfigFolderPath, TestTxtFile);
@@ -141,7 +141,7 @@ public class FileHandlerTest
     public void DisposeTest()
     {
         var fileHandler = new FileHandler();
-        fileHandler.Import(TestZip);
+        fileHandler.ImportConfig(TestZip);
 
         Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True);
 
@@ -162,7 +162,7 @@ public class FileHandlerTest
         var fileHandler = new FileHandler();
         var tempFilePath = Path.Combine(IFileHandler.ConfigFolderPath, Path.GetRandomFileName());
 
-        fileHandler.Import(TestZip);
+        fileHandler.ImportConfig(TestZip);
 
         var file = File.Create(tempFilePath);
 
@@ -185,7 +185,7 @@ public class FileHandlerTest
     public void DisposeIOExceptionLinuxTest()
     {
         var fileHandler = new FileHandler();
-        fileHandler.Import(TestZip);
+        fileHandler.ImportConfig(TestZip);
 
         Process.Start("chmod", "000 " + IFileHandler.ConfigFolderPath).WaitForExit();
 
@@ -217,7 +217,7 @@ public class FileHandlerTest
         var fileHandler = new FileHandler();
         var config = new Config(ImmutableList<Hotspot>.Empty);
 
-        fileHandler.Save(config);
+        fileHandler.SaveConfig(config);
 
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
 
@@ -244,7 +244,7 @@ public class FileHandlerTest
         var fileHandler = new FileHandler();
         var config = new Config(ImmutableList<Hotspot>.Empty);
 
-        fileHandler.Save(config);
+        fileHandler.SaveConfig(config);
 
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
 
@@ -277,7 +277,7 @@ public class FileHandlerTest
             new(0, new Coord(0,0,0), textFilePath, ImmutableList<string>.Empty, ImmutableList<string>.Empty)
         });
 
-        fileHandler.Save(config);
+        fileHandler.SaveConfig(config);
 
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
@@ -326,7 +326,7 @@ public class FileHandlerTest
                 ImmutableList<string>.Empty )
         });
 
-        fileHandler.Save(config);
+        fileHandler.SaveConfig(config);
 
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
@@ -386,7 +386,7 @@ public class FileHandlerTest
                 ImmutableList<string>.Empty )
         });
 
-        fileHandler.Save(config);
+        fileHandler.SaveConfig(config);
 
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
@@ -447,7 +447,7 @@ public class FileHandlerTest
                 new List<string>{ videoFilePath }.ToImmutableList() )
         });
 
-        fileHandler.Save(config);
+        fileHandler.SaveConfig(config);
 
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
@@ -513,7 +513,7 @@ public class FileHandlerTest
                 ImmutableList<string>.Empty)
         });
 
-        fileHandler.Save(config);
+        fileHandler.SaveConfig(config);
 
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
@@ -591,7 +591,7 @@ public class FileHandlerTest
                 ImmutableList<string>.Empty)
         });
 
-        fileHandler.Save(config);
+        fileHandler.SaveConfig(config);
 
         var newConfig = new Config(new List<Hotspot>
         {
@@ -607,7 +607,7 @@ public class FileHandlerTest
                 new List<string>{ Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4") }.ToImmutableList() )
         });
 
-        fileHandler.Save(newConfig);
+        fileHandler.SaveConfig(newConfig);
 
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
         Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));

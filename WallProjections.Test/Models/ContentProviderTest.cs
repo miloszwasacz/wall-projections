@@ -172,8 +172,10 @@ public class ContentProviderTest
     {
         var hotspot = new Hotspot(id, position, descriptionPath, imagePaths, videoPaths);
 
+        Assert.That(hotspot, Is.Not.Null);
+
         // Use reflection to update file path of hotspots.
-        var hotspotFilePathField = typeof(Hotspot).GetField("FilePath", BindingFlags.Instance | BindingFlags.NonPublic);
+        var hotspotFilePathField = typeof(Hotspot).GetField("_filePath", BindingFlags.Instance | BindingFlags.NonPublic);
         hotspotFilePathField.SetValue(hotspot, filePath);
 
         return hotspot;

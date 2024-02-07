@@ -8,6 +8,9 @@ public interface IFileHandler
     public const string ConfigFileName = "config.json";
     public const string ConfigFolderName = "WallProjections";
 
+    /// <summary>
+    /// Path to the folder containing the config.json and the media files.
+    /// </summary>
     public static string ConfigFolderPath =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigFolderName);
 
@@ -17,7 +20,7 @@ public interface IFileHandler
     /// <param name="zipPath">Path to the zip file</param>
     /// <returns>A config at the specified path, if any exist</returns>
     /// <exception cref="FileNotFoundException">If zip file or config file could not be found</exception>
-    public IConfig? Import(string zipPath);
+    public IConfig? ImportConfig(string zipPath);
 
     /// <summary>
     /// Loads the config.json file from the config folder.
@@ -31,7 +34,7 @@ public interface IFileHandler
     /// </summary>
     /// <param name="config">The new config file to save</param>
     /// <returns>True if saved successfully</returns>
-    public bool Save(IConfig config);
+    public bool SaveConfig(IConfig config);
 
     /// <summary>
     /// Removes all files and the folder<see cref="ConfigFolderPath" />.
