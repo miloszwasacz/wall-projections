@@ -1,0 +1,50 @@
+name: .NET Publish
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: 'Target runtime'
+        type: string
+        required: true
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install Zip
+        run: sudo apt-get install zip
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget
+
+      - name: Restore dependencies
+        run: dotnet restore -r ${{ inputs.target }}
+
+      - name: Publish
+        run: >
+          dotnet publish WallProjections --no-restore -c Release -r ${{ inputs.target }} \
+              --sc -o $HOME/build/WallProjections --verbosity normal
+
+      - name: Zip
+        run: zip -r ${{ inputs.target }} $HOME/build/WallProjections
+
+      - name: Archive production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.target }}
+          path: WallProjections-${{ inputs.target }}.zip
+          retention-days: 1
