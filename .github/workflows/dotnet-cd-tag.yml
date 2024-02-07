@@ -1,0 +1,17 @@
+name: .NET CD Production
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: read
+
+on:
+  push:
+    tags:
+      - *
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/dotnet-cd-generic.yml
+    with:
+      full: true

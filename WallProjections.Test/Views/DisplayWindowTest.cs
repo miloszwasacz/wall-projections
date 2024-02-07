@@ -1,7 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
 using Avalonia.Input;
+using Avalonia.Threading;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.Views;
@@ -55,6 +57,7 @@ public class DisplayWindowTest
     }
 
     [AvaloniaTest]
+    [NonParallelizable]
     public void FullscreenToggleTest()
     {
         var vm = new MockDisplayViewModel();
@@ -63,13 +66,20 @@ public class DisplayWindowTest
             DataContext = vm
         };
         displayWindow.Show();
+        Dispatcher.UIThread.RunJobs();
 
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
 
-        displayWindow.OnKeyDown(null, new KeyEventArgs { Key = Key.F11 });
+        displayWindow.KeyPress(Key.F11, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        displayWindow.KeyRelease(Key.F11, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.Normal));
 
-        displayWindow.OnKeyDown(null, new KeyEventArgs { Key = Key.F11 });
+        displayWindow.KeyPress(Key.F11, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        displayWindow.KeyRelease(Key.F11, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
 
         vm.Dispose();
@@ -87,7 +97,9 @@ public class DisplayWindowTest
         };
         displayWindow.Show();
 
-        displayWindow.OnKeyDown(null, new KeyEventArgs { Key = Key.Escape });
+        displayWindow.KeyPress(Key.Escape, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+        displayWindow.KeyRelease(Key.Escape, RawInputModifiers.None);
         Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
     }
 }
