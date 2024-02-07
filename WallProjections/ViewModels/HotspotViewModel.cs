@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -22,12 +23,20 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
             });
         Coordinates = GetHotspots();
         ActivateHotspot(2);
+        DisplayHotspots();
     }
 
     private bool _displayHotspots;
     public List<HotCoord> Coordinates { get; }
     
-    public bool ShowHotspots => _displayHotspots;
+    public bool ShowHotspots
+    {
+        get => _displayHotspots;
+    private set
+    {
+        this.RaiseAndSetIfChanged(ref _displayHotspots, value);
+    }
+}
 
     private List<HotCoord> GetHotspots()
     {

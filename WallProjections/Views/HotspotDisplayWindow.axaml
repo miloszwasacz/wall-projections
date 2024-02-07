@@ -54,6 +54,9 @@
         </ItemsControl.ItemTemplate>
         
         <ItemsControl.Styles>
+            <Style Selector="ItemsControl">
+                <Setter Property="IsVisible" Value="{Binding ShowHotspots}"/>
+            </Style>
             <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:HotCoord">
                 <Setter Property="Canvas.Top" Value="{Binding Y}" />
                 <Setter Property="Canvas.Left" Value="{Binding X}" />
