@@ -14,16 +14,7 @@ on:
         default: true
 
 jobs:
-  publish:
-    strategy:
-      matrix:
-        target: [ win-x64, osx-x64, osx-arm64, linux-x64, linux-arm ]
-    uses: ./.github/workflows/dotnet-publish.yml
-    with:
-      target: ${{ matrix.target }}
-
   release:
-    needs: publish
     runs-on: ubuntu-latest
     steps:
       - name: Download published artifact
@@ -63,12 +54,16 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             const sha = process.env.GITHUB_SHA
-            await github.rest.git.updateRef({
-              owner,
-              repo,
-              ref: `tags/latest`,
-              sha,
-            })
+            try {
+              await github.rest.git.updateRef({
+                owner,
+                repo,
+                ref: `tags/latest`,
+                sha,
+              })
+            } catch (error) {
+              console.log('Tag `latest` does not exist')
+            }
 
       - name: Generate changelog
         id: changelog
