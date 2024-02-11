@@ -5,6 +5,10 @@ from abc import ABC, abstractmethod
 from typing import NamedTuple
 import math
 import time
+from tkinter import *
+from tkinter import ttk
+from threading import Thread
+from PIL import Image, ImageTk
 
 
 logging.basicConfig(level=logging.INFO)
@@ -295,9 +299,65 @@ def media_finished() -> None:
         hotspot.deactivate()
 
 
-if __name__ == "__main__":
-    class MyEventListener(EventListener):
-        def OnPressDetected(self, hotspot_id):
-            print(f"Hotspot {hotspot_id} activated.")
+# -------- SET UP/CALIBRATE HOTSPOTS --------
 
-    run(MyEventListener())
+class VideoCaptureThread(Thread):
+    def __init__(self):
+        super().__init__()
+        self.current_frame = None
+
+    def run(self):
+        logging.info("Initialising video capture...")
+        video_capture = cv2.VideoCapture()
+        success = video_capture.open(VIDEO_CAPTURE_TARGET, VIDEO_CAPTURE_BACKEND)
+        if not success:
+            raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid.")
+        for prop_id, prop_value in VIDEO_CAPTURE_PROPERTIES.items():
+            supported = video_capture.set(prop_id, prop_value)
+            if not supported:
+                logging.warning(f"Property id {prop_id} is not supported by video capture backend {VIDEO_CAPTURE_BACKEND}.")
+
+        while video_capture.isOpened():
+            success, video_capture_img = video_capture.read()
+            if not success:
+                logging.warning("Unsuccessful video read; ignoring frame.")
+                continue
+            video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
+            self.current_frame = ImageTk.PhotoImage(Image.fromarray(video_capture_img_rgb))
+            print("Processed frame.")
+
+
+class SetUpHotspotsWindow(Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Set up hotspots")
+        frm = ttk.Frame(self, padding=16)
+        frm.grid()
+        self.infoLabel = ttk.Label(frm, text="Use your mouse to place the hotspot in the desired position.")
+        self.infoLabel.grid(column=0, row=0)
+        self.videoLabel = ttk.Label(frm)
+        self.videoLabel.grid(column=0, row=1)
+        ttk.Button(frm, text="Cancel", command=self.destroy).grid(column=0, row=2)
+        ttk.Button(frm, text="Ok").grid(column=1, row=2)
+
+        self.videoCaptureThread = VideoCaptureThread()
+        self.videoCaptureThread.start()
+        self.poll_video_capture()
+
+    def poll_video_capture(self):
+        if self.videoCaptureThread.current_frame is not None:
+            self.videoLabel.config(image=self.videoCaptureThread.current_frame)
+            print("Polled frame.")
+
+        self.after(33, self.poll_video_capture)  # 1000 / 33 = 30 fps
+
+
+if __name__ == "__main__":
+    # class MyEventListener(EventListener):
+    #     def OnPressDetected(self, hotspot_id):
+    #         print(f"Hotspot {hotspot_id} activated.")
+    #
+    # run(MyEventListener())
+
+    setUpHotspotsWindow = SetUpHotspotsWindow()
+    setUpHotspotsWindow.mainloop()
