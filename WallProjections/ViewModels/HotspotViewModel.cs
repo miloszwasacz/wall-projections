@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DynamicData.Kernel;
 using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
@@ -27,7 +28,7 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     }
 
     private bool _displayHotspots;
-    public List<HotCoord> Coordinates { get; }
+    public List<HotCoord> Coordinates { get; set; }
     
     public bool ShowHotspots
     {
@@ -54,36 +55,24 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     }
 
     public void ActivateHotspot(int id)
-    //TODO refactor ActivateHotspot 
     {
-        var alteredCoords = new List<HotCoord>();
-        var removedCoords = new List<HotCoord>();
+        var updatedCoords = new List<HotCoord>();
         foreach (var coord in Coordinates)
         {
-            if (coord.Vis)
-            {
+            if (coord.Vis) {
                 var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, false);
-                alteredCoords.Add(newCoord);
-                removedCoords.Add(coord);
-            }
-
-            if (coord.Id != id) continue;
+                updatedCoords.Add(newCoord);
+            } 
+            else if (coord.Id == id) 
             {
                 var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, true);
-                alteredCoords.Add(newCoord);
-                removedCoords.Add(coord);
+                updatedCoords.Add(newCoord);
+            } 
+            else {
+                updatedCoords.Add(coord);
             }
         }
-
-        foreach (var coord in removedCoords)
-        {
-            Coordinates.Remove(coord);
-        }
-
-        foreach (var coord in alteredCoords)
-        {
-            Coordinates.Add(coord);
-        }
+        Coordinates = updatedCoords;
     }
 
     public void DisplayHotspots()

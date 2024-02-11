@@ -1,4 +1,5 @@
-﻿using WallProjections.ViewModels.Interfaces;
+﻿using WallProjections.ViewModels;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
@@ -27,5 +28,5 @@ public class MockViewModelProvider : IViewModelProvider
     /// Creates a new <see cref="MockHotspotViewModel"/>
     /// </summary>
     /// <returns>A new <see cref="MockHotspotViewModel"/></returns>
-    public IHotspotViewModel GetHotspotViewModel() => throw new NotImplementedException();
+    public IHotspotViewModel GetHotspotViewModel() => new MockHotspotViewModel();
 }
