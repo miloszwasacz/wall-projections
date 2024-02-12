@@ -352,6 +352,9 @@ class SetUpHotspotsWindow(Tk):
         main_frame.grid()
         self._infoLabel = ttk.Label(main_frame, text="Use your mouse to place the hotspot in the desired position.")
         self._infoLabel.grid(row=0, pady=(0, 16))
+        # assume video will be 640x480 and fill space until it starts
+        spacer = ttk.Frame(main_frame, width=640, height=480)
+        spacer.grid(row=1, pady=(0, 16))
         self._videoLabel = ttk.Label(main_frame, text="Starting video capture...")
         self._videoLabel.grid(row=1, pady=(0, 16))
         buttons = ttk.Frame(main_frame)
