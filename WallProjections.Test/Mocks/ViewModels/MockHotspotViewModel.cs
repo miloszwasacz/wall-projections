@@ -1,4 +1,3 @@
-using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
@@ -12,11 +11,6 @@ namespace WallProjections.Test.Mocks.ViewModels;
 public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
 {
     /// <summary>
-    /// The backing field for <see cref="ShowHotspots" />
-    /// </summary>
-    private bool _displayHotspots = false;
-
-    /// <summary>
     /// A list of coordinates and diameters of hotspots given through the config
     /// </summary>
     public List<HotCoord> Coordinates { get; private set; } = new();
@@ -24,12 +18,8 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     /// <summary>
     /// Decides whether or not to display the hotspots
     /// </summary>
-    public bool ShowHotspots
-    {
-        get => _displayHotspots;
-        private set => this.RaiseAndSetIfChanged(ref _displayHotspots, value);
-    } 
-    
+    public bool ShowHotspots { get; private set; }
+
     /// <summary>
     /// Changes the <see paramcref="Vis" /> parameter for all
     /// <see cref="HotCoord"/> to false in <see cref="Coordinates"/>
@@ -63,6 +53,6 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     /// </summary>
     public void DisplayHotspots()
     {
-        _displayHotspots = true;
+        ShowHotspots = true;
     }
 }

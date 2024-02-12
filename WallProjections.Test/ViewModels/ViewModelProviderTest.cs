@@ -24,6 +24,7 @@ public class ViewModelProviderTest
             Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
             Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
             Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
+            Assert.That(displayViewModel.HotspotViewModel, Is.Not.Null);
         });
     }
 

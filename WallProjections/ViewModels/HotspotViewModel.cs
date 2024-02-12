@@ -1,6 +1,5 @@
+using System;
 using System.Collections.Generic;
-using DynamicData.Kernel;
-using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -23,18 +22,13 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
                 new(id: 4, x: 40, y: 400, r: 45)
             });
         Coordinates = GetHotspots();
-        ActivateHotspot(2);
-        DisplayHotspots();
+        // ActivateHotspot(2);
+        // DisplayHotspots();
     }
 
-    private bool _displayHotspots;
     public List<HotCoord> Coordinates { get; private set; }
     
-    public bool ShowHotspots
-    {
-        get => _displayHotspots;
-        private set => this.RaiseAndSetIfChanged(ref _displayHotspots, value);
-    }
+    public bool ShowHotspots { get; private set; }
 
     private List<HotCoord> GetHotspots()
     {
@@ -42,7 +36,7 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
         for (var i = 0; i < _config?.HotspotCount; i++)
         {
             var hotspot = _config?.GetHotspot(i);
-            if (hotspot is null) continue;
+            if (hotspot is null) throw new ArgumentException();
             var pos = hotspot.Position;
             var hotCord = new HotCoord(i, pos.X, pos.Y, pos.R, pos.R * 2, false);
             coord.Add(hotCord);
@@ -74,6 +68,6 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
 
     public void DisplayHotspots()
     {
-        _displayHotspots = true;
+        ShowHotspots = true;
     }
 }
