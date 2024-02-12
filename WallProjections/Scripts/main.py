@@ -7,7 +7,7 @@ import math
 import time
 from tkinter import *
 from tkinter import ttk
-from threading import Thread
+import threading
 from PIL import Image, ImageTk
 
 
@@ -301,7 +301,7 @@ def media_finished() -> None:
 
 # -------- SET UP/CALIBRATE HOTSPOTS --------
 
-class VideoCaptureThread(Thread):
+class VideoCaptureThread(threading.Thread):
     def __init__(self):
         super().__init__()
         self.current_frame = None
@@ -327,7 +327,7 @@ class VideoCaptureThread(Thread):
             video_capture_img = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
             new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
             video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)  # normalise size
-            self.current_frame = ImageTk.PhotoImage(Image.fromarray(video_capture_img))
+            self.current_frame = Image.fromarray(video_capture_img)
 
             if self.stopping:
                 logging.info("Stopping video capture.")
@@ -370,9 +370,7 @@ class SetUpHotspotsWindow(Tk):
     def _poll_video_capture(self):
         if self._videoCaptureThread.current_frame is not None and \
                 self._videoCaptureThread.current_frame != self._displayed_frame:
-            # noinspection PyUnusedLocal
-            old_displayed_frame = self._displayed_frame  # keep reference until videoLabel updated
-            self._displayed_frame = self._videoCaptureThread.current_frame
+            self._displayed_frame = ImageTk.PhotoImage(self._videoCaptureThread.current_frame)
             self._videoLabel.config(image=self._displayed_frame)
         self.after(33, self._poll_video_capture)  # 1000 / 33 = 30 fps
 
@@ -380,14 +378,12 @@ class SetUpHotspotsWindow(Tk):
         self._videoCaptureThread.stop()
         self._videoCaptureThread.join()
         self.destroy()
-        print("finished cancel")
 
     def ok(self):
         self._videoCaptureThread.stop()
         self._videoCaptureThread.join()
         # todo: save hotspots
         self.destroy()
-        print("finished cancel")
 
 
 def set_up_hotspots():
