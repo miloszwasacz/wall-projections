@@ -14,13 +14,7 @@
             <ControlTemplate x:DataType="vm:IDescriptionEditorViewModel">
 
                 <!--TODO Style children properly -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition
-                            Width="{Binding Spacing, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                <Grid ColumnDefinitions="*, Auto">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition
@@ -28,7 +22,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TextBox Grid.Column="0" Grid.Row="0"
+                    <TextBox Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
                              Watermark="Title"
                              UseFloatingWatermark="True"
                              TextWrapping="NoWrap"
@@ -36,16 +30,26 @@
                              BorderBrush="LightGray"
                              BorderThickness="2"
                              CornerRadius="8"
+                             Padding="8, 5, 52, 6"
                              IsEnabled="{Binding IsEnabled}"
                              Text="{Binding Title}" />
 
-                    <Button Grid.Column="2" Grid.Row="0"
+                    <Button Grid.Column="1" Grid.Row="0"
+                            VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            BorderBrush="Transparent"
+                            BorderThickness="3"
+                            CornerRadius="0 7 7 0"
+                            Padding="12 10"
                             Command="{Binding ImportButton_OnClick, RelativeSource={RelativeSource TemplatedParent}}"
                             CommandParameter="{Binding RelativeSource={RelativeSource Self}}">
-                        Import
+
+                        <PathIcon Width="20" Height="20"
+                                  Data="{StaticResource document_import_regular}" />
+
                     </Button>
 
-                    <TextBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3"
+                    <TextBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"
                              Watermark="Description"
                              UseFloatingWatermark="True"
                              TextWrapping="Wrap"

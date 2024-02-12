@@ -151,6 +151,121 @@ public partial class EditorWindow : Window
         RemoveMedia(MediaEditorType.Videos, e);
     }
 
+    /// <summary>
+    /// Opens a file picker to imports a new configuration from a file.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private async void ConfigImport_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select a configuration file to import...",
+            AllowMultiple = false,
+            FileTypeFilter = new[]
+            {
+                new FilePickerFileType("Configuration")
+                {
+                    Patterns = new[] { "*.zip" }, //TODO Change to custom file type
+                    AppleUniformTypeIdentifiers = new[] { "public.zip-archive" },
+                    MimeTypes = new[] { "application/zip" },
+                }
+            }
+        });
+
+        if (files.Count == 0) return;
+
+        var file = files[0].Path.AbsolutePath;
+
+        var dialog = new ConfirmationDialog(
+            "Import Configuration",
+            WarningIconPath,
+            "Are you sure you want to import a new configuration? All currently saved data will be lost.",
+            "Import"
+        );
+        dialog.Confirm += (_, _) =>
+        {
+            if (vm.ImportConfig(file)) return;
+
+            // An error occurred while importing
+            ImportErrorToast.Show(Toast.ShowDuration.Short);
+        };
+
+        _isDialogShown = true;
+        await dialog.ShowDialog(this);
+        _isDialogShown = false;
+    }
+
+    /// <summary>
+    /// Opens a folder picker to export the current configuration to a file.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private async void ConfigExport_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Choose export location...",
+            AllowMultiple = false
+        });
+
+        if (folders.Count == 0) return;
+
+        var folder = folders[0].Path.AbsolutePath;
+        if (vm.ExportConfig(folder)) return;
+
+        // An error occurred while exporting
+        ExportErrorToast.Show(Toast.ShowDuration.Short);
+    }
+
+    /// <summary>
+    /// Saves the current configuration to a file.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void Save_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        if (vm.SaveConfig()) return;
+
+        // An error occurred while saving
+        SaveErrorToast.Show(Toast.ShowDuration.Short);
+    }
+
+    /// <summary>
+    /// Shows a <see cref="ConfirmationDialog">dialog</see> to confirm discarding changes,
+    /// and closes the Editor if confirmed.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private async void Close_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        if (vm.IsSaved)
+        {
+            Close();
+            return;
+        }
+
+        var dialog = new ConfirmationDialog(
+            "Discard Changes",
+            WarningIconPath,
+            "Are you sure you want to discard your changes? All unsaved data will be lost.",
+            "Discard"
+        );
+        dialog.Confirm += (_, _) => Close();
+
+        _isDialogShown = true;
+        await dialog.ShowDialog(this);
+        _isDialogShown = false;
+    }
+
     //ReSharper restore UnusedParameter.Local
 
     /// <summary>

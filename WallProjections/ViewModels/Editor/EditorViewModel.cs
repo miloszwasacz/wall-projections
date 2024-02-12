@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,16 @@ namespace WallProjections.ViewModels.Editor;
 public class EditorViewModel : ViewModelBase, IEditorViewModel
 {
     /// <summary>
+    /// A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.
+    /// </summary>
+    private readonly IFileHandler _fileHandler;
+
+    /// <summary>
+    /// The backing field for <see cref="Hotspots" />.
+    /// </summary>
+    private ObservableHotspotCollection<EditorHotspotViewModel> _hotspots;
+
+    /// <summary>
     /// The backing field for <see cref="SelectedHotspot" />.
     /// </summary>
     private EditorHotspotViewModel? _selectedHotspot;
@@ -26,8 +37,26 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// </summary>
     private readonly DescriptionEditorViewModel _descriptionEditor = new();
 
+    /// <summary>
+    /// The backing field for <see cref="IsSaved" />.
+    /// </summary>
+    private bool _isSaved;
+
     /// <inheritdoc />
-    public ObservableHotspotCollection<EditorHotspotViewModel> Hotspots { get; }
+    public ObservableHotspotCollection<EditorHotspotViewModel> Hotspots
+    {
+        get => _hotspots;
+        set
+        {
+            _hotspots.CollectionChanged -= SetUnsaved;
+
+            this.RaiseAndSetIfChanged(ref _hotspots, value);
+            SelectedHotspot = null;
+
+            _hotspots.CollectionChanged += SetUnsaved;
+            IsSaved = false;
+        }
+    }
 
     /// <inheritdoc />
     public EditorHotspotViewModel? SelectedHotspot
@@ -40,6 +69,10 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
             this.RaiseAndSetIfChanged(ref _selectedHotspot, value);
             _descriptionEditor.Hotspot = value;
+
+            ImageEditor.Media.CollectionChanged -= SetUnsaved;
+            VideoEditor.Media.CollectionChanged -= SetUnsaved;
+
             if (value is not null)
             {
                 ImageEditor.Media = value.Images;
@@ -50,6 +83,9 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
                 ImageEditor.Media = new ObservableCollection<IThumbnailViewModel>();
                 VideoEditor.Media = new ObservableCollection<IThumbnailViewModel>();
             }
+
+            ImageEditor.Media.CollectionChanged += SetUnsaved;
+            VideoEditor.Media.CollectionChanged += SetUnsaved;
         }
     }
 
@@ -63,8 +99,21 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     public IMediaEditorViewModel VideoEditor { get; } = new MediaEditorViewModel("Videos");
 
     /// <inheritdoc />
+    public bool IsSaved
+    {
+        get => _isSaved;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isSaved, value);
+            this.RaisePropertyChanged(nameof(IEditorViewModel.CloseButtonText));
+        }
+    }
+
+    /// <inheritdoc />
     public void AddHotspot()
     {
+        IsSaved = false;
+
         // Find the smallest available ID
         var newId = 0;
         foreach (var id in Hotspots.Select(h => h.Id).OrderBy(id => id))
@@ -81,6 +130,8 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public void DeleteHotspot(EditorHotspotViewModel hotspot)
     {
+        IsSaved = false;
+
         Hotspots.Remove(hotspot);
         SelectedHotspot = Hotspots.FirstOrDefault();
     }
@@ -88,12 +139,18 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public void AddMedia(MediaEditorType type, IEnumerable<IStorageFile> files)
     {
+        if (SelectedHotspot is null) return;
+        IsSaved = false;
+
         SelectedHotspot?.AddMedia(type, files);
     }
 
     /// <inheritdoc />
     public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media)
     {
+        if (SelectedHotspot is null) return;
+        IsSaved = false;
+
         var selectedMedia = type switch
         {
             MediaEditorType.Images => ImageEditor.SelectedMedia,
@@ -104,28 +161,110 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         selectedMedia.Clear();
     }
 
+    /// <inheritdoc />
+    public bool SaveConfig()
+    {
+        try
+        {
+            var hotspots = Hotspots.Select(hotspot => hotspot.ToHotspot());
+            var config = new Config(hotspots);
+
+            // Set IsSaved to the result of SaveConfig and return the same value
+            return IsSaved = _fileHandler.SaveConfig(config);
+        }
+        catch (Exception e)
+        {
+            //TODO Log to file
+            Console.Error.WriteLine(e);
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public bool ImportConfig(string filePath)
+    {
+        try
+        {
+            var config = _fileHandler.ImportConfig(filePath);
+            if (config is null) return false;
+
+            Hotspots = new ObservableHotspotCollection<EditorHotspotViewModel>(
+                config.Hotspots.Select(hotspot => new EditorHotspotViewModel(hotspot)));
+            SelectedHotspot = Hotspots.FirstOrDefault();
+
+            IsSaved = true;
+            return true;
+        }
+        catch (Exception e)
+        {
+            //TODO Log to file
+            Console.Error.WriteLine(e);
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public bool ExportConfig(string exportPath)
+    {
+        //TODO Implement export functionality (FileHandler does not have export functionality yet)
+        return false;
+    }
+
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" />, not linked to any existing <see cref="IConfig" />.
     /// </summary>
-    public EditorViewModel()
+    /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
+    public EditorViewModel(IFileHandler fileHandler)
     {
-        Hotspots = new ObservableHotspotCollection<EditorHotspotViewModel>();
+        _fileHandler = fileHandler;
+        _hotspots = new ObservableHotspotCollection<EditorHotspotViewModel>();
+
+        InitEventHandlers();
     }
 
     /// <summary>
     /// Creates a new <see cref="EditorViewModel" /> with initial data loaded from the provided <paramref name="config" />.
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> providing initial state of the editor.</param>
-    public EditorViewModel(IConfig config)
+    /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
+    public EditorViewModel(IConfig config, IFileHandler fileHandler)
     {
-        Hotspots = new ObservableHotspotCollection<EditorHotspotViewModel>(
+        _fileHandler = fileHandler;
+        _hotspots = new ObservableHotspotCollection<EditorHotspotViewModel>(
             config.Hotspots.Select(hotspot => new EditorHotspotViewModel(hotspot)));
         SelectedHotspot = Hotspots.FirstOrDefault();
+        IsSaved = true;
+
+        InitEventHandlers();
+    }
+
+    /// <summary>
+    /// Initializes event handlers for the editor (to keep track of unsaved changes).
+    /// </summary>
+    private void InitEventHandlers()
+    {
+        _hotspots.CollectionChanged += SetUnsaved;
+        _descriptionEditor.ContentChanged += SetUnsaved;
+        ImageEditor.Media.CollectionChanged += SetUnsaved;
+        VideoEditor.Media.CollectionChanged += SetUnsaved;
+    }
+
+    /// <summary>
+    /// A callback that sets <see cref="IsSaved" /> to <i>false</i>.
+    /// </summary>
+    private void SetUnsaved(object? sender, EventArgs e)
+    {
+        IsSaved = false;
     }
 
     /// <inheritdoc cref="IEditorHotspotViewModel" />
     public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
     {
+        /// <summary>
+        /// The backing field for <see cref="Position" />
+        /// </summary>
+        private Coord _position;
+
         /// <summary>
         /// The backing field for <see cref="Title" />.
         /// </summary>
@@ -138,6 +277,13 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
         /// <inheritdoc />
         public int Id { get; }
+
+        /// <inheritdoc />
+        public Coord Position
+        {
+            get => _position;
+            set => this.RaiseAndSetIfChanged(ref _position, value);
+        }
 
         /// <inheritdoc />
         public string Title
@@ -166,6 +312,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         public EditorHotspotViewModel(int id)
         {
             Id = id;
+            _position = new Coord(0, 0, 0);
             _title = "";
             _description = "";
             Images = new ObservableCollection<IThumbnailViewModel>();
@@ -180,13 +327,14 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         public EditorHotspotViewModel(Hotspot hotspot)
         {
             Id = hotspot.Id;
+            _position = hotspot.Position;
             _title = hotspot.Title;
             //TODO Add error handling
-            _description = File.ReadAllText(hotspot.DescriptionPath);
+            _description = File.ReadAllText(hotspot.FullDescriptionPath);
 
-            var images = hotspot.ImagePaths
+            var images = hotspot.FullImagePaths
                 .Select((path, i) => new ImageThumbnailViewModel(path, GetMediaRow(i), GetMediaColumn(i)));
-            var videos = hotspot.VideoPaths
+            var videos = hotspot.FullVideoPaths
                 .Select((path, i) => new VideoThumbnailViewModel(path, GetMediaRow(i), GetMediaColumn(i)));
             Images = new ObservableCollection<IThumbnailViewModel>(images);
             Videos = new ObservableCollection<IThumbnailViewModel>(videos);
@@ -232,6 +380,17 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
             mediaList.RemoveMany(media);
             ReindexMedia(mediaList);
+        }
+
+        /// <inheritdoc />
+        public Hotspot ToHotspot()
+        {
+            var tempDescPath = Path.GetTempFileName();
+            File.WriteAllText(tempDescPath, Description);
+
+            var imagePaths = Images.Select(vm => vm.FilePath).ToImmutableList();
+            var videoPaths = Videos.Select(vm => vm.FilePath).ToImmutableList();
+            return new Hotspot(Id, Position, Title, tempDescPath, imagePaths, videoPaths);
         }
 
         /// <summary>

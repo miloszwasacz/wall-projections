@@ -14,6 +14,9 @@ public interface IEditorHotspotViewModel
     /// <inheritdoc cref="Hotspot.Id" />
     public int Id { get; }
 
+    /// <inheritdoc cref="Hotspot.Position" />
+    public Coord Position { get; set; }
+
     /// <inheritdoc cref="Hotspot.Title" />
     public string Title { get; set; }
 
@@ -59,4 +62,10 @@ public interface IEditorHotspotViewModel
     /// <param name="type">The <see cref="MediaEditorType">type</see> of media to remove.</param>
     /// <param name="media">The media to remove from the hotspot.</param>
     public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media);
+
+    /// <summary>
+    /// Creates a <see cref="Hotspot" /> using the currently stored data in this <see cref="IEditorHotspotViewModel" />.
+    /// </summary>
+    /// <returns>A <see cref="Hotspot" /> representation of this <see cref="IEditorHotspotViewModel" />.</returns>
+    public Hotspot ToHotspot();
 }

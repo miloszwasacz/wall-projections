@@ -49,23 +49,29 @@ public class FileHandler : IFileHandler
 
             // Copy in non-imported description path.
             if (!hotspot.DescriptionPath.IsInConfig())
-                File.Copy(hotspot.DescriptionPath, Path.Combine(ConfigFolderPath, newDescriptionPath));
+            {
+                File.Copy(
+                    hotspot.DescriptionPath,
+                    Path.Combine(ConfigFolderPath, newDescriptionPath),
+                    true
+                );
+            }
             else
             {
                 File.Move(
                     Path.Combine(ConfigFolderPath, hotspot.DescriptionPath),
-                    Path.Combine(ConfigFolderPath, newDescriptionPath)
+                    Path.Combine(ConfigFolderPath, newDescriptionPath),
+                    true
                 );
             }
 
-            // Move already imported image files.
-            var newImagePaths = UpdateFiles(
+            var newImagePaths = UpdateFiles( // Move already imported image files.
                 PathExtensions.IsInConfig,
                 File.Move,
                 hotspot.ImagePaths,
                 "image",
                 hotspot.Id
-            ).Concat(UpdateFiles(
+            ).Concat(UpdateFiles( // Import non-imported image files.
                 PathExtensions.IsNotInConfig,
                 File.Copy,
                 hotspot.ImagePaths,
@@ -73,36 +79,19 @@ public class FileHandler : IFileHandler
                 hotspot.Id
             )).ToImmutableList();
 
-            // Import non-imported image files.
-            // newImagePaths.AddRange(UpdateFiles(
-            // PathExtensions.IsNotInConfig,
-            // File.Copy,
-            // hotspot.ImagePaths,
-            // "image",
-            // hotspot.Id));
-
-            // Move already imported video files.
-            var newVideoPaths = UpdateFiles(
+            var newVideoPaths = UpdateFiles( // Move already imported video files.
                 PathExtensions.IsInConfig,
                 File.Move,
                 hotspot.VideoPaths,
                 "video",
                 hotspot.Id
-            ).Concat(UpdateFiles(
+            ).Concat(UpdateFiles( // Import non-imported video files.
                 PathExtensions.IsNotInConfig,
                 File.Copy,
                 hotspot.VideoPaths,
                 "video",
                 hotspot.Id
             )).ToImmutableList();
-
-            // Import non-imported video files.
-            // newVideoPaths.AddRange(UpdateFiles(
-            // PathExtensions.IsNotInConfig,
-            // File.Copy,
-            // hotspot.VideoPaths,
-            // "video",
-            // hotspot.Id));
 
             var newHotspot = new Hotspot(
                 hotspot.Id,

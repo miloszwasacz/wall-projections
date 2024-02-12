@@ -1,4 +1,6 @@
-﻿using ReactiveUI;
+﻿using System;
+using System.Threading;
+using ReactiveUI;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels.Editor;
@@ -6,6 +8,23 @@ namespace WallProjections.ViewModels.Editor;
 /// <inheritdoc cref="IDescriptionEditorViewModel" />
 public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewModel
 {
+    /// <summary>
+    /// An event that is raised when the content of the <see cref="Hotspot" />
+    /// (i.e. <see cref="IEditorHotspotViewModel.Title" /> or <see cref="IEditorHotspotViewModel.Description"/>)
+    /// has changed.
+    /// </summary>
+    public event EventHandler<EventArgs>? ContentChanged;
+
+    /// <summary>
+    /// Whether the <see cref="Hotspot" /> is being changed.
+    /// </summary>
+    private bool _isHotspotChanging;
+
+    /// <summary>
+    /// A mutex guarding sequential access to <see cref="_isHotspotChanging" />.
+    /// </summary>
+    private readonly Mutex _hotspotMutex = new();
+
     /// <summary>
     /// The backing field for <see cref="Hotspot"/>.
     /// </summary>
@@ -18,10 +37,16 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
     {
         set
         {
+            _hotspotMutex.WaitOne();
+            _isHotspotChanging = true;
+
             _hotspot = value;
             this.RaisePropertyChanged(nameof(Title));
             this.RaisePropertyChanged(nameof(Description));
             this.RaisePropertyChanged(nameof(IsEnabled));
+
+            _isHotspotChanging = false;
+            _hotspotMutex.ReleaseMutex();
         }
     }
 
@@ -40,6 +65,9 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
 
             _hotspot.Title = value;
             this.RaisePropertyChanged();
+
+            if (!_isHotspotChanging)
+                ContentChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -58,6 +86,9 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
 
             _hotspot.Description = value;
             this.RaisePropertyChanged();
+
+            if (!_isHotspotChanging)
+                ContentChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
