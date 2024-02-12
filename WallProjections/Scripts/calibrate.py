@@ -52,7 +52,7 @@ def detectArucos(img : np.ndarray, arucoDict : aruco.Dictionary, displayResults 
     
     if displayResults == True:
         cv2.imshow("Labled Aruco Markers", aruco.drawDetectedMarkers(img, corners, ids))
-        cv2.waitKey(3000)
+        cv2.waitKey(60000)
     
     detectedCoords = {}
     if ids is None:
@@ -82,10 +82,16 @@ def getTransformationMatrix(fromCoords : Dict[int, Tuple[int, int]], toCoords : 
     fromNpArray = np.array(fromArray, dtype=np.float32)
     toNpArray = np.array(toArray, dtype=np.float32)
 
-    return cv2.findHomography(fromNpArray, toNpArray)
+    return cv2.findHomography(fromNpArray, toNpArray)[0]
 
-if __name__ == "__main__":
-    #generate an example projectCoords dictionary
+
+def transform(vector, matrix):
+    rotVector = np.array(vector, np.float32).reshape(-1, 1, 2)
+    return cv2.perspectiveTransform(rotVector, matrix)[0][0]
+
+
+def example():
+        #generate an example projectCoords dictionary
     projectedCoords = {}
     k = 0
     for i in range(6):
@@ -99,10 +105,26 @@ if __name__ == "__main__":
 
     cv2.imshow("Calibration", drawArucos(projectedCoords, arucoDict))
     cv2.waitKey(800)
+    photo = takePhoto()
 
-    cameraCoords = detectArucos(takePhoto(), arucoDict, displayResults=True)
+
+    cameraCoords = detectArucos(photo, arucoDict, displayResults=False)
 
     camera2ProjectorMatrix = getTransformationMatrix(cameraCoords, projectedCoords)
 
-    print(camera2ProjectorMatrix)
-    #cv2.warpPerspective() to use matrix 
+
+
+    for iD in projectedCoords:
+        if iD in cameraCoords:
+            print("id:",iD,"|camera coord:", cameraCoords[iD], "| projected coord:", projectedCoords[iD], "| transformed: ", transform(cameraCoords[iD], camera2ProjectorMatrix))
+
+
+    test = [(0,0), (1000,1000)]
+
+    for coord in test:
+        print("coord:", coord, "| transformed to:", transform(coord, camera2ProjectorMatrix))
+    return camera2ProjectorMatrix
+
+if __name__ == "__main__":
+
+    print(example())

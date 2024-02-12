@@ -7,10 +7,10 @@ from typing import Dict, Tuple
 
 
 def normalizeToPixel(coord, width, height):
-    return (int(coord.x*width), int(coord.y*height))
+    return (coord.x*width, coord.y*height)
 
 
-def run2() -> None:  # This function is called by Program.cs
+def run2(tMatrix) -> None:  # This function is called by Program.cs
     """
     Captures video and runs the hand-detection model to handle the hotspots.
 
@@ -52,14 +52,18 @@ def run2() -> None:  # This function is called by Program.cs
         video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
         model_output = hands_model.process(video_capture_img_rgb)
 
+        image=np.full((1080,1920), 0,np.uint8) #generate empty background
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
             index_coords = [normalizeToPixel(landmarks.landmark[8], camera_width, camera_height) for landmarks in
                                 model_output.multi_hand_landmarks]
+            
             for index_coord in index_coords:
-                cv2.circle(video_capture_img_rgb, index_coord, 3, (255,255,255), 2)
+                index_coord = transform(index_coord, tMatrix)
+                index_coord = (int(index_coord[1]), int(index_coord[0]))
+                cv2.circle(image, index_coord, 3, 255, 2)
 
-        cv2.imshow("Calibration", video_capture_img_rgb)
+        cv2.imshow("Calibration", image)
 
         # development key inputs
         key = chr(cv2.waitKey(1) & 0xFF).lower()
@@ -76,5 +80,5 @@ def run2() -> None:  # This function is called by Program.cs
 
 
 if __name__ == "__main__":
-    #tMatrix = example()
-    run2()
+    tMatrix = example()
+    run2(tMatrix)
