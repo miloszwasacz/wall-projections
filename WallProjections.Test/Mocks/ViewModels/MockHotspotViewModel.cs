@@ -1,3 +1,4 @@
+using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
@@ -11,24 +12,23 @@ namespace WallProjections.Test.Mocks.ViewModels;
 public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
 {
     /// <summary>
-    /// The backing field for <see cref="Coordinates" />
-    /// </summary>
-    private readonly List<HotCoord> _coordList = new();
-    
-    /// <summary>
     /// The backing field for <see cref="ShowHotspots" />
     /// </summary>
-    private bool _dispHotspots = false;
+    private bool _displayHotspots = false;
 
     /// <summary>
     /// A list of coordinates and diameters of hotspots given through the config
     /// </summary>
-    public List<HotCoord> Coordinates => _coordList;
+    public List<HotCoord> Coordinates { get; private set; } = new();
 
     /// <summary>
     /// Decides whether or not to display the hotspots
     /// </summary>
-    public bool ShowHotspots => _dispHotspots;
+    public bool ShowHotspots
+    {
+        get => _displayHotspots;
+        private set => this.RaiseAndSetIfChanged(ref _displayHotspots, value);
+    } 
     
     /// <summary>
     /// Changes the <see paramcref="Vis" /> parameter for all
@@ -39,7 +39,23 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     /// </summary>
     public void ActivateHotspot(int id)
     {
-        throw new NotImplementedException();
+        var updatedCoords = new List<HotCoord>();
+        foreach (var coord in Coordinates)
+        {
+            if (coord.Vis) {
+                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, false);
+                updatedCoords.Add(newCoord);
+            } 
+            else if (coord.Id == id) 
+            {
+                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, true);
+                updatedCoords.Add(newCoord);
+            } 
+            else {
+                updatedCoords.Add(coord);
+            }
+        }
+        Coordinates = updatedCoords;
     }
 
     /// <summary>
@@ -47,6 +63,6 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     /// </summary>
     public void DisplayHotspots()
     {
-        _dispHotspots = true;
+        _displayHotspots = true;
     }
 }

@@ -28,16 +28,13 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     }
 
     private bool _displayHotspots;
-    public List<HotCoord> Coordinates { get; set; }
+    public List<HotCoord> Coordinates { get; private set; }
     
     public bool ShowHotspots
     {
         get => _displayHotspots;
-    private set
-    {
-        this.RaiseAndSetIfChanged(ref _displayHotspots, value);
+        private set => this.RaiseAndSetIfChanged(ref _displayHotspots, value);
     }
-}
 
     private List<HotCoord> GetHotspots()
     {
