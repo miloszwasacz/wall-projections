@@ -54,10 +54,10 @@ def run2() -> None:  # This function is called by Program.cs
 
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
-            fingertip_coords = [landmarks.landmark[8] for landmarks in
+            index_coords = [normalizeToPixel(landmarks.landmark[8], camera_width, camera_height) for landmarks in
                                 model_output.multi_hand_landmarks]
-            index_coord = normalizeToPixel(fingertip_coords[0], camera_width, camera_height)
-            cv2.circle(video_capture_img_rgb, index_coord, 3, (255,255,255), 2)
+            for index_coord in index_coords:
+                cv2.circle(video_capture_img_rgb, index_coord, 3, (255,255,255), 2)
 
         cv2.imshow("Calibration", video_capture_img_rgb)
 
@@ -74,12 +74,7 @@ def run2() -> None:  # This function is called by Program.cs
     hands_model.close()
 
 
-def media_finished() -> None:
-    for hotspot in hotspots:
-        hotspot.deactivate()
-
-
 
 if __name__ == "__main__":
-    tMatrix = example()
+    #tMatrix = example()
     run2()
