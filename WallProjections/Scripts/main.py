@@ -305,6 +305,7 @@ class VideoCaptureThread(Thread):
     def __init__(self):
         super().__init__()
         self.current_frame = None
+        self.stopping = False
 
     def run(self):
         logging.info("Initialising video capture...")
@@ -324,7 +325,18 @@ class VideoCaptureThread(Thread):
                 continue
             video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
             self.current_frame = ImageTk.PhotoImage(Image.fromarray(video_capture_img_rgb))
-            print("Processed frame.")
+            if self.stopping:
+                break
+
+        video_capture.release()
+
+    def stop(self):
+        """
+        Stop the video capture after the current frame.
+
+        Call `Thread.join` after this to block until the thread has stopped.
+        """
+        self.stopping = True
 
 
 class SetUpHotspotsWindow(Tk):
@@ -333,23 +345,42 @@ class SetUpHotspotsWindow(Tk):
         self.title("Set up hotspots")
         frm = ttk.Frame(self, padding=16)
         frm.grid()
-        self.infoLabel = ttk.Label(frm, text="Use your mouse to place the hotspot in the desired position.")
-        self.infoLabel.grid(column=0, row=0)
-        self.videoLabel = ttk.Label(frm)
-        self.videoLabel.grid(column=0, row=1)
-        ttk.Button(frm, text="Cancel", command=self.destroy).grid(column=0, row=2)
-        ttk.Button(frm, text="Ok").grid(column=1, row=2)
+        self._infoLabel = ttk.Label(frm, text="Use your mouse to place the hotspot in the desired position.")
+        self._infoLabel.grid(column=0, row=0)
+        self._videoLabel = ttk.Label(frm)
+        self._videoLabel.grid(column=0, row=1)
+        ttk.Button(frm, text="Cancel", command=self.cancel).grid(column=0, row=2)
+        ttk.Button(frm, text="Ok", command=self.ok).grid(column=1, row=2)
 
-        self.videoCaptureThread = VideoCaptureThread()
-        self.videoCaptureThread.start()
-        self.poll_video_capture()
+        self._displayed_frame = None  # store reference to frame so it doesn't get GCed
+        self._videoCaptureThread = VideoCaptureThread()
+        self._videoCaptureThread.start()
+        self._poll_video_capture()
 
-    def poll_video_capture(self):
-        if self.videoCaptureThread.current_frame is not None:
-            self.videoLabel.config(image=self.videoCaptureThread.current_frame)
-            print("Polled frame.")
+    def _poll_video_capture(self):
+        if self._videoCaptureThread.current_frame is not None and \
+                self._videoCaptureThread.current_frame != self._displayed_frame:
+            # noinspection PyUnusedLocal
+            old_displayed_frame = self._displayed_frame  # keep reference until videoLabel updated
+            self._displayed_frame = self._videoCaptureThread.current_frame
+            self._videoLabel.config(image=self._displayed_frame)
+        self.after(33, self._poll_video_capture)  # 1000 / 33 = 30 fps
 
-        self.after(33, self.poll_video_capture)  # 1000 / 33 = 30 fps
+    def cancel(self):
+        self._videoCaptureThread.stop()
+        self._videoCaptureThread.join(timeout=1)
+        self.destroy()
+
+    def ok(self):
+        self._videoCaptureThread.stop()
+        self._videoCaptureThread.join(timeout=1)
+        # todo: save hotspots
+        self.destroy()
+
+
+def set_up_hotspots():
+    set_up_hotspots_window = SetUpHotspotsWindow()
+    set_up_hotspots_window.mainloop()
 
 
 if __name__ == "__main__":
@@ -359,5 +390,4 @@ if __name__ == "__main__":
     #
     # run(MyEventListener())
 
-    setUpHotspotsWindow = SetUpHotspotsWindow()
-    setUpHotspotsWindow.mainloop()
+    set_up_hotspots()
