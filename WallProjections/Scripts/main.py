@@ -330,6 +330,7 @@ class VideoCaptureThread(Thread):
             self.current_frame = ImageTk.PhotoImage(Image.fromarray(video_capture_img))
 
             if self.stopping:
+                logging.info("Stopping video capture.")
                 break
 
         video_capture.release()
@@ -347,14 +348,16 @@ class SetUpHotspotsWindow(Tk):
     def __init__(self):
         super().__init__()
         self.title("Set up hotspots")
-        frm = ttk.Frame(self, padding=16)
-        frm.grid()
-        self._infoLabel = ttk.Label(frm, text="Use your mouse to place the hotspot in the desired position.")
-        self._infoLabel.grid(column=0, row=0)
-        self._videoLabel = ttk.Label(frm)
-        self._videoLabel.grid(column=0, row=1)
-        ttk.Button(frm, text="Cancel", command=self.cancel).grid(column=0, row=2)
-        ttk.Button(frm, text="Ok", command=self.ok).grid(column=1, row=2)
+        main_frame = ttk.Frame(self, padding=16)
+        main_frame.grid()
+        self._infoLabel = ttk.Label(main_frame, text="Use your mouse to place the hotspot in the desired position.")
+        self._infoLabel.grid(row=0, pady=(0, 16))
+        self._videoLabel = ttk.Label(main_frame, text="Starting video capture...")
+        self._videoLabel.grid(row=1, pady=(0, 16))
+        buttons = ttk.Frame(main_frame)
+        buttons.grid(row=2)
+        ttk.Button(buttons, text="Cancel", command=self.cancel).grid(row=0, column=0, padx=(0, 16))
+        ttk.Button(buttons, text="Save", command=self.ok).grid(row=0, column=1, padx=(16, 0))
 
         self._displayed_frame = None  # store reference to frame so it doesn't get GCed
         self._videoCaptureThread = VideoCaptureThread()
@@ -372,14 +375,16 @@ class SetUpHotspotsWindow(Tk):
 
     def cancel(self):
         self._videoCaptureThread.stop()
-        self._videoCaptureThread.join(timeout=1)
+        self._videoCaptureThread.join()
         self.destroy()
+        print("finished cancel")
 
     def ok(self):
         self._videoCaptureThread.stop()
         self._videoCaptureThread.join()
         # todo: save hotspots
         self.destroy()
+        print("finished cancel")
 
 
 def set_up_hotspots():
