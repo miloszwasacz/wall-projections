@@ -323,8 +323,12 @@ class VideoCaptureThread(Thread):
             if not success:
                 logging.warning("Unsuccessful video read; ignoring frame.")
                 continue
-            video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
-            self.current_frame = ImageTk.PhotoImage(Image.fromarray(video_capture_img_rgb))
+
+            video_capture_img = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
+            new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
+            video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)  # normalise size
+            self.current_frame = ImageTk.PhotoImage(Image.fromarray(video_capture_img))
+
             if self.stopping:
                 break
 
@@ -373,7 +377,7 @@ class SetUpHotspotsWindow(Tk):
 
     def ok(self):
         self._videoCaptureThread.stop()
-        self._videoCaptureThread.join(timeout=1)
+        self._videoCaptureThread.join()
         # todo: save hotspots
         self.destroy()
 
