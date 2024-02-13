@@ -1,10 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Headless.NUnit;
 using WallProjections.Helper;
 using WallProjections.Models;
-using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.Test.Mocks.ViewModels.Editor;
 
 namespace WallProjections.Test.Helper;
 
@@ -14,13 +11,13 @@ public class ObservableHotspotCollectionTest
     /// <summary>
     /// Creates a list of sample items.
     /// </summary>
-    /// <returns>A new of 5 <see cref="MockHotspotViewModel" />.</returns>
-    private static List<MockHotspotViewModel> CreateTestItems()
+    /// <returns>A new of 5 <see cref="MockEditorHotspotViewModel" />.</returns>
+    private static List<MockEditorHotspotViewModel> CreateTestItems()
     {
-        var items = new List<MockHotspotViewModel>();
+        var items = new List<MockEditorHotspotViewModel>();
         for (var i = 0; i < 5; i++)
         {
-            items.Add(new MockHotspotViewModel(
+            items.Add(new MockEditorHotspotViewModel(
                 i,
                 new Coord(0, 0, 0),
                 $"Title {i}",
@@ -31,17 +28,19 @@ public class ObservableHotspotCollectionTest
         return items;
     }
 
-    private static MockHotspotViewModel CreateNewItem() => new(
+    private static MockEditorHotspotViewModel CreateNewItem() => new(
         5,
         new Coord(0, 0, 0),
         "Title New",
         "Description New"
     );
 
+    private static MockThumbnailViewModel CreateThumbnailViewModel() => new(0, 0, "", "Name");
+
     [Test]
     public void ConstructorEmptyTest()
     {
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>();
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>();
         Assert.That(collection, Is.Empty);
     }
 
@@ -49,8 +48,8 @@ public class ObservableHotspotCollectionTest
     public void ConstructorEnumerableTest()
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>(
-            (IEnumerable<MockHotspotViewModel>)items
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(
+            (IEnumerable<MockEditorHotspotViewModel>)items
         );
         Assert.That(collection, Is.EquivalentTo(items));
     }
@@ -59,7 +58,7 @@ public class ObservableHotspotCollectionTest
     public void ConstructorListTest()
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>(items);
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(items);
         Assert.That(collection, Is.EquivalentTo(items));
     }
 
@@ -70,7 +69,7 @@ public class ObservableHotspotCollectionTest
     public async Task ItemPropertyChangedTest(int id, int timesChanged)
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>(items);
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(items);
         var changed = 0;
         collection.CollectionChanged += (_, _) =>
         {
@@ -85,11 +84,11 @@ public class ObservableHotspotCollectionTest
         Assert.That(changed, Is.EqualTo(timesChanged));
     }
 
-    [Test]
+    [AvaloniaTest]
     public async Task ItemCollectionsChangedTest()
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>(items);
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(items);
         var changed = 0;
         collection.CollectionChanged += (_, _) =>
         {
@@ -97,8 +96,8 @@ public class ObservableHotspotCollectionTest
             changed++;
         };
 
-        items[0].Images.Add(new MockThumbnailViewModel());
-        items[0].Videos.Add(new MockThumbnailViewModel());
+        items[0].Images.Add(CreateThumbnailViewModel());
+        items[0].Videos.Add(CreateThumbnailViewModel());
         await Task.Delay(200);
 
         // Updating inner collections does not trigger a change event.
@@ -109,7 +108,7 @@ public class ObservableHotspotCollectionTest
     public async Task ClearItemsTest()
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>(items);
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(items);
         var changed = false;
         collection.CollectionChanged += (_, _) =>
         {
@@ -131,7 +130,7 @@ public class ObservableHotspotCollectionTest
     public async Task InsertItemTest()
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>(items);
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(items);
         var changed = false;
         collection.CollectionChanged += (_, _) =>
         {
@@ -157,7 +156,7 @@ public class ObservableHotspotCollectionTest
     public async Task RemoveItemTest()
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>(items);
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(items);
         var changed = false;
         collection.CollectionChanged += (_, _) =>
         {
@@ -182,7 +181,7 @@ public class ObservableHotspotCollectionTest
     public async Task SetItemTest()
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<MockHotspotViewModel>(items);
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(items);
         var changed = false;
         collection.CollectionChanged += (_, _) =>
         {
@@ -202,106 +201,5 @@ public class ObservableHotspotCollectionTest
         });
         for (var i = 1; i < items.Count; i++)
             Assert.That(collection[i], Is.EqualTo(items[i]));
-    }
-
-    /// <summary>
-    /// A mock viewmodel used as items for testing <see cref="ObservableHotspotCollection{T}" />.
-    /// </summary>
-    public class MockHotspotViewModel : IEditorHotspotViewModel, INotifyPropertyChanged
-    {
-        private Coord _position;
-        private string _title;
-        private string _description;
-
-        public int Id { get; }
-
-        public Coord Position
-        {
-            get => _position;
-            set
-            {
-                _position = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Position)));
-            }
-        }
-
-        public string Title
-        {
-            get => _title;
-            set
-            {
-                _title = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title)));
-            }
-        }
-
-        public string Description
-        {
-            get => _description;
-            set
-            {
-                _description = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Description)));
-            }
-        }
-
-        public ObservableCollection<IThumbnailViewModel> Images { get; }
-        public ObservableCollection<IThumbnailViewModel> Videos { get; }
-
-        public MockHotspotViewModel(
-            int id,
-            Coord position,
-            string title,
-            string description
-        )
-        {
-            Id = id;
-            _position = position;
-            _title = title;
-            _description = description;
-            Images = new ObservableCollection<IThumbnailViewModel>();
-            Videos = new ObservableCollection<IThumbnailViewModel>();
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Invokes <see cref="PropertyChanged"/> event with the given property name and <i>null</i> sender.
-        /// </summary>
-        /// <param name="propertyName">
-        /// The name of the property passed to <see cref="PropertyChangedEventArgs(string)" />.
-        /// </param>
-        public void UntypedNotifyPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
-        }
-
-        #region Unused
-
-        public void AddMedia(MediaEditorType type, IEnumerable<IStorageFile> files)
-        {
-            throw new NotSupportedException();
-        }
-
-        public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media)
-        {
-            throw new NotSupportedException();
-        }
-
-        public Hotspot ToHotspot()
-        {
-            throw new NotSupportedException();
-        }
-
-        #endregion
-    }
-
-    private class MockThumbnailViewModel : IThumbnailViewModel
-    {
-        public int Row { get; set; } = 0;
-        public int Column { get; set; } = 0;
-        public string FilePath => "Path";
-        public Bitmap Image => null!;
-        public string Name => "Name";
     }
 }

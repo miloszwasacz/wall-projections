@@ -5,6 +5,7 @@ using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Interfaces.Display;
 using static WallProjections.Test.TestExtensions;

@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using Avalonia.Input;
 using WallProjections.Helper.Interfaces;
-using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.Test.Mocks.Views;
 using WallProjections.Views;
 

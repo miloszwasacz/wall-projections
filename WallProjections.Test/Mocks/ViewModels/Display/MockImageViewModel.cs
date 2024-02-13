@@ -4,7 +4,7 @@ using Avalonia.Platform;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Interfaces.Display;
 
-namespace WallProjections.Test.Mocks.ViewModels;
+namespace WallProjections.Test.Mocks.ViewModels.Display;
 
 /// <summary>
 /// A mock of <see cref="ImageViewModel" /> for injecting into <see cref="DisplayViewModel" />

@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
-using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.ViewModels;
 using WallProjections.Views;
 

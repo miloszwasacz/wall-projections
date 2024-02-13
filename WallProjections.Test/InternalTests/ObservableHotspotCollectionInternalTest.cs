@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Reflection;
 using WallProjections.Helper;
 using WallProjections.Models;
-using WallProjections.Test.Helper;
+using WallProjections.Test.Mocks.ViewModels.Editor;
 
 namespace WallProjections.Test.InternalTests;
 
@@ -13,13 +13,13 @@ public class ObservableHotspotCollectionInternalTest
     /// <summary>
     /// Creates a list of sample items.
     /// </summary>
-    /// <returns>A new of 5 <see cref="ObservableHotspotCollectionTest.MockHotspotViewModel" />.</returns>
-    private static List<ObservableHotspotCollectionTest.MockHotspotViewModel> CreateTestItems()
+    /// <returns>A new of 5 <see cref="MockEditorHotspotViewModel" />.</returns>
+    private static List<MockEditorHotspotViewModel> CreateTestItems()
     {
-        var items = new List<ObservableHotspotCollectionTest.MockHotspotViewModel>();
+        var items = new List<MockEditorHotspotViewModel>();
         for (var i = 0; i < 5; i++)
         {
-            items.Add(new ObservableHotspotCollectionTest.MockHotspotViewModel(
+            items.Add(new MockEditorHotspotViewModel(
                 i,
                 new Coord(0, 0, 0),
                 $"Title {i}",
@@ -38,7 +38,7 @@ public class ObservableHotspotCollectionInternalTest
     public async Task WrongTypeItemPropertyChangedTest()
     {
         var items = CreateTestItems();
-        var collection = new ObservableHotspotCollection<ObservableHotspotCollectionTest.MockHotspotViewModel>(items);
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>(items);
         var changed = false;
         collection.CollectionChanged += (_, e) =>
         {
@@ -50,7 +50,7 @@ public class ObservableHotspotCollectionInternalTest
             changed = true;
         };
 
-        items[2].UntypedNotifyPropertyChanged(nameof(ObservableHotspotCollectionTest.MockHotspotViewModel.Title));
+        items[2].UntypedNotifyPropertyChanged(nameof(MockEditorHotspotViewModel.Title));
         await Task.Delay(100);
 
         Assert.That(changed, Is.True);
@@ -63,8 +63,8 @@ public class ObservableHotspotCollectionInternalTest
     [Test]
     public async Task NonexistentItemPropertyChangedTest()
     {
-        var collection = new ObservableHotspotCollection<ObservableHotspotCollectionTest.MockHotspotViewModel>();
-        var item = new ObservableHotspotCollectionTest.MockHotspotViewModel(
+        var collection = new ObservableHotspotCollection<MockEditorHotspotViewModel>();
+        var item = new MockEditorHotspotViewModel(
             0,
             new Coord(0, 0, 0),
             "Title",

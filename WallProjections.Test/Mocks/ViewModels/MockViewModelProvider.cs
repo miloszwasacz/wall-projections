@@ -1,6 +1,9 @@
-﻿using WallProjections.Models.Interfaces;
+﻿using WallProjections.Models;
+using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
@@ -23,4 +26,44 @@ public class MockViewModelProvider : IViewModelProvider
     /// </summary>
     /// <returns>A new <see cref="MockVideoViewModel"/></returns>
     public IVideoViewModel GetVideoViewModel() => new MockVideoViewModel();
+
+    public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEditorHotspotViewModel GetEditorHotspotViewModel(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEditorHotspotViewModel GetEditorHotspotViewModel(Hotspot hotspot)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IDescriptionEditorViewModel GetDescriptionEditorViewModel()
+    {
+        throw new NotImplementedException();
+    }
+
+    public IMediaEditorViewModel GetMediaEditorViewModel(MediaEditorType type)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath, int gridRow, int gridColumn)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm)
+    {
+        throw new NotImplementedException();
+    }
 }

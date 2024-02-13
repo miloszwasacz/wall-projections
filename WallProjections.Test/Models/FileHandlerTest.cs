@@ -135,34 +135,31 @@ public class FileHandlerTest
     [NonParallelizable]
     public void ExportConfigTest()
     {
-        var tempFilePath = Path.Combine(Path.GetTempPath(), "export_test.zip");
+        var tempFilePath = Path.GetTempFileName();
         File.Delete(tempFilePath);
         Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
 
         var fileHandler = new FileHandler();
-
         fileHandler.ImportConfig(TestZip);
-
         Assert.That(fileHandler.IsConfigImported(), Is.True, "Config not successfully imported for test");
 
         fileHandler.ExportConfig(tempFilePath);
-
         Assert.That(File.Exists(tempFilePath), Is.True, "Exported zip does not exist");
+        {
+            using var zipFile = ZipFile.OpenRead(tempFilePath);
+            var configFile = zipFile.GetEntry("config.json");
+            Assert.That(configFile, Is.Not.Null, "config.json not found in zip file.");
 
-        var zipFile = ZipFile.OpenRead(tempFilePath);
+            var textFile = zipFile.GetEntry(TestTxtFile);
+            Assert.That(textFile, Is.Not.Null, "text_0.txt not found in zip file.");
 
-        var configFile = zipFile.GetEntry("config.json");
-        Assert.That(configFile, Is.Not.Null, "config.json not found in zip file.");
+            using var textReader = new StreamReader(textFile!.Open());
+            var textFileContent = textReader.ReadToEnd();
+            Assert.That(textFileContent, Is.EqualTo(TestTxtFileContents));
 
-        var textFile = zipFile.GetEntry(TestTxtFile);
-        Assert.That(textFile, Is.Not.Null, "text_0.txt not found in zip file.");
-
-        var textReader = new StreamReader(textFile.Open());
-        var textFileContent = textReader.ReadToEnd();
-        Assert.That(textFileContent, Is.EqualTo(TestTxtFileContents));
-
-        var imageFile = zipFile.GetEntry("image_1_0.png");
-        Assert.That(imageFile, Is.Not.Null, "image_1_0.png not found in zip file.");
+            var imageFile = zipFile.GetEntry("image_1_0.png");
+            Assert.That(imageFile, Is.Not.Null, "image_1_0.png not found in zip file.");
+        }
 
         File.Delete(tempFilePath);
         Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
@@ -171,18 +168,19 @@ public class FileHandlerTest
     /// <summary>
     /// Test that error is thrown if no config is imported when export is attempted.
     /// </summary>
+    [Test]
+    [NonParallelizable]
     public void ExportConfigNoConfigTest()
     {
-        var tempFilePath = Path.Combine(Path.GetTempPath(), "export_test.zip");
+        var tempFilePath = Path.GetTempFileName();
         File.Delete(tempFilePath);
         Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
 
         if (Directory.Exists(IFileHandler.ConfigFolderPath))
-        {
             Directory.Delete(IFileHandler.ConfigFolderPath);
-        }
 
-        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True, "Could not delete config folder for test.");
+        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.False,
+            "Could not delete config folder for test.");
 
         var fileHandler = new FileHandler();
 
