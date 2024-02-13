@@ -1,5 +1,3 @@
-import cv2
-import mediapipe as mp
 import logging
 from abc import ABC, abstractmethod
 from typing import NamedTuple
@@ -8,7 +6,8 @@ from EventListener import *
 from Hotspot import *
 from calibrate import *
 
-
+import cv2
+import mediapipe as mp
 
 logging.basicConfig(level=logging.INFO)
 
@@ -253,7 +252,6 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
         video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
         model_output = hands_model.process(video_capture_img_rgb)
 
-
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
             fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
@@ -271,10 +269,10 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 
                     event_listener.OnPressDetected(hotspot.id)
 
-            # # draw hand landmarks
-            # for landmarks in model_output.multi_hand_landmarks:
-            #     mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
-            #                                               connections=mp.solutions.hands.HAND_CONNECTIONS)
+            # draw hand landmarks
+            for landmarks in model_output.multi_hand_landmarks:
+                mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
+                                                          connections=mp.solutions.hands.HAND_CONNECTIONS)
 
         image=np.full((1080,1920), 255,np.uint8) #generate empty background
         # draw hotspot
@@ -299,6 +297,51 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 def media_finished() -> None:
     for hotspot in hotspots:
         hotspot.deactivate()
+
+
+# -------- SET UP/CALIBRATE HOTSPOTS --------
+
+class VideoCaptureThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.current_frame = None
+        self.stopping = False
+
+    def run(self):
+        logging.info("Initialising video capture...")
+        video_capture = cv2.VideoCapture()
+        success = video_capture.open(VIDEO_CAPTURE_TARGET, VIDEO_CAPTURE_BACKEND)
+        if not success:
+            raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid.")
+        for prop_id, prop_value in VIDEO_CAPTURE_PROPERTIES.items():
+            supported = video_capture.set(prop_id, prop_value)
+            if not supported:
+                logging.warning(f"Property id {prop_id} is not supported by video capture backend {VIDEO_CAPTURE_BACKEND}.")
+
+        while video_capture.isOpened():
+            success, video_capture_img = video_capture.read()
+            if not success:
+                logging.warning("Unsuccessful video read; ignoring frame.")
+                continue
+
+            video_capture_img = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
+            new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
+            video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)  # normalise size
+            self.current_frame = Image.fromarray(video_capture_img)
+
+            if self.stopping:
+                logging.info("Stopping video capture.")
+                break
+
+        video_capture.release()
+
+    def stop(self):
+        """
+        Stop the video capture after the current frame.
+
+        Call `Thread.join` after this to block until the thread has stopped.
+        """
+        self.stopping = True
 
 
 if __name__ == "__main__":
