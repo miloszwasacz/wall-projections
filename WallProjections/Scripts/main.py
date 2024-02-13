@@ -1,15 +1,13 @@
-import cv2
-import mediapipe as mp
 import logging
+import math
+import threading
+import time
 from abc import ABC, abstractmethod
 from typing import NamedTuple
-import math
-import time
-from tkinter import *
-from tkinter import ttk
-import threading
-from PIL import Image, ImageTk
 
+import cv2
+import mediapipe as mp
+from PIL import Image
 
 logging.basicConfig(level=logging.INFO)
 
@@ -344,58 +342,9 @@ class VideoCaptureThread(threading.Thread):
         self.stopping = True
 
 
-class SetUpHotspotsWindow(Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("Set up hotspots")
-        main_frame = ttk.Frame(self, padding=16)
-        main_frame.grid()
-        self._infoLabel = ttk.Label(main_frame, text="Use your mouse to place the hotspot in the desired position.")
-        self._infoLabel.grid(row=0, pady=(0, 16))
-        # assume video will be 640x480 and fill space until it starts
-        spacer = ttk.Frame(main_frame, width=640, height=480)
-        spacer.grid(row=1, pady=(0, 16))
-        self._videoLabel = ttk.Label(main_frame, text="Starting video capture...")
-        self._videoLabel.grid(row=1, pady=(0, 16))
-        buttons = ttk.Frame(main_frame)
-        buttons.grid(row=2)
-        ttk.Button(buttons, text="Cancel", command=self.cancel).grid(row=0, column=0, padx=(0, 16))
-        ttk.Button(buttons, text="Save", command=self.ok).grid(row=0, column=1, padx=(16, 0))
-
-        self._displayed_frame = None  # store reference to frame so it doesn't get GCed
-        self._videoCaptureThread = VideoCaptureThread()
-        self._videoCaptureThread.start()
-        self._poll_video_capture()
-
-    def _poll_video_capture(self):
-        if self._videoCaptureThread.current_frame is not None and \
-                self._videoCaptureThread.current_frame != self._displayed_frame:
-            self._displayed_frame = ImageTk.PhotoImage(self._videoCaptureThread.current_frame)
-            self._videoLabel.config(image=self._displayed_frame)
-        self.after(33, self._poll_video_capture)  # 1000 / 33 = 30 fps
-
-    def cancel(self):
-        self._videoCaptureThread.stop()
-        self._videoCaptureThread.join()
-        self.destroy()
-
-    def ok(self):
-        self._videoCaptureThread.stop()
-        self._videoCaptureThread.join()
-        # todo: save hotspots
-        self.destroy()
-
-
-def set_up_hotspots():
-    set_up_hotspots_window = SetUpHotspotsWindow()
-    set_up_hotspots_window.mainloop()
-
-
 if __name__ == "__main__":
-    # class MyEventListener(EventListener):
-    #     def OnPressDetected(self, hotspot_id):
-    #         print(f"Hotspot {hotspot_id} activated.")
-    #
-    # run(MyEventListener())
+    class MyEventListener(EventListener):
+        def OnPressDetected(self, hotspot_id):
+            print(f"Hotspot {hotspot_id} activated.")
 
-    set_up_hotspots()
+    run(MyEventListener())
