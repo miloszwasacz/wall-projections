@@ -30,6 +30,7 @@ public class ObservableHotspotCollection<T> : ObservableCollection<T>
     public bool IsItemUpdating { get; private set; }
 
     /// <inheritdoc cref="ObservableCollection{T}()"/>
+    /// <seealso cref="ObservableCollection{T}()"/>
     public ObservableHotspotCollection()
     {
     }
@@ -39,6 +40,7 @@ public class ObservableHotspotCollection<T> : ObservableCollection<T>
     /// Then, attaches handlers to <see cref="INotifyPropertyChanged.PropertyChanged"/> of each item.
     /// </summary>
     /// <inheritdoc cref="ObservableCollection{T}(IEnumerable{T})"/>
+    /// <seealso cref="ObservableCollection{T}(IEnumerable{T})"/>
     public ObservableHotspotCollection(IEnumerable<T> collection) : base(collection)
     {
         ListenForChanges();
@@ -49,6 +51,7 @@ public class ObservableHotspotCollection<T> : ObservableCollection<T>
     /// Then, attaches handlers to <see cref="INotifyPropertyChanged.PropertyChanged"/> of each item.
     /// </summary>
     /// <inheritdoc cref="ObservableCollection{T}(List{T})"/>
+    /// <seealso cref="ObservableCollection{T}(List{T})"/>
     public ObservableHotspotCollection(List<T> list) : base(list)
     {
         ListenForChanges();
