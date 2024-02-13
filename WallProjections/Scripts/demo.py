@@ -1,23 +1,64 @@
+import logging
 from calibrate import *
-from main import *
 import numpy as np
 import cv2
 from cv2 import aruco
+import mediapipe as mp
 from typing import Dict, Tuple
 
+MAX_NUM_HANDS: int = 4
+"""The maximum number of hands to detect."""
 
-def normalizeToPixel(coord, width, height):
+MIN_DETECTION_CONFIDENCE: float = 0.5
+"""The minimum confidence for hand detection to be considered successful.
+
+Must be between 0 and 1.
+
+See https://developers.google.com/mediapipe/solutions/vision/hand_landmarker."""
+
+MIN_TRACKING_CONFIDENCE: float = 0.5
+"""The minimum confidence for hand detection to be considered successful.
+
+Must be between 0 and 1.
+
+See https://developers.google.com/mediapipe/solutions/vision/hand_landmarker."""
+
+
+VIDEO_CAPTURE_TARGET: int | str = 0
+"""Camera ID, video filename, image sequence filename or video stream URL to capture video from.
+
+Set to 0 to use default camera.
+
+See https://docs.opencv.org/3.4/d8/dfe/classcv_1_1VideoCapture.html#a949d90b766ba42a6a93fe23a67785951 for details."""
+
+VIDEO_CAPTURE_BACKEND: int = cv2.CAP_ANY
+"""The API backend to use for capturing video. 
+
+Use ``cv2.CAP_ANY`` to auto-detect. 
+
+See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html for more options."""
+
+VIDEO_CAPTURE_PROPERTIES: dict[int, int] = {}
+"""Extra properties to use for OpenCV video capture.
+
+Tweaking these properties could be found useful in case of any issues with capturing video.
+
+See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d and
+https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
+
+
+def normalizeToCamera(coord : Tuple[float, float], width : int, height : int) -> Tuple[float, float]:
+    """
+    Takes in a coordinate returned by mediapipes given as two values between 0 and 1 for x and y
+    and returns the corresponding coordinate on the camera. 
+    """
     return (coord.x*width, coord.y*height)
 
 
-def run2(tMatrix) -> None:  # This function is called by Program.cs
+def drawCirlces(tMatrix : np.ndarray) -> None:
     """
-    Captures video and runs the hand-detection model to handle the hotspots.
-
-    :param event_listener: Callbacks for communicating events back to the C# side.
+    draws circles on index fingers based on transformtion matrix
     """
-
-    global hotspots
 
     # initialise ML hand-tracking model
     logging.info("Initialising hand-tracking model...")
@@ -54,22 +95,20 @@ def run2(tMatrix) -> None:  # This function is called by Program.cs
 
         image=np.full((1080,1920), 0,np.uint8) #generate empty background
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
-            # update hotspots
-            index_coords = [normalizeToPixel(landmarks.landmark[8], camera_width, camera_height) for landmarks in
+            #get index finger coords in camera space
+            index_coords = [normalizeToCamera(landmarks.landmark[8], camera_width, camera_height) for landmarks in
                                 model_output.multi_hand_landmarks]
-            
+            #transform coords with matrix and draw circle
             for index_coord in index_coords:
                 index_coord = transform(index_coord, tMatrix)
-                index_coord = (int(index_coord[1]), int(index_coord[0]))
+                index_coord = (int(index_coord[0]), int(index_coord[1]))
                 cv2.circle(image, index_coord, 3, 255, 2)
 
         cv2.imshow("Calibration", image)
 
         # development key inputs
         key = chr(cv2.waitKey(1) & 0xFF).lower()
-        if key == "c":
-            media_finished()
-        elif key == "q":
+        if key == "q":
             break
 
     # clean up
@@ -80,5 +119,6 @@ def run2(tMatrix) -> None:  # This function is called by Program.cs
 
 
 if __name__ == "__main__":
-    tMatrix = example()
-    run2(tMatrix)
+    tMatrix = projectDetectGetTransform()
+    if not tMatrix is None:
+        drawCirlces(tMatrix)
