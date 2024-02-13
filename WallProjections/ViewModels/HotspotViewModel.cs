@@ -21,8 +21,8 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
                 new(id: 4, x: 40, y: 400, r: 45)
             });
         Coordinates = GetHotspots();
+        DisplayHotspots();
         // ActivateHotspot(2);
-        // DisplayHotspots();
     }
 
     /// <inheritdoc/>

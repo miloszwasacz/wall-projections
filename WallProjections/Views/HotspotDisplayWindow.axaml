@@ -56,7 +56,18 @@
         <ItemsControl.Styles>
             <Style Selector="ItemsControl">
                 <Setter Property="IsVisible" Value="{Binding ShowHotspots}"/>
+                <Setter Property="Opacity" Value="0.0" />
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <DoubleTransition Property="Opacity" Duration="0:0:3"/>
+                    </Transitions>
+                </Setter>
             </Style>
+            
+            <Style Selector="ItemsControl[IsVisible=True]">
+                <Setter Property="Opacity" Value="1.0" />
+            </Style>
+            
             <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:HotCoord">
                 <Setter Property="Canvas.Top" Value="{Binding Y}" />
                 <Setter Property="Canvas.Left" Value="{Binding X}" />
