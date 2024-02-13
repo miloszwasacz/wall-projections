@@ -13,9 +13,7 @@ namespace WallProjections.Models;
 [Serializable]
 public class Config : IConfig
 {
-    /// <summary>
-    /// List of all hotspots (their locations and content).
-    /// </summary>
+    /// <inheritdoc />
     [JsonInclude]
     public ImmutableList<Hotspot> Hotspots { get; }
 

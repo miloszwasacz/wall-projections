@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
@@ -33,15 +32,12 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     private List<HotCoord> GetHotspots()
     {
         var coord = new List<HotCoord>();
-        for (var i = 0; i < _config?.HotspotCount; i++)
+        foreach (var hotspot in _config!.Hotspots)
         {
-            var hotspot = _config?.GetHotspot(i);
-            if (hotspot is null) throw new ArgumentException();
             var pos = hotspot.Position;
-            var hotCord = new HotCoord(i, pos.X, pos.Y, pos.R, pos.R * 2, false);
+            var hotCord = new HotCoord(hotspot.Id, pos.X, pos.Y, pos.R, pos.R * 2, false);
             coord.Add(hotCord);
         }
-
         return coord;
     }
 
