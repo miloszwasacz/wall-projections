@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using Avalonia.Platform.Storage;
 using WallProjections.Models;
 
@@ -8,9 +9,8 @@ namespace WallProjections.ViewModels.Interfaces.Editor;
 /// <summary>
 /// A viewmodel for editing data about a <see cref="Hotspot" />.
 /// </summary>
-public interface IEditorHotspotViewModel
+public interface IEditorHotspotViewModel: INotifyPropertyChanged
 {
-    //TODO Add coordinates
     /// <inheritdoc cref="Hotspot.Id" />
     public int Id { get; }
 

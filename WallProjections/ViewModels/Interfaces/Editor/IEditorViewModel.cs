@@ -3,7 +3,6 @@ using System.ComponentModel;
 using Avalonia.Platform.Storage;
 using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
-using WallProjections.ViewModels.Editor;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
 
@@ -100,9 +99,9 @@ public interface IEditorViewModel<T>
 }
 
 /// <summary>
-/// An extension of <see cref="IEditorViewModel{T}" /> with <see cref="EditorViewModel.EditorHotspotViewModel" />
+/// An extension of <see cref="IEditorViewModel{T}" /> with <see cref="IEditorHotspotViewModel" />
 /// as the generic type (required for XAML compatibility).
 /// </summary>
-public interface IEditorViewModel : IEditorViewModel<EditorViewModel.EditorHotspotViewModel>
+public interface IEditorViewModel : IEditorViewModel<IEditorHotspotViewModel>
 {
 }

@@ -35,13 +35,13 @@ public partial class HotspotList : UserControl
     /// </summary>
     /// <param name="sender">
     /// The sender of the event.
-    /// Must have a <see cref="Control.Tag" /> property of type <see cref="EditorViewModel.EditorHotspotViewModel" />.
+    /// Must have a <see cref="Control.Tag" /> property of type <see cref="EditorHotspotViewModel" />.
     /// </param>
     /// <param name="e">The event arguments (unused).</param>
     private void Delete_OnClick(object? sender, RoutedEventArgs e)
     {
         var control = sender as Control;
-        if (control?.Tag is not EditorViewModel.EditorHotspotViewModel hotspot) return;
+        if (control?.Tag is not EditorHotspotViewModel hotspot) return;
 
         RaiseEvent(new DeleteArgs(this, hotspot));
     }
@@ -56,13 +56,13 @@ public partial class HotspotList : UserControl
         /// <summary>
         /// The hotspot to be deleted.
         /// </summary>
-        public EditorViewModel.EditorHotspotViewModel Hotspot { get; }
+        public EditorHotspotViewModel Hotspot { get; }
 
         /// <inheritdoc cref="DeleteArgs" />
         /// <seealso cref="HotspotList.Delete_OnClick" />
         public DeleteArgs(
             object? source,
-            EditorViewModel.EditorHotspotViewModel hotspot
+            EditorHotspotViewModel hotspot
         ) : base(DeleteHotspotEvent, source)
         {
             Hotspot = hotspot;

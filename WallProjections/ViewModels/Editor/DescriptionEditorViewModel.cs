@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using ReactiveUI;
+using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels.Editor;
@@ -8,11 +9,7 @@ namespace WallProjections.ViewModels.Editor;
 /// <inheritdoc cref="IDescriptionEditorViewModel" />
 public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewModel
 {
-    /// <summary>
-    /// An event that is raised when the content of the <see cref="Hotspot" />
-    /// (i.e. <see cref="IEditorHotspotViewModel.Title" /> or <see cref="IEditorHotspotViewModel.Description"/>)
-    /// has changed.
-    /// </summary>
+    /// <inheritdoc />
     public event EventHandler<EventArgs>? ContentChanged;
 
     /// <summary>
@@ -30,9 +27,7 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
     /// </summary>
     private IEditorHotspotViewModel? _hotspot;
 
-    /// <summary>
-    /// The source <see cref="IEditorHotspotViewModel">hotspot</see> that is being edited.
-    /// </summary>
+    /// <inheritdoc />
     public IEditorHotspotViewModel? Hotspot
     {
         set
@@ -103,9 +98,8 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
     /// <summary>
     /// Creates a new <see cref="DescriptionEditorViewModel" />.
     /// </summary>
-    public DescriptionEditorViewModel()
+    public DescriptionEditorViewModel(IViewModelProvider vmProvider)
     {
-        //TODO Change to use ViewModelProvider
-        Importer = new ImportViewModel(this);
+        Importer = vmProvider.GetImportViewModel(this);
     }
 }

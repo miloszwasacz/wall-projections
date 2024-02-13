@@ -56,7 +56,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
                 {
                     new EditorWindow
                     {
-                        DataContext = new EditorViewModel(config, new FileHandler())
+                        DataContext = new EditorViewModel(config, new FileHandler(), ViewModelProvider.Instance)
                     }.Show();
                     return;
                 }

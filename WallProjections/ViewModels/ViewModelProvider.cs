@@ -4,8 +4,10 @@ using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels;
 
@@ -37,6 +39,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <remarks>Only instantiated if needed</remarks>
     private LibVLC LibVlc => _libVlc ??= new LibVLC();
 
+    #region Display
+
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> instance
     /// </summary>
@@ -56,6 +60,85 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <returns>A new <see cref="VideoViewModel" /> instance</returns>
     public IVideoViewModel GetVideoViewModel() => new VideoViewModel(LibVlc, new VLCMediaPlayer(LibVlc));
+
+    #endregion
+
+    #region Editor
+
+    /// <summary>
+    /// Creates a new <see cref="EditorViewModel" /> instance based on the given <see cref="IConfig" />
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
+    public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler) =>
+        new EditorViewModel(config, fileHandler, this);
+
+    /// <summary>
+    /// Creates a new empty <see cref="EditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
+    public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler) =>
+        new EditorViewModel(fileHandler, this);
+
+    /// <summary>
+    /// Creates a new <see cref="EditorHotspotViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="EditorHotspotViewModel" /> instance</returns>
+    public IEditorHotspotViewModel GetEditorHotspotViewModel(int id) =>
+        new EditorHotspotViewModel(id, this);
+
+    /// <summary>
+    /// Creates a new <see cref="EditorHotspotViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="EditorHotspotViewModel" /> instance</returns>
+    public IEditorHotspotViewModel GetEditorHotspotViewModel(Hotspot hotspot) =>
+        new EditorHotspotViewModel(hotspot, this);
+
+    /// <summary>
+    /// Creates a new <see cref="DescriptionEditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="DescriptionEditorViewModel" /> instance</returns>
+    public IDescriptionEditorViewModel GetDescriptionEditorViewModel() => new DescriptionEditorViewModel(this);
+
+    /// <summary>
+    /// Creates a new <see cref="MediaEditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="MediaEditorViewModel" /> instance</returns>
+    public IMediaEditorViewModel GetMediaEditorViewModel(MediaEditorType type) => new MediaEditorViewModel(type switch
+    {
+        MediaEditorType.Images => "Images",
+        MediaEditorType.Videos => "Videos",
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
+    });
+
+    /// <inheritdoc />
+    /// <seealso cref="ImageThumbnailViewModel" />
+    /// <seealso cref="VideoThumbnailViewModel" />
+    public IThumbnailViewModel GetThumbnailViewModel(
+        MediaEditorType type,
+        string filePath,
+        int gridRow,
+        int gridColumn
+    ) => type switch
+    {
+        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, gridRow, gridColumn),
+        MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, gridRow, gridColumn),
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+    };
+
+    /// <summary>
+    /// Creates a new <see cref="ImportViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="ImportViewModel" /> instance</returns>
+    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new ImportViewModel(descVm);
+
+    #endregion
 
     /// <summary>
     /// Disposes of the <see cref="LibVlc" /> instance on resets the backing field to <i>null</i>,

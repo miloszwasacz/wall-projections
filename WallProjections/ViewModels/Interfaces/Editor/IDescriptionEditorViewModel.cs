@@ -1,10 +1,24 @@
-﻿namespace WallProjections.ViewModels.Interfaces.Editor;
+﻿using System;
+
+namespace WallProjections.ViewModels.Interfaces.Editor;
 
 /// <summary>
 /// A viewmodel for editing the title and description of a hotspot.
 /// </summary>
 public interface IDescriptionEditorViewModel
 {
+    /// <summary>
+    /// An event that is raised when the content of the <see cref="Hotspot" />
+    /// (i.e. <see cref="IEditorHotspotViewModel.Title" /> or <see cref="IEditorHotspotViewModel.Description"/>)
+    /// has changed.
+    /// </summary>
+    public event EventHandler<EventArgs>? ContentChanged;
+
+    /// <summary>
+    /// The source <see cref="IEditorHotspotViewModel">hotspot</see> that is being edited.
+    /// </summary>
+    public IEditorHotspotViewModel? Hotspot { set; }
+
     /// <summary>
     /// The title of the hotspot that is being edited.
     /// </summary>
