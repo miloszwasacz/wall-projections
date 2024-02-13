@@ -29,6 +29,20 @@ public class FileHandler : IFileHandler
         return config;
     }
 
+    /// <summary>
+    /// Exports the config files to a zip file with specified path.
+    /// </summary>
+    /// <param name="zipPath">Path to export zip to.</param>
+    /// <returns>true if export is successful.</returns>
+    public bool ExportConfig(string zipPath)
+    {
+        if (!Directory.Exists(ConfigFolderPath))
+            throw new DirectoryNotFoundException("No imported/created config to export.");
+        ZipFile.CreateFromDirectory(ConfigFolderPath, zipPath);
+        return true;
+    }
+
+
     /// <inheritdoc />
     /// <exception>
     /// Can throw the same exceptions as <see cref="Directory.CreateDirectory" />,

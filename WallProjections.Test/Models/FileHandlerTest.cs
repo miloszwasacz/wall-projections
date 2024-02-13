@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Text.Json;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -125,6 +126,70 @@ public class FileHandlerTest
     {
         var fileHandler = new FileHandler();
         Assert.Throws<JsonException>(() => fileHandler.ImportConfig(TestZipInvalidConfig));
+    }
+
+    /// <summary>
+    /// Test that a normal config exports correctly.
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void ExportConfigTest()
+    {
+        var tempFilePath = Path.Combine(Path.GetTempPath(), "export_test.zip");
+        File.Delete(tempFilePath);
+        Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
+
+        var fileHandler = new FileHandler();
+
+        fileHandler.ImportConfig(TestZip);
+
+        Assert.That(fileHandler.IsConfigImported(), Is.True, "Config not successfully imported for test");
+
+        fileHandler.ExportConfig(tempFilePath);
+
+        Assert.That(File.Exists(tempFilePath), Is.True, "Exported zip does not exist");
+
+        var zipFile = ZipFile.OpenRead(tempFilePath);
+
+        var configFile = zipFile.GetEntry("config.json");
+        Assert.That(configFile, Is.Not.Null, "config.json not found in zip file.");
+
+        var textFile = zipFile.GetEntry(TestTxtFile);
+        Assert.That(textFile, Is.Not.Null, "text_0.txt not found in zip file.");
+
+        var textReader = new StreamReader(textFile.Open());
+        var textFileContent = textReader.ReadToEnd();
+        Assert.That(textFileContent, Is.EqualTo(TestTxtFileContents));
+
+        var imageFile = zipFile.GetEntry("image_1_0.png");
+        Assert.That(imageFile, Is.Not.Null, "image_1_0.png not found in zip file.");
+
+        File.Delete(tempFilePath);
+        Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
+    }
+
+    /// <summary>
+    /// Test that error is thrown if no config is imported when export is attempted.
+    /// </summary>
+    public void ExportConfigNoConfigTest()
+    {
+        var tempFilePath = Path.Combine(Path.GetTempPath(), "export_test.zip");
+        File.Delete(tempFilePath);
+        Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
+
+        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.ConfigFolderPath);
+        }
+
+        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True, "Could not delete config folder for test.");
+
+        var fileHandler = new FileHandler();
+
+        Assert.That(() => fileHandler.ExportConfig(tempFilePath), Throws.InstanceOf<DirectoryNotFoundException>());
+
+        File.Delete(tempFilePath);
+        Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
     }
 
     /// <summary>
