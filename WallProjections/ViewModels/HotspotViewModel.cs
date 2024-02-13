@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -11,6 +12,7 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     
     public HotspotViewModel()
     {
+        //mock data for _config, change to real once editor complete
         _config = new Config(
             hotspots: new List<Hotspot>
             {
@@ -21,7 +23,7 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
                 new(id: 4, x: 40, y: 400, r: 45)
             });
         Coordinates = GetHotspots();
-        DisplayHotspots();
+        // DisplayHotspots();
         // ActivateHotspot(2);
     }
 
@@ -31,21 +33,22 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     /// <inheritdoc/>
     public bool ShowHotspots { get; private set; }
     
+    /// <summary>
+    /// Goes through all the hotspots in the config file and turns them into <see cref="HotCoord"/>
+    /// instances 
+    /// </summary>
+    /// <returns>List of <see cref="HotCoord"/> relating to all hotspots in config file</returns>
     private List<HotCoord> GetHotspots()
     {
-        var coord = new List<HotCoord>();
-        foreach (var hotspot in _config!.Hotspots)
-        {
-            var pos = hotspot.Position;
-            var hotCord = new HotCoord(hotspot.Id, pos.X, pos.Y, pos.R, pos.R * 2, false);
-            coord.Add(hotCord);
-        }
-        return coord;
+        return (from hotspot in _config!.Hotspots 
+            let pos = hotspot.Position 
+            select new HotCoord(hotspot.Id, pos.X, pos.Y, pos.R, pos.R * 2, false)).ToList();
     }
 
     /// <inheritdoc/>
     public void ActivateHotspot(int id)
     {
+        //HotCoord is init only so must create a new list then set Coordinates to this list
         var updatedCoords = new List<HotCoord>();
         foreach (var coord in Coordinates)
         {

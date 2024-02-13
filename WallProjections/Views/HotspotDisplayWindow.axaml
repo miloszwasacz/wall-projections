@@ -8,9 +8,8 @@
         x:Class="WallProjections.Views.HotspotDisplayWindow"
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
-    
-    <!-- TODO make visible upon DisplayHotspots event-->
 
+    <!-- Styles relating to hotspot (ellipse) activation -->
     <Window.Styles>
         <Style Selector="Ellipse.triggered" x:DataType="models:HotCoord">
             <Style.Animations>
@@ -28,7 +27,7 @@
         </Style>
     </Window.Styles>
 
-
+    <!-- Mapping coordinates onto the display  -->
     <ItemsControl ItemsSource="{Binding Coordinates}">
 
         <ItemsControl.ItemsPanel>
@@ -53,6 +52,7 @@
             </DataTemplate>
         </ItemsControl.ItemTemplate>
         
+        <!-- Styles for ItemsControl (all circles rather than individual) -->
         <ItemsControl.Styles>
             <Style Selector="ItemsControl">
                 <Setter Property="IsVisible" Value="{Binding ShowHotspots}"/>
@@ -68,6 +68,7 @@
                 <Setter Property="Opacity" Value="1.0" />
             </Style>
             
+            <!-- Positioning of the hotspots -->
             <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:HotCoord">
                 <Setter Property="Canvas.Top" Value="{Binding Y}" />
                 <Setter Property="Canvas.Left" Value="{Binding X}" />
