@@ -8,7 +8,7 @@ namespace WallProjections.Test.ViewModels;
 public class HotspotViewModelTest
 {
     [AvaloniaTest]
-    public void ActivateHotspotsTest()
+    public void ActivateDeactivateHotspotsTest()
     {
         var hotspotViewModel = new HotspotViewModel();
         hotspotViewModel.Coordinates.Add(new HotCoord(0, 10, 10, 5, 10, false));
@@ -20,7 +20,6 @@ public class HotspotViewModelTest
             Assert.That(hotspotViewModel.Coordinates[0].Vis, Is.True);
             Assert.That(hotspotViewModel.Coordinates[1].Vis, Is.False);
             Assert.That(hotspotViewModel.Coordinates[2].Vis, Is.False);
-
         });
         hotspotViewModel.ActivateHotspot(1);
         Assert.Multiple(() =>
@@ -28,7 +27,13 @@ public class HotspotViewModelTest
             Assert.That(hotspotViewModel.Coordinates[0].Vis, Is.False);
             Assert.That(hotspotViewModel.Coordinates[1].Vis, Is.True);
             Assert.That(hotspotViewModel.Coordinates[2].Vis, Is.False);
-
+        });
+        hotspotViewModel.DeactivateHotspots();
+        Assert.Multiple(() =>
+        {
+            Assert.That(hotspotViewModel.Coordinates[0].Vis, Is.False);
+            Assert.That(hotspotViewModel.Coordinates[1].Vis, Is.False);
+            Assert.That(hotspotViewModel.Coordinates[2].Vis, Is.False);
         });
     }
 
