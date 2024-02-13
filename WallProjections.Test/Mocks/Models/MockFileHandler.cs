@@ -43,37 +43,28 @@ public sealed class MockFileHandler : IFileHandler
     public IReadOnlyList<string> ExportedZips => _exportedZips;
 
     /// <summary>
-    /// The theoretical path to the folder containing the media files
-    /// </summary>
-    public string MediaPath { get; set; }
-
-    /// <summary>
     /// The number of times <see cref="ImportConfig" /> has been called
     /// </summary>
     public int LoadCount => _loadedZips.Count;
 
     /// <summary>
-    /// Creates a new mock cache that has the given <paramref name="mediaPath" /> and <paramref name="config" />
-    /// and no media files
+    /// Creates a new mock cache that uses the given <paramref name="config" /> and no media files
     /// </summary>
     /// <param name="config">The <see cref="IConfig"/> to be returned by <see cref="ImportConfig" /></param>
-    /// <param name="mediaPath">The value to set <see cref="MediaPath" /> to</param>
-    public MockFileHandler(IConfig config, string mediaPath)
+    public MockFileHandler(IConfig config)
     {
         _media = new List<Hotspot.Media>();
-        MediaPath = mediaPath;
         Config = config;
     }
 
     /// <summary>
     /// Creates a new <see cref="MockFileHandler" /> with the given list of media files,
-    /// and empty <see cref="IConfig" /> and <see cref="MediaPath" />
+    /// and empty <see cref="IConfig" />
     /// </summary>
     /// <param name="files">The list of media files provided to <see cref="CreateContentProvider" /></param>
     public MockFileHandler(List<Hotspot.Media> files)
     {
         _media = files;
-        MediaPath = "";
         Config = new Config(Enumerable.Empty<Hotspot>());
     }
 

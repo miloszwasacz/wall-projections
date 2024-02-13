@@ -128,7 +128,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     {
         MediaEditorType.Images => new ImageThumbnailViewModel(filePath, gridRow, gridColumn),
         MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, gridRow, gridColumn),
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
     };
 
     /// <summary>
