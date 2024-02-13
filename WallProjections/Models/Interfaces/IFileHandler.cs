@@ -23,6 +23,14 @@ public interface IFileHandler
     public IConfig? ImportConfig(string zipPath);
 
     /// <summary>
+    /// Export config file and media file to a zip file.
+    /// </summary>
+    /// <param name="zipPath">Path to the zip file</param>
+    /// <returns>True if file is exported</returns>
+    /// <exception cref="DirectoryNotFoundException">If there is no imported config/media.</exception>
+    public bool ExportConfig(string zipPath);
+
+    /// <summary>
     /// Loads the config.json file from the config folder.
     /// </summary>
     /// <returns>Loaded <see cref="IConfig"/></returns>
