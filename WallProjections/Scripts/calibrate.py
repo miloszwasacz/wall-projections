@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 from cv2 import aruco
 from typing import Dict, Tuple
+from main import VideoCaptureThread
 
 
 
@@ -16,16 +17,20 @@ def takePhoto() -> np.ndarray:
     """
     Returns a photo from a detectable camera
     """
-    cap = cv2.VideoCapture(cv2.CAP_ANY)
-    cv2.waitKey(2000)
-    ok, image = cap.read()
+    # cap = cv2.VideoCapture(cv2.CAP_ANY)
+    # cv2.waitKey(2000)
+    # ok, image = cap.read()
+    #
+    # cap.release()
 
-    cap.release()
-    
-    if not ok:
-        cv2.destroyAllWindows()
-        print("No camera detected")
-        exit()
+    videoCaptureThread = VideoCaptureThread()
+    videoCaptureThread.start()
+    image = None
+    while image is None:
+        image = videoCaptureThread.current_frame
+        cv2.waitKey(500)
+    videoCaptureThread.stop()
+    videoCaptureThread.join()
     
     return image
 

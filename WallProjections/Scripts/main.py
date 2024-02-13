@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from typing import NamedTuple
 import numpy as np
 from EventListener import *
-from Hotspot import *
-from calibrate import *
+import time
+import math
 
 import cv2
 import mediapipe as mp
