@@ -11,6 +11,11 @@ public sealed class MockFileHandler : IFileHandler
     private readonly List<string> _loadedZips = new();
 
     /// <summary>
+    /// The backing field for <see cref="ExportedZips"/>
+    /// </summary>
+    private readonly List<string> _exportedZips = new();
+
+    /// <summary>
     /// The media list passed to the <see cref="MockContentProvider" />'s constructor
     /// when <see cref="CreateContentProvider" /> is called
     /// </summary>
@@ -31,6 +36,11 @@ public sealed class MockFileHandler : IFileHandler
     /// A list of all the zip files that have been loaded using <see cref="ImportConfig" />
     /// </summary>
     public IReadOnlyList<string> LoadedZips => _loadedZips;
+
+    /// <summary>
+    /// A list of all the zip files that have been loaded using <see cref="ExportConfig" />
+    /// </summary>
+    public IReadOnlyList<string> ExportedZips => _exportedZips;
 
     /// <summary>
     /// The theoretical path to the folder containing the media files
@@ -85,6 +95,17 @@ public sealed class MockFileHandler : IFileHandler
     {
         _loadedZips.Add(zipPath);
         return Config;
+    }
+
+    /// <summary>
+    /// Adds the <paramref name="zipPath"/> to the list of loaded zips and returns true"/>
+    /// </summary>
+    /// <param name="zipPath">The theoretical path to save the config and media.</param>
+    /// <returns>true</returns>
+    public bool ExportConfig(string zipPath)
+    {
+        _exportedZips.Add(zipPath);
+        return true;
     }
 
     /// <summary>
