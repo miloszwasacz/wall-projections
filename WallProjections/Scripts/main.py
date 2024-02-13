@@ -3,8 +3,11 @@ import mediapipe as mp
 import logging
 from abc import ABC, abstractmethod
 from typing import NamedTuple
-import math
-import time
+import numpy as np
+from EventListener import *
+from Hotspot import *
+from calibrate import *
+
 
 
 logging.basicConfig(level=logging.INFO)
@@ -236,6 +239,7 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
     logging.info("Initialisation done.")
 
     # basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
+    cv2.namedWindow("Projected Hotspots", cv2.WINDOW_FULLSCREEN)
 
     while video_capture.isOpened():
         success, video_capture_img = video_capture.read()
@@ -248,6 +252,7 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
         # run model
         video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
         model_output = hands_model.process(video_capture_img_rgb)
+
 
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
@@ -266,16 +271,17 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 
                     event_listener.OnPressDetected(hotspot.id)
 
-            # draw hand landmarks
-            for landmarks in model_output.multi_hand_landmarks:
-                mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
-                                                          connections=mp.solutions.hands.HAND_CONNECTIONS)
+            # # draw hand landmarks
+            # for landmarks in model_output.multi_hand_landmarks:
+            #     mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
+            #                                               connections=mp.solutions.hands.HAND_CONNECTIONS)
 
+        image=np.full((1080,1920), 255,np.uint8) #generate empty background
         # draw hotspot
         for hotspot in hotspots:
-            hotspot.draw(video_capture_img)
+            hotspot.draw(image)
 
-        cv2.imshow("Projected Hotspots", video_capture_img)
+        cv2.imshow("Projected Hotspots", image)
 
         # development key inputs
         key = chr(cv2.waitKey(1) & 0xFF).lower()
