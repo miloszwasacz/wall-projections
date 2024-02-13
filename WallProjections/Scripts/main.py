@@ -1,4 +1,5 @@
 import logging
+import threading
 from abc import ABC, abstractmethod
 from typing import NamedTuple
 import numpy as np
@@ -327,7 +328,7 @@ class VideoCaptureThread(threading.Thread):
             video_capture_img = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
             new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
             video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)  # normalise size
-            self.current_frame = Image.fromarray(video_capture_img)
+            self.current_frame = video_capture_img
 
             if self.stopping:
                 logging.info("Stopping video capture.")
