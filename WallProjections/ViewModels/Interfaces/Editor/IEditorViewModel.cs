@@ -13,6 +13,12 @@ namespace WallProjections.ViewModels.Interfaces.Editor;
 public interface IEditorViewModel<T>
     where T : IEditorHotspotViewModel, INotifyPropertyChanged
 {
+    //TODO Change to use a custom extension
+    /// <summary>
+    /// The name of the file to export the config to.
+    /// </summary>
+    public const string ExportFileName = "WallProjectionsConfig.zip";
+
     /// <summary>
     /// A collection of all hotspots in the editor.
     /// </summary>

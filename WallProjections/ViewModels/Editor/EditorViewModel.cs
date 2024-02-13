@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
@@ -205,8 +206,17 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public bool ExportConfig(string exportPath)
     {
-        //TODO Implement export functionality (FileHandler does not have export functionality yet)
-        return false;
+        try
+        {
+            var path = Path.Combine(exportPath, IEditorViewModel.ExportFileName);
+            return _fileHandler.ExportConfig(path);
+        }
+        catch (Exception e)
+        {
+            //TODO Log to file
+            Console.Error.WriteLine(e);
+            return false;
+        }
     }
 
     /// <summary>

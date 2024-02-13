@@ -34,6 +34,7 @@ public class FileHandler : IFileHandler
     {
         if (!Directory.Exists(ConfigFolderPath))
             throw new DirectoryNotFoundException("No imported/created config to export.");
+
         ZipFile.CreateFromDirectory(ConfigFolderPath, zipPath);
         return true;
     }
@@ -174,6 +175,7 @@ public class FileHandler : IFileHandler
                throw new JsonException("Config format invalid");
     }
 
+    //TODO Remove this
     /// <summary>
     /// Checks if config has already been imported into the app folder.
     /// </summary>
