@@ -9,6 +9,7 @@
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
 
+    <!-- TODO update the activateHotspot animation -->
     <!-- Styles relating to hotspot (ellipse) activation -->
     <Window.Styles>
         <Style Selector="Ellipse.triggered" x:DataType="models:HotCoord">

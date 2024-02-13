@@ -22,8 +22,16 @@ public interface IHotspotViewModel
     /// to true in <see cref="Coordinates"/> where Id matches
     /// the id passed into the function
     /// </summary>
+    /// <param name="id"></param>
     public void ActivateHotspot(int id);
 
+    /// <summary>
+    /// Changes the Vis parameter for the
+    /// <see cref="HotCoord"/> to false for all <see cref="Coordinates"/>
+    /// (to be used when user doesn't hover over hotspot for long enough)
+    /// </summary>
+    public void DeactivateHotspots();
+    
     /// <summary>
     /// Changes <see cref="ShowHotspots" /> to true
     /// </summary>
