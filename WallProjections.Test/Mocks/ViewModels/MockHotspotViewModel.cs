@@ -10,47 +10,26 @@ namespace WallProjections.Test.Mocks.ViewModels;
 
 public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
 {
-    /// <summary>
-    /// A list of coordinates and diameters of hotspots given through the config
-    /// </summary>
+    /// <inheritdoc/>
     public List<HotCoord> Coordinates { get; private set; } = new();
 
-    /// <summary>
-    /// Decides whether or not to display the hotspots
-    /// </summary>
+    /// <inheritdoc/>
     public bool ShowHotspots { get; private set; }
 
     /// <summary>
-    /// Changes the <see paramcref="Vis" /> parameter for all
-    /// <see cref="HotCoord"/> to false in <see cref="Coordinates"/>
-    /// and sets <see paramcref="Vis" /> parameter for <see cref="HotCoord"/>
-    /// to true in <see cref="Coordinates"/> where <see paramcref="Id" /> matches
-    /// the id passed into the function
+    /// mock version of the ActivateHotspot function in <see cref="HotspotViewModel"/> which just
+    /// sets the first hotspot in the list to true
     /// </summary>
     public void ActivateHotspot(int id)
     {
-        var updatedCoords = new List<HotCoord>();
-        foreach (var coord in Coordinates)
-        {
-            if (coord.Vis) {
-                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, false);
-                updatedCoords.Add(newCoord);
-            } 
-            else if (coord.Id == id) 
-            {
-                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, true);
-                updatedCoords.Add(newCoord);
-            } 
-            else {
-                updatedCoords.Add(coord);
-            }
-        }
-        Coordinates = updatedCoords;
+        var toChange = Coordinates.First();
+        var active = new HotCoord(toChange.Id, toChange.X, toChange.Y, toChange.R, toChange.D, true);
+        var newCoords = new List<HotCoord> { active };
+        newCoords.AddRange(Coordinates.Where(coord => coord.Id != toChange.Id));
+        Coordinates = newCoords;
     }
 
-    /// <summary>
-    /// Changes <see cref="ShowHotspots" /> to true
-    /// </summary>
+    /// <inheritdoc/>
     public void DisplayHotspots()
     {
         ShowHotspots = true;

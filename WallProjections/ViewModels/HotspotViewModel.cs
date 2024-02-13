@@ -25,10 +25,12 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
         // DisplayHotspots();
     }
 
+    /// <inheritdoc/>
     public List<HotCoord> Coordinates { get; private set; }
     
+    /// <inheritdoc/>
     public bool ShowHotspots { get; private set; }
-
+    
     private List<HotCoord> GetHotspots()
     {
         var coord = new List<HotCoord>();
@@ -41,6 +43,7 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
         return coord;
     }
 
+    /// <inheritdoc/>
     public void ActivateHotspot(int id)
     {
         var updatedCoords = new List<HotCoord>();
@@ -62,6 +65,7 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
         Coordinates = updatedCoords;
     }
 
+    /// <inheritdoc/>
     public void DisplayHotspots()
     {
         ShowHotspots = true;
