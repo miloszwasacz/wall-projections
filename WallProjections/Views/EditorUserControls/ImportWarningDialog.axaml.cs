@@ -42,6 +42,7 @@ public partial class ImportWarningDialog : Window
     {
         if (DataContext is not IImportViewModel vm) return;
 
+        //TODO Use the result of ImportFromFile to show an error message
         vm.ImportFromFile(_filePath);
         Close();
     }

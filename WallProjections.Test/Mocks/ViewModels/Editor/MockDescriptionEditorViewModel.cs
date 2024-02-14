@@ -12,15 +12,15 @@ public class MockDescriptionEditorViewModel : IDescriptionEditorViewModel
     public IImportViewModel Importer { get; }
 
     public MockDescriptionEditorViewModel(
-        string title,
-        string description,
-        bool isEnabled,
-        IImportViewModel importer
+        string title = "",
+        string description = "",
+        bool isEnabled = false,
+        Func<IDescriptionEditorViewModel, IImportViewModel>? importerConstructor = null
     )
     {
         Title = title;
         Description = description;
         IsEnabled = isEnabled;
-        Importer = importer;
+        Importer = importerConstructor?.Invoke(this)!;
     }
 }

@@ -16,7 +16,7 @@ public class MockImportViewModel : IImportViewModel
         throw new NotImplementedException();
     }
 
-    public void ImportFromFile(string path)
+    public bool ImportFromFile(string path)
     {
         throw new NotImplementedException();
     }

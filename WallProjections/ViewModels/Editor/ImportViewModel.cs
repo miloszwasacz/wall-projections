@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels.Editor;
@@ -34,14 +35,25 @@ public class ImportViewModel : ViewModelBase, IImportViewModel
     }
 
     /// <inheritdoc />
-    public void ImportFromFile(string path)
+    public bool ImportFromFile(string path)
     {
-        var lines = File.ReadAllLines(path);
-        if (lines.Length == 0) return;
+        try
+        {
+            var lines = File.ReadAllLines(path);
+            if (lines.Length == 0) return true;
 
-        DescriptionEditor.Title = lines[0].Trim();
-        DescriptionEditor.Description = lines.Length > 1
-            ? string.Join("\n", lines[1..]).Trim()
-            : "";
+            DescriptionEditor.Title = lines[0].Trim();
+            DescriptionEditor.Description = lines.Length > 1
+                ? string.Join("\n", lines[1..]).Trim()
+                : "";
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            //TODO Log to file
+            Console.Error.WriteLine(e);
+            return false;
+        }
     }
 }

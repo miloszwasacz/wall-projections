@@ -219,7 +219,7 @@ public class ViewModelProviderTest
     [Test]
     public void GetImportViewModelTest()
     {
-        var descriptionEditorViewModel = new MockDescriptionEditorViewModel("", "", true, null!);
+        var descriptionEditorViewModel = new MockDescriptionEditorViewModel();
         var importViewModel = ViewModelProvider.Instance.GetImportViewModel(descriptionEditorViewModel);
 
         Assert.That(importViewModel, Is.InstanceOf<ImportViewModel>());

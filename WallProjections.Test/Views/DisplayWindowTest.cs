@@ -55,6 +55,7 @@ public class DisplayWindowTest
     }
 
     [AvaloniaTest]
+    [NonParallelizable]
     public void FullscreenToggleTest()
     {
         var vm = new MockDisplayViewModel();

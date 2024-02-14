@@ -67,6 +67,7 @@ public partial class EditorWindow : Window
         var safety = importer.IsImportSafe();
         if (safety is ImportWarningLevel.None)
         {
+            //TODO Use the result of ImportFromFile to show an error message
             importer.ImportFromFile(file);
             return;
         }

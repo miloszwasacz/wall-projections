@@ -23,7 +23,8 @@ public interface IImportViewModel
     /// then a blank line, then the description.
     /// </summary>
     /// <param name="path">A path to the file containing the description.</param>
-    public void ImportFromFile(string path);
+    /// <returns>Whether the import was successful.</returns>
+    public bool ImportFromFile(string path);
 }
 
 /// <summary>
