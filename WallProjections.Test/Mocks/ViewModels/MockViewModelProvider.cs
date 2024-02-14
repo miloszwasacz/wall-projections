@@ -1,6 +1,7 @@
 ﻿using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.ViewModels.Display;
+using WallProjections.Test.Mocks.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -62,8 +63,10 @@ public class MockViewModelProvider : IViewModelProvider
         throw new NotImplementedException();
     }
 
-    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockImportViewModel"/> linked to the given <see cref="IDescriptionEditorViewModel" />
+    /// </summary>
+    /// <param name="descVm">The parent <see cref="IDescriptionEditorViewModel" /></param>
+    /// <returns>A new <see cref="MockImportViewModel" /></returns>
+    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new MockImportViewModel(descVm);
 }

@@ -12,6 +12,7 @@ public interface IDescriptionEditorViewModel
     /// (i.e. <see cref="IEditorHotspotViewModel.Title" /> or <see cref="IEditorHotspotViewModel.Description"/>)
     /// has changed.
     /// </summary>
+    /// <remarks>Note that this event is not raised when the <see cref="Hotspot" /> that is edited changes.</remarks>
     public event EventHandler<EventArgs>? ContentChanged;
 
     /// <summary>
