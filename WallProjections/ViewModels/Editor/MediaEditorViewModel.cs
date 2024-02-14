@@ -31,6 +31,8 @@ public class MediaEditorViewModel : ViewModelBase, IMediaEditorViewModel
             Media.CollectionChanged -= UpdateCanRemoveMedia;
             Media.CollectionChanged -= ClearSelectedMedia;
             this.RaiseAndSetIfChanged(ref _media, value);
+            SelectedMedia.Source = Media;
+            this.RaisePropertyChanged(nameof(SelectedMedia));
             Media.CollectionChanged += UpdateCanRemoveMedia;
             Media.CollectionChanged += ClearSelectedMedia;
         }
@@ -40,7 +42,11 @@ public class MediaEditorViewModel : ViewModelBase, IMediaEditorViewModel
     public SelectionModel<IThumbnailViewModel> SelectedMedia
     {
         get => _selectedMedia;
-        set => this.RaiseAndSetIfChanged(ref _selectedMedia, value);
+        set
+        {
+            value.Source = Media;
+            this.RaiseAndSetIfChanged(ref _selectedMedia, value);
+        }
     }
 
     /// <summary>
@@ -53,7 +59,8 @@ public class MediaEditorViewModel : ViewModelBase, IMediaEditorViewModel
         Title = title;
         _selectedMedia = new SelectionModel<IThumbnailViewModel>
         {
-            SingleSelect = false
+            SingleSelect = false,
+            Source = Media
         };
 
         Media.CollectionChanged += UpdateCanRemoveMedia;
