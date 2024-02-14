@@ -1,7 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using Avalonia.Media.Imaging;
+using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
 
@@ -11,6 +11,11 @@ namespace WallProjections.ViewModels.Interfaces.Editor;
 /// </summary>
 public interface IThumbnailViewModel
 {
+    /// <summary>
+    /// A proxy for starting up <see cref="Process" />es.
+    /// </summary>
+    protected IProcessProxy ProcessProxy { get; }
+
     /// <summary>
     /// The row of the thumbnail in the grid.
     /// </summary>
@@ -43,20 +48,11 @@ public interface IThumbnailViewModel
     {
         var path = Directory.GetParent(FilePath)?.FullName ?? FilePath;
 
-        //TODO Verify this works on all (necessary) platforms
-        // Tested on: Windows 11
-
-        string command;
-        if (OperatingSystem.IsWindows())
-            command = "explorer.exe";
-        else if (OperatingSystem.IsMacOS())
-            command = "open";
-        else if (OperatingSystem.IsLinux())
-            command = "pcmanfm"; // This only handles default Raspbian file manager
-        else
+        var command = ProcessProxy.GetFileExplorerCommand();
+        if (command is null)
             return false;
 
-        Process.Start(command, path);
+        ProcessProxy.Start(command, path);
         return true;
     }
 }

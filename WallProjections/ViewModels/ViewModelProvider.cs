@@ -126,8 +126,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         int gridColumn
     ) => type switch
     {
-        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, gridRow, gridColumn),
-        MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, gridRow, gridColumn),
+        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, gridRow, gridColumn, new ProcessProxy()),
+        MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, gridRow, gridColumn, new ProcessProxy()),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
     };
 

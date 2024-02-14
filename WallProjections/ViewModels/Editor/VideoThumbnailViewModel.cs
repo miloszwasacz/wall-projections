@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using ReactiveUI;
+using WallProjections.Helper.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels.Editor;
@@ -27,6 +29,9 @@ public class VideoThumbnailViewModel : ViewModelBase, IThumbnailViewModel
     /// The backing field for <see cref="Column" />.
     /// </summary>
     private int _column;
+
+    /// <inheritdoc />
+    public IProcessProxy ProcessProxy { get; }
 
     /// <inheritdoc />
     public int Row
@@ -57,8 +62,10 @@ public class VideoThumbnailViewModel : ViewModelBase, IThumbnailViewModel
     /// <param name="path">Path to the associated file.</param>
     /// <param name="row">The row in the grid.</param>
     /// <param name="column">The column in the grid.</param>
-    public VideoThumbnailViewModel(string path, int row, int column)
+    /// <param name="proxy">A proxy for starting up <see cref="Process" />es.</param>
+    public VideoThumbnailViewModel(string path, int row, int column, IProcessProxy proxy)
     {
+        ProcessProxy = proxy;
         Row = row;
         Column = column;
 
