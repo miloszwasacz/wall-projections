@@ -254,12 +254,33 @@ public partial class EditorWindow : Window
             return;
         }
 
-        var dialog = new ConfirmationDialog(
-            "Discard Changes",
-            WarningIconPath,
-            "Are you sure you want to discard your changes? All unsaved data will be lost.",
-            "Discard"
-        );
+        var dialog = CreateDiscardChangesDialog();
+        dialog.Confirm += (_, _) => Close();
+
+        _isDialogShown = true;
+        await dialog.ShowDialog(this);
+        _isDialogShown = false;
+    }
+
+    // ReSharper disable once SuggestBaseTypeForParameter
+    /// <summary>
+    /// Shows a <see cref="ConfirmationDialog">dialog</see> to confirm discarding changes,
+    /// when the window is being closed. If Editor's state is <see cref="IEditorViewModel.IsSaved">saved</see>
+    /// or the window is being closed programmatically, then the window is closed immediately.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private async void Editor_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        // If the configuration is saved or the window is being closed programmatically, then it is safe to close.
+        if (e.IsProgrammatic || vm.IsSaved) return;
+
+        // Prevent the window from closing
+        e.Cancel = true;
+
+        var dialog = CreateDiscardChangesDialog();
         dialog.Confirm += (_, _) => Close();
 
         _isDialogShown = true;
@@ -268,6 +289,16 @@ public partial class EditorWindow : Window
     }
 
     //ReSharper restore UnusedParameter.Local
+
+    /// <summary>
+    /// Creates a new <see cref="ConfirmationDialog" /> to discard changes.
+    /// </summary>
+    private static ConfirmationDialog CreateDiscardChangesDialog() => new(
+        "Discard Changes",
+        WarningIconPath,
+        "Are you sure you want to discard your changes? All unsaved data will be lost.",
+        "Discard"
+    );
 
     /// <summary>
     /// Opens a file picker to import media files. Then, performs the <paramref name="action" /> on the selected files.
