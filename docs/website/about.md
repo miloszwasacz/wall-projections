@@ -11,3 +11,30 @@ The functionality includes a camera and 2 projectors. The first projector overla
 The system aims to be intuitive and require no prior knowledge to use, with at most only simple instructions required to make full use of the system.
 
 The system features an editor to allow for full visual editing of hotspots, with no editing of config files or manual import of media required. The configuration can be backed up via a single, easy to manage file and later restored back to into the program. We aim for the software to be installed and ran on a small form factor computer, specifically the RaspberryPi Model 4.
+
+## Technologies
+
+### Hardware/OS
+- [Raspberry Pi Model 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/)
+- [Raspberry Pi OS with desktop](https://www.raspberrypi.com/software/raspberry-pi-desktop/)
+
+### User Interface
+- [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [Avalonia UI](https://docs.avaloniaui.net/)
+- [LibVLCSharp](https://code.videolan.org/videolan/LibVLCSharp)
+- [NUnit](https://docs.nunit.org/)
+
+### Computer Vision
+- **TODO:** Get Python version
+- [Python.NET](https://github.com/pythonnet/pythonnet)
+- [MediaPipe](https://developers.google.com/mediapipe)
+
+## Members
+
+| Member | Account                                            |
+|--------|----------------------------------------------------|
+| Sergi  | [@Rolodophone](https://github.com/Rolodophone)     |
+| Daniel | [@danieldiamand](https://github.com/danieldiamand) |
+| Sonny  | [@ed22699](https://github.com/ed22699)             |
+| Miłosz | [@miloszwasacz](https://github.com/miloszwasacz)   |
+| Thomas | [@LW22736](https://github.com/LW22736)             |
