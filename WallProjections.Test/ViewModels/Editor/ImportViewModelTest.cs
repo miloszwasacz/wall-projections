@@ -21,7 +21,7 @@ public class ImportViewModelTest
 
             foreach (var file in files)
             {
-                var testName = Path.GetFileNameWithoutExtension(file).Replace("_", " ");
+                var testName = Path.GetFileNameWithoutExtension(file);
 
                 var lines = File.ReadAllLines(file);
                 var title = lines[0].Trim();
@@ -61,11 +61,11 @@ public class ImportViewModelTest
     }
 
     [Test]
-    [TestCase("", "", ImportWarningLevel.None, TestName = "Empty Title and Description")]
-    [TestCase("    \n", "\t\n", ImportWarningLevel.None, TestName = "Whitespace Title and Description")]
-    [TestCase("Title", " \r ", ImportWarningLevel.Title, TestName = "Title Only")]
-    [TestCase("", " D e s c r i p t i o n ", ImportWarningLevel.Description, TestName = "Description Only")]
-    [TestCase("  Title", "\tDescription\r\nTest\r\n", ImportWarningLevel.Both, TestName = "Title and Description")]
+    [TestCase("", "", ImportWarningLevel.None, TestName = "Empty")]
+    [TestCase("    \n", "\t\n", ImportWarningLevel.None, TestName = "Whitespace")]
+    [TestCase("Title", " \r ", ImportWarningLevel.Title, TestName = "TitleOnly")]
+    [TestCase("", " D e s c r i p t i o n ", ImportWarningLevel.Description, TestName = "DescriptionOnly")]
+    [TestCase("  Title", "\tDescription\r\nTest\r\n", ImportWarningLevel.Both, TestName = "TitleAndDescription")]
     public void IsImportSafeTest(string title, string description, ImportWarningLevel expected)
     {
         var importViewModel = CreateViewModel();
@@ -95,8 +95,8 @@ public class ImportViewModelTest
     }
 
     [Test]
-    [TestCase("empty.txt", true, TestName = "Empty File")]
-    [TestCase("nonexistent.txt", false, TestName = "Nonexistent File")]
+    [TestCase("empty.txt", true, TestName = "Empty")]
+    [TestCase("nonexistent.txt", false, TestName = "Nonexistent")]
     public void ImportFromFileInvalidOrEmptyTest(string file, bool successful)
     {
         var importViewModel = CreateViewModel();
