@@ -84,12 +84,15 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 
 ## User stories
 
-- As a museum visitor, I want to interact with the installation, so that I can learn more about it.
-- As an exhibit maintainer, I want to set up the installation, so that it is ready for visitors to use.
-- As an exhibit maintainer, I want to be able to relocate the hotspots, so that they are in the correct place after moving the artifact or switching it for a different one.
-- As an exhibit maintainer, I want to be able to calibrate the software, so that the finger tracking is accurate.
-- As an exhibit maintainer, I want to be able to update the content that is projected, so that it reflects the information we want to convey.
-- **TODO:** Add more/update user stories for more stakeholders.
+- As a **museum visitor**, I want to interact with the installation, so that I can learn about the artefacts in an engaging way.
+- As a **museum visitor**, I want to make full use of the system without any prior tutorial or teaching, so that as much time as possible is spent learning about the artefacts.
+- As an **exhibit designer**, I want to integrate the system with the rest of the exhibition, so that it does not look out of place.
+- As an **exhibit designer**, I want to edit the location of hotspots with a graphical interface, so that it is inutitive and takes less time.
+- As an **exhibit designer**, I want to edit hotspot information with a graphical interface, so that it is easier to line up the hotspots with the artefacts.
+- As an **exhibit designer**, I want to package the data, so that the museum curator can load it up without manual editing.
+- As a **museum curator**, I want to quickly setup the installation, so that it is ready to use with minimal effort.
+- As a **museum curator**, I want to be able to easily diagonose any issues with the system, so that it has minimal downtime.
+- As a **museum curator**, I want to spend as little money as possible maintaining the system, so that more money can be spent.
 
 ## Releases
 
@@ -170,6 +173,7 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 ## More Info
 - [User Flows](docs/USER_FLOWS.md)
 - [Useful Links](docs/USEFUL_LINKS.md)
+- [Main SEP Repository](https://github.com/spe-uob/SEP2023)
 
 ## Group Members
 
