@@ -58,13 +58,16 @@ public class MockViewModelProvider : IViewModelProvider
         throw new NotImplementedException();
     }
 
-    public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockImportViewModel" />
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="MockImportViewModel" /></returns>
+    public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath) =>
+        new MockThumbnailViewModel(filePath, type.Name());
 
     /// <summary>
-    /// Creates a new <see cref="MockImportViewModel"/> linked to the given <see cref="IDescriptionEditorViewModel" />
+    /// Creates a new <see cref="MockImportViewModel" /> linked to the given <see cref="IDescriptionEditorViewModel" />
     /// </summary>
     /// <param name="descVm">The parent <see cref="IDescriptionEditorViewModel" /></param>
     /// <returns>A new <see cref="MockImportViewModel" /></returns>

@@ -104,7 +104,7 @@ public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
         var images = hotspot.FullImagePaths.Select(path =>
             _vmProvider.GetThumbnailViewModel(MediaEditorType.Images, path)
         );
-        var videos = hotspot.FullImagePaths.Select(path =>
+        var videos = hotspot.FullVideoPaths.Select(path =>
             _vmProvider.GetThumbnailViewModel(MediaEditorType.Videos, path)
         );
         Images = new ObservableCollection<IThumbnailViewModel>(images);
