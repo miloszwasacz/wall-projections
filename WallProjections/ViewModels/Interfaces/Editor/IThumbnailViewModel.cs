@@ -17,16 +17,6 @@ public interface IThumbnailViewModel
     protected IProcessProxy ProcessProxy { get; }
 
     /// <summary>
-    /// The row of the thumbnail in the grid.
-    /// </summary>
-    public int Row { get; set; }
-
-    /// <summary>
-    /// The column of the thumbnail in the grid.
-    /// </summary>
-    public int Column { get; set; }
-
-    /// <summary>
     /// The full path to the associated file.
     /// </summary>
     public string FilePath { get; }

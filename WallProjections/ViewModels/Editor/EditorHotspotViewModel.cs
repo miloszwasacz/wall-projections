@@ -101,11 +101,11 @@ public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
         //TODO Add error handling
         _description = File.ReadAllText(hotspot.FullDescriptionPath);
 
-        var images = hotspot.FullImagePaths.Select((path, i) =>
-            _vmProvider.GetThumbnailViewModel(MediaEditorType.Images, path, GetMediaRow(i), GetMediaColumn(i))
+        var images = hotspot.FullImagePaths.Select(path =>
+            _vmProvider.GetThumbnailViewModel(MediaEditorType.Images, path)
         );
-        var videos = hotspot.FullImagePaths.Select((path, i) =>
-            _vmProvider.GetThumbnailViewModel(MediaEditorType.Videos, path, GetMediaRow(i), GetMediaColumn(i))
+        var videos = hotspot.FullImagePaths.Select(path =>
+            _vmProvider.GetThumbnailViewModel(MediaEditorType.Videos, path)
         );
         Images = new ObservableCollection<IThumbnailViewModel>(images);
         Videos = new ObservableCollection<IThumbnailViewModel>(videos);
@@ -121,13 +121,7 @@ public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
         };
 
-        collection.AddRange(
-            GetIThumbnailViewModels(
-                type,
-                files,
-                collection.Count
-            )
-        );
+        collection.AddRange(GetIThumbnailViewModels(type, files));
     }
 
     /// <inheritdoc />
@@ -141,7 +135,6 @@ public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
         };
 
         mediaList.RemoveMany(media);
-        ReindexMedia(mediaList);
     }
 
     /// <inheritdoc />
@@ -161,47 +154,9 @@ public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
     /// </summary>
     /// <param name="type">The type of media to map.</param>
     /// <param name="files">The files to map.</param>
-    /// <param name="indexOffset">
-    /// An offset added to the index of each file (used for correct placement in the grid).
-    /// </param>
     /// <returns>An iterator of <see cref="IThumbnailViewModel" />s.</returns>
     private IEnumerable<IThumbnailViewModel> GetIThumbnailViewModels(
         MediaEditorType type,
-        IEnumerable<IStorageFile> files,
-        int indexOffset
-    ) => files.Select((file, i) =>
-    {
-        var path = file.Path.AbsolutePath;
-        var index = i + indexOffset;
-        var row = GetMediaRow(index);
-        var column = GetMediaColumn(index);
-        return _vmProvider.GetThumbnailViewModel(type, path, row, column);
-    });
-
-    /// <summary>
-    /// Updates the <see cref="IThumbnailViewModel.Row" /> and <see cref="IThumbnailViewModel.Column" />
-    /// of the media items in the given <paramref name="media" /> collection.
-    /// </summary>
-    /// <param name="media">The collection of media items to reindex.</param>
-    private static void ReindexMedia(IReadOnlyList<IThumbnailViewModel> media)
-    {
-        for (var i = 0; i < media.Count; i++)
-        {
-            var thumbnail = media[i];
-            thumbnail.Row = GetMediaRow(i);
-            thumbnail.Column = GetMediaColumn(i);
-        }
-    }
-
-    /// <summary>
-    /// Returns the row of the grid where the media item at the given <paramref name="index" /> is.
-    /// </summary>
-    /// <returns><paramref name="index" /> divided by <see cref="IMediaEditorViewModel.ColumnCount" /></returns>
-    private static int GetMediaRow(int index) => index / IMediaEditorViewModel.ColumnCount;
-
-    /// <summary>
-    /// Returns the column of the grid where the media item at the given <paramref name="index" /> is.
-    /// </summary>
-    /// <returns><paramref name="index" /> modulo <see cref="IMediaEditorViewModel.ColumnCount" /></returns>
-    private static int GetMediaColumn(int index) => index % IMediaEditorViewModel.ColumnCount;
+        IEnumerable<IStorageFile> files
+    ) => files.Select(file => _vmProvider.GetThumbnailViewModel(type, file.Path.AbsolutePath));
 }

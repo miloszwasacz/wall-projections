@@ -87,8 +87,7 @@
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Grid.Column="{Binding Column}" Grid.Row="{Binding Row}"
-                                BorderBrush="LightGray"
+                        <Border BorderBrush="LightGray"
                                 BorderThickness="2"
                                 CornerRadius="5"
                                 ClipToBounds="True">

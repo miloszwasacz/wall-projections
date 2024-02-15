@@ -83,18 +83,11 @@ public interface IViewModelProvider
     /// </summary>
     /// <param name="type">The type of thumbnail.</param>
     /// <param name="filePath">The path to the media file.</param>
-    /// <param name="gridRow">The row where the thumbnail will be displayed in the grid.</param>
-    /// <param name="gridColumn">The column where the thumbnail will be displayed in the grid.</param>
     /// <returns>A new <see cref="IThumbnailViewModel" /> instance</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// If <paramref name="type" /> is not a valid <see cref="MediaEditorType" />.
     /// </exception>
-    public IThumbnailViewModel GetThumbnailViewModel(
-        MediaEditorType type,
-        string filePath,
-        int gridRow,
-        int gridColumn
-    );
+    public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath);
 
     /// <summary>
     /// Creates a new <see cref="IImportViewModel" /> instance

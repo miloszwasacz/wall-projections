@@ -194,16 +194,12 @@ public class ViewModelProviderTest
     [TestCase(MediaEditorType.Videos, VideoPath, typeof(VideoThumbnailViewModel), TestName = "Videos")]
     public void GetThumbnailViewModelTest(MediaEditorType type, string filePath, Type expectedType)
     {
-        const int row = 1;
-        const int column = 2;
-        var thumbnailViewModel = ViewModelProvider.Instance.GetThumbnailViewModel(type, filePath, row, column);
+        var thumbnailViewModel = ViewModelProvider.Instance.GetThumbnailViewModel(type, filePath);
 
         Assert.Multiple(() =>
         {
             Assert.That(thumbnailViewModel, Is.InstanceOf(expectedType));
             Assert.That(thumbnailViewModel.FilePath, Is.EqualTo(filePath));
-            Assert.That(thumbnailViewModel.Row, Is.EqualTo(row));
-            Assert.That(thumbnailViewModel.Column, Is.EqualTo(column));
         });
     }
 
@@ -211,7 +207,7 @@ public class ViewModelProviderTest
     public void GetThumbnailViewModelInvalidTypeTest()
     {
         Assert.That(
-            () => ViewModelProvider.Instance.GetThumbnailViewModel((MediaEditorType)2, "", 0, 0),
+            () => ViewModelProvider.Instance.GetThumbnailViewModel((MediaEditorType)2, ""),
             Throws.InstanceOf<ArgumentOutOfRangeException>()
         );
     }

@@ -58,7 +58,7 @@ public class MockViewModelProvider : IViewModelProvider
         throw new NotImplementedException();
     }
 
-    public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath, int gridRow, int gridColumn)
+    public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath)
     {
         throw new NotImplementedException();
     }

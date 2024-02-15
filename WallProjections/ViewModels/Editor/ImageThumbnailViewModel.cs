@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using ReactiveUI;
 using WallProjections.Helper.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 
@@ -20,32 +19,8 @@ public class ImageThumbnailViewModel : ViewModelBase, IThumbnailViewModel
     /// </summary>
     private static readonly Uri FallbackImagePath = new("avares://WallProjections/Assets/fallback.png");
 
-    /// <summary>
-    /// The backing field for <see cref="Row" />.
-    /// </summary>
-    private int _row;
-
-    /// <summary>
-    /// The backing field for <see cref="Column" />.
-    /// </summary>
-    private int _column;
-
     /// <inheritdoc />
     public IProcessProxy ProcessProxy { get; }
-
-    /// <inheritdoc />
-    public int Row
-    {
-        get => _row;
-        set => this.RaiseAndSetIfChanged(ref _row, value);
-    }
-
-    /// <inheritdoc />
-    public int Column
-    {
-        get => _column;
-        set => this.RaiseAndSetIfChanged(ref _column, value);
-    }
 
     /// <inheritdoc />
     public string FilePath { get; }
@@ -60,15 +35,10 @@ public class ImageThumbnailViewModel : ViewModelBase, IThumbnailViewModel
     /// Creates a new <see cref="ImageThumbnailViewModel" /> with the given path and position in the grid.
     /// </summary>
     /// <param name="path">Path to the associated file.</param>
-    /// <param name="row">The row in the grid.</param>
-    /// <param name="column">The column in the grid.</param>
     /// <param name="proxy">A proxy for starting up <see cref="Process" />es.</param>
-    public ImageThumbnailViewModel(string path, int row, int column, IProcessProxy proxy)
+    public ImageThumbnailViewModel(string path, IProcessProxy proxy)
     {
         ProcessProxy = proxy;
-        Row = row;
-        Column = column;
-
         FilePath = path;
         Name = Path.GetFileName(path);
 

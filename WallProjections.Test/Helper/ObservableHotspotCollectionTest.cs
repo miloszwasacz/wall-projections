@@ -35,7 +35,7 @@ public class ObservableHotspotCollectionTest
         "Description New"
     );
 
-    private static MockThumbnailViewModel CreateThumbnailViewModel() => new(0, 0, "", "Name");
+    private static MockThumbnailViewModel CreateThumbnailViewModel() => new("", "Name");
 
     [Test]
     public void ConstructorEmptyTest()

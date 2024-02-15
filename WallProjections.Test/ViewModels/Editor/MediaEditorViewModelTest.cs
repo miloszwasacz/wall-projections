@@ -12,7 +12,7 @@ public class MediaEditorViewModelTest
 {
     private const string Title = "Title";
 
-    private static MockThumbnailViewModel CreateThumbnail(int id) => new(1, 2, $"path{id}", $"name{id}");
+    private static MockThumbnailViewModel CreateThumbnail(int id) => new($"path{id}", $"name{id}");
 
     [Test]
     public void ConstructorTest()

@@ -119,15 +119,10 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <seealso cref="ImageThumbnailViewModel" />
     /// <seealso cref="VideoThumbnailViewModel" />
-    public IThumbnailViewModel GetThumbnailViewModel(
-        MediaEditorType type,
-        string filePath,
-        int gridRow,
-        int gridColumn
-    ) => type switch
+    public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath) => type switch
     {
-        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, gridRow, gridColumn, new ProcessProxy()),
-        MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, gridRow, gridColumn, new ProcessProxy()),
+        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, new ProcessProxy()),
+        MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, new ProcessProxy()),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
     };
 

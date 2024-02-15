@@ -53,7 +53,7 @@ public partial class EditorWindow : Window
         if (DataContext is not IEditorViewModel vm) return;
         var importer = vm.DescriptionEditor.Importer;
 
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions()
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select a file to import...",
             AllowMultiple = false,
@@ -171,7 +171,7 @@ public partial class EditorWindow : Window
                 {
                     Patterns = new[] { "*.zip" }, //TODO Change to custom file type
                     AppleUniformTypeIdentifiers = new[] { "public.zip-archive" },
-                    MimeTypes = new[] { "application/zip" },
+                    MimeTypes = new[] { "application/zip" }
                 }
             }
         });

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.ComponentModel;
 using Avalonia.Headless.NUnit;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.Helper;
@@ -8,7 +7,7 @@ using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.Test.ViewModels.Editor;
 
-using ThumbnailVmFactory = Func<string, int, int, IProcessProxy, IThumbnailViewModel>;
+using ThumbnailVmFactory = Func<string, IProcessProxy, IThumbnailViewModel>;
 
 /// <summary>
 /// Tests for <see cref="IThumbnailViewModel" /> based on the <see cref="ThumbnailViewModelFixtureData" />.
@@ -49,73 +48,15 @@ public class ThumbnailViewModelTest
     public void ConstructorTest(bool valid)
     {
         var file = valid ? _testFile : _nonexistentFile;
-        const int row = 1;
-        const int column = 2;
         var path = Path.Combine(TestAssets, file);
         var proxy = new MockProcessProxy();
 
-        var thumbnailViewModel = _constructor(path, row, column, proxy);
+        var thumbnailViewModel = _constructor(path, proxy);
         Assert.Multiple(() =>
         {
-            Assert.That(thumbnailViewModel.Row, Is.EqualTo(row));
-            Assert.That(thumbnailViewModel.Column, Is.EqualTo(column));
             Assert.That(thumbnailViewModel.FilePath, Is.EqualTo(path));
             Assert.That(thumbnailViewModel.Image, Is.Not.Null);
             Assert.That(thumbnailViewModel.Name, Is.EqualTo(file));
-        });
-    }
-
-
-    [AvaloniaTest]
-    public void GridPlacementTest()
-    {
-        const int row = 1;
-        const int column = 2;
-        var path = Path.Combine(TestAssets, _testFile);
-        var proxy = new MockProcessProxy();
-
-        var thumbnailViewModel = _constructor(path, row, column, proxy);
-
-        var rowChanged = false;
-        var columnChanged = false;
-        if (thumbnailViewModel is INotifyPropertyChanged notifiableVm)
-        {
-            notifiableVm.PropertyChanged += (_, args) =>
-            {
-                switch (args.PropertyName)
-                {
-                    case nameof(IThumbnailViewModel.Row):
-                        rowChanged = true;
-                        break;
-                    case nameof(IThumbnailViewModel.Column):
-                        columnChanged = true;
-                        break;
-                }
-            };
-        }
-        else Assert.Fail("ViewModel does not implement INotifyPropertyChanged");
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(thumbnailViewModel.Row, Is.EqualTo(row));
-            Assert.That(thumbnailViewModel.Column, Is.EqualTo(column));
-        });
-
-        thumbnailViewModel.Row = 3;
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(rowChanged, Is.True);
-            Assert.That(columnChanged, Is.False);
-        });
-
-        rowChanged = false;
-        thumbnailViewModel.Column = 4;
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(rowChanged, Is.False);
-            Assert.That(columnChanged, Is.True);
         });
     }
 
@@ -132,7 +73,7 @@ public class ThumbnailViewModelTest
         var command = proxy.GetFileExplorerCommand();
         var expected = command is not null;
 
-        var thumbnailViewModel = _constructor(path, 1, 2, proxy);
+        var thumbnailViewModel = _constructor(path, proxy);
 
 #pragma warning disable NUnit2045
         Assert.That(thumbnailViewModel.OpenInExplorer(), Is.EqualTo(expected));
@@ -162,9 +103,7 @@ public class ThumbnailViewModelFixtureData
         get
         {
             yield return new TestFixtureData(
-                new ThumbnailVmFactory(
-                    (path, row, column, proxy) => new ImageThumbnailViewModel(path, row, column, proxy)
-                ),
+                new ThumbnailVmFactory((path, proxy) => new ImageThumbnailViewModel(path, proxy)),
                 TestImage,
                 NonexistentImage
             )
@@ -173,9 +112,7 @@ public class ThumbnailViewModelFixtureData
             };
 
             yield return new TestFixtureData(
-                new ThumbnailVmFactory(
-                    (path, row, column, proxy) => new VideoThumbnailViewModel(path, row, column, proxy)
-                ),
+                new ThumbnailVmFactory((path, proxy) => new VideoThumbnailViewModel(path, proxy)),
                 TestVideo,
                 NonexistentVideo
             )
