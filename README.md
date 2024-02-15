@@ -94,11 +94,61 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 ## Releases
 
 ### MVP
-Use buttons (instead of a camera system) to trigger the projection of hotspots (lit-up circles) onto the replica artifact.
+
+#### Hotspot Input
+- [x] Buttons are used to activate hotspots instead of a computer vision based hand tracking system.
+- [x] Pressing of a button sends an event to the information display.
+
+#### Hotspot Display
+- **N/A**
+
+#### Information Display
+- [x] Only a single image or video can be displayed at once.
+- [x] Styling is left very minimal with just the information displayed.
+
+#### Editor
+- [x] Configuration for hotspot information is created manually through the creation of a zip file containing a `config.json` file and media files.
+- [x] The configuration is manully loaded from the zip file on every opening of the program.
 
 ### First Release
 
-### Final Release
+#### Hotspot Imput (Computer Vision)
+- [x] Computer vision is used to both calibrate the projector and camera to match.
+- [x] Hand tracking is used to tell when someone is touching a hotspot.
+- [ ] All of the computer vision code runs at a good speed on a Raspberry Pi Model 4B.
+- [ ] The computer vision updates the hotspot and information displays.
+
+#### Hotspot Display
+- [ ] Hotspots are projected onto the artefacts.
+- [x] Animations are added to show users that a hotspot has been activated.
+
+#### Information Display
+- [x] The hotspot data is retained between closing and reopening the software.
+- [ ] Styling is added to make the information display more visually appealing and engaging.
+- [ ] Multiple images and videos can be displayed at the same time, while keeping the content easily readable and digestible.
+- [ ] Animatons/transitions ar eused to make the softare feel less static.
+- [ ] Automatic layouting is used to allow for a more complex and appealing visual presentation.
+
+#### Editor
+- [x] An editor can be used to add text, images, and video to hotspots.
+- [ ] The editor has support to easily reposition hotspot locations relative to the artefact.
+- [x] Any changes the editor makes can be saved to the disk.
+
+### Final Release / Stretch Goals
+
+#### Hotspot Imput (Computer Vision)
+- [ ] Crop the camera view to reduce the required processing power for hand tracking.
+- [ ] Use a faster model to quickly find hands, before using the slower model to find a fingertip on a much smaller area of the image.
+
+#### Hotspot Display
+- [ ] Hotspots illuminate one at a time when a user enters the space of the installation.
+- [ ] Hotspots have a rich, engaging animation making it obvious when it is activated.
+
+#### Information Display
+- [ ] Transitions upon activation of a hotspot will be eye catching.
+
+#### Editor
+- [ ] A preview shows what the information will look like.
 
 ## Technologies used
 
