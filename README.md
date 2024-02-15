@@ -23,8 +23,7 @@
     * [Hardware/OS](#hardwareos)
     * [User Interface](#user-interface)
     * [Computer Vision](#computer-vision)
-  * [User Flows](#user-flows)
-  * [Useful Links](#useful-links)
+  * [More Info](#more-info)
   * [Group Members](#group-members)
 <!-- TOC -->
 
@@ -118,16 +117,16 @@ Use buttons (instead of a camera system) to trigger the projection of hotspots (
 - [Python.NET](https://github.com/pythonnet/pythonnet)
 - [MediaPipe](https://developers.google.com/mediapipe)
 
-## [User Flows](docs/USER_FLOWS.md)
-
-## [Useful Links](docs/USEFUL_LINKS.md)
+## More Info
+- [User Flows](docs/USER_FLOWS.md)
+- [Useful Links](docs/USEFUL_LINKS.md)
 
 ## Group Members
 
-| Member | Account                                       |
-|--------|-----------------------------------------------|
-| Sergi  | [@Rolodophone](https://github.com/Rolodophone) |
-|   Daniel     |    [@danieldiamand](https://github.com/danieldiamand)                   |
-|      Sonny        |  [@ed22699](https://github.com/ed22699)                                                                       |
-|     Miłosz              |  [@miloszwasacz](https://github.com/miloszwasacz)                                                                                                             |
-|Thomas|[@LW22736](https://github.com/LW22736)|
+| Member | Account                                            |
+|--------|----------------------------------------------------|
+| Sergi  | [@Rolodophone](https://github.com/Rolodophone)     |
+| Daniel | [@danieldiamand](https://github.com/danieldiamand) |
+| Sonny  | [@ed22699](https://github.com/ed22699)             |
+| Miłosz | [@miloszwasacz](https://github.com/miloszwasacz)   |
+| Thomas | [@LW22736](https://github.com/LW22736)             |
