@@ -3,7 +3,6 @@ import threading
 from abc import ABC, abstractmethod
 from typing import NamedTuple
 import numpy as np
-from EventListener import *
 import time
 import math
 
