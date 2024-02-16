@@ -8,9 +8,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5460507-da8e-4f1c-b4e4-588abd1edaa7" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.WallProjections/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WallProjections/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/index.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +95,7 @@
       <workItem from="1706526418925" duration="1325000" />
       <workItem from="1706785582635" duration="38215000" />
       <workItem from="1707831207986" duration="198000" />
-      <workItem from="1707831425028" duration="22230000" />
+      <workItem from="1707831425028" duration="22290000" />
     </task>
     <task id="LOCAL-00001" summary="Refactor for integration with editor&#10;&#10;Co-authored-by: miloszwasacz &lt;wasacz.dev@gmail.com&gt;">
       <option name="closed" value="true" />
