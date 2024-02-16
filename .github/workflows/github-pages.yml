@@ -27,14 +27,12 @@ jobs:
 
       - name: Install dependencies
         run: bundle install
-      
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./
-          destination: ./_site
+
+      - name: Jekyll build
+        run: jekyll build
+
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
 
   # Deployment job
   deploy:
@@ -46,7 +44,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
 
 # jobs:
 #   build_and_deploy_job:
