@@ -28,6 +28,11 @@ public sealed class MockFileHandler : IFileHandler
     private readonly Exception? _exception;
 
     /// <summary>
+    /// The result of all "modification" methods <i>(see <see cref="MockFileHandler(bool)" />)</i>.
+    /// </summary>
+    private readonly bool _modificationOutputs = true;
+
+    /// <summary>
     /// The <see cref="IConfig" /> to be returned by <see cref="ImportConfig" />
     /// </summary>
     public IConfig Config { get; set; }
@@ -78,25 +83,73 @@ public sealed class MockFileHandler : IFileHandler
     }
 
     /// <summary>
-    /// Adds the <paramref name="zipPath" /> to the list of loaded zips and returns the <see cref="Config" />
+    /// Creates a new <see cref="MockFileHandler" /> that will always return the given <paramref name="modificationOutputs" />
+    /// when <see cref="ImportConfig" />, <see cref="ExportConfig" />, and <see cref="LoadConfig" /> are called.
     /// </summary>
-    /// <param name="zipPath">The theoretical path to the zip file containing media files</param>
-    /// <returns><see cref="IConfig" /></returns>
-    public IConfig ImportConfig(string zipPath)
+    /// <param name="modificationOutputs">The result of all "modification" methods</param>
+    public MockFileHandler(bool modificationOutputs) : this(new List<Hotspot.Media>())
     {
-        _loadedZips.Add(zipPath);
-        return Config;
+        _modificationOutputs = modificationOutputs;
     }
 
     /// <summary>
-    /// Adds the <paramref name="zipPath"/> to the list of loaded zips and returns true"/>
+    /// Sets the <see cref="Config" /> to the given <paramref name="config" />
+    /// and returns <i>true</i>, or a custom result <i>(see <see cref="MockFileHandler(bool)" />)</i>.
     /// </summary>
-    /// <param name="zipPath">The theoretical path to save the config and media.</param>
-    /// <returns>true</returns>
-    public bool ExportConfig(string zipPath)
+    /// <returns>
+    /// <i>true</i>, or the custom result if the mock was created with <i>false</i>
+    /// for <see cref="MockFileHandler(bool)" />
+    /// </returns>
+    /// <exception cref="Exception">
+    /// If the mock was created with an <see cref="Exception" /> for <see cref="MockFileHandler(Exception)" />
+    /// </exception>
+    public bool SaveConfig(IConfig config)
     {
-        _exportedZips.Add(zipPath);
-        return true;
+        if (_exception is not null)
+            throw _exception;
+
+        Config = config;
+        return _modificationOutputs;
+    }
+
+    /// <summary>
+    /// Adds the <paramref name="filePath" /> to the list of loaded zips and returns the <see cref="Config" />
+    /// </summary>
+    /// <param name="filePath">The theoretical path to the zip file containing media files</param>
+    /// <returns>
+    /// <see cref="IConfig" />, or <i>null</i> if the mock was created with <i>false</i>
+    /// for <see cref="MockFileHandler(bool)" />
+    /// </returns>
+    /// <exception cref="Exception">
+    /// If the mock was created with an <see cref="Exception" /> for <see cref="MockFileHandler(Exception)" />
+    /// </exception>
+    public IConfig? ImportConfig(string filePath)
+    {
+        if (_exception is not null)
+            throw _exception;
+
+        _loadedZips.Add(filePath);
+        return _modificationOutputs ? Config : null;
+    }
+
+    /// <summary>
+    /// Adds the <paramref name="exportPath"/> to the list of loaded zips and returns true"/>
+    /// </summary>
+    /// <param name="exportPath">The theoretical path to save the config and media.</param>
+    /// <returns>
+    /// <i>true</i>, or the custom result if the mock was created with <i>false</i>
+    /// for <see cref="MockFileHandler(bool)" />
+    /// </returns>
+    /// <exception cref="Exception">
+    /// If the mock was created with an <see cref="Exception" /> for <see cref="MockFileHandler(Exception)" />
+    /// </exception>
+    public bool ExportConfig(string exportPath)
+    {
+        if (_exception is not null)
+            throw _exception;
+
+        _exportedZips.Add(exportPath);
+        return _modificationOutputs;
     }
 
     /// <summary>
@@ -115,11 +168,6 @@ public sealed class MockFileHandler : IFileHandler
     public bool IsConfigImported()
     {
         return true;
-    }
-
-    public bool SaveConfig(IConfig config)
-    {
-        throw new NotImplementedException();
     }
 
     /// <summary>

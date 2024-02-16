@@ -30,6 +30,9 @@ public class EditorHotspotViewModelTest
         return new Hotspot(id, position, title, descriptionPath, images, videos);
     }
 
+    /// <summary>
+    /// Uses <see cref="Window.StorageProvider" /> to get a file from the test assets.
+    /// </summary>
     private static async Task<IStorageFile> GetFile(string fileName)
     {
         var window = new Window();

@@ -25,10 +25,10 @@ public interface IFileHandler
     /// <summary>
     /// Export config file and media file to a zip file.
     /// </summary>
-    /// <param name="zipPath">Path to the zip file</param>
+    /// <param name="exportPath">Path to the zip file</param>
     /// <returns>True if file is exported</returns>
     /// <exception cref="DirectoryNotFoundException">If there is no imported config/media.</exception>
-    public bool ExportConfig(string zipPath);
+    public bool ExportConfig(string exportPath);
 
     /// <summary>
     /// Loads the config.json file from the config folder.

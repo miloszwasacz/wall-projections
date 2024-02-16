@@ -30,12 +30,12 @@ public class FileHandler : IFileHandler
     }
 
     /// <inheritdoc/>
-    public bool ExportConfig(string zipPath)
+    public bool ExportConfig(string exportPath)
     {
         if (!Directory.Exists(ConfigFolderPath))
             throw new DirectoryNotFoundException("No imported/created config to export.");
 
-        ZipFile.CreateFromDirectory(ConfigFolderPath, zipPath);
+        ZipFile.CreateFromDirectory(ConfigFolderPath, exportPath);
         return true;
     }
 

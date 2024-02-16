@@ -13,7 +13,7 @@ using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels.Editor;
 
-/// <inheritdoc cref="IEditorViewModel{T}" />
+/// <inheritdoc cref="IEditorViewModel" />
 public class EditorViewModel : ViewModelBase, IEditorViewModel
 {
     /// <summary>
@@ -215,6 +215,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         {
             //TODO Log to file
             Console.Error.WriteLine(e);
+            //TODO Improve error reporting (especially for "file already exists")
             return false;
         }
     }

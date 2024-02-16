@@ -1,4 +1,5 @@
-﻿using WallProjections.Models;
+﻿using System.Collections.ObjectModel;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.Test.Mocks.ViewModels.Editor;
@@ -10,6 +11,8 @@ namespace WallProjections.Test.Mocks.ViewModels;
 
 public class MockViewModelProvider : IViewModelProvider
 {
+    #region Display
+
     /// <summary>
     /// Creates a new <see cref="MockDisplayViewModel"/>
     /// </summary>
@@ -28,6 +31,10 @@ public class MockViewModelProvider : IViewModelProvider
     /// <returns>A new <see cref="MockVideoViewModel"/></returns>
     public IVideoViewModel GetVideoViewModel() => new MockVideoViewModel();
 
+    #endregion
+
+    #region Editor
+
     public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler)
     {
         throw new NotImplementedException();
@@ -38,25 +45,48 @@ public class MockViewModelProvider : IViewModelProvider
         throw new NotImplementedException();
     }
 
-    public IEditorHotspotViewModel GetEditorHotspotViewModel(int id)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockEditorHotspotViewModel" />
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="MockEditorHotspotViewModel" /></returns>
+    public IEditorHotspotViewModel GetEditorHotspotViewModel(int id) =>
+        new MockEditorHotspotViewModel(id, new Coord(0, 0, 0), "", "");
 
-    public IEditorHotspotViewModel GetEditorHotspotViewModel(Hotspot hotspot)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockEditorHotspotViewModel" />
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="MockEditorHotspotViewModel" /></returns>
+    /// <exception cref="Exception">
+    /// Can throw all the exceptions that <see cref="File.ReadAllText(string)" />can throw
+    /// </exception>
+    public IEditorHotspotViewModel GetEditorHotspotViewModel(Hotspot hotspot) => new MockEditorHotspotViewModel(
+        hotspot.Id,
+        hotspot.Position,
+        hotspot.Title,
+        File.ReadAllText(hotspot.DescriptionPath),
+        new ObservableCollection<IThumbnailViewModel>(
+            hotspot.ImagePaths.Select(path => new MockThumbnailViewModel(path, Path.GetFileName(path)))
+        ),
+        new ObservableCollection<IThumbnailViewModel>(
+            hotspot.VideoPaths.Select(path => new MockThumbnailViewModel(path, Path.GetFileName(path)))
+        )
+    );
 
-    public IDescriptionEditorViewModel GetDescriptionEditorViewModel()
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockDescriptionEditorViewModel" />
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="MockDescriptionEditorViewModel" /></returns>
+    public IDescriptionEditorViewModel GetDescriptionEditorViewModel() => new MockDescriptionEditorViewModel();
 
-    public IMediaEditorViewModel GetMediaEditorViewModel(MediaEditorType type)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockMediaEditorViewModel" />
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="MockMediaEditorViewModel" /></returns>
+    public IMediaEditorViewModel GetMediaEditorViewModel(MediaEditorType type) => new MockMediaEditorViewModel(type);
 
     /// <summary>
     /// Creates a new <see cref="MockImportViewModel" />
@@ -64,7 +94,7 @@ public class MockViewModelProvider : IViewModelProvider
     /// <inheritdoc />
     /// <returns>A new <see cref="MockImportViewModel" /></returns>
     public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath) =>
-        new MockThumbnailViewModel(filePath, type.Name());
+        new MockThumbnailViewModel(filePath, Path.GetFileName(filePath));
 
     /// <summary>
     /// Creates a new <see cref="MockImportViewModel" /> linked to the given <see cref="IDescriptionEditorViewModel" />
@@ -72,4 +102,6 @@ public class MockViewModelProvider : IViewModelProvider
     /// <param name="descVm">The parent <see cref="IDescriptionEditorViewModel" /></param>
     /// <returns>A new <see cref="MockImportViewModel" /></returns>
     public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new MockImportViewModel(descVm);
+
+    #endregion
 }

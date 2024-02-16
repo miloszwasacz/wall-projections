@@ -217,7 +217,7 @@ public partial class EditorWindow : Window
         if (folders.Count == 0) return;
 
         var folder = folders[0].Path.AbsolutePath;
-        if (vm.ExportConfig(folder)) return;
+        if (vm.ExportConfig(folder)) return; //TODO Show a success message
 
         // An error occurred while exporting
         ExportErrorToast.Show(Toast.ShowDuration.Short);

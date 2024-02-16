@@ -46,7 +46,6 @@ public class ImportViewModelTest
         var descriptionEditor = new MockDescriptionEditorViewModel(
             "Title",
             "Description",
-            true,
             descVm => new ImportViewModel(descVm)
         );
         var importVm = descriptionEditor.Importer as ImportViewModel;

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using Avalonia.Platform.Storage;
 using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
@@ -9,9 +8,7 @@ namespace WallProjections.ViewModels.Interfaces.Editor;
 /// <summary>
 /// A viewmodel for editing data about a <see cref="IConfig" />.
 /// </summary>
-/// <typeparam name="T">The type of <see cref="Hotspots" />' items.</typeparam>
-public interface IEditorViewModel<T>
-    where T : IEditorHotspotViewModel, INotifyPropertyChanged
+public interface IEditorViewModel
 {
     //TODO Change to use a custom extension
     /// <summary>
@@ -22,12 +19,12 @@ public interface IEditorViewModel<T>
     /// <summary>
     /// A collection of all hotspots in the editor.
     /// </summary>
-    public ObservableHotspotCollection<T> Hotspots { get; set; }
+    public ObservableHotspotCollection<IEditorHotspotViewModel> Hotspots { get; set; }
 
     /// <summary>
     /// The currently selected hotspot (or <i>null</i> if <see cref="Hotspots" /> is empty).
     /// </summary>
-    public T? SelectedHotspot { get; set; }
+    public IEditorHotspotViewModel? SelectedHotspot { get; set; }
 
     /// <summary>
     /// A <see cref="IDescriptionEditorViewModel" /> for editing the title and description of the currently selected hotspot.
@@ -53,7 +50,7 @@ public interface IEditorViewModel<T>
     /// The text of the button that closes the editor.
     /// </summary>
     /// <returns>"Close" if <see cref="IsSaved" /> is <i>true</i>; "Discard" otherwise.</returns>
-    public string CloseButtonText => IsSaved ? "Close" : "Discard ";
+    public string CloseButtonText => IsSaved ? "Close" : "Discard";
 
     /// <summary>
     /// Adds a new hotspot and selects it.
@@ -64,7 +61,7 @@ public interface IEditorViewModel<T>
     /// Deletes the given hotspot.
     /// </summary>
     /// <param name="hotspot">The hotspot to delete.</param>
-    public void DeleteHotspot(T hotspot);
+    public void DeleteHotspot(IEditorHotspotViewModel hotspot);
 
     /// <summary>
     /// Adds media of the given <paramref name="type" /> to <see cref="SelectedHotspot" />.
@@ -83,7 +80,7 @@ public interface IEditorViewModel<T>
     public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media);
 
     /// <summary>
-    /// Creates a new <see cref="IConfig" /> using the currently stored data in this <see cref="IEditorViewModel{T}" />
+    /// Creates a new <see cref="IConfig" /> using the currently stored data in this <see cref="IEditorViewModel" />
     /// and saves it to the file system.
     /// </summary>
     /// <returns>Whether the file was saved successfully.</returns>
@@ -102,12 +99,4 @@ public interface IEditorViewModel<T>
     /// <param name="exportPath">A path to a folder where the configuration will be exported.</param>
     /// <returns>Whether the file was exported successfully.</returns>
     public bool ExportConfig(string exportPath);
-}
-
-/// <summary>
-/// An extension of <see cref="IEditorViewModel{T}" /> with <see cref="IEditorHotspotViewModel" />
-/// as the generic type (required for XAML compatibility).
-/// </summary>
-public interface IEditorViewModel : IEditorViewModel<IEditorHotspotViewModel>
-{
 }
