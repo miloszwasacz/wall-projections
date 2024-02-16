@@ -14,4 +14,4 @@ with to display detailed, rich information about the touched area.
 
 ## Installation
 
-To run WallProjections, start [HERE](/docs/installation)
+To run WallProjections, start [HERE]({%link docs/installation/index.md %})
