@@ -46,6 +46,7 @@ GEM
       jekyll (>= 3.8, < 5.0)
     jekyll-watch (2.2.1)
       listen (~> 3.0)
+    json (2.7.1)
     just-the-docs (0.7.0)
       jekyll (>= 3.8.5)
       jekyll-include-cache
@@ -130,6 +131,7 @@ DEPENDENCIES
   http_parser.rb (~> 0.6.0)
   jekyll (~> 4.3.3)
   jekyll-feed (~> 0.12)
+  json
   just-the-docs
   minima (~> 2.5)
   tzinfo (>= 1, < 3)
