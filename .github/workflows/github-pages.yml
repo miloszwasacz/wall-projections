@@ -29,7 +29,7 @@ jobs:
         run: bundle install
 
       - name: Jekyll build
-        run: jekyll build 
+        run: jekyll build -b "/2023-WallProjections"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
