@@ -1,6 +1,7 @@
 ﻿using System;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
+using WallProjections.Views;
 
 namespace WallProjections.ViewModels.Interfaces.Display;
 
@@ -30,4 +31,14 @@ public interface IDisplayViewModel : IDisposable
     /// <param name="sender">The sender of the event</param>
     /// <param name="e">Event args holding the ID of the selected <see cref="Hotspot" /></param>
     public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e);
+
+    /// <summary>
+    /// Opens the <see cref="EditorWindow">Editor</see>.
+    /// </summary>
+    public void OpenEditor();
+
+    /// <summary>
+    /// Closes the <see cref="DisplayWindow">Display</see>.
+    /// </summary>
+    public void CloseDisplay();
 }

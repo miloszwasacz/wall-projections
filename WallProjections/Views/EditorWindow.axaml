@@ -8,7 +8,9 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.EditorWindow"
         x:DataType="vm:IEditorViewModel"
+        Icon="/Assets/avalonia-logo.ico"
         Title="EditorWindow"
+        WindowState="Maximized"
         Closing="Editor_OnClosing">
 
     <Grid RowDefinitions="Auto, *">

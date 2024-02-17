@@ -6,6 +6,9 @@ using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels.Interfaces;
 
+/// <summary>
+/// A provider for creating viewmodels using Dependency Injection
+/// </summary>
 public interface IViewModelProvider
 {
     #region Display

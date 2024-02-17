@@ -2,6 +2,7 @@
 using Avalonia.Platform.Storage;
 using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
+using WallProjections.Views;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
 
@@ -99,4 +100,9 @@ public interface IEditorViewModel
     /// <param name="exportPath">A path to a folder where the configuration will be exported.</param>
     /// <returns>Whether the file was exported successfully.</returns>
     public bool ExportConfig(string exportPath);
+
+    /// <summary>
+    /// Closes the <see cref="EditorWindow">Editor</see> and discards any unsaved changes.
+    /// </summary>
+    public void CloseEditor();
 }

@@ -9,6 +9,8 @@
         x:DataType="vm:IDisplayViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="WallProjections"
+        WindowState="FullScreen"
+        Closing="Window_OnClosing"
         KeyDown="OnKeyDown">
 
     <Grid ColumnDefinitions="*, *" RowDefinitions="*, 2*, *">

@@ -118,13 +118,13 @@ public class FileHandler : IFileHandler
 
         var newConfig = new Config(newHotspots);
 
-#if DEBUG || DEBUGSKIPPYTHON
+#if RELEASE
+        var configString = JsonSerializer.Serialize(newConfig);
+#else
         var configString = JsonSerializer.Serialize(newConfig, new JsonSerializerOptions
         {
             WriteIndented = true
         });
-#else
-        var configString = JsonSerializer.Serialize(newConfig);
 #endif
 
         using var configFile = new StreamWriter(Path.Combine(ConfigFolderPath, ConfigFileName));

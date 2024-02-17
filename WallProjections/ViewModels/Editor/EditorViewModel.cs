@@ -17,6 +17,11 @@ namespace WallProjections.ViewModels.Editor;
 public class EditorViewModel : ViewModelBase, IEditorViewModel
 {
     /// <summary>
+    /// A <see cref="INavigator" /> used for closing the Editor.
+    /// </summary>
+    private readonly INavigator _navigator;
+
+    /// <summary>
     /// A <see cref="IViewModelProvider" /> used for creating child viewmodels.
     /// </summary>
     private readonly IViewModelProvider _vmProvider;
@@ -97,6 +102,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public IMediaEditorViewModel VideoEditor { get; }
 
+    //TODO Change how is saved is handled when there is no configuration
     /// <inheritdoc />
     public bool IsSaved
     {
@@ -220,13 +226,21 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         }
     }
 
+    /// <inheritdoc />
+    public void CloseEditor()
+    {
+        _navigator.CloseEditor();
+    }
+
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" />, not linked to any existing <see cref="IConfig" />.
     /// </summary>
+    /// <param name="navigator">A <see cref="INavigator" /> used for closing the Editor.</param>
     /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
-    public EditorViewModel(IFileHandler fileHandler, IViewModelProvider vmProvider)
+    public EditorViewModel(INavigator navigator, IFileHandler fileHandler, IViewModelProvider vmProvider)
     {
+        _navigator = navigator;
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>();
@@ -241,10 +255,17 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// Creates a new <see cref="EditorViewModel" /> with initial data loaded from the provided <paramref name="config" />.
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> providing initial state of the editor.</param>
+    /// <param name="navigator">A <see cref="INavigator" /> used for closing the Editor.</param>
     /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
-    public EditorViewModel(IConfig config, IFileHandler fileHandler, IViewModelProvider vmProvider)
+    public EditorViewModel(
+        IConfig config,
+        INavigator navigator,
+        IFileHandler fileHandler,
+        IViewModelProvider vmProvider
+        )
     {
+        _navigator = navigator;
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>(

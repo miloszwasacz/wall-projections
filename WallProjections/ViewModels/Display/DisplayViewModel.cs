@@ -21,6 +21,11 @@ Looks like this hotspot has missing content.
 Please report this to the museum staff.";
 
     /// <summary>
+    /// The <see cref="INavigator" /> used for opening the Editor and closing the Display.
+    /// </summary>
+    private readonly INavigator _navigator;
+
+    /// <summary>
     /// The <see cref="IContentProvider" /> used to fetch Hotspot's content files
     /// </summary>
     private readonly IContentProvider _contentProvider;
@@ -40,15 +45,18 @@ Please report this to the museum staff.";
     /// and <see cref="VideoViewModel" /> fetched by <paramref name="vmProvider" />,
     /// and starts listening for <see cref="IPythonEventHandler.HotspotSelected">Python events</see>
     /// </summary>
+    /// <param name="navigator">The <see cref="INavigator" /> used for opening the Editor and closing the Display</param>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
     /// <param name="contentProvider">A <see cref="IContentProvider"/> for fetching data about hotspots.</param>
     /// <param name="pythonEventHandler">The <see cref="IPythonEventHandler" /> used to listen for Python events</param>
     public DisplayViewModel(
+        INavigator navigator,
         IViewModelProvider vmProvider,
         IContentProvider contentProvider,
         IPythonEventHandler pythonEventHandler
     )
     {
+        _navigator = navigator;
         ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
         _contentProvider = contentProvider;
@@ -106,6 +114,18 @@ Please report this to the museum staff.";
             Console.Error.WriteLine(e);
             Description = GenericError;
         }
+    }
+
+    /// <inheritdoc />
+    public void OpenEditor()
+    {
+        _navigator.OpenEditor();
+    }
+
+    /// <inheritdoc />
+    public void CloseDisplay()
+    {
+        _navigator.Shutdown();
     }
 
     /// <summary>
