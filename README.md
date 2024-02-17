@@ -2,6 +2,8 @@
 [![.NET CI](https://github.com/spe-uob/2023-WallProjections/actions/workflows/dotnet-ci.yml/badge.svg)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/dotnet-ci.yml)
 [![GitHub Pages Deployment](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml/badge.svg?branch=docs)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml)
 
+## [Documentation](https://spe-uob.github.io/2023-WallProjections/)
+
 ## Contents
 
 <!-- TOC -->
