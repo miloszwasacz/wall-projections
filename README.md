@@ -2,7 +2,8 @@
 [![.NET CI](https://github.com/spe-uob/2023-WallProjections/actions/workflows/dotnet-ci.yml/badge.svg)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/dotnet-ci.yml)
 [![GitHub Pages Deployment](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml/badge.svg?branch=docs)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml)
 
-## [Documentation](https://spe-uob.github.io/2023-WallProjections/)
+> [!Important]
+> Find the complete documentation here: [spe-uob.github.io/2023-WallProjections/](https://spe-uob.github.io/2023-WallProjections/)
 
 ## Contents
 
@@ -52,7 +53,7 @@ RaspberryPi Model 4.
 ## Getting Started
 The software can be installed on Windows, MacOS, and Linux computers, as well as on the Raspberry Pi for deployment.
 
-> **TODO:** Add setup guides for all platforms for both deployment and development.
+> Go to installation guide: [spe-uob.github.io/2023-WallProjections/docs/installation/](https://spe-uob.github.io/2023-WallProjections/docs/installation/)
 
 
 ## Stakeholders
@@ -140,7 +141,7 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 - [ ] The editor has support to easily reposition hotspot locations relative to the artefact.
 - [x] Any changes the editor makes can be saved to the disk.
 
-### Final Release / Stretch Goals
+### Final Release
 
 #### Hotspot Imput (Computer Vision)
 - [ ] Crop the camera view to reduce the required processing power for hand tracking.
