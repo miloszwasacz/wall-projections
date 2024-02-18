@@ -48,7 +48,7 @@ Use ``cv2.CAP_ANY`` to auto-detect.
 
 See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html for more options."""
 
-VIDEO_CAPTURE_PROPERTIES: dict[int, int] = {}
+VIDEO_CAPTURE_PROPERTIES: dict[int, int] = {cv2.CAP_PROP_FPS: 30}
 """Extra properties to use for OpenCV video capture.
 
 Tweaking these properties could be found useful in case of any issues with capturing video.

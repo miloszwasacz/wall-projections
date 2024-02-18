@@ -64,9 +64,10 @@ class Calibrator:
         arucoDict = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
 
         cv2.namedWindow("Hotspots", cv2.WINDOW_FULLSCREEN)
-
+        cv2.setWindowProperty("Hotspots", cv2.WND_PROP_TOPMOST, 1)
+        cv2.moveWindow("Hotspots", 1920, -20)  # Move rightwards to second monitor and upwards to hide top bar
         cv2.imshow("Hotspots", self._drawArucos(projectedCoords, arucoDict))
-        cv2.waitKey(800)
+        cv2.waitKey(3000)
         photo = takePhoto()
         self._cameraWidth, self._cameraHeight, _ = photo.shape
         cameraCoords = self._detectArucos(photo, arucoDict, displayResults=displayResults)

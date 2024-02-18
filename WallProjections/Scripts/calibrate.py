@@ -25,6 +25,7 @@ def takePhoto() -> np.ndarray:
 
     videoCaptureThread = VideoCaptureThread()
     videoCaptureThread.start()
+    cv2.waitKey(5000)
     image = None
     while image is None:
         image = videoCaptureThread.current_frame
@@ -113,8 +114,9 @@ def projectDetectGetTransform(printData = False) -> np.ndarray:
     
     arucoDict = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
 
-    cv2.namedWindow("Calibration", cv2.WINDOW_FULLSCREEN)
-
+    cv2.namedWindow("Calibration")
+    cv2.setWindowProperty("Calibration", cv2.WND_PROP_TOPMOST, 1)
+    cv2.moveWindow("Calibration", 1920, -20)  # Move rightwards to second monitor and upwards to hide top bar
     cv2.imshow("Calibration", drawArucos(projectedCoords, arucoDict))
     cv2.waitKey(800)
     photo = takePhoto()
