@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Controls.Selection;
-using Avalonia.Headless.NUnit;
 using WallProjections.Test.Mocks.ViewModels.Editor;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;

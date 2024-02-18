@@ -1,4 +1,3 @@
-using Avalonia.Headless.NUnit;
 using WallProjections.ViewModels.Display;
 
 namespace WallProjections.Test.ViewModels.Display;

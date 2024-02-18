@@ -67,7 +67,7 @@ public sealed class Navigator : ViewModelBase, INavigator
         try
         {
             _config = fileHandler.LoadConfig();
-            OpenDisplay(true);
+            OpenDisplay();
         }
         catch (Exception e)
         {
@@ -79,19 +79,16 @@ public sealed class Navigator : ViewModelBase, INavigator
 
     /// <summary>
     /// Opens the <see cref="DisplayWindow" /> with the current configuration.
-    /// If no configuration is found, the <see cref="OpenEditor">editor window</see> is opened
-    /// (if <paramref name="openEditorOnFail" /> is <i>true</i>).
+    /// If no configuration is found, the <see cref="OpenEditor">editor window</see> is opened.
     /// </summary>
-    /// <param name="openEditorOnFail">Whether to open the editor window if the configuration is not found.</param>
-    private void OpenDisplay(bool openEditorOnFail)
+    private void OpenDisplay()
     {
         _windowMutex.WaitOne();
         var config = _config;
         if (config == null)
         {
             _windowMutex.ReleaseMutex();
-            if (openEditorOnFail)
-                OpenEditor();
+            OpenEditor();
             return;
         }
 
@@ -135,13 +132,15 @@ public sealed class Navigator : ViewModelBase, INavigator
         try
         {
             _config = fileHandler.LoadConfig();
-            OpenDisplay(false);
+            OpenDisplay();
         }
         catch (Exception e)
         {
             //TODO Log to file
             Console.Error.WriteLine(e);
-            OpenEditor();
+            _config = null;
+            //TODO Show error message
+            Shutdown();
         }
     }
 
@@ -173,7 +172,10 @@ public sealed class Navigator : ViewModelBase, INavigator
         if (_vmProvider is IDisposable vmProvider)
             vmProvider.Dispose();
 
-        _appLifetime.MainWindow?.CloseAndDispose();
+        if (_appLifetime.MainWindow?.DataContext is IDisposable vm)
+            vm.Dispose();
+
+        _appLifetime.MainWindow = null;
         _appLifetime.Exit -= OnExit;
     }
 

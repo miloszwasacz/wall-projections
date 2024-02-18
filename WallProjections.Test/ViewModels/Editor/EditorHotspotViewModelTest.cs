@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Avalonia.Controls;
-using Avalonia.Headless.NUnit;
 using Avalonia.Platform.Storage;
 using WallProjections.Models;
 using WallProjections.Test.Mocks.ViewModels;

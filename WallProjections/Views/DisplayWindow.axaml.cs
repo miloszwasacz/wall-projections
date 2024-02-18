@@ -77,7 +77,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     /// The window should never be closed using <see cref="Window.Close()" />; instead, the ViewModel's
     /// <see cref="IDisplayViewModel.CloseDisplay" /> method should be called.
     /// </remarks>
-    private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
+    internal void Window_OnClosing(object? sender, WindowClosingEventArgs e)
     {
         if (DataContext is not IDisplayViewModel viewModel) return;
 

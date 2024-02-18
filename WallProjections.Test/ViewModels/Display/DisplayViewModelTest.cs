@@ -248,6 +248,36 @@ public class DisplayViewModelTest
     }
 
     [Test]
+    public void OpenEditorTest()
+    {
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonEventHandler();
+        var contentProvider = new MockContentProvider(FilesAll);
+        Assert.That(navigator.IsEditorOpen, Is.False);
+
+        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
+        displayViewModel.OpenEditor();
+
+        Assert.That(navigator.IsEditorOpen, Is.True);
+        displayViewModel.Dispose();
+    }
+
+    [Test]
+    public void CloseDisplayTest()
+    {
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonEventHandler();
+        var contentProvider = new MockContentProvider(FilesAll);
+        Assert.That(navigator.HasBeenShutDown, Is.False);
+
+        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
+        displayViewModel.CloseDisplay();
+
+        Assert.That(navigator.HasBeenShutDown, Is.True);
+        displayViewModel.Dispose();
+    }
+
+    [Test]
     public void DisposeTest()
     {
         var navigator = new MockNavigator();

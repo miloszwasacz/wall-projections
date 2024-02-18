@@ -1,6 +1,6 @@
-﻿using Avalonia.Controls;
+﻿using System.Reflection;
+using Avalonia.Controls;
 using Avalonia.Headless;
-using Avalonia.Headless.NUnit;
 using Avalonia.Input;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.ViewModels;
@@ -162,5 +162,87 @@ public class DisplayWindowTest
                 Assert.Pass();
                 break;
         }
+    }
+
+    [AvaloniaTest]
+    public void WindowClosedByUserTest()
+    {
+        var navigator = new MockNavigator();
+        var vm = new MockDisplayViewModel(navigator: navigator);
+        var displayWindow = new DisplayWindow
+        {
+            DataContext = vm
+        };
+        displayWindow.Show();
+
+        var args = CreateWindowClosingEventArgs();
+        Assert.That(args.Cancel, Is.False);
+
+        displayWindow.Window_OnClosing(displayWindow, args);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(args.Cancel, Is.True);
+            Assert.That(navigator.HasBeenShutDown, Is.True);
+        });
+    }
+
+    [AvaloniaTest]
+    public void WindowClosedByNavigatorTest()
+    {
+        var navigator = new MockNavigator();
+        var vm = new MockDisplayViewModel(navigator: navigator);
+        var displayWindow = new DisplayWindow
+        {
+            DataContext = vm
+        };
+        displayWindow.Show();
+
+        displayWindow.Close();
+
+        Assert.That(navigator.HasBeenShutDown, Is.False);
+    }
+
+    [AvaloniaTest]
+    public void WindowClosedInvalidViewModelTest()
+    {
+        var navigator = new MockNavigator();
+        var displayWindow = new DisplayWindow
+        {
+            DataContext = navigator
+        };
+        displayWindow.Show();
+
+        var args = CreateWindowClosingEventArgs();
+        Assert.That(args.Cancel, Is.False);
+
+        displayWindow.Window_OnClosing(displayWindow, args);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(args.Cancel, Is.False);
+            Assert.That(navigator.HasBeenShutDown, Is.False);
+        });
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="WindowClosingEventArgs" />
+    /// using reflection to bypass the internal constructor.
+    /// </summary>
+    /// <seealso cref="WindowClosingEventArgs(WindowCloseReason, bool)" />
+    private static WindowClosingEventArgs CreateWindowClosingEventArgs(
+        WindowCloseReason reason = WindowCloseReason.WindowClosing,
+        bool isProgrammatic = false
+    )
+    {
+        var ctor = typeof(WindowClosingEventArgs).GetConstructor(
+            BindingFlags.NonPublic | BindingFlags.Instance,
+            null,
+            new[] { typeof(WindowCloseReason), typeof(bool) },
+            null
+        );
+        var instance = ctor?.Invoke(new object[] { reason, isProgrammatic }) as WindowClosingEventArgs;
+
+        return instance ?? throw new MissingMethodException("Could not create WindowClosingEventArgs instance");
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Avalonia.Controls;
-using Avalonia.Headless.NUnit;
 using Avalonia.Platform.Storage;
 using NUnit.Framework.Constraints;
 using WallProjections.Helper;
@@ -592,6 +591,21 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(exported, Is.False);
                 Assert.That(editorViewModel, Is.Unsaved);
             });
+        }
+
+        [AvaloniaTest]
+        public void CloseEditorTest()
+        {
+            var navigator = new MockNavigator();
+            var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            navigator.OpenEditor();
+            Assert.That(navigator.IsEditorOpen, Is.True);
+
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
+
+            editorViewModel.CloseEditor();
+
+            Assert.That(navigator.IsEditorOpen, Is.False);
         }
     }
 }

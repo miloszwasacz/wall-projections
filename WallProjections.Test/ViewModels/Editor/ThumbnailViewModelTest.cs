@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using Avalonia.Headless.NUnit;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.ViewModels.Editor;

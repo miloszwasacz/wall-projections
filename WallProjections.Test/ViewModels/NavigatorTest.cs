@@ -1,0 +1,147 @@
+﻿using Avalonia.Controls;
+using WallProjections.Models;
+using WallProjections.Test.Mocks.Models;
+using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Test.Mocks.Views;
+using WallProjections.ViewModels;
+using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.Views;
+
+namespace WallProjections.Test.ViewModels;
+
+[TestFixture]
+[NonParallelizable]
+public class NavigatorTest
+{
+    [AvaloniaTest]
+    [NonParallelizable]
+    public void ConstructorTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+
+        using var navigator = new Navigator(lifetime, _ => vmProvider, () => fileHandler);
+
+        var window = lifetime.MainWindow;
+        Assert.That(window, Is.InstanceOf<DisplayWindow>());
+        Assert.That(window?.DataContext, Is.InstanceOf<IDisplayViewModel>());
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    public void ConstructorNoConfigTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new FileNotFoundException());
+
+        using var navigator = new Navigator(lifetime, _ => vmProvider, () => fileHandler);
+
+        var window = lifetime.MainWindow;
+        Assert.That(window, Is.InstanceOf<EditorWindow>());
+        Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    public void OpenEditorTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+
+        using var navigator = new Navigator(lifetime, _ => vmProvider, () => fileHandler);
+        Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
+
+        navigator.OpenEditor();
+
+        var window = lifetime.MainWindow;
+        Assert.That(window, Is.InstanceOf<EditorWindow>());
+        Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    public void CloseEditorTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+
+        using var navigator = new Navigator(lifetime, _ => vmProvider, () => fileHandler);
+        navigator.OpenEditor();
+        Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
+
+        navigator.CloseEditor();
+        Assert.Multiple(() =>
+        {
+            Assert.That(lifetime.Shutdowns, Is.Empty);
+            Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
+            Assert.That(vmProvider.HasBeenDisposed, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    public void CloseEditorNoConfigTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new FileNotFoundException());
+
+        var navigator = new Navigator(lifetime, _ => vmProvider, () => fileHandler);
+        Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
+
+        navigator.CloseEditor();
+        Assert.Multiple(() =>
+        {
+            Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
+            Assert.That(lifetime.MainWindow, Is.Null);
+            Assert.That(vmProvider.HasBeenDisposed, Is.True);
+        });
+    }
+
+    [TestFixture]
+    private class WindowExtensionsTest
+    {
+        [AvaloniaTest]
+        public async Task CloseAndDisposeTest()
+        {
+            var dataContext = new MockDataContext();
+            var closed = false;
+            var window = new Window
+            {
+                DataContext = dataContext
+            };
+            window.Closed += (_, _) => closed = true;
+            Assert.That(window.ShowInTaskbar, Is.True);
+
+            window.CloseAndDispose();
+
+            await Task.Delay(2);
+            Assert.That(window.ShowInTaskbar, Is.False);
+
+            await Task.Delay(250);
+            Assert.Multiple(() =>
+            {
+                Assert.That(dataContext.HasBeenDisposed, Is.True);
+                Assert.That(closed, Is.True);
+            });
+        }
+
+        /// <summary>
+        /// A mock <see cref="IDisposable" /> object.
+        /// </summary>
+        private class MockDataContext : IDisposable
+        {
+            public bool HasBeenDisposed { get; private set; }
+
+            public void Dispose()
+            {
+                HasBeenDisposed = true;
+            }
+        }
+    }
+}

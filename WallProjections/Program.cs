@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,6 +50,7 @@ internal class Program
     /// Initializes the Python engine on a separate thread
     /// </summary>
     /// <returns>A handle to cancel the task after the app is closed</returns>
+    [ExcludeFromCodeCoverage]
     private static CancellationTokenSource InitializePython()
     {
         //TODO Include this in the setup guide
