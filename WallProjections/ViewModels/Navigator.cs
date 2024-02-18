@@ -10,7 +10,7 @@ using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleA
 namespace WallProjections.ViewModels;
 
 /// <inheritdoc cref="INavigator" />
-public sealed class Navigator : ViewModelBase, INavigator, IDisposable
+public sealed class Navigator : ViewModelBase, INavigator
 {
     /// <summary>
     /// A mutex ensure sequential access to the main window.

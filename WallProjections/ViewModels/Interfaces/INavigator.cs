@@ -1,9 +1,11 @@
-﻿namespace WallProjections.ViewModels.Interfaces;
+﻿using System;
+
+namespace WallProjections.ViewModels.Interfaces;
 
 /// <summary>
 /// An object for application-wide navigation between views.
 /// </summary>
-public interface INavigator
+public interface INavigator : IDisposable
 {
     /// <summary>
     /// Opens the Editor.

@@ -16,10 +16,11 @@ public class EditorViewModelInternalTest
     [Test]
     public void SkipSelectedHotspotUpdateOnItemChangeTest()
     {
+        var navigator = new MockNavigator();
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
         var vmProvider = new MockViewModelProvider();
 
-        var editorViewModel = new EditorViewModel(fileHandler, vmProvider);
+        var editorViewModel = new EditorViewModel(navigator, fileHandler, vmProvider);
 
         editorViewModel.AddHotspot();
         editorViewModel.AddHotspot();

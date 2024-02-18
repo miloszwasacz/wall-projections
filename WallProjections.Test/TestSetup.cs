@@ -1,5 +1,4 @@
 ﻿using WallProjections.Models.Interfaces;
-using WallProjections.ViewModels;
 
 namespace WallProjections.Test;
 
@@ -11,7 +10,6 @@ public class TestSetup
     {
         // Dispose of the global singletons after all tests have run
         IFileHandler.DeleteConfigFolder();
-        ViewModelProvider.Instance.Dispose();
     }
 }
 

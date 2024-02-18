@@ -79,8 +79,9 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void EmptyConstructorTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
-            IEditorViewModel editorViewModel = new EditorViewModel(fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
 
             Assert.Multiple(() =>
             {
@@ -100,9 +101,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void FromConfigConstructorTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             Assert.That(editorViewModel.Hotspots, Is.Not.Empty);
             Assert.Multiple(() =>
@@ -118,9 +120,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void SetHotspotsTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             var hotspots = new[]
             {
@@ -146,9 +149,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void SelectHotspotWhenSavedTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             var selected = expectedViewModels[1];
             editorViewModel.SelectedHotspot = selected;
@@ -169,9 +173,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void SelectHotspotWhenUnsavedTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             // Asserts that modifying hotspot's properties doesn't change SelectedHotspot
             // and sets the editor to "unsaved".
@@ -208,9 +213,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void AddHotspotTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             editorViewModel.AddHotspot();
 
@@ -234,9 +240,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [TestCase(1, 2, TestName = "DeleteUnselected")]
         public void DeleteHotspotTest(int selectedIndex, int deletedIndex)
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             editorViewModel.SelectedHotspot = editorViewModel.Hotspots[selectedIndex];
             var deleted = editorViewModel.Hotspots[deletedIndex];
@@ -258,9 +265,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [TestCase((MediaEditorType)2, new[] { "" }, TestName = "AddInvalidType")]
         public async Task AddMediaTest(MediaEditorType expectedType, string[] expectedMediaPaths)
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             // Thanks to Dependency Injection we know that the selected hotspot is a MockEditorHotspotViewModel
             var selectedHotspot = editorViewModel.SelectedHotspot as MockEditorHotspotViewModel;
@@ -299,9 +307,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void AddMediaNoHotspotSelectedTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             editorViewModel.SelectedHotspot = null;
             editorViewModel.AddMedia(MediaEditorType.Images, Array.Empty<IStorageFile>());
@@ -320,9 +329,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [TestCase((MediaEditorType)2, new[] { "" }, TestName = "RemoveInvalidType")]
         public void RemoveMediaTest(MediaEditorType expectedType, string[] expectedMediaPaths)
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             // Thanks to Dependency Injection we know that the selected hotspot is a MockEditorHotspotViewModel
             var selectedHotspot = editorViewModel.SelectedHotspot as MockEditorHotspotViewModel;
@@ -380,9 +390,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void RemoveMediaNoHotspotSelectedTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             editorViewModel.SelectedHotspot = null;
             editorViewModel.RemoveMedia(MediaEditorType.Images, Array.Empty<IThumbnailViewModel>());
@@ -400,9 +411,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [TestCase(false, TestName = "Unsuccessful")]
         public void SaveConfigTest(bool savingSuccessful)
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(savingSuccessful);
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.That(editorViewModel, Is.Unsaved);
@@ -424,9 +436,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void SaveConfigExceptionTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             editorViewModel.DeleteHotspot(editorViewModel.Hotspots[^1]);
@@ -444,9 +457,10 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void SaveConfigNoHotspotsTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(true);
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
             editorViewModel.Hotspots.Clear();
             var saved = editorViewModel.SaveConfig();
@@ -464,10 +478,11 @@ namespace WallProjections.Test.ViewModels.Editor
         public void ImportConfigTest(bool expectedSuccess)
         {
             const string filePath = "test.zip";
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(expectedSuccess);
             var (config, expectedViewModels) = CreateConfig();
             fileHandler.Config = config;
-            IEditorViewModel editorViewModel = new EditorViewModel(fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             editorViewModel.DeleteHotspot(editorViewModel.Hotspots[^1]);
@@ -494,8 +509,9 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void ImportConfigExceptionTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
-            IEditorViewModel editorViewModel = new EditorViewModel(fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.That(editorViewModel, Is.Unsaved);
@@ -513,11 +529,12 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void ImportConfigNoHotspotsTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(true)
             {
                 Config = new Config(new List<Hotspot>())
             };
-            IEditorViewModel editorViewModel = new EditorViewModel(fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.That(editorViewModel, Is.Unsaved);
@@ -538,8 +555,9 @@ namespace WallProjections.Test.ViewModels.Editor
         public void ExportConfigTest(bool expectedSuccess)
         {
             const string exportPath = "test";
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(expectedSuccess);
-            IEditorViewModel editorViewModel = new EditorViewModel(fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.That(editorViewModel, Is.Unsaved);
@@ -560,8 +578,9 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         public void ExportConfigExceptionTest()
         {
+            var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
-            IEditorViewModel editorViewModel = new EditorViewModel(fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.That(editorViewModel, Is.Unsaved);

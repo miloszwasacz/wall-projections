@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
+using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.ViewModels;
 using WallProjections.Views;
@@ -10,10 +11,19 @@ namespace WallProjections.Test.Views;
 [TestFixture]
 public class VideoViewTest
 {
+    // ReSharper disable once InconsistentNaming
+    private readonly ViewModelProvider VMProvider = new(new MockNavigator());
+
+    [OneTimeTearDown]
+    public void TearDown()
+    {
+        VMProvider.Dispose();
+    }
+
     [AvaloniaTest]
     public void ViewModelTest()
     {
-        var videoViewModel = ViewModelProvider.Instance.GetVideoViewModel();
+        var videoViewModel = VMProvider.GetVideoViewModel();
         var displayViewModel = new MockDisplayViewModel(videoViewModel: videoViewModel);
         var displayWindow = new DisplayWindow
         {

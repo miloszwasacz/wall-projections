@@ -1,12 +1,10 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
 using Avalonia.Input;
-using Avalonia.Threading;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Display;
-using WallProjections.Test.Mocks.Views;
 using WallProjections.Views;
 
 namespace WallProjections.Test.Views;
@@ -66,32 +64,21 @@ public class DisplayWindowTest
             DataContext = vm
         };
         displayWindow.Show();
-        Dispatcher.UIThread.RunJobs();
 
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
 
         displayWindow.KeyPress(Key.F11, RawInputModifiers.None);
-        Dispatcher.UIThread.RunJobs();
-        displayWindow.KeyRelease(Key.F11, RawInputModifiers.None);
-        Dispatcher.UIThread.RunJobs();
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.Normal));
 
         displayWindow.KeyPress(Key.F11, RawInputModifiers.None);
-        Dispatcher.UIThread.RunJobs();
-        displayWindow.KeyRelease(Key.F11, RawInputModifiers.None);
-        Dispatcher.UIThread.RunJobs();
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
-
-        vm.Dispose();
     }
 
     [AvaloniaTest]
-    [NonParallelizable]
     public void QuitTest()
     {
-        var lifetime = new MockDesktopLifetime();
-        Application.Current!.ApplicationLifetime = lifetime;
-        var vm = new MockDisplayViewModel();
+        var navigator = new MockNavigator();
+        var vm = new MockDisplayViewModel(navigator: navigator);
         var displayWindow = new DisplayWindow
         {
             DataContext = vm
@@ -99,8 +86,81 @@ public class DisplayWindowTest
         displayWindow.Show();
 
         displayWindow.KeyPress(Key.Escape, RawInputModifiers.None);
-        Dispatcher.UIThread.RunJobs();
-        displayWindow.KeyRelease(Key.Escape, RawInputModifiers.None);
-        Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
+        Assert.That(navigator.HasBeenShutDown, Is.True);
+    }
+
+    [AvaloniaTest]
+    public void OpenEditorTest()
+    {
+        var navigator = new MockNavigator();
+        var vm = new MockDisplayViewModel(navigator: navigator);
+        var displayWindow = new DisplayWindow
+        {
+            DataContext = vm
+        };
+        displayWindow.Show();
+
+        Assert.That(navigator.IsEditorOpen, Is.False);
+        displayWindow.KeyPress(Key.E, RawInputModifiers.None);
+        Assert.That(navigator.IsEditorOpen, Is.True);
+    }
+
+    [AvaloniaTheory]
+    public void KeyPressTest(Key key)
+    {
+        Assume.That(key is not Key.F11);
+        Assume.That(key is not Key.Escape);
+        Assume.That(key is not Key.E);
+        Assume.That(key is > Key.D9 or < Key.D0);
+
+        var navigator = new MockNavigator();
+        var vm = new MockDisplayViewModel(navigator: navigator);
+        var displayWindow = new DisplayWindow
+        {
+            DataContext = vm
+        };
+        displayWindow.Show();
+
+        displayWindow.KeyPress(key, RawInputModifiers.None);
+        Assert.Multiple(() =>
+        {
+            Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
+            Assert.That(navigator.HasBeenShutDown, Is.False);
+            Assert.That(navigator.IsEditorOpen, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    [TestCase(Key.F11)]
+    [TestCase(Key.Escape)]
+    [TestCase(Key.E)]
+    public void KeyPressInvalidViewModelTest(Key key)
+    {
+        var navigator = new MockNavigator();
+        var displayWindow = new DisplayWindow
+        {
+            DataContext = navigator
+        };
+        displayWindow.Show();
+
+        displayWindow.KeyPress(key, RawInputModifiers.None);
+
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+        switch (key)
+        {
+            case Key.F11:
+                // Toggling fullscreen should still work
+                Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.Normal));
+                break;
+            case Key.Escape:
+                Assert.That(navigator.HasBeenShutDown, Is.False);
+                break;
+            case Key.E:
+                Assert.That(navigator.IsEditorOpen, Is.False);
+                break;
+            default:
+                Assert.Pass();
+                break;
+        }
     }
 }
