@@ -48,7 +48,7 @@ make full use of the system.
 The system features an editor to allow for full visual editing of hotspots, with no editing of config files or manual 
 import of media required. The configuration can be backed up via a single, easy to manage file and later restored back 
 to into the program. We aim for the software to be installed and ran on a small form factor computer, specifically the
-RaspberryPi Model 4.
+Raspberry Pi Model 4.
 
 ## Getting Started
 The software can be installed on Windows, MacOS, and Linux computers, as well as on the Raspberry Pi for deployment.
@@ -119,7 +119,7 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 
 ### First Release
 
-#### Hotspot Imput (Computer Vision)
+#### Hotspot Input (Computer Vision)
 - [x] Computer vision is used to both calibrate the projector and camera to match.
 - [x] Hand tracking is used to tell when someone is touching a hotspot.
 - [ ] All of the computer vision code runs at a good speed on a Raspberry Pi Model 4B.
@@ -133,7 +133,7 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 - [x] The hotspot data is retained between closing and reopening the software.
 - [ ] Styling is added to make the information display more visually appealing and engaging.
 - [ ] Multiple images and videos can be displayed at the same time, while keeping the content easily readable and digestible.
-- [ ] Animatons/transitions ar eused to make the softare feel less static.
+- [ ] Animatons/transitions are used to make the software feel less static.
 - [ ] Automatic layouting is used to allow for a more complex and appealing visual presentation.
 
 #### Editor
@@ -143,7 +143,7 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 
 ### Final Release
 
-#### Hotspot Imput (Computer Vision)
+#### Hotspot Input (Computer Vision)
 - [ ] Crop the camera view to reduce the required processing power for hand tracking.
 - [ ] Use a faster model to quickly find hands, before using the slower model to find a fingertip on a much smaller area of the image.
 
@@ -170,7 +170,7 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 - [NUnit](https://docs.nunit.org/)
 
 ### Computer Vision
-- **TODO:** Get Python version
+- [Python 3.11](https://www.python.org/downloads/release/python-3110/)
 - [Python.NET](https://github.com/pythonnet/pythonnet)
 - [MediaPipe](https://developers.google.com/mediapipe)
 
