@@ -62,6 +62,7 @@ button activates. Once the finger leaves the hotspot, it also takes this amount
 of time to \"cool down\"."""
 
 
+# noinspection PyPep8Naming
 class EventListener(ABC):
     @abstractmethod
     def OnPressDetected(self, hotspot_id: int) -> None:
@@ -252,6 +253,7 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
         video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
         model_output = hands_model.process(video_capture_img_rgb)
 
+        # noinspection PyUnresolvedReferences
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
             fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
