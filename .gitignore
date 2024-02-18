@@ -907,3 +907,10 @@ pyrightconfig.json
 
 .DS_STORE
 .avalonia-build-tasks
+
+# Jekyll Ignore
+_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
+vendor
