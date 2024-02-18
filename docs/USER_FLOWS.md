@@ -2,40 +2,38 @@
 
 ## Museum visitor - interact with hotspot
 
-1. They approach the replica artefact.
-2. The visitor touches a hotspot on the artefact.
+1. Approach the replica artefact.
+2. Touch a hotspot on the artefact.
 3. Information regarding that part of the artefact is projected onto a nearby wall.
-4. The visitor reads/watches the information projected to learn more about the artefact.
+4. Read/watch the information projected to learn more about the artefact.
 
-## Exhibit maintainer - setup
+## Curator - setup
 
 1. Install the hardware (projector, computer & camera) high-up on the wall, facing the artifact.
-2. Follow the "relocate hotspots" flow to position the hotspots in the correct place. (This would also have to include some way to add/remove hotspots.)
-3. Follow the "calibration" flow to calibrate the camera system.
+2. Follow the "calibration" flow to calibrate the camera system.
+3. Follow the "relocate hotspots" flow to position the hotspots in the correct place. (This would also have to include some way to add/remove hotspots.)
 4. Follow the "update content" flow to add the content to be projected.
 
-## Exhibit maintainer - relocate hotspots
+## Curator - calibration
+
+Calibrating to ensure the camera hand detection lines up with the projected hotspots.
+
+1. Activate the calibration procedure from the UI.
+2. The software automatically projects tracking markers across the view, and determines the location of symbols using computer vision.
+3. The software tells the curator that calibration is finished.
+
+## Curator - relocate hotspots
 
 1. Switch on hotspot relocation mode.
-2. Adjust location of hotspots interactively somehow (e.g. using a mouse).
-3. Press some button to save the new locations.
+2. Adjust location of hotspots interactively (e.g. using a mouse).
+3. Press the save button to save the new locations.
 
-## Exhibit maintainer - calibration
+## Exhibit designer - update content
 
-(Calibrating the camera system with the location of the hotspots.)
-
-1. Ensure the artifact is well-lit with white light. (So that the computer vision works properly.)
-2. Activate the calibration procedure from the UI.
-3. The software automatically projects some symbol in place of each hotspot, determines the location of each symbol using computer vision, and plays a beep sound to indicate that the calibration is complete.
-
-## Exhibit maintainer - update content
-
-(could use a USB stick connected to the raspberry pi or whatever to store the content)
-
-1. Take the USB stick from whatever computing hardware we’re using
-2. Connect it into their computer
-3. They transfer the files they want to be projected, i.e. an image or a video file for each hotspot
-    - Could work simply using directory structure - each hotspot has its own folder which requires there to be one and only one image or video file inside of it to be projected
-    - That would make it nice and easy for the museum staff
-    - Could also have a simple program for editing the information stored in a file. Maybe use a rebranded zip file similar to Word .docx to cleanly package the information.
-4. Plug the USB back into the hardware
+1. Open the WallProjections software on a laptop/PC.
+2. Add all the required content for all the hotspots (images, text, video etc.)
+3. Export the project with all the added content to a USB drive.
+4. Plug the USB drive, as well as a mouse and keyboard to the setup Raspberry Pi.
+5. Open the editor on the WallProjections software on the Raspberry Pi and import the project from the USB drive.
+6. Move the hotspot locations to the desired positions on the artefacts.
+7. Press the save button to save the updated positions.
