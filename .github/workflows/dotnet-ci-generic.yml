@@ -1,0 +1,43 @@
+﻿# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET CI Generic
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: 'Operating system to run the tests on'
+        type: string
+        required: true
+
+jobs:
+  build:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget
+
+      - name: Install LibVLCSharp dependencies
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: sudo apt install -y libvlc-dev vlc
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c DebugSkipPython
+
+      - name: Test
+        run: dotnet test --no-build -c DebugSkipPython --verbosity normal

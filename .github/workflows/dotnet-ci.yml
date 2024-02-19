@@ -1,44 +1,10 @@
-﻿# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET CI
+﻿name: .NET CI
 
 on:
   push:
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macOS-latest ]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 6.0.x
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget
-
-      - name: Install LibVLCSharp dependencies
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: sudo apt install -y libvlc-dev vlc
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --no-restore -c DebugSkipPython
-
-      - name: Test
-        run: dotnet test --no-build -c DebugSkipPython --verbosity normal
+  test:
+    uses: ./.github/workflows/dotnet-ci-generic.yml
+    with:
+      os: 'ubuntu-latest'
