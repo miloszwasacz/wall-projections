@@ -30,7 +30,7 @@ public interface IDisplayViewModel : IDisposable
     /// </summary>
     /// <param name="sender">The sender of the event</param>
     /// <param name="e">Event args holding the ID of the selected <see cref="Hotspot" /></param>
-    public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e);
+    public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e);
 
     /// <summary>
     /// Opens the <see cref="EditorWindow">Editor</see>.

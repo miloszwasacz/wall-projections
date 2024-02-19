@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
@@ -35,7 +36,8 @@ public class App : Application
         {
             _navigator = new Navigator(
                 desktop,
-                nav => new ViewModelProvider(nav),
+                PythonHandler.Instance,
+                (nav, pythonHandler) => new ViewModelProvider(nav, pythonHandler),
                 () => new FileHandler()
             );
         }

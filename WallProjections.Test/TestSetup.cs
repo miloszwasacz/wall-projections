@@ -1,15 +1,27 @@
-﻿using WallProjections.Models.Interfaces;
+﻿using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test;
 
 [SetUpFixture]
 public class TestSetup
 {
+    private static IPythonHandler? _pythonHandler;
+
+    [OneTimeSetUp]
+    public void GlobalSetup()
+    {
+        // Set up the global singletons before any tests run
+        _pythonHandler = PythonHandler.Initialize();
+    }
+
     [OneTimeTearDown]
     public void GlobalTearDown()
     {
         // Dispose of the global singletons after all tests have run
         IFileHandler.DeleteConfigFolder();
+        _pythonHandler?.Dispose();
     }
 }
 

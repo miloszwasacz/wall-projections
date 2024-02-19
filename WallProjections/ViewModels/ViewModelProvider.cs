@@ -1,6 +1,7 @@
 ﻿using System;
 using LibVLCSharp.Shared;
 using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Display;
@@ -26,12 +27,19 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     private readonly INavigator _navigator;
 
     /// <summary>
+    /// The app-wide <see cref="IPythonHandler" /> used for Python interop
+    /// </summary>
+    private readonly IPythonHandler _pythonHandler;
+
+    /// <summary>
     /// Creates a new <see cref="ViewModelProvider" /> with the given <see cref="INavigator" />
     /// </summary>
     /// <param name="navigator">The app-wide <see cref="INavigator" /> used for navigation between views</param>
-    public ViewModelProvider(INavigator navigator)
+    /// <param name="pythonHandler">The app-wide <see cref="IPythonHandler" /> used for Python interop</param>
+    public ViewModelProvider(INavigator navigator, IPythonHandler pythonHandler)
     {
         _navigator = navigator;
+        _pythonHandler = pythonHandler;
     }
 
     /// <summary>
@@ -48,7 +56,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
     public IDisplayViewModel GetDisplayViewModel(IConfig config) =>
-        new DisplayViewModel(_navigator, this, new ContentProvider(config), PythonEventHandler.Instance);
+        new DisplayViewModel(_navigator, this, new ContentProvider(config), _pythonHandler);
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance

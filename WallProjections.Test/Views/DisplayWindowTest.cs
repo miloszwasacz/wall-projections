@@ -45,7 +45,7 @@ public class DisplayWindowTest
 
         foreach (var id in Ids)
         {
-            vm.OnHotspotSelected(null, new IPythonEventHandler.HotspotSelectedArgs(id));
+            vm.OnHotspotSelected(null, new IPythonHandler.HotspotSelectedArgs(id));
             Assert.Multiple(() =>
             {
                 Assert.That(vm.CurrentHotspotId, Is.EqualTo(id));

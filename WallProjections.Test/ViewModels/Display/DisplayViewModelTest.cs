@@ -149,7 +149,7 @@ public class DisplayViewModelTest
     public void CreationTest(ImmutableList<Hotspot.Media> hotspots)
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonEventHandler();
+        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(hotspots);
 
         var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
@@ -164,14 +164,14 @@ public class DisplayViewModelTest
     {
         var hotspot = hotspots[0];
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonEventHandler();
+        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(hotspots);
 
         var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
         var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
 
-        var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
+        var args = new IPythonHandler.HotspotSelectedArgs(HotspotId);
         Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
         Assert.Multiple(() =>
         {
@@ -201,12 +201,12 @@ public class DisplayViewModelTest
     public void OnHotspotSelectedNoConfigTest()
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonEventHandler();
+        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(ImmutableList<Hotspot.Media>.Empty);
 
         var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
 
-        var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
+        var args = new IPythonHandler.HotspotSelectedArgs(HotspotId);
         AssertJustInitialized(displayViewModel);
         Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
 
@@ -226,14 +226,14 @@ public class DisplayViewModelTest
     {
         var (exception, expectedDescription) = testCase;
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonEventHandler();
+        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(exception);
 
         var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
         var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
         var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
 
-        var args = new IPythonEventHandler.HotspotSelectedArgs(HotspotId);
+        var args = new IPythonHandler.HotspotSelectedArgs(HotspotId);
 
         AssertJustInitialized(displayViewModel);
 
@@ -251,7 +251,7 @@ public class DisplayViewModelTest
     public void OpenEditorTest()
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonEventHandler();
+        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(FilesAll);
         Assert.That(navigator.IsEditorOpen, Is.False);
 
@@ -266,7 +266,7 @@ public class DisplayViewModelTest
     public void CloseDisplayTest()
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonEventHandler();
+        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(FilesAll);
         Assert.That(navigator.HasBeenShutDown, Is.False);
 
@@ -281,7 +281,7 @@ public class DisplayViewModelTest
     public void DisposeTest()
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonEventHandler();
+        var pythonHandler = new MockPythonHandler();
         var config = new Config(Enumerable.Empty<Hotspot>());
         var contentProvider = new ContentProvider(config);
 

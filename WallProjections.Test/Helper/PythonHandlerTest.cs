@@ -1,18 +1,18 @@
 ﻿using WallProjections.Helper;
-using HotspotSelectedArgs = WallProjections.Helper.Interfaces.IPythonEventHandler.HotspotSelectedArgs;
+using HotspotSelectedArgs = WallProjections.Helper.Interfaces.IPythonHandler.HotspotSelectedArgs;
 
 namespace WallProjections.Test.Helper;
 
 [TestFixture]
-public class PythonEventHandlerTest
+public class PythonHandlerTest
 {
     private static readonly int[] Ids = { 0, 1, 2, 1000, -100 };
 
     [Test]
     public void SingletonPatternTest()
     {
-        var instance1 = PythonEventHandler.Instance;
-        var instance2 = PythonEventHandler.Instance;
+        var instance1 = PythonHandler.Instance;
+        var instance2 = PythonHandler.Instance;
 
         Assert.That(instance2, Is.SameAs(instance1));
     }
@@ -39,15 +39,15 @@ public class PythonEventHandlerTest
     }
 
     /// <summary>
-    /// Uses reflection to get the private constructor of <see cref="PythonEventHandler" />,
+    /// Uses reflection to get the private constructor of <see cref="PythonHandler" />,
     /// so that the global instance is not used
     /// </summary>
-    /// <returns>A new instance of <see cref="PythonEventHandler" /></returns>
-    /// <exception cref="InvalidCastException">When the object cannot be instantiated as <see cref="PythonEventHandler" /></exception>
-    private static PythonEventHandler CreateInstance()
+    /// <returns>A new instance of <see cref="PythonHandler" /></returns>
+    /// <exception cref="InvalidCastException">When the object cannot be instantiated as <see cref="PythonHandler" /></exception>
+    private static PythonHandler CreateInstance()
     {
-        var type = typeof(PythonEventHandler);
-        var res = Activator.CreateInstance(type, true) as PythonEventHandler;
+        var type = typeof(PythonHandler);
+        var res = Activator.CreateInstance(type, true) as PythonHandler;
         return res ?? throw new InvalidCastException("Could not construct PythonEventHandler");
     }
 }

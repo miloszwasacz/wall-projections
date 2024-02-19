@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.ViewModels;
@@ -11,7 +12,7 @@ namespace WallProjections.Test.Views;
 public class VideoViewTest
 {
     // ReSharper disable once InconsistentNaming
-    private readonly ViewModelProvider VMProvider = new(new MockNavigator());
+    private readonly ViewModelProvider VMProvider = new(new MockNavigator(), new MockPythonHandler());
 
     [OneTimeTearDown]
     public void TearDown()

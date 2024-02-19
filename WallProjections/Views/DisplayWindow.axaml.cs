@@ -128,7 +128,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 
         if (!keyVal.HasValue) return;
 
-        PythonEventHandler.Instance.OnPressDetected(keyVal.Value);
+        PythonHandler.Instance.OnPressDetected(keyVal.Value);
     }
 #endif
 }

@@ -107,11 +107,11 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     public IVideoViewModel VideoViewModel { get; }
 
     /// <summary>
-    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="IPythonEventHandler.HotspotSelectedArgs.Id" />
+    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="IPythonHandler.HotspotSelectedArgs.Id" />
     /// </summary>
     /// <param name="sender">The caller of the event (not used)</param>
     /// <param name="e">The event args containing the id of a hotspot to be theoretically loaded</param>
-    public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e)
+    public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
     {
         CurrentHotspotId = e.Id;
     }

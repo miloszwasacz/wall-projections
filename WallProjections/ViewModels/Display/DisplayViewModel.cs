@@ -31,9 +31,9 @@ Please report this to the museum staff.";
     private readonly IContentProvider _contentProvider;
 
     /// <summary>
-    /// The <see cref="IPythonEventHandler" /> used to listen for Python events
+    /// The <see cref="IPythonHandler" /> used to listen for Python events
     /// </summary>
-    private readonly IPythonEventHandler _pythonEventHandler;
+    private readonly IPythonHandler _pythonHandler;
 
     /// <summary>
     /// The backing field for <see cref="Description" />
@@ -43,25 +43,25 @@ Please report this to the museum staff.";
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> with <see cref="ImageViewModel" />
     /// and <see cref="VideoViewModel" /> fetched by <paramref name="vmProvider" />,
-    /// and starts listening for <see cref="IPythonEventHandler.HotspotSelected">Python events</see>
+    /// and starts listening for <see cref="IPythonHandler.HotspotSelected">Python events</see>
     /// </summary>
     /// <param name="navigator">The <see cref="INavigator" /> used for opening the Editor and closing the Display</param>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
     /// <param name="contentProvider">A <see cref="IContentProvider"/> for fetching data about hotspots.</param>
-    /// <param name="pythonEventHandler">The <see cref="IPythonEventHandler" /> used to listen for Python events</param>
+    /// <param name="pythonHandler">The <see cref="IPythonHandler" /> used to listen for Python events</param>
     public DisplayViewModel(
         INavigator navigator,
         IViewModelProvider vmProvider,
         IContentProvider contentProvider,
-        IPythonEventHandler pythonEventHandler
+        IPythonHandler pythonHandler
     )
     {
         _navigator = navigator;
         ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
         _contentProvider = contentProvider;
-        _pythonEventHandler = pythonEventHandler;
-        _pythonEventHandler.HotspotSelected += OnHotspotSelected;
+        _pythonHandler = pythonHandler;
+        _pythonHandler.HotspotSelected += OnHotspotSelected;
     }
 
     /// <inheritdoc />
@@ -78,7 +78,7 @@ Please report this to the museum staff.";
     public IVideoViewModel VideoViewModel { get; }
 
     /// <inheritdoc />
-    public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e)
+    public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
     {
         ShowHotspot(e.Id);
     }
@@ -129,11 +129,11 @@ Please report this to the museum staff.";
     }
 
     /// <summary>
-    /// Unsubscribes from <see cref="IPythonEventHandler.HotspotSelected" /> and disposes of <see cref="VideoViewModel" />
+    /// Unsubscribes from <see cref="IPythonHandler.HotspotSelected" /> and disposes of <see cref="VideoViewModel" />
     /// </summary>
     public void Dispose()
     {
-        _pythonEventHandler.HotspotSelected -= OnHotspotSelected;
+        _pythonHandler.HotspotSelected -= OnHotspotSelected;
         VideoViewModel.Dispose();
     }
 }

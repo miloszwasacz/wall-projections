@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Views;
@@ -28,6 +29,11 @@ public sealed class Navigator : ViewModelBase, INavigator
     private readonly IViewModelProvider _vmProvider;
 
     /// <summary>
+    /// The handler for Python interop.
+    /// </summary>
+    private readonly IPythonHandler _pythonHandler;
+
+    /// <summary>
     /// A factory for creating <see cref="IFileHandler">file handlers</see>.
     /// </summary>
     private readonly Func<IFileHandler> _fileHandlerFactory;
@@ -41,17 +47,20 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// Creates a new instance of <see cref="Navigator" />.
     /// </summary>
     /// <param name="appLifetime">The application lifetime.</param>
+    /// <param name="pythonHandler">The handler for Python interop.</param>
     /// <param name="vmProviderFactory">A factory to create a <see cref="IViewModelProvider" /> instance.</param>
     /// <param name="fileHandlerFactory">A factory to create <see cref="IFileHandler">file handlers</see>.</param>
     public Navigator(
         AppLifetime appLifetime,
-        Func<INavigator, IViewModelProvider> vmProviderFactory,
+        IPythonHandler pythonHandler,
+        Func<INavigator, IPythonHandler, IViewModelProvider> vmProviderFactory,
         Func<IFileHandler> fileHandlerFactory
     )
     {
         _appLifetime = appLifetime;
+        _pythonHandler = pythonHandler;
         _fileHandlerFactory = fileHandlerFactory;
-        _vmProvider = vmProviderFactory(this);
+        _vmProvider = vmProviderFactory(this, pythonHandler);
         _appLifetime.Exit += OnExit;
 
         Initialize();
@@ -92,6 +101,7 @@ public sealed class Navigator : ViewModelBase, INavigator
             return;
         }
 
+        _pythonHandler.RunHotspotDetection();
         Navigate(new DisplayWindow
         {
             DataContext = _vmProvider.GetDisplayViewModel(config)
@@ -114,6 +124,8 @@ public sealed class Navigator : ViewModelBase, INavigator
             ? _vmProvider.GetEditorViewModel(config, fileHandler)
             : _vmProvider.GetEditorViewModel(fileHandler);
 
+        //TODO Don't start calibration here (it's here temporarily, just for showcasing Python interop)
+        _pythonHandler.RunCalibration();
         Navigate(new EditorWindow
         {
             DataContext = vm
@@ -174,6 +186,8 @@ public sealed class Navigator : ViewModelBase, INavigator
 
         if (_appLifetime.MainWindow?.DataContext is IDisposable vm)
             vm.Dispose();
+
+        _pythonHandler.CancelCurrentTask();
 
         _appLifetime.MainWindow = null;
         _appLifetime.Exit -= OnExit;
