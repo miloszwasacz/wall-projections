@@ -28,6 +28,7 @@ public class VideoViewTest
     }
 
     [AvaloniaTest]
+    [NonParallelizable]
     public void ResizeWidthTest()
     {
         var initSize = new Size(1920, 1080);
@@ -54,6 +55,7 @@ public class VideoViewTest
     }
 
     [AvaloniaTest]
+    [NonParallelizable]
     public void ResizeHeightTest()
     {
         var initSize = new Size(1920, 1080);

@@ -1,0 +1,26 @@
+name: .NET CD Production
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: read
+
+on:
+  push:
+    tags-ignore:
+      - 'latest'
+
+jobs:
+  publish:
+    strategy:
+      matrix:
+        target: [ win-x64, osx-x64, osx-arm64, linux-x64, linux-arm ]
+    uses: ./.github/workflows/dotnet-publish.yml
+    with:
+      target: ${{ matrix.target }}
+
+  deploy:
+    needs: publish
+    uses: ./.github/workflows/dotnet-cd-generic.yml
+    with:
+      full: true
