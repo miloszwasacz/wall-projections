@@ -8,13 +8,14 @@
         x:Class="WallProjections.Views.HotspotDisplayWindow"
         x:DataType="vm:IHotspotViewModel"
         Title="HotspotDisplayWindow">
-    
+
     <!-- Styles relating to hotspot (ellipse) activation -->
     <Window.Styles>
         <!-- active animation -->
         <Style Selector="Ellipse.triggered" x:DataType="models:HotspotProjection">
             <Style.Animations>
-                <Animation Duration="0:0:1" Delay="0:0:5" PlaybackDirection="AlternateReverse" IterationCount="INFINITE">
+                <Animation Duration="0:0:1" Delay="0:0:5" PlaybackDirection="AlternateReverse"
+                           IterationCount="INFINITE">
                     <KeyFrame Cue="0%">
                         <Setter Property="(ScaleTransform.ScaleX)" Value="1" />
                         <Setter Property="(ScaleTransform.ScaleY)" Value="1" />
@@ -27,7 +28,7 @@
                 </Animation>
             </Style.Animations>
         </Style>
-        
+
         <!-- activating animation -->
         <Style Selector="Ellipse.activating" x:DataType="models:HotspotProjection">
             <Style.Animations>
@@ -46,7 +47,8 @@
     </Window.Styles>
 
     <!-- Mapping coordinates onto the display  -->
-    <ItemsControl ItemsSource="{Binding Coordinates}">
+    <ItemsControl Name="HotspotList"
+                  ItemsSource="{Binding Coordinates}">
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
@@ -60,7 +62,7 @@
                          Width="{Binding D}"
                          Fill="White"
                          Stroke="LightGray"
-                         
+
                          Classes.activating="{Binding IsActive}"
                          Classes.triggered="{Binding IsActive}">
 
@@ -72,23 +74,23 @@
                 </Ellipse>
             </DataTemplate>
         </ItemsControl.ItemTemplate>
-        
+
         <!-- Styles for ItemsControl (all circles rather than individual) -->
         <ItemsControl.Styles>
             <Style Selector="ItemsControl">
-                <Setter Property="IsVisible" Value="{Binding IsVisible}"/>
+                <Setter Property="IsVisible" Value="{Binding IsVisible}" />
                 <Setter Property="Opacity" Value="0.0" />
                 <Setter Property="Transitions">
                     <Transitions>
-                        <DoubleTransition Property="Opacity" Duration="0:0:3"/>
+                        <DoubleTransition Property="Opacity" Duration="0:0:3" />
                     </Transitions>
                 </Setter>
             </Style>
-            
+
             <Style Selector="ItemsControl[IsVisible=True]">
                 <Setter Property="Opacity" Value="1.0" />
             </Style>
-            
+
             <!-- Positioning of the hotspots -->
             <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:HotspotProjection">
                 <Setter Property="Canvas.Top" Value="{Binding Y}" />

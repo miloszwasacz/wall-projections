@@ -11,7 +11,12 @@ namespace WallProjections.Test.Mocks.ViewModels;
 public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
 {
     /// <inheritdoc/>
-    public List<HotspotProjection> Coordinates { get; private set; } = new();
+    public List<HotspotProjection> Coordinates { get; } = new()
+    {
+        new HotspotProjection { Id = 0, X = 10, Y = 10, D = 20, IsActive = false },
+        new HotspotProjection { Id = 1, X = 90, Y = 130, D = 60, IsActive = false },
+        new HotspotProjection { Id = 2, X = 120, Y = 50, D = 40, IsActive = false },
+    };
 
     /// <inheritdoc/>
     public bool IsVisible { get; private set; }
