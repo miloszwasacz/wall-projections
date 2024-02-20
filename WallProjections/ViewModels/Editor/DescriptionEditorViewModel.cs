@@ -15,6 +15,11 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
     /// <summary>
     /// Whether the <see cref="Hotspot" /> is being changed.
     /// </summary>
+    /// <remarks>
+    /// This prevents the <see cref="ContentChanged" /> event from being raised when the Hotspot is being changed
+    /// to ensure that the event is only raised when the <see cref="Title" /> or <see cref="Description" /> is actually
+    /// changed (e.g. to implement saving properly).
+    /// </remarks>
     private bool _isHotspotChanging;
 
     /// <summary>

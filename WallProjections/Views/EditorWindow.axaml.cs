@@ -316,7 +316,7 @@ public partial class EditorWindow : Window
 
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Select a media files to import...",
+            Title = "Select media files to import...",
             AllowMultiple = true,
             FileTypeFilter = filter
         });
