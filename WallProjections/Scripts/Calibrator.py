@@ -1,5 +1,9 @@
 import cv2
+from cv2 import aruco
 import numpy as np
+
+from VideoCaptureThread import takePhoto
+
 
 class Calibrator:
 
@@ -12,7 +16,7 @@ class Calibrator:
 
     def skipCalibration(self):
         self._tMatrix = self._inverseTMatrix = np.identity(3)
-
+        self._cameraWidth =  self._cameraHeight = 1
 
     def calibrate(self, displayResults : bool = False):
         projectedCoords = {}
@@ -34,7 +38,7 @@ class Calibrator:
         cameraCoords = self._detectArucos(photo, arucoDict, displayResults=displayResults)
 
         self._tMatrix = self._getTransformationMatrix(projectedCoords, cameraCoords)
-        self._inverseTMatrix = self._getTransformationMatrix(cameraCoords, projectedCoords)
+        self._inverseTMatrix = np.linalg.inv(self._tMatrix)
 
     def _drawArucos(self, projectedCoords : dict[int, tuple[int, int]], arucoDict : aruco.Dictionary) -> np.ndarray:
         """
@@ -62,7 +66,7 @@ class Calibrator:
             cv2.imshow("Labled Aruco Markers", aruco.drawDetectedMarkers(img, corners, ids))
             cv2.waitKey(60000)
 
-        detectedCoords = {}
+        detectedCoords: dict[int, tuple[np.float32, np.float32]] = {}
         if ids is None:
             return detectedCoords
         for i in range(ids.size):

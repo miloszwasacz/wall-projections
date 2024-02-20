@@ -4,8 +4,15 @@ from typing import NamedTuple, Tuple
 import cv2
 import math
 
-from WallProjections.Scripts.Calibrator import Calibrator
-from WallProjections.Scripts.EventListener import EventListener
+from Calibrator import Calibrator
+from EventListener import EventListener
+
+
+BUTTON_COOLDOWN: float = 1.5
+"""The number of seconds for which the finger must be over the hotspot until the 
+button activates. Once the finger leaves the hotspot, it also takes this amount
+of time to \"cool down\"."""
+
 
 class Point(NamedTuple):
     x: float
@@ -125,7 +132,7 @@ class Hotspot:
         """
         Returns true if given point is inside hotspot
         """
-        squared_dist = (self._x - point.x) ** 2 + (self._y - point.y) ** 2
+        squared_dist = (self._proj_pos[0] - point.x) ** 2 + (self._proj_pos[1] - point.y) ** 2
         return squared_dist <= self._radius ** 2
 
     def activate(self) -> None:
@@ -134,6 +141,3 @@ class Hotspot:
 
     def deactivate(self) -> None:
         self._is_activated = False
-    """
-    The _Button class is used to keep track if a HotSpot is activated
-    """
