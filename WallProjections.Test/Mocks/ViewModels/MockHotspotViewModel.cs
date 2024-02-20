@@ -1,22 +1,22 @@
+using System.Collections.Immutable;
 using WallProjections.Models;
 using WallProjections.ViewModels;
-using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Interfaces.Display;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
 /// <summary>
 /// A mock of <see cref="HotspotViewModel" />
 /// </summary>
-
-public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
+public class MockHotspotViewModel : ViewModelBase, IHotspotViewModel
 {
     /// <inheritdoc/>
-    public List<HotspotProjection> Coordinates { get; } = new()
-    {
+    public ImmutableList<HotspotProjection> Projections { get; } = ImmutableList.Create(
         new HotspotProjection { Id = 0, X = 10, Y = 10, D = 20, IsActive = false },
         new HotspotProjection { Id = 1, X = 90, Y = 130, D = 60, IsActive = false },
-        new HotspotProjection { Id = 2, X = 120, Y = 50, D = 40, IsActive = false },
-    };
+        new HotspotProjection { Id = 2, X = 120, Y = 50, D = 40, IsActive = false }
+    );
 
     /// <inheritdoc/>
     public bool IsVisible { get; private set; }
@@ -29,7 +29,7 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     /// <param name="id">The id of the hotspot to be activated</param>
     public void ActivateHotspot(int id)
     {
-        Coordinates.First().IsActive = true;
+        Projections.First().IsActive = true;
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     /// </summary>
     public void DeactivateHotspots()
     {
-        Coordinates.First().IsActive = false;
+        Projections.First().IsActive = false;
     }
 
     /// <inheritdoc/>

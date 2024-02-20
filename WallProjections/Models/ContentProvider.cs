@@ -1,20 +1,21 @@
 using System.IO;
-using System.Linq;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Models;
 
 public class ContentProvider : IContentProvider
 {
-    private static readonly string[] ImageExtensions = { ".jpeg", ".png", ".jpg" };
-    private static readonly string[] VideoExtensions = { ".mp4", ".mov", ".mkv", ".mka", ".avi" };
-
-    private readonly IContentCache _cache;
+    /// <summary>
+    /// The <see cref="IConfig"/> for fetching data about the artifact.
+    /// </summary>
     private readonly IConfig _config;
 
-    public ContentProvider(IContentCache cache, IConfig config)
+    /// <summary>
+    /// Create a new <see cref="ContentProvider"/> with the given <see cref="IConfig"/>.
+    /// </summary>
+    /// <param name="config">The <see cref="IConfig"/> for fetching data obout the artifact.</param>
+    public ContentProvider(IConfig config)
     {
-        _cache = cache;
         _config = config;
     }
 
@@ -25,16 +26,13 @@ public class ContentProvider : IContentProvider
         if (hotspot is null)
             throw new IConfig.HotspotNotFoundException(hotspotId);
 
-        var path = _cache.GetHotspotMediaFolder(hotspot);
-        var files = Directory.GetFiles(path);
+        var fullDescriptionPath = hotspot.FullDescriptionPath;
 
-        var descriptionPath = files.FirstOrDefault(file => file.EndsWith(".txt"));
-        if (descriptionPath is null)
-            throw new FileNotFoundException("No .txt files found in hotspot folder");
+        var title = hotspot.Title;
+        var description = File.ReadAllText(fullDescriptionPath);
+        var imagePaths = hotspot.FullImagePaths;
+        var videoPaths = hotspot.FullVideoPaths;
 
-        var imagePath = files.FirstOrDefault(file => ImageExtensions.Any(file.EndsWith));
-        var videoPath = files.FirstOrDefault(file => VideoExtensions.Any(file.EndsWith));
-
-        return new Hotspot.Media(hotspot, File.ReadAllText(descriptionPath), imagePath, videoPath);
+        return new Hotspot.Media(hotspotId, title, description, imagePaths, videoPaths);
     }
 }

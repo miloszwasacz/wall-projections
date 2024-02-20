@@ -5,7 +5,7 @@ using Avalonia.Headless.NUnit;
 using Avalonia.Input;
 using Avalonia.Threading;
 using WallProjections.Helper.Interfaces;
-using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.Test.Mocks.Views;
 using WallProjections.Views;
 

@@ -1,0 +1,70 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:WallProjections.Views.EditorUserControls"
+        xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor">
+    <Design.PreviewWith>
+        <controls:DescriptionEditor />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|DescriptionEditor">
+        <!-- Set Defaults -->
+        <Setter Property="Spacing" Value="15" />
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Template">
+            <ControlTemplate x:DataType="vm:IDescriptionEditorViewModel">
+
+                <!--TODO Style children properly -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition
+                            Height="{Binding Spacing, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBox Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
+                             Watermark="Title"
+                             UseFloatingWatermark="True"
+                             TextWrapping="NoWrap"
+                             Background="White"
+                             BorderBrush="LightGray"
+                             BorderThickness="2"
+                             CornerRadius="8"
+                             Padding="8, 5, 52, 6"
+                             IsEnabled="{Binding IsEnabled}"
+                             Text="{Binding Title}" />
+
+                    <Button Grid.Column="1" Grid.Row="0"
+                            VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            BorderBrush="Transparent"
+                            BorderThickness="3"
+                            CornerRadius="0 7 7 0"
+                            Padding="12 10"
+                            Command="{Binding ImportButton_OnClick, RelativeSource={RelativeSource TemplatedParent}}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource Self}}">
+
+                        <PathIcon Width="20" Height="20"
+                                  Data="{StaticResource document_import_regular}" />
+
+                    </Button>
+
+                    <TextBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"
+                             Watermark="Description"
+                             UseFloatingWatermark="True"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             AcceptsTab="True"
+                             Background="White"
+                             BorderBrush="LightGray"
+                             BorderThickness="2"
+                             CornerRadius="8"
+                             IsEnabled="{Binding IsEnabled}"
+                             Text="{Binding Description}" />
+
+                </Grid>
+
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

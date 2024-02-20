@@ -9,7 +9,7 @@ public interface IConfig
     /// List of all hotspots (their locations and content).
     /// </summary>
     public ImmutableList<Hotspot> Hotspots { get; }
-    
+
     /// <summary>
     /// Returns hotspot if Id matches a hotspot.
     /// </summary>

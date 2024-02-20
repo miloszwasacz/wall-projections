@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
-using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.ViewModels;
 using WallProjections.Views;
 
@@ -38,7 +38,7 @@ public class VideoViewTest
         var window = new DisplayWindow
         {
             Width = initSize.Width,
-            Height = initSize.Height,
+            Height = initSize.Height
         };
         var videoView = window.VideoView;
         window.Show();
@@ -65,7 +65,7 @@ public class VideoViewTest
         var window = new DisplayWindow
         {
             Width = initSize.Width,
-            Height = initSize.Height,
+            Height = initSize.Height
         };
         var videoView = window.VideoView;
         window.Show();

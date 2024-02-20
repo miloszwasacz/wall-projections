@@ -3,11 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
-using WallProjections.ViewModels.Interfaces;
 using Avalonia.Platform.Storage;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using System.Diagnostics.CodeAnalysis;
+using WallProjections.ViewModels;
+using WallProjections.ViewModels.Editor;
+using WallProjections.ViewModels.Interfaces.Display;
 #if DEBUGSKIPPYTHON
 using Avalonia.Data;
 using WallProjections.Helper;
@@ -18,11 +20,21 @@ namespace WallProjections.Views;
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
     [ExcludeFromCodeCoverage] private IConfig? Config { get; set; }
+    [ExcludeFromCodeCoverage] private IFileHandler FileHandler { get; }
 
     public DisplayWindow()
     {
         InitializeComponent();
+        FileHandler = new FileHandler();
         WindowState = WindowState.FullScreen;
+
+        if (!FileHandler.IsConfigImported()) return;
+        Config = FileHandler.LoadConfig();
+        DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
+        new HotspotDisplayWindow
+        {
+            DataContext = ViewModelProvider.Instance.GetHotspotViewModel(Config)
+        }.Show(this);
     }
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)
@@ -30,18 +42,34 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
         switch (e.Key)
         {
             case Key.Escape:
+            {
                 var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
                 lifetime?.Shutdown();
                 return;
+            }
             case Key.F11:
+            {
                 WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
                 return;
+            }
+            case Key.E:
+            {
+                //TODO Refactor this: fetching the Config shouldn't be done in a window (maybe in App.axmal.cs?)
+                var config = Config;
+                if (config is not null)
+                {
+                    new EditorWindow
+                    {
+                        DataContext = new EditorViewModel(config, new FileHandler(), ViewModelProvider.Instance)
+                    }.Show();
+                    return;
+                }
+
+                break;
+            }
         }
 
-        var vm = ViewModel;
-        if (vm is null) return;
-
-        LoadConfig(vm, e.Key);
+        LoadConfig(e.Key);
     }
 
     internal void OnVideoViewResize(object? sender, SizeChangedEventArgs e)
@@ -53,7 +81,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 
     //TODO Get rid of this - figure out how to set the config in the viewmodel
     [ExcludeFromCodeCoverage]
-    private async void LoadConfig(IDisplayViewModel vm, Key key)
+    private async void LoadConfig(Key key)
     {
         while (Config is null)
         {
@@ -66,10 +94,12 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             var zipPath = files[0].Path.AbsolutePath;
             if (!zipPath.EndsWith(".zip")) continue;
 
-            Config = ContentCache.Instance.Load(zipPath);
+            Config = new FileHandler().ImportConfig(zipPath);
+
+            DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
         }
 
-        vm.Config = Config;
+
 #if DEBUGSKIPPYTHON
         MockPythonInput(key);
 #endif

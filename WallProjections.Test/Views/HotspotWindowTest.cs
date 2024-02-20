@@ -15,8 +15,7 @@ public class HotspotWindowTest
         {
             DataContext = vm
         };
-        
-        Assert.That(hotspotWindow.HotspotList.Items.Count, Is.EqualTo(vm.Coordinates.Count));
+
+        Assert.That(hotspotWindow.HotspotList.Items, Has.Count.EqualTo(vm.Projections.Count));
     }
-    
 }
