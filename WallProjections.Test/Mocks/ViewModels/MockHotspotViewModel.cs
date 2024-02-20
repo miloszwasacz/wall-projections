@@ -11,7 +11,7 @@ namespace WallProjections.Test.Mocks.ViewModels;
 public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
 {
     /// <inheritdoc/>
-    public List<HotCoord> Coordinates { get; private set; } = new();
+    public List<HotspotProjection> Coordinates { get; private set; } = new();
 
     /// <inheritdoc/>
     public bool ShowHotspots { get; private set; }
@@ -25,8 +25,8 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     public void ActivateHotspot(int id)
     {
         var toChange = Coordinates.First();
-        var active = new HotCoord(toChange.Id, toChange.X, toChange.Y, toChange.R, toChange.D, true);
-        var newCoords = new List<HotCoord> { active };
+        var active = new HotspotProjection(toChange.Id, toChange.X, toChange.Y, toChange.R, toChange.D, true);
+        var newCoords = new List<HotspotProjection> { active };
         newCoords.AddRange(Coordinates.Where(coord => coord.Id != toChange.Id));
         Coordinates = newCoords;
     }
@@ -38,8 +38,8 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     public void DeactivateHotspots()
     {
         var toChange = Coordinates.First();
-        var active = new HotCoord(toChange.Id, toChange.X, toChange.Y, toChange.R, toChange.D, false);
-        var newCoords = new List<HotCoord> { active };
+        var active = new HotspotProjection(toChange.Id, toChange.X, toChange.Y, toChange.R, toChange.D, false);
+        var newCoords = new List<HotspotProjection> { active };
         newCoords.AddRange(Coordinates.Where(coord => coord.Id != toChange.Id));
         Coordinates = newCoords;
     }

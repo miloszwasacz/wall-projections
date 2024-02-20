@@ -29,37 +29,37 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     }
 
     /// <inheritdoc/>
-    public List<HotCoord> Coordinates { get; private set; }
+    public List<HotspotProjection> Coordinates { get; private set; }
     
     /// <inheritdoc/>
     public bool ShowHotspots { get; private set; }
     
     /// <summary>
-    /// Goes through all the hotspots in the config file and turns them into <see cref="HotCoord"/>
+    /// Goes through all the hotspots in the config file and turns them into <see cref="HotspotProjection"/>
     /// instances 
     /// </summary>
-    /// <returns>List of <see cref="HotCoord"/> relating to all hotspots in config file</returns>
-    private List<HotCoord> GetHotspots()
+    /// <returns>List of <see cref="HotspotProjection"/> relating to all hotspots in config file</returns>
+    private List<HotspotProjection> GetHotspots()
     {
         return (from hotspot in _config!.Hotspots 
             let pos = hotspot.Position 
-            select new HotCoord(hotspot.Id, pos.X, pos.Y, pos.R, pos.R * 2, false)).ToList();
+            select new HotspotProjection(hotspot.Id, pos.X, pos.Y, pos.R, pos.R * 2, false)).ToList();
     }
 
     /// <inheritdoc/>
     public void ActivateHotspot(int id)
     {
-        //HotCoord is init only so must create a new list then set Coordinates to this list
-        var updatedCoords = new List<HotCoord>();
+        //HotspotProjection is init only so must create a new list then set Coordinates to this list
+        var updatedCoords = new List<HotspotProjection>();
         foreach (var coord in Coordinates)
         {
-            if (coord.Vis) {
-                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, false);
+            if (coord.IsActive) {
+                var newCoord = new HotspotProjection(coord.Id, coord.X, coord.Y, coord.R, coord.D, false);
                 updatedCoords.Add(newCoord);
             } 
             else if (coord.Id == id) 
             {
-                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, true);
+                var newCoord = new HotspotProjection(coord.Id, coord.X, coord.Y, coord.R, coord.D, true);
                 updatedCoords.Add(newCoord);
             } 
             else {
@@ -72,12 +72,12 @@ public class HotspotViewModel : ViewModelBase, IHotspotViewModel
     /// <inheritdoc/>
     public void DeactivateHotspots()
     {
-        //HotCoord is init only so must create a new list then set Coordinates to this list
-        var updatedCoords = new List<HotCoord>();
+        //HotspotProjection is init only so must create a new list then set Coordinates to this list
+        var updatedCoords = new List<HotspotProjection>();
         foreach (var coord in Coordinates)
         {
-            if (coord.Vis) {
-                var newCoord = new HotCoord(coord.Id, coord.X, coord.Y, coord.R, coord.D, false);
+            if (coord.IsActive) {
+                var newCoord = new HotspotProjection(coord.Id, coord.X, coord.Y, coord.R, coord.D, false);
                 updatedCoords.Add(newCoord);
             } 
             else {
