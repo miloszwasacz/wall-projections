@@ -18,10 +18,17 @@ public class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel();
             desktop.MainWindow = new DisplayWindow
             {
-                DataContext = ViewModelProvider.Instance.GetDisplayViewModel()
+                DataContext = displayViewModel
             };
+            var w = new HotspotDisplayWindow
+            {
+                DataContext = displayViewModel.HotspotViewModel
+            };
+            w.Show();
+            
 
             desktop.Exit += OnExit;
         }

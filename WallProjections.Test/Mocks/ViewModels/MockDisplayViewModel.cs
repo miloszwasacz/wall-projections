@@ -28,18 +28,21 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
 
     /// <summary>
     /// Initializes a new <see cref="MockDisplayViewModel" /> with <see cref="ImageViewModel" /> set to
-    /// <paramref name="imageViewModel" /> and <see cref="VideoViewModel" /> set to <paramref name="videoViewModel" />
+    /// <paramref name="imageViewModel" />, <see cref="VideoViewModel" /> set to <paramref name="videoViewModel" />
+    /// and <see cref="HotspotViewModel"/> set to <paramref name="hotspotViewModel"/>
     /// </summary>
     /// <param name="imageViewModel"><see cref="IImageViewModel" /> to use by the mock</param>
     /// <param name="videoViewModel"><see cref="IVideoViewModel" /> to use by the mock</param>
+    /// <param name="hotspotViewModel"><see cref="IHotspotViewModel"/> to use by the mock</param>
     /// <remarks>
-    /// Uses <see cref="MockImageViewModel" /> and <see cref="MockVideoViewModel" />
+    /// Uses <see cref="MockImageViewModel" />, <see cref="MockVideoViewModel" /> and <see cref="MockHotspotViewModel"/>
     /// if the respective parameters are <i>null</i>
     /// </remarks>
-    public MockDisplayViewModel(IImageViewModel? imageViewModel = null, IVideoViewModel? videoViewModel = null)
+    public MockDisplayViewModel(IImageViewModel? imageViewModel = null, IVideoViewModel? videoViewModel = null, IHotspotViewModel? hotspotViewModel = null)
     {
         ImageViewModel = imageViewModel ?? new MockImageViewModel();
         VideoViewModel = videoViewModel ?? new MockVideoViewModel();
+        HotspotViewModel = hotspotViewModel ?? new MockHotspotViewModel();
     }
 
     // /// <summary>
@@ -92,6 +95,11 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     /// Returns a <see cref="MockVideoViewModel" />
     /// </summary>
     public IVideoViewModel VideoViewModel { get; }
+    
+    /// <summary>
+    /// Returns a <see cref="MockHotspotViewModel" />
+    /// </summary>
+    public IHotspotViewModel HotspotViewModel { get; }
 
     /// <summary>
     /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="IPythonEventHandler.HotspotSelectedArgs.Id" />

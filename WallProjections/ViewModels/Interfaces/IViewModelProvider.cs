@@ -20,4 +20,10 @@ public interface IViewModelProvider
     /// </summary>
     /// <returns>A new <see cref="IVideoViewModel" /> instance</returns>
     public IVideoViewModel GetVideoViewModel();
+
+    /// <summary>
+    /// Creates a new <see cref="IHotspotViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="IHotspotViewModel" /> instance</returns>
+    public IHotspotViewModel GetHotspotViewModel();
 }

@@ -53,6 +53,7 @@ Please report this to the museum staff.";
     {
         ImageViewModel = vmProvider.GetImageViewModel();
         VideoViewModel = vmProvider.GetVideoViewModel();
+        HotspotViewModel = vmProvider.GetHotspotViewModel();
         _pythonEventHandler = pythonEventHandler;
         _pythonEventHandler.HotspotSelected += OnHotspotSelected;
         _contentCache = contentCache;
@@ -83,6 +84,9 @@ Please report this to the museum staff.";
 
     /// <inheritdoc />
     public IVideoViewModel VideoViewModel { get; }
+    
+    /// <inheritdoc />
+    public IHotspotViewModel HotspotViewModel { get; }
 
     /// <inheritdoc />
     public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e)
