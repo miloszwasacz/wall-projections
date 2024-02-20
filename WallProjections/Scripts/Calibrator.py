@@ -32,12 +32,13 @@ class Calibrator:
         cv2.setWindowProperty("Hotspots", cv2.WND_PROP_TOPMOST, 1)
         cv2.moveWindow("Hotspots", 1920, -20)  # Move rightwards to second monitor and upwards to hide top bar
         cv2.imshow("Hotspots", self._drawArucos(projectedCoords, arucoDict))
-        cv2.waitKey(3000)
+        #cv2.waitKey(3000)
         photo = takePhoto()
         self._cameraWidth, self._cameraHeight, _ = photo.shape
         cameraCoords = self._detectArucos(photo, arucoDict, displayResults=displayResults)
 
         self._tMatrix = self._getTransformationMatrix(projectedCoords, cameraCoords)
+        print(self._tMatrix)
         self._inverseTMatrix = np.linalg.inv(self._tMatrix)
 
     def _drawArucos(self, projectedCoords : dict[int, tuple[int, int]], arucoDict : aruco.Dictionary) -> np.ndarray:
@@ -89,7 +90,7 @@ class Calibrator:
 
         if len(fromArray) < 4:
             print(len(fromArray), "matching coords found, at least 4 are required for calibration.")
-            return
+            return np.identity(3)  # return identity for now; replace with something more meaningful later
 
         fromNpArray = np.array(fromArray, dtype=np.float32)
         toNpArray = np.array(toArray, dtype=np.float32)
@@ -124,5 +125,5 @@ class Calibrator:
         """
         Transforms a coordinate in camera space to a projector in camera space
         """
-        cam_coords = (norm_coords[0]*self._cameraWidth, norm_coords[1]*self._cameraHeight)
+        cam_coords = (norm_coords[0]*self._cameraHeight, norm_coords[1]*self._cameraWidth)
         return self.cam_to_proj(cam_coords)
