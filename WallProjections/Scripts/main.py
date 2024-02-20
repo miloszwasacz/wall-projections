@@ -111,8 +111,6 @@ def run2(screenDimensions :Tuple[int, int], hotspots : List[Hotspot], calibrator
                                 model_output.multi_hand_landmarks]
             #transform coords with matrix and draw circle
             for index_coord in index_coords:
-                print([landmarks.landmark[8]  for landmarks in
-                                model_output.multi_hand_landmarks])
                 # index_coord = calibrator.inverseTransform(index_coord)
                 # index_coord = (int(index_coord[0]), int(index_coord[1]))
                 cv2.circle(image, index_coord, 3, 255, 2)
@@ -153,7 +151,7 @@ def demo():
         if calibrator._tMatrix is None:
             exit()
 
-    hotspots = [Hotspot(0, (700, 700), calibrator, eventLister), Hotspot(1, (100, 100), calibrator, eventLister)]
+    hotspots = [Hotspot(1, (100, 100), calibrator, eventLister)]
 
     run2((1080, 1920), hotspots, calibrator)
 

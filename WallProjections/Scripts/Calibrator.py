@@ -19,11 +19,12 @@ class Calibrator:
         self._cameraWidth =  self._cameraHeight = 1
 
     def calibrate(self, displayResults : bool = False):
+        # Create a dictionary of ids to coordinates for the ArUcos
         projectedCoords = {}
         code = 0
-        for i in range(6):
-            for j  in range(12):
-                projectedCoords[code] = (25+(150*i), 25+(150*j))
+        for x in range(12):
+            for y in range(6):
+                projectedCoords[code] = (25+(150*x), 25+(150*y))
                 code = code+1
 
         arucoDict = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
@@ -49,7 +50,7 @@ class Calibrator:
         image=np.full((1080,1920), 255,np.uint8) #generate empty background
         for code in projectedCoords: #id is the name of a built in function in python, so use iD
             arucoImage = aruco.generateImageMarker(arucoDict, code, 100, borderBits= 1) #fetch ArUco
-            topLeftCorner = projectedCoords[code]
+            topLeftCorner = (projectedCoords[code][1], projectedCoords[code][0])
             #replace pixels in image with the ArUco's pixels
             image[topLeftCorner[0]:topLeftCorner[0]+arucoImage.shape[0], topLeftCorner[1]:topLeftCorner[1]+arucoImage.shape[1]] = arucoImage
         return image
@@ -103,7 +104,7 @@ class Calibrator:
         """
         rotatedVector = np.array(proj_coords, np.float32).reshape(-1, 1, 2)
         transformedVector =  cv2.perspectiveTransform(rotatedVector, self._tMatrix)[0][0]
-        return (transformedVector[1], transformedVector[0])
+        return (transformedVector[0], transformedVector[1])
 
     def proj_to_norm(self, proj_coords : tuple[int, int]) -> tuple[float, float]:
         """
@@ -111,7 +112,7 @@ class Calibrator:
         then normalizes to floats between 0 and 1, as used by mediapipe
         """
         cameraCoords = self.proj_to_cam(proj_coords)
-        return (cameraCoords[1]/self._cameraHeight, cameraCoords[0]/self._cameraWidth)
+        return (cameraCoords[0]/self._cameraHeight, cameraCoords[1]/self._cameraWidth)
     
     def cam_to_proj(self, cam_coords : tuple[float, float]) -> tuple[int, int]:
         """
@@ -119,7 +120,7 @@ class Calibrator:
         """
         rotatedVector = np.array(cam_coords, np.float32).reshape(-1, 1, 2)
         transformedVector =  cv2.perspectiveTransform(rotatedVector, self._inverseTMatrix)[0][0]
-        return (int(transformedVector[1]), int(transformedVector[0]))
+        return (int(transformedVector[0]), int(transformedVector[1]))
     
     def norm_to_proj(self, norm_coords : tuple[float, float]) -> tuple[int, int]:
         """
