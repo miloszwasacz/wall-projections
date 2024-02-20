@@ -76,7 +76,7 @@
         <!-- Styles for ItemsControl (all circles rather than individual) -->
         <ItemsControl.Styles>
             <Style Selector="ItemsControl">
-                <Setter Property="IsVisible" Value="{Binding ShowHotspots}"/>
+                <Setter Property="IsVisible" Value="{Binding IsVisible}"/>
                 <Setter Property="Opacity" Value="0.0" />
                 <Setter Property="Transitions">
                     <Transitions>

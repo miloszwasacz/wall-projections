@@ -11,9 +11,12 @@ public class HotspotViewModelTest
     public void ActivateDeactivateHotspotsTest()
     {
         var hotspotViewModel = new HotspotViewModel();
-        hotspotViewModel.Coordinates.Add(new HotspotProjection(0, 10, 10, 5, 10, false));
-        hotspotViewModel.Coordinates.Add(new HotspotProjection(1, 50, 50, 7, 14, false));
-        hotspotViewModel.Coordinates.Add(new HotspotProjection(2, 100, 200, 10, 20, false));
+        hotspotViewModel.Coordinates.Add(new HotspotProjection
+            { Id = 0, X = 10, Y = 10, D = 10, IsActive = false });
+        hotspotViewModel.Coordinates.Add(new HotspotProjection
+            { Id = 1, X = 50, Y = 50, D = 14, IsActive = false });
+        hotspotViewModel.Coordinates.Add(new HotspotProjection
+            { Id = 2, X = 100, Y = 200, D = 20, IsActive = false });
         hotspotViewModel.ActivateHotspot(0);
         Assert.Multiple(() =>
         {
@@ -41,8 +44,8 @@ public class HotspotViewModelTest
     public void DisplayHotspotsTest()
     {
         var hotspotViewModel = new HotspotViewModel();
-        Assert.That(hotspotViewModel.ShowHotspots, Is.False);
+        Assert.That(hotspotViewModel.IsVisible, Is.False);
         hotspotViewModel.DisplayHotspots();
-        Assert.That(hotspotViewModel.ShowHotspots, Is.True);
+        Assert.That(hotspotViewModel.IsVisible, Is.True);
     }
 }

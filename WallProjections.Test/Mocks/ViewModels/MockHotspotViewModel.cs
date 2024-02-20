@@ -14,7 +14,7 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     public List<HotspotProjection> Coordinates { get; private set; } = new();
 
     /// <inheritdoc/>
-    public bool ShowHotspots { get; private set; }
+    public bool IsVisible { get; private set; }
 
     /// <summary>
     /// Mock version of the ActivateHotspot function in <see cref="HotspotViewModel"/> which just
@@ -24,11 +24,7 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     /// <param name="id">The id of the hotspot to be activated</param>
     public void ActivateHotspot(int id)
     {
-        var toChange = Coordinates.First();
-        var active = new HotspotProjection(toChange.Id, toChange.X, toChange.Y, toChange.R, toChange.D, true);
-        var newCoords = new List<HotspotProjection> { active };
-        newCoords.AddRange(Coordinates.Where(coord => coord.Id != toChange.Id));
-        Coordinates = newCoords;
+        Coordinates.First().IsActive = true;
     }
 
     /// <summary>
@@ -37,16 +33,12 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     /// </summary>
     public void DeactivateHotspots()
     {
-        var toChange = Coordinates.First();
-        var active = new HotspotProjection(toChange.Id, toChange.X, toChange.Y, toChange.R, toChange.D, false);
-        var newCoords = new List<HotspotProjection> { active };
-        newCoords.AddRange(Coordinates.Where(coord => coord.Id != toChange.Id));
-        Coordinates = newCoords;
+        Coordinates.First().IsActive = false;
     }
 
     /// <inheritdoc/>
     public void DisplayHotspots()
     {
-        ShowHotspots = true;
+        IsVisible = true;
     }
 }

@@ -13,7 +13,7 @@ public interface IHotspotViewModel
     /// <summary>
     /// Decides whether or not to display the hotspots
     /// </summary>
-    public bool ShowHotspots { get; }
+    public bool IsVisible { get; }
     
     /// <summary>
     /// Changes the <see cref="HotspotProjection.IsActive"/> parameter for all
@@ -33,7 +33,7 @@ public interface IHotspotViewModel
     public void DeactivateHotspots();
     
     /// <summary>
-    /// Changes <see cref="ShowHotspots" /> to true
+    /// Changes <see cref="IsVisible" /> to true
     /// </summary>
     public void DisplayHotspots();
 }
