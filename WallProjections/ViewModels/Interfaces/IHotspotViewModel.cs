@@ -22,7 +22,7 @@ public interface IHotspotViewModel
     /// to true in <see cref="Coordinates"/> where Id matches
     /// the id passed into the function
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="id">The id of the hotspot to be activated</param>
     public void ActivateHotspot(int id);
 
     /// <summary>

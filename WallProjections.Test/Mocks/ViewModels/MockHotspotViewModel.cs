@@ -17,10 +17,11 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     public bool ShowHotspots { get; private set; }
 
     /// <summary>
-    /// mock version of the ActivateHotspot function in <see cref="HotspotViewModel"/> which just
-    /// sets the first hotspot in the list to true
+    /// Mock version of the ActivateHotspot function in <see cref="HotspotViewModel"/> which just
+    /// sets the first hotspot in the list to true, takes in the param <paramref name="id"></paramref>
+    /// to uphold the interface but does not use this parameter 
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="id">The id of the hotspot to be activated</param>
     public void ActivateHotspot(int id)
     {
         var toChange = Coordinates.First();
@@ -31,7 +32,7 @@ public class MockHotspotViewModel: ViewModelBase, IHotspotViewModel
     }
 
     /// <summary>
-    /// mock version of the DeactivateHotspot function in <see cref="HotspotViewModel"/> which just
+    /// Mock version of the DeactivateHotspot function in <see cref="HotspotViewModel"/> which just
     /// sets the first hotspot in the list to false
     /// </summary>
     public void DeactivateHotspots()
