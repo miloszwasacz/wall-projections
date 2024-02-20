@@ -31,6 +31,10 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
         if (!FileHandler.IsConfigImported()) return;
         Config = FileHandler.LoadConfig();
         DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
+        new HotspotDisplayWindow
+        {
+            DataContext = ViewModelProvider.Instance.GetHotspotViewModel(Config)
+        }.Show(this);
     }
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)

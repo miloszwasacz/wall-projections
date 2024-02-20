@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.ViewModels.Display;
@@ -30,6 +30,12 @@ public class MockViewModelProvider : IViewModelProvider
     /// </summary>
     /// <returns>A new <see cref="MockVideoViewModel"/></returns>
     public IVideoViewModel GetVideoViewModel() => new MockVideoViewModel();
+
+    /// <summary>
+    /// Creates a new <see cref="MockHotspotViewModel"/>
+    /// </summary>
+    /// <returns>A new <see cref="MockHotspotViewModel"/></returns>
+    public IHotspotViewModel GetHotspotViewModel(IConfig config) => new MockHotspotViewModel();
 
     #endregion
 

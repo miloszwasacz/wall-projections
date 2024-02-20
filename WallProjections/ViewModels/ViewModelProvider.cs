@@ -136,6 +136,13 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     #endregion
 
     /// <summary>
+    /// Creates a new <see cref="HotspotViewModel" /> instance
+    /// </summary>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
+    /// <returns>A new <see cref="HotspotViewModel" /> instance</returns>
+    public IHotspotViewModel GetHotspotViewModel(IConfig config) => new HotspotViewModel(config);
+
+    /// <summary>
     /// Disposes of the <see cref="LibVlc" /> instance on resets the backing field to <i>null</i>,
     /// so that a new instance can be created if needed
     /// </summary>

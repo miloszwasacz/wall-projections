@@ -29,6 +29,13 @@ public interface IViewModelProvider
     /// <returns>A new <see cref="IVideoViewModel" /> instance</returns>
     public IVideoViewModel GetVideoViewModel();
 
+    /// <summary>
+    /// Creates a new <see cref="IHotspotViewModel" /> instance
+    /// </summary>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
+    /// <returns>A new <see cref="IHotspotViewModel" /> instance</returns>
+    public IHotspotViewModel GetHotspotViewModel(IConfig config);
+
     #endregion
 
     #region Editor
