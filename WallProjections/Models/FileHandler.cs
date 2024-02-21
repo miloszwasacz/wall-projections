@@ -174,16 +174,6 @@ public class FileHandler : IFileHandler
         return JsonSerializer.Deserialize<Config>(configFile) ??
                throw new JsonException("Config format invalid");
     }
-
-    //TODO Remove this
-    /// <summary>
-    /// Checks if config has already been imported into the app folder.
-    /// </summary>
-    /// <returns>True if config imported, false otherwise.</returns>
-    public bool IsConfigImported()
-    {
-        return File.Exists(Path.Combine(ConfigFolderPath, ConfigFileName));
-    }
 }
 
 /// <summary>

@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 #if !DEBUGSKIPPYTHON
 using System.Diagnostics;
 using Python.Runtime;
+#else
+using System.Diagnostics.CodeAnalysis;
 #endif
 using WallProjections.Helper.Interfaces;
 

@@ -12,7 +12,7 @@ public class HotspotViewModelTest
     /// <summary>
     /// The tolerance for comparing floating point numbers (i.e. hotspot positions)
     /// </summary>
-    private const double FpCompTolerance = 0.001;
+    public const double PositionCmpTolerance = 0.001;
 
     /// <summary>
     /// Creates a new config with 3 hotspots
@@ -41,17 +41,21 @@ public class HotspotViewModelTest
     {
         var config = CreateConfig();
         var hotspotViewModel = new HotspotViewModel(config);
-        Assert.That(
-            hotspotViewModel.Projections,
-            Is.EquivalentTo(config.Hotspots).Using<HotspotProjection, Hotspot>((actual, expected) =>
-            {
-                var id = actual.Id == expected.Id;
-                var x = Math.Abs(actual.X - expected.Position.X) < FpCompTolerance;
-                var y = Math.Abs(actual.Y - expected.Position.Y) < FpCompTolerance;
-                var d = Math.Abs(actual.D - 2 * expected.Position.R) < FpCompTolerance;
-                return id && x && y && d;
-            })
-        );
+        Assert.Multiple(() =>
+        {
+            Assert.That(
+                hotspotViewModel.Projections,
+                Is.EquivalentTo(config.Hotspots).Using<HotspotProjection, Hotspot>((actual, expected) =>
+                {
+                    var id = actual.Id == expected.Id;
+                    var x = Math.Abs(actual.X - expected.Position.X) < PositionCmpTolerance;
+                    var y = Math.Abs(actual.Y - expected.Position.Y) < PositionCmpTolerance;
+                    var d = Math.Abs(actual.D - 2 * expected.Position.R) < PositionCmpTolerance;
+                    return id && x && y && d;
+                })
+            );
+            Assert.That(hotspotViewModel.IsVisible, Is.False);
+        });
     }
 
     [Test]

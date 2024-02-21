@@ -63,8 +63,4 @@ public interface IFileHandler
             Console.Error.WriteLine(e);
         }
     }
-
-
-    // TODO: Remove this
-    public bool IsConfigImported();
 }

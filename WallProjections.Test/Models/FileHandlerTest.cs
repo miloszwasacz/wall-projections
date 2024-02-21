@@ -141,7 +141,7 @@ public class FileHandlerTest
 
         var fileHandler = new FileHandler();
         fileHandler.ImportConfig(TestZip);
-        Assert.That(fileHandler.IsConfigImported(), Is.True, "Config not successfully imported for test");
+        AssertConfigImported();
 
         fileHandler.ExportConfig(tempFilePath);
         Assert.That(File.Exists(tempFilePath), Is.True, "Exported zip does not exist");
@@ -823,5 +823,13 @@ public class FileHandlerTest
                 CollectionAssert.AreEqual(hotspot1.VideoPaths, hotspot2.VideoPaths);
             });
         }
+    }
+
+    /// <summary>
+    /// Asserts that the config file has been correctly imported
+    /// </summary>
+    private static void AssertConfigImported()
+    {
+        Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, IFileHandler.ConfigFileName)), Is.True);
     }
 }

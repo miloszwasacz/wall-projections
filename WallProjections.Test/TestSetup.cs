@@ -12,7 +12,7 @@ public class TestSetup
     /// A mock of the Python runtime supplied to the <see cref="PythonHandler.Instance">Python handler</see>
     /// at <see cref="PythonHandler.Initialize">initialization</see>
     /// </summary>
-    public static MockPythonProxy PythonRuntime { get; private set; } = new();
+    public static MockPythonProxy PythonRuntime { get; } = new();
 
     /// <summary>
     /// The global instance of the <see cref="PythonHandler.Instance">Python handler</see>

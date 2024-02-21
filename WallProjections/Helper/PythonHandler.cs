@@ -54,6 +54,11 @@ public sealed class PythonHandler : IPythonHandler
     private readonly IPythonProxy _pythonProxy;
 
     /// <summary>
+    /// A mutex to ensure sequential access to <see cref="_currentTask" />
+    /// </summary>
+    private readonly Mutex _taskMutex = new();
+
+    /// <summary>
     /// The currently running Python task
     /// </summary>
     private CancellationTokenSource? _currentTask;
@@ -71,8 +76,25 @@ public sealed class PythonHandler : IPythonHandler
     private async Task RunNewPythonAction(Action<IPythonProxy> action)
     {
         CancelCurrentTask();
-        _currentTask = new CancellationTokenSource();
-        await Task.Run(() => RunPythonAction(action), _currentTask.Token);
+        _taskMutex.WaitOne();
+        var task = _currentTask = new CancellationTokenSource();
+        _taskMutex.ReleaseMutex();
+        await Task.Run(() =>
+        {
+            try
+            {
+                RunPythonAction(action);
+            }
+            catch (Exception)
+            {
+                if (task.IsCancellationRequested)
+                {
+                    //TODO Log to file
+                    Console.Out.WriteLine("Task was cancelled");
+                }
+                else throw;
+            }
+        }, task.Token);
     }
 
     /// <summary>
@@ -98,10 +120,19 @@ public sealed class PythonHandler : IPythonHandler
     /// <inheritdoc />
     public void CancelCurrentTask()
     {
+        _taskMutex.WaitOne();
+        if (_currentTask is null)
+        {
+            _taskMutex.ReleaseMutex();
+            return;
+        }
+
         RunPythonAction(python => python.StopHotspotDetection());
         _currentTask?.Cancel();
         _currentTask?.Dispose();
         _currentTask = null;
+
+        _taskMutex.ReleaseMutex();
     }
 
     /// <inheritdoc />

@@ -26,23 +26,115 @@ public class PythonHandlerTest
     }
 
     [Test]
+    [NonParallelizable]
+    public void InitializeTest()
+    {
+        // Clear the global instance
+        var field = typeof(PythonHandler).GetField("_instance", BindingFlags.NonPublic | BindingFlags.Static)
+                    ?? throw new MissingFieldException("Could not find the `_instance` field");
+        field.SetValue(PythonHandler.Instance, null);
+
+        // Usage of uninitialized global instance
+        Assert.That(() => _ = PythonHandler.Instance, Throws.TypeOf<TypeInitializationException>());
+
+        // Initialization of the global instance
+        var initialized = PythonHandler.Initialize(PythonRuntime);
+        var singleton = PythonHandler.Instance;
+        Assert.Multiple(() =>
+        {
+            Assert.That(initialized, Is.SameAs(singleton));
+            Assert.That(initialized, Is.InstanceOf<IPythonHandler>());
+            Assert.That(PythonRuntime.IsDisposed, Is.False);
+        });
+
+        // Re-initialization of the global instance
+        Assert.That(() => PythonHandler.Initialize(PythonRuntime), Throws.InvalidOperationException);
+    }
+
+    [Test]
+    [Timeout(2000)]
+    public async Task RunHotspotDetectionTest()
+    {
+        var (handler, python) = CreateInstance();
+        await handler.RunHotspotDetection();
+        Assert.That(python.IsHotspotDetectionRunning, Is.True);
+    }
+
+    [Test]
+    [Timeout(2000)]
+    public async Task RunCalibrationTest()
+    {
+        var (handler, python) = CreateInstance();
+        await handler.RunCalibration();
+        Assert.That(python.IsCameraCalibrated, Is.True);
+    }
+
+    [Test]
+    [Timeout(5000)]
+    public async Task CancelCurrentTaskTest()
+    {
+        var (handler, python) = CreateInstance();
+        python.Delay = 2000;
+        var task = handler.RunHotspotDetection();
+        await Task.Delay(100);
+        python.Delay = 0;
+        handler.CancelCurrentTask();
+        await Task.Delay(100);
+        python.Exception = new Exception("Test exception");
+
+        // The task finishes execution but any exceptions are caught
+        await task;
+        Assert.That(python.IsHotspotDetectionRunning, Is.True);
+    }
+
+    /// <summary>
+    /// Tests whether a task is cancelled when another task is started
+    /// </summary>
+    [Test]
+    [Timeout(5000)]
+    public async Task RunNewPythonActionTest()
+    {
+        var (handler, python) = CreateInstance();
+        python.Delay = 2000;
+        var task = handler.RunHotspotDetection();
+        await Task.Delay(100);
+        python.Delay = 0;
+        await handler.RunCalibration();
+        python.Exception = new Exception("Test exception");
+
+        // The task finishes execution but any exceptions are caught
+        await task;
+        Assert.Multiple(() =>
+        {
+            Assert.That(python.IsHotspotDetectionRunning, Is.True);
+            Assert.That(python.IsCameraCalibrated, Is.True);
+        });
+    }
+
+    [Test]
+    public void PythonActionExceptionTest()
+    {
+        var (handler, python) = CreateInstance();
+        python.Exception = new Exception("Test exception");
+        Assert.ThrowsAsync<Exception>(() => handler.RunHotspotDetection());
+    }
+
+    [Test]
     [TestCaseSource(nameof(Ids))]
     public void OnPressDetectedTest(int id)
     {
+        var id2 = id + 1;
         var (handler, _) = CreateInstance();
         HotspotSelectedArgs? eventFiredArgs = null;
         handler.HotspotSelected += (_, a) => eventFiredArgs = a;
 
-
         handler.OnPressDetected(id);
-        Assert.That(eventFiredArgs, Is.Not.Null);
-        Assert.That(eventFiredArgs!, Is.InstanceOf<HotspotSelectedArgs>());
+        Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
         Assert.That(eventFiredArgs!.Id, Is.EqualTo(id));
+        eventFiredArgs = null;
 
-        var id2 = id + 1;
         handler.OnPressDetected(id2);
-        Assert.That(eventFiredArgs, Is.Not.Null);
-        Assert.That(eventFiredArgs!, Is.InstanceOf<HotspotSelectedArgs>());
+        Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
         Assert.That(eventFiredArgs!.Id, Is.EqualTo(id2));
     }
 

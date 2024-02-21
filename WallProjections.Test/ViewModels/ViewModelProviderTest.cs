@@ -5,6 +5,7 @@ using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Editor;
+using WallProjections.Test.ViewModels.Display;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Editor;
@@ -53,6 +54,42 @@ public class ViewModelProviderTest
         var videoViewModel = vmProvider.GetVideoViewModel();
         Assert.That(videoViewModel, Is.InstanceOf<VideoViewModel>());
         Assert.That(videoViewModel.MediaPlayer, Is.Not.Null);
+    }
+
+    [Test]
+    public void GetHotspotViewModelTest()
+    {
+        var hotspot = new Hotspot(
+            0,
+            new Coord(0, 0, 0),
+            "Title",
+            "test.txt",
+            ImmutableList<string>.Empty,
+            ImmutableList<string>.Empty
+        );
+        var config = new Config(new List<Hotspot> { hotspot });
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+
+        var hotspotViewModel = vmProvider.GetHotspotViewModel(config);
+        Assert.That(hotspotViewModel, Is.InstanceOf<HotspotViewModel>());
+        Assert.Multiple(() =>
+        {
+            Assert.That(hotspotViewModel.Projections, Has.Count.EqualTo(config.HotspotCount));
+            Assert.That(hotspotViewModel.IsVisible, Is.False);
+        });
+        Assert.That(
+            hotspotViewModel.Projections,
+            Is.EquivalentTo(config.Hotspots).Using<HotspotProjection, Hotspot>((actual, expected) =>
+            {
+                var id = actual.Id == expected.Id;
+                var x = Math.Abs(actual.X - expected.Position.X) < HotspotViewModelTest.PositionCmpTolerance;
+                var y = Math.Abs(actual.Y - expected.Position.Y) < HotspotViewModelTest.PositionCmpTolerance;
+                var d = Math.Abs(actual.D - 2 * expected.Position.R) < HotspotViewModelTest.PositionCmpTolerance;
+                return id && x && y && d;
+            })
+        );
     }
 
     #endregion
