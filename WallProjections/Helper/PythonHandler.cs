@@ -127,7 +127,7 @@ public sealed class PythonHandler : IPythonHandler
             return;
         }
 
-        RunPythonAction(python => python.StopHotspotDetection());
+        RunPythonAction(python => python.StopCurrentAction());
         _currentTask?.Cancel();
         _currentTask?.Dispose();
         _currentTask = null;

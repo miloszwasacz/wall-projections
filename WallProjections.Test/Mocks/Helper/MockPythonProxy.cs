@@ -14,7 +14,7 @@ public class MockPythonProxy : IPythonProxy
 
     /// <summary>
     /// Whether <see cref="StartHotspotDetection" /> has been called
-    /// and not yet <see cref="StopHotspotDetection">stopped</see>
+    /// and not yet <see cref="StopCurrentAction">stopped</see>
     /// </summary>
     public bool IsHotspotDetectionRunning { get; private set; }
 
@@ -41,7 +41,7 @@ public class MockPythonProxy : IPythonProxy
             throw Exception;
     }
 
-    public void StopHotspotDetection()
+    public void StopCurrentAction()
     {
         IsHotspotDetectionRunning = false;
         Task.Delay(Delay).Wait();

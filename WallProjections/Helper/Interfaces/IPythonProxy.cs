@@ -14,9 +14,9 @@ public interface IPythonProxy : IDisposable
     public void StartHotspotDetection(IPythonHandler eventListener);
 
     /// <summary>
-    /// Stops the detection of hotspots
+    /// Tells Python to stop the currently running action
     /// </summary>
-    public void StopHotspotDetection();
+    public void StopCurrentAction();
 
     /// <summary>
     /// Calibrates the camera
