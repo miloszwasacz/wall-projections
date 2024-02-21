@@ -1,19 +1,29 @@
 ﻿using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks.Helper;
 
 namespace WallProjections.Test;
 
 [SetUpFixture]
 public class TestSetup
 {
+    /// <summary>
+    /// A mock of the Python runtime supplied to the <see cref="PythonHandler.Instance">Python handler</see>
+    /// at <see cref="PythonHandler.Initialize">initialization</see>
+    /// </summary>
+    public static MockPythonProxy PythonRuntime { get; private set; } = new();
+
+    /// <summary>
+    /// The global instance of the <see cref="PythonHandler.Instance">Python handler</see>
+    /// </summary>
     private static IPythonHandler? _pythonHandler;
 
     [OneTimeSetUp]
     public void GlobalSetup()
     {
         // Set up the global singletons before any tests run
-        _pythonHandler = PythonHandler.Initialize();
+        _pythonHandler = PythonHandler.Initialize(PythonRuntime);
     }
 
     [OneTimeTearDown]

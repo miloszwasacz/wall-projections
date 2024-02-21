@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.ReactiveUI;
@@ -18,16 +19,20 @@ internal class Program
     /// </summary>
     /// <param name="args">Application arguments</param>
     [STAThread]
+    [ExcludeFromCodeCoverage]
     public static void Main(string[] args)
     {
-        var pythonHandler = PythonHandler.Initialize();
+        var pythonProxy = new PythonProxy();
+        var pythonHandler = PythonHandler.Initialize(pythonProxy);
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         pythonHandler.Dispose();
+        pythonProxy.Dispose();
     }
 
     /// <summary>
     /// Avalonia configuration, don't remove; also used by visual designer.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     private static AppBuilder BuildAvaloniaApp()
     {
         return AppBuilder.Configure<App>()

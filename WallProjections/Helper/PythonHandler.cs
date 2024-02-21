@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Python.Runtime;
 using WallProjections.Helper.Interfaces;
-#if !DEBUGSKIPPYTHON
-using System.Diagnostics;
-#endif
 
 namespace WallProjections.Helper;
 
@@ -14,17 +10,6 @@ namespace WallProjections.Helper;
 /// </summary>
 public sealed class PythonHandler : IPythonHandler
 {
-    //TODO Use an enum for the module names
-    private const string HotspotDetectionModule = "hotspot_detection";
-    private const string CalibrationModule = "calibration";
-
-#if !DEBUGSKIPPYTHON
-    /// <summary>
-    /// A handle to Python threads
-    /// </summary>
-    private readonly IntPtr _threadsPtr;
-#endif
-
     /// <summary>
     /// The backing field for <see cref="Instance" />
     /// </summary>
@@ -33,7 +18,7 @@ public sealed class PythonHandler : IPythonHandler
     /// <summary>
     /// The global instance of the event handler
     /// </summary>
-    /// <remarks>If possible, don't use this global instance - use Dependency Injection instead</remarks>
+    /// <remarks>If possible, <b>don't use this global instance</b> - use Dependency Injection instead</remarks>
     /// <exception cref="TypeInitializationException">
     /// If the global instance has not been <see cref="Initialize">initialized</see>
     /// </exception>
@@ -43,29 +28,30 @@ public sealed class PythonHandler : IPythonHandler
     /// <summary>
     /// Initializes the global instance of the Python event handler
     /// </summary>
+    /// <param name="pythonProxy">The proxy used for executing Python scripts</param>
     /// <exception cref="InvalidOperationException">If the global instance has already been initialized</exception>
-    public static IPythonHandler Initialize()
+    public static IPythonHandler Initialize(IPythonProxy pythonProxy)
     {
         if (_instance != null)
             throw new InvalidOperationException("PythonEventHandler has already been initialized");
 
-        _instance = new PythonHandler();
+        _instance = new PythonHandler(pythonProxy);
         return _instance;
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="PythonHandler" /> and initializes the Python runtime
+    /// Creates a new instance of <see cref="PythonHandler" /> which uses the given <see cref="IPythonProxy" />
     /// </summary>
-    private PythonHandler()
+    private PythonHandler(IPythonProxy pythonProxy)
     {
-#if !DEBUGSKIPPYTHON
-        Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
-        Debug.Write("Initializing Python...    ");
-        PythonEngine.Initialize();
-        _threadsPtr = PythonEngine.BeginAllowThreads();
-        Debug.WriteLine("Done");
-#endif
+        _pythonProxy = pythonProxy;
     }
+
+    //TODO Maybe exclude this when marshalling to a Python object?
+    /// <summary>
+    /// A proxy for setting up Python runtime and executing Python scripts
+    /// </summary>
+    private readonly IPythonProxy _pythonProxy;
 
     /// <summary>
     /// The currently running Python task
@@ -73,56 +59,46 @@ public sealed class PythonHandler : IPythonHandler
     private CancellationTokenSource? _currentTask;
 
     /// <inheritdoc />
-    public Task RunHotspotDetection() =>
-        RunNewPythonAction(HotspotDetectionModule, module => { module.run(this.ToPython()); });
+    public Task RunHotspotDetection() => RunNewPythonAction(python => python.StartHotspotDetection(this));
 
     /// <inheritdoc />
-    public Task RunCalibration() =>
-        RunNewPythonAction(CalibrationModule, module => { module.test(); });
+    public Task RunCalibration() => RunNewPythonAction(python => python.CalibrateCamera());
 
     /// <summary>
     /// Cancels the current task and calls <see cref="RunPythonAction" /> on a separate thread.
     /// </summary>
-    /// <param name="moduleName">The module name passed to <see cref="RunPythonAction" /></param>
     /// <param name="action">The action passed to <see cref="RunPythonAction" /></param>
-    private async Task RunNewPythonAction(string moduleName, Action<dynamic> action)
+    private async Task RunNewPythonAction(Action<IPythonProxy> action)
     {
         CancelCurrentTask();
         _currentTask = new CancellationTokenSource();
-        await Task.Run(() => RunPythonAction(moduleName, action), _currentTask.Token);
+        await Task.Run(() => RunPythonAction(action), _currentTask.Token);
     }
 
-    // ReSharper disable UnusedParameter.Local
     /// <summary>
-    /// Runs the given action after acquiring the Python GIL importing the given module
+    /// Runs the given action using a <see cref="IPythonProxy" />.
     /// </summary>
-    /// <param name="moduleName">The name of the Python module to import</param>
-    /// <param name="action">The action to run using the Python module</param>
-    private static void RunPythonAction(string moduleName, Action<dynamic> action)
+    /// <param name="action">
+    /// The action to execute (it should involve calling a method on the input <see cref="IPythonProxy" />)
+    /// </param>
+    private void RunPythonAction(Action<IPythonProxy> action)
     {
         try
         {
-#if !DEBUGSKIPPYTHON
-            using (Py.GIL())
-            {
-                //TODO Import a module once and reuse it
-                dynamic module = Py.Import($"Scripts.{moduleName}");
-                action(module);
-            }
-#endif
+            action(_pythonProxy);
         }
         catch (Exception e)
         {
+            //TODO Log to file
             Console.Error.WriteLine(e);
             throw;
         }
     }
-    // ReSharper restore UnusedParameter.Local
 
     /// <inheritdoc />
     public void CancelCurrentTask()
     {
-        RunPythonAction(HotspotDetectionModule, module => module.stop_hotspot_detection());
+        RunPythonAction(python => python.StopHotspotDetection());
         _currentTask?.Cancel();
         _currentTask?.Dispose();
         _currentTask = null;
@@ -140,9 +116,5 @@ public sealed class PythonHandler : IPythonHandler
     public void Dispose()
     {
         CancelCurrentTask();
-#if !DEBUGSKIPPYTHON
-        PythonEngine.EndAllowThreads(_threadsPtr);
-        PythonEngine.Shutdown();
-#endif
     }
 }
