@@ -33,6 +33,9 @@ public class NavigatorTest
             Assert.That(window?.DataContext, Is.InstanceOf<IDisplayViewModel>());
             Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
+        var ownedWindows = window!.OwnedWindows;
+        Assert.That(ownedWindows, Has.Count.EqualTo(1));
+        Assert.That(ownedWindows[0], Is.InstanceOf<HotspotDisplayWindow>());
     }
 
     [AvaloniaTest]
@@ -99,6 +102,9 @@ public class NavigatorTest
             Assert.That(vmProvider.HasBeenDisposed, Is.False);
             Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
+        var ownedWindows = lifetime.MainWindow!.OwnedWindows;
+        Assert.That(ownedWindows, Has.Count.EqualTo(1));
+        Assert.That(ownedWindows[0], Is.InstanceOf<HotspotDisplayWindow>());
     }
 
     [AvaloniaTest]

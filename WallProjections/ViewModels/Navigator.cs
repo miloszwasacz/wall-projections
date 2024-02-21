@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -14,7 +16,7 @@ namespace WallProjections.ViewModels;
 public sealed class Navigator : ViewModelBase, INavigator
 {
     /// <summary>
-    /// A mutex ensure sequential access to the main window.
+    /// A mutex to ensure sequential access to <see cref="_appLifetime" />.<see cref="AppLifetime.MainWindow" />
     /// </summary>
     private readonly Mutex _windowMutex = new();
 
@@ -102,10 +104,17 @@ public sealed class Navigator : ViewModelBase, INavigator
         }
 
         _pythonHandler.RunHotspotDetection();
-        Navigate(new DisplayWindow
+        var displayWindow = new DisplayWindow
         {
             DataContext = _vmProvider.GetDisplayViewModel(config)
-        });
+        };
+        var hotspotWindow = new HotspotDisplayWindow
+        {
+            DataContext = _vmProvider.GetHotspotViewModel(config)
+        };
+        Navigate(displayWindow);
+        OpenHotspotWindow(hotspotWindow, displayWindow);
+
         _windowMutex.ReleaseMutex();
     }
 
@@ -176,6 +185,22 @@ public sealed class Navigator : ViewModelBase, INavigator
         newWindow.Show();
         _appLifetime.MainWindow = newWindow;
         currentWindow?.CloseAndDispose();
+    }
+
+    /// <summary>
+    /// Opens a new window for projecting hotspots on a secondary screen (if available).
+    /// </summary>
+    /// <param name="hotspotWindow">The window for projecting hotspots.</param>
+    /// <param name="owner">The owner window of the hotspot window.</param>
+    [ExcludeFromCodeCoverage(Justification = "Headless mode doesn't support multiple screens")]
+    private static void OpenHotspotWindow(Window hotspotWindow, Window owner)
+    {
+        var screens = owner.Screens;
+        var secondaryScreen = screens.All.FirstOrDefault(s => s != screens.Primary);
+        if (secondaryScreen is not null)
+            hotspotWindow.Position = secondaryScreen.Bounds.Position;
+        hotspotWindow.Show(owner);
+        hotspotWindow.WindowState = WindowState.FullScreen;
     }
 
     /// <inheritdoc />

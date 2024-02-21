@@ -12,11 +12,24 @@ namespace WallProjections.Test.Mocks.ViewModels;
 public class MockHotspotViewModel : ViewModelBase, IHotspotViewModel
 {
     /// <inheritdoc/>
-    public ImmutableList<HotspotProjection> Projections { get; } = ImmutableList.Create(
-        new HotspotProjection { Id = 0, X = 10, Y = 10, D = 20, IsActive = false },
-        new HotspotProjection { Id = 1, X = 90, Y = 130, D = 60, IsActive = false },
-        new HotspotProjection { Id = 2, X = 120, Y = 50, D = 40, IsActive = false }
-    );
+    public ImmutableList<HotspotProjectionViewModel> Projections { get; } = new[]
+    {
+        (0, 10.0, 10.0, 10.0),
+        (1, 90.0, 130.0, 30.0),
+        (2, 120.0, 50.0, 20.0)
+    }.Select(data =>
+    {
+        var (id, x, y, r) = data;
+        var hotspot = new Hotspot(
+            id,
+            new Coord(x, y, r),
+            "",
+            "",
+            ImmutableList<string>.Empty,
+            ImmutableList<string>.Empty
+        );
+        return new HotspotProjectionViewModel(hotspot);
+    }).ToImmutableList();
 
     /// <inheritdoc/>
     public bool IsVisible { get; private set; }

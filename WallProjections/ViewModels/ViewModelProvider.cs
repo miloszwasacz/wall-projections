@@ -75,7 +75,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="HotspotViewModel" /> instance</returns>
-    public IHotspotViewModel GetHotspotViewModel(IConfig config) => new HotspotViewModel(config);
+    public IHotspotViewModel GetHotspotViewModel(IConfig config) => new HotspotViewModel(config, _pythonHandler);
 
     #endregion
 
