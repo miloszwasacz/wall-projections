@@ -1,0 +1,14 @@
+﻿name: .NET CI All Platforms
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macOS-latest ]
+    uses: ./.github/workflows/dotnet-ci-generic.yml
+    with:
+      os: ${{ matrix.os }}
