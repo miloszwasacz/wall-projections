@@ -39,7 +39,7 @@ public class EditorHotspotViewModelTest
         var uri = new Uri($"file://{path}");
 
         return await window.StorageProvider.TryGetFileFromPathAsync(uri)
-               ?? throw new FileNotFoundException("Could not find the file.", uri.AbsolutePath);
+               ?? throw new FileNotFoundException("Could not find the file.", uri.LocalPath);
     }
 
     [AvaloniaTest]
@@ -133,19 +133,19 @@ public class EditorHotspotViewModelTest
         Assert.Multiple(() =>
         {
             Assert.That(
-                editorHotspotViewModel.Images.Where(x => x.FilePath == image.Path.AbsolutePath),
+                editorHotspotViewModel.Images.Where(x => x.FilePath == image.Path.LocalPath),
                 Has.Exactly(1).Items
             );
             Assert.That(
-                editorHotspotViewModel.Videos.Where(x => x.FilePath == video.Path.AbsolutePath),
+                editorHotspotViewModel.Videos.Where(x => x.FilePath == video.Path.LocalPath),
                 Has.Exactly(1).Items
             );
         });
 
         Assert.Multiple(() =>
         {
-            Assert.That(editorHotspotViewModel.Images[0].FilePath, Is.EqualTo(image.Path.AbsolutePath));
-            Assert.That(editorHotspotViewModel.Videos[0].FilePath, Is.EqualTo(video.Path.AbsolutePath));
+            Assert.That(editorHotspotViewModel.Images[0].FilePath, Is.EqualTo(image.Path.LocalPath));
+            Assert.That(editorHotspotViewModel.Videos[0].FilePath, Is.EqualTo(video.Path.LocalPath));
         });
 
 
@@ -206,8 +206,8 @@ public class EditorHotspotViewModelTest
             Assert.That(newHotspot.Position, Is.EqualTo(hotspot.Position));
             Assert.That(newHotspot.Title, Is.EqualTo(hotspot.Title));
             Assert.That(newHotspot.DescriptionPath, Is.Not.EqualTo(hotspot.DescriptionPath));
-            Assert.That(newHotspot.ImagePaths, Is.EquivalentTo(hotspot.ImagePaths.Append(image.Path.AbsolutePath)));
-            Assert.That(newHotspot.VideoPaths, Is.EquivalentTo(hotspot.VideoPaths.Append(video.Path.AbsolutePath)));
+            Assert.That(newHotspot.ImagePaths, Is.EquivalentTo(hotspot.ImagePaths.Append(image.Path.LocalPath)));
+            Assert.That(newHotspot.VideoPaths, Is.EquivalentTo(hotspot.VideoPaths.Append(video.Path.LocalPath)));
         });
     }
 }

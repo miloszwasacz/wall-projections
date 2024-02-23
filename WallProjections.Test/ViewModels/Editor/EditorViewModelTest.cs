@@ -70,8 +70,8 @@ namespace WallProjections.Test.ViewModels.Editor
             var uri = new Uri($"file://{path}");
 
             return await window.StorageProvider.TryGetFileFromPathAsync(uri) ?? throw new FileNotFoundException(
-                $"Could not find the file `{Path.GetFileName(uri.AbsolutePath)}`",
-                uri.AbsolutePath
+                $"Could not find the file `{Path.GetFileName(uri.LocalPath)}`",
+                uri.LocalPath
             );
         }
 
@@ -274,7 +274,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var added = false;
             selectedHotspot!.MediaAdded += (_, args) =>
             {
-                var mediaPaths = args.Files.Select(f => Path.GetFileName(f.Path.AbsolutePath));
+                var mediaPaths = args.Files.Select(f => Path.GetFileName(f.Path.LocalPath));
                 Assert.Multiple(() =>
                 {
                     Assert.That(args.Type, Is.EqualTo(expectedType));

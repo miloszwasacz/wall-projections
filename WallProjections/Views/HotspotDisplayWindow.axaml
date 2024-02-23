@@ -8,7 +8,6 @@
         x:Class="WallProjections.Views.HotspotDisplayWindow"
         x:DataType="dvm:IHotspotViewModel"
         Title="HotspotDisplayWindow"
-        WindowState="FullScreen"
         Background="Black"
         KeyDown="OnKeyDown"
         Closing="OnClosing">

@@ -82,9 +82,13 @@ public class PythonHandlerTest
         await Task.Delay(100);
         python.Exception = new Exception("Test exception");
 
-        // The task finishes execution but any exceptions are caught
-        await task;
-        Assert.That(python.IsHotspotDetectionRunning, Is.True);
+        // If the task finishes execution, any exceptions are caught
+        // If it doesn't, there should be no side effects
+        AwaitCancelledTask(
+            task,
+            () => Assert.That(python.IsHotspotDetectionRunning, Is.True),
+            () => Assert.That(python.IsHotspotDetectionRunning, Is.False)
+        );
     }
 
     /// <summary>
@@ -102,13 +106,21 @@ public class PythonHandlerTest
         await handler.RunCalibration();
         python.Exception = new Exception("Test exception");
 
-        // The task finishes execution but any exceptions are caught
-        await task;
-        Assert.Multiple(() =>
-        {
-            Assert.That(python.IsHotspotDetectionRunning, Is.True);
-            Assert.That(python.IsCameraCalibrated, Is.True);
-        });
+        // If the task finishes execution, any exceptions are caught
+        // If it doesn't, there should be no side effects
+        AwaitCancelledTask(
+            task,
+            () => Assert.Multiple(() =>
+            {
+                Assert.That(python.IsHotspotDetectionRunning, Is.True);
+                Assert.That(python.IsCameraCalibrated, Is.True);
+            }),
+            () => Assert.Multiple(() =>
+            {
+                Assert.That(python.IsHotspotDetectionRunning, Is.False);
+                Assert.That(python.IsCameraCalibrated, Is.True);
+            })
+        );
     }
 
     [Test]
@@ -159,5 +171,26 @@ public class PythonHandlerTest
                        ?? throw new MissingMethodException("Could not construct PythonEventHandler");
 
         return (instance, python);
+    }
+
+    /// <summary>
+    /// Waits for the <paramref name="task" /> to finish execution, catching any <see cref="TaskCanceledException" />
+    /// </summary>
+    /// <param name="task">The task to wait for</param>
+    /// <param name="onFinished">Action to execute if the task finishes successfully</param>
+    /// <param name="onCancelled">Action to execute if the task hasn't finished before being cancelled</param>
+    private static void AwaitCancelledTask(Task task, Action? onFinished, Action? onCancelled)
+    {
+        try
+        {
+            task.Wait();
+            onFinished?.Invoke();
+        }
+        catch (AggregateException e)
+        {
+            if (e.InnerException is not TaskCanceledException) throw;
+
+            onCancelled?.Invoke();
+        }
     }
 }

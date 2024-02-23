@@ -65,7 +65,7 @@ public partial class EditorWindow : Window
         // No file was selected
         if (files.Count == 0) return;
 
-        var file = files[0].Path.AbsolutePath;
+        var file = files[0].Path.LocalPath;
         var safety = importer.IsImportSafe();
         if (safety is ImportWarningLevel.None)
         {
@@ -184,7 +184,7 @@ public partial class EditorWindow : Window
 
         if (files.Count == 0) return;
 
-        var file = files[0].Path.AbsolutePath;
+        var file = files[0].Path.LocalPath;
 
         var dialog = new ConfirmationDialog(
             "Import Configuration",
@@ -224,7 +224,7 @@ public partial class EditorWindow : Window
 
         if (folders.Count == 0) return;
 
-        var folder = folders[0].Path.AbsolutePath;
+        var folder = folders[0].Path.LocalPath;
         if (vm.ExportConfig(folder)) return; //TODO Show a success message
 
         // An error occurred while exporting

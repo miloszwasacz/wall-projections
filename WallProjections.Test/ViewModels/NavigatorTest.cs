@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using WallProjections.Models;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
@@ -26,6 +27,7 @@ public class NavigatorTest
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
+        Dispatcher.UIThread.RunJobs();
         var window = lifetime.MainWindow;
         Assert.Multiple(() =>
         {
@@ -33,9 +35,9 @@ public class NavigatorTest
             Assert.That(window?.DataContext, Is.InstanceOf<IDisplayViewModel>());
             Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
-        var ownedWindows = window!.OwnedWindows;
-        Assert.That(ownedWindows, Has.Count.EqualTo(1));
-        Assert.That(ownedWindows[0], Is.InstanceOf<HotspotDisplayWindow>());
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
+        Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
+        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<HotspotDisplayWindow>());
     }
 
     [AvaloniaTest]
@@ -49,6 +51,7 @@ public class NavigatorTest
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
+        Dispatcher.UIThread.RunJobs();
         var window = lifetime.MainWindow;
         Assert.Multiple(() =>
         {
@@ -56,11 +59,13 @@ public class NavigatorTest
             Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(1));
+        Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
     }
 
     [AvaloniaTest]
     [NonParallelizable]
-    public void OpenEditorTest()
+    public async Task OpenEditorTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
@@ -68,10 +73,14 @@ public class NavigatorTest
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+
+        Dispatcher.UIThread.RunJobs();
         Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
 
         navigator.OpenEditor();
 
+        await Task.Delay(200);
+        Dispatcher.UIThread.RunJobs();
         var window = lifetime.MainWindow;
         Assert.Multiple(() =>
         {
@@ -79,11 +88,13 @@ public class NavigatorTest
             Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(1));
+        Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
     }
 
     [AvaloniaTest]
     [NonParallelizable]
-    public void CloseEditorTest()
+    public async Task CloseEditorTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
@@ -92,9 +103,13 @@ public class NavigatorTest
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
         navigator.OpenEditor();
+        Dispatcher.UIThread.RunJobs();
         Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
 
         navigator.CloseEditor();
+
+        await Task.Delay(200);
+        Dispatcher.UIThread.RunJobs();
         Assert.Multiple(() =>
         {
             Assert.That(lifetime.Shutdowns, Is.Empty);
@@ -102,9 +117,9 @@ public class NavigatorTest
             Assert.That(vmProvider.HasBeenDisposed, Is.False);
             Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
-        var ownedWindows = lifetime.MainWindow!.OwnedWindows;
-        Assert.That(ownedWindows, Has.Count.EqualTo(1));
-        Assert.That(ownedWindows[0], Is.InstanceOf<HotspotDisplayWindow>());
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
+        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<DisplayWindow>());
+        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<HotspotDisplayWindow>());
     }
 
     [AvaloniaTest]
@@ -117,9 +132,11 @@ public class NavigatorTest
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
         var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        Dispatcher.UIThread.RunJobs();
         Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
 
         navigator.CloseEditor();
+        Dispatcher.UIThread.RunJobs();
         Assert.Multiple(() =>
         {
             Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));

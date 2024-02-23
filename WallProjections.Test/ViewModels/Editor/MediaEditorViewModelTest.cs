@@ -13,7 +13,7 @@ public class MediaEditorViewModelTest
 
     private static MockThumbnailViewModel CreateThumbnail(int id) => new($"path{id}", $"name{id}");
 
-    [Test]
+    [AvaloniaTest]
     public void ConstructorTest()
     {
         IMediaEditorViewModel mediaEditorViewModel = new MediaEditorViewModel(Title);
