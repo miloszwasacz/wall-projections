@@ -30,7 +30,7 @@ jobs:
             ${{ runner.os }}-nuget
 
       - name: Install LibVLCSharp dependencies
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        if: ${{ startsWith(runner.os, 'ubuntu') }}
         run: sudo apt install -y libvlc-dev vlc
 
       - name: Restore dependencies
