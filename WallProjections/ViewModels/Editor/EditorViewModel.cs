@@ -46,6 +46,12 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// </summary>
     private bool _isSaved;
 
+    /// <summary>
+    /// Whether the config exists, i.e. is not empty
+    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IViewModelProvider)" />)</i>.
+    /// </summary>
+    private bool _configExists;
+
     /// <inheritdoc />
     public ObservableHotspotCollection<IEditorHotspotViewModel> Hotspots
     {
@@ -102,17 +108,22 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public IMediaEditorViewModel VideoEditor { get; }
 
-    //TODO Change how is saved is handled when there is no configuration
     /// <inheritdoc />
     public bool IsSaved
     {
         get => _isSaved;
         private set
         {
+            if (value)
+                _configExists = true;
             this.RaiseAndSetIfChanged(ref _isSaved, value);
             this.RaisePropertyChanged(nameof(IEditorViewModel.CloseButtonText));
+            this.RaisePropertyChanged(nameof(CanExport));
         }
     }
+
+    /// <inheritdoc />
+    public bool CanExport => IsSaved && _configExists;
 
     /// <inheritdoc />
     public void AddHotspot()
@@ -248,6 +259,9 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
 
+        _configExists = false;
+        _isSaved = true; // Setting the backing field directly to avoid changing _configExists, which is set in IsSaved setter
+
         InitEventHandlers();
     }
 
@@ -263,7 +277,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         INavigator navigator,
         IFileHandler fileHandler,
         IViewModelProvider vmProvider
-        )
+    )
     {
         _navigator = navigator;
         _vmProvider = vmProvider;
@@ -275,6 +289,8 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
         SelectedHotspot = Hotspots.FirstOrDefault();
+
+        _configExists = true;
         IsSaved = true;
 
         InitEventHandlers();

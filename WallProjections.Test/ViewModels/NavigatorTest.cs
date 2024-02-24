@@ -79,8 +79,8 @@ public class NavigatorTest
 
         navigator.OpenEditor();
 
-        await Task.Delay(200);
         Dispatcher.UIThread.RunJobs();
+        await Task.Delay(400);
         var window = lifetime.MainWindow;
         Assert.Multiple(() =>
         {
@@ -108,8 +108,8 @@ public class NavigatorTest
 
         navigator.CloseEditor();
 
-        await Task.Delay(200);
         Dispatcher.UIThread.RunJobs();
+        await Task.Delay(400);
         Assert.Multiple(() =>
         {
             Assert.That(lifetime.Shutdowns, Is.Empty);

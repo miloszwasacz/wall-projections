@@ -14,6 +14,7 @@ public class MockEditorViewModel : IEditorViewModel
     public IMediaEditorViewModel ImageEditor { get; }
     public IMediaEditorViewModel VideoEditor { get; }
     public bool IsSaved { get; set; } = false;
+    public bool CanExport { get; set; } = false;
 
     // ReSharper disable once UnusedParameter.Local
     public MockEditorViewModel(IConfig config, IViewModelProvider vmProvider, IFileHandler fileHandler) :
