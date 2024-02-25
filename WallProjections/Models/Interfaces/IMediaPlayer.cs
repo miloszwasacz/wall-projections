@@ -1,4 +1,5 @@
 ﻿using System;
+using Avalonia.Platform;
 using LibVLCSharp.Shared;
 
 namespace WallProjections.Models.Interfaces;
@@ -17,4 +18,8 @@ public interface IMediaPlayer : IDisposable
 
     /// <inheritdoc cref="MediaPlayer.Stop" />
     public void Stop();
+
+    public void SetHandle(IPlatformHandle handle);
+
+    public void DisposeHandle();
 }

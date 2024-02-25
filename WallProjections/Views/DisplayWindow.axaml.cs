@@ -1,7 +1,9 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using System.Diagnostics.CodeAnalysis;
+using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Display;
 #if DEBUGSKIPPYTHON
 using Avalonia.Data;
@@ -12,9 +14,13 @@ namespace WallProjections.Views;
 
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
+    private VideoView _videoViewer;
+    
     public DisplayWindow()
     {
         InitializeComponent();
+
+        _videoViewer = this.Get<VideoView>("VideoViewer");
     }
 
     // ReSharper disable UnusedParameter.Local
@@ -87,6 +93,15 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
         e.Cancel = true;
 
         viewModel.CloseDisplay();
+    }
+
+    internal void Window_OnOpened(object? sender, System.EventArgs e)
+    {
+        if (_videoViewer != null && ViewModel.VideoViewModel.MediaPlayer != null)
+        {
+            Console.WriteLine(_videoViewer.MediaPlayer);
+            ViewModel.VideoViewModel.MediaPlayer.SetHandle(_videoViewer.Hndl);
+        }
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using Avalonia.Platform;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.ViewModels.Interfaces.Display;

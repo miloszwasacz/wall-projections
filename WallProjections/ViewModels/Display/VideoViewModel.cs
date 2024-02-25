@@ -1,6 +1,8 @@
 ﻿using System;
+using Avalonia.Platform;
 using LibVLCSharp.Shared;
 using ReactiveUI;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 
@@ -28,11 +30,12 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// The backing field for <see cref="MediaPlayer" />
     /// </summary>
     private IMediaPlayer? _mediaPlayer;
-
+    
     public VideoViewModel(LibVLC libVlc, IMediaPlayer mediaPlayer)
     {
         _libVlc = libVlc;
         _mediaPlayer = mediaPlayer;
+
         this.RaisePropertyChanged(nameof(MediaPlayer));
     }
 

@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces.Display"
         xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
+        xmlns:models="clr-namespace:WallProjections.Models"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.DisplayWindow"
         x:DataType="vm:IDisplayViewModel"
@@ -11,6 +12,7 @@
         Title="WallProjections"
         WindowState="FullScreen"
         Closing="Window_OnClosing"
+        Opened="Window_OnOpened"
         KeyDown="OnKeyDown">
 
     <Grid ColumnDefinitions="*, *" RowDefinitions="*, 2*, *">
@@ -30,11 +32,18 @@
                IsVisible="{Binding HasImages, FallbackValue=False}" />
 
         <!-- VideoView has to be directly in Window or it will itself open a new window -->
-        <vlc:VideoView Name="VideoView" Grid.Column="1" Grid.Row="1"
-                       DataContext="{Binding VideoViewModel}"
-                       MediaPlayer="{Binding MediaPlayer}"
-                       IsVisible="{Binding HasVideos, FallbackValue=False}"
-                       SizeChanged="OnVideoViewResize" />
+        <!-- <vlc:VideoView Name="VideoView" Grid.Column="1" Grid.Row="1" -->
+        <!--                DataContext="{Binding VideoViewModel}" -->
+        <!--                MediaPlayer="{Binding MediaPlayer}" -->
+        <!--                IsVisible="{Binding HasVideos, FallbackValue=False}" -->
+        <!--                SizeChanged="OnVideoViewResize" /> -->
+        
+        <models:VideoView Name="VideoView" Grid.Column="1" Grid.Row="1"
+                          x:Name="VideoViewer"
+                          DataContext="{Binding VideoViewModel}"
+                          MediaPlayer="{Binding MediaPlayer}"
+                          IsVisible="{Binding HasVideos, FallbackValue=False}"
+                          SizeChanged="OnVideoViewResize" />
 
     </Grid>
 </Window>
