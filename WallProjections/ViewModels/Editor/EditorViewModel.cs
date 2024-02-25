@@ -17,6 +17,11 @@ namespace WallProjections.ViewModels.Editor;
 public class EditorViewModel : ViewModelBase, IEditorViewModel
 {
     /// <summary>
+    /// A <see cref="INavigator" /> used for closing the Editor.
+    /// </summary>
+    private readonly INavigator _navigator;
+
+    /// <summary>
     /// A <see cref="IViewModelProvider" /> used for creating child viewmodels.
     /// </summary>
     private readonly IViewModelProvider _vmProvider;
@@ -40,6 +45,12 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// The backing field for <see cref="IsSaved" />.
     /// </summary>
     private bool _isSaved;
+
+    /// <summary>
+    /// Whether the config exists, i.e. is not empty
+    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IViewModelProvider)" />)</i>.
+    /// </summary>
+    private bool _configExists;
 
     /// <inheritdoc />
     public ObservableHotspotCollection<IEditorHotspotViewModel> Hotspots
@@ -103,10 +114,16 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         get => _isSaved;
         private set
         {
+            if (value)
+                _configExists = true;
             this.RaiseAndSetIfChanged(ref _isSaved, value);
             this.RaisePropertyChanged(nameof(IEditorViewModel.CloseButtonText));
+            this.RaisePropertyChanged(nameof(CanExport));
         }
     }
+
+    /// <inheritdoc />
+    public bool CanExport => IsSaved && _configExists;
 
     /// <inheritdoc />
     public void AddHotspot()
@@ -220,19 +237,30 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         }
     }
 
+    /// <inheritdoc />
+    public void CloseEditor()
+    {
+        _navigator.CloseEditor();
+    }
+
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" />, not linked to any existing <see cref="IConfig" />.
     /// </summary>
+    /// <param name="navigator">A <see cref="INavigator" /> used for closing the Editor.</param>
     /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
-    public EditorViewModel(IFileHandler fileHandler, IViewModelProvider vmProvider)
+    public EditorViewModel(INavigator navigator, IFileHandler fileHandler, IViewModelProvider vmProvider)
     {
+        _navigator = navigator;
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>();
         DescriptionEditor = vmProvider.GetDescriptionEditorViewModel();
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
+
+        _configExists = false;
+        _isSaved = true; // Setting the backing field directly to avoid changing _configExists, which is set in IsSaved setter
 
         InitEventHandlers();
     }
@@ -241,10 +269,17 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// Creates a new <see cref="EditorViewModel" /> with initial data loaded from the provided <paramref name="config" />.
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> providing initial state of the editor.</param>
+    /// <param name="navigator">A <see cref="INavigator" /> used for closing the Editor.</param>
     /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
-    public EditorViewModel(IConfig config, IFileHandler fileHandler, IViewModelProvider vmProvider)
+    public EditorViewModel(
+        IConfig config,
+        INavigator navigator,
+        IFileHandler fileHandler,
+        IViewModelProvider vmProvider
+    )
     {
+        _navigator = navigator;
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>(
@@ -254,6 +289,8 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
         SelectedHotspot = Hotspots.FirstOrDefault();
+
+        _configExists = true;
         IsSaved = true;
 
         InitEventHandlers();

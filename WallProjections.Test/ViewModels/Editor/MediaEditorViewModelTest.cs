@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Controls.Selection;
-using Avalonia.Headless.NUnit;
 using WallProjections.Test.Mocks.ViewModels.Editor;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -14,7 +13,7 @@ public class MediaEditorViewModelTest
 
     private static MockThumbnailViewModel CreateThumbnail(int id) => new($"path{id}", $"name{id}");
 
-    [Test]
+    [AvaloniaTest]
     public void ConstructorTest()
     {
         IMediaEditorViewModel mediaEditorViewModel = new MediaEditorViewModel(Title);

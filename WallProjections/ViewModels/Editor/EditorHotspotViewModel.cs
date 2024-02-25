@@ -158,5 +158,5 @@ public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
     private IEnumerable<IThumbnailViewModel> GetIThumbnailViewModels(
         MediaEditorType type,
         IEnumerable<IStorageFile> files
-    ) => files.Select(file => _vmProvider.GetThumbnailViewModel(type, file.Path.AbsolutePath));
+    ) => files.Select(file => _vmProvider.GetThumbnailViewModel(type, file.Path.LocalPath));
 }

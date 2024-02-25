@@ -18,6 +18,7 @@ public class Config : IConfig
     public ImmutableList<Hotspot> Hotspots { get; }
 
     /// <inheritdoc />
+    [JsonIgnore]
     public int HotspotCount => Hotspots.Count;
 
     /// <summary>

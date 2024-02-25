@@ -1,14 +1,7 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
-using Avalonia.Platform.Storage;
-using WallProjections.Models;
-using WallProjections.Models.Interfaces;
 using System.Diagnostics.CodeAnalysis;
-using WallProjections.ViewModels;
-using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Display;
 #if DEBUGSKIPPYTHON
 using Avalonia.Data;
@@ -19,59 +12,88 @@ namespace WallProjections.Views;
 
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
-    [ExcludeFromCodeCoverage] private IConfig? Config { get; set; }
-    [ExcludeFromCodeCoverage] private IFileHandler FileHandler { get; }
-
     public DisplayWindow()
     {
         InitializeComponent();
-        FileHandler = new FileHandler();
-        WindowState = WindowState.FullScreen;
-
-        if (!FileHandler.IsConfigImported()) return;
-        Config = FileHandler.LoadConfig();
-        DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
-        new HotspotDisplayWindow
-        {
-            DataContext = ViewModelProvider.Instance.GetHotspotViewModel(Config)
-        }.Show(this);
     }
 
+    // ReSharper disable UnusedParameter.Local
+
+    /// <summary>
+    /// Handles key presses:
+    /// <ul>
+    ///     <li><b>F11</b>: Toggles fullscreen</li>
+    ///     <li><b>Escape</b>: Closes the display</li>
+    ///     <li><b>E</b>: Opens the editor</li>
+    /// </ul>
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the key that was pressed.</param>
     internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        // Toggle fullscreen
+        if (e.Key == Key.F11)
+        {
+            WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
+            return;
+        }
+
+        if (DataContext is not IDisplayViewModel viewModel) return;
+
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (e.Key)
         {
+            // Close the display
             case Key.Escape:
             {
-                var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
-                lifetime?.Shutdown();
+                viewModel.CloseDisplay();
                 return;
             }
-            case Key.F11:
-            {
-                WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
-                return;
-            }
+
+            // Open the editor
             case Key.E:
             {
-                //TODO Refactor this: fetching the Config shouldn't be done in a window (maybe in App.axmal.cs?)
-                var config = Config;
-                if (config is not null)
-                {
-                    new EditorWindow
-                    {
-                        DataContext = new EditorViewModel(config, new FileHandler(), ViewModelProvider.Instance)
-                    }.Show();
-                    return;
-                }
+                viewModel.OpenEditor();
+                return;
+            }
 
+            default:
+            {
+#if DEBUGSKIPPYTHON
+                MockPythonInput(e.Key);
+#endif
+                base.OnKeyDown(e);
                 break;
             }
         }
-
-        LoadConfig(e.Key);
     }
 
+    /// <summary>
+    /// Intercepts the window closing event to allow the ViewModel to handle it.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the reason for the window closing.</param>
+    /// <remarks>
+    /// The window should never be closed using <see cref="Window.Close()" />; instead, the ViewModel's
+    /// <see cref="IDisplayViewModel.CloseDisplay" /> method should be called.
+    /// </remarks>
+    internal void Window_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (DataContext is not IDisplayViewModel viewModel) return;
+
+        // The window is being closed programmatically only by ViewModel's Navigator
+        if (e.IsProgrammatic) return;
+
+        e.Cancel = true;
+
+        viewModel.CloseDisplay();
+    }
+
+    /// <summary>
+    /// Resizes the video view to maintain a 16:9 aspect ratio.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the new size of the video view.</param>
     internal void OnVideoViewResize(object? sender, SizeChangedEventArgs e)
     {
         if (e.WidthChanged)
@@ -79,49 +101,34 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             VideoView.Height = e.NewSize.Width * 9 / 16;
     }
 
-    //TODO Get rid of this - figure out how to set the config in the viewmodel
-    [ExcludeFromCodeCoverage]
-    private async void LoadConfig(Key key)
-    {
-        while (Config is null)
-        {
-            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-            {
-                AllowMultiple = false
-            });
-            if (files.Count == 0) continue;
-
-            var zipPath = files[0].Path.AbsolutePath;
-            if (!zipPath.EndsWith(".zip")) continue;
-
-            Config = new FileHandler().ImportConfig(zipPath);
-
-            DataContext = ViewModelProvider.Instance.GetDisplayViewModel(Config);
-        }
-
+    // ReSharper restore UnusedParameter.Local
 
 #if DEBUGSKIPPYTHON
-        MockPythonInput(key);
-#endif
-    }
-
-#if DEBUGSKIPPYTHON
+    /// <summary>
+    /// Mocks the input from the Python script for testing purposes.
+    /// </summary>
+    /// <param name="key"></param>
     [ExcludeFromCodeCoverage]
     private static void MockPythonInput(Key key)
     {
         var keyVal = key switch
         {
+            Key.D0 => new Optional<int>(0),
             Key.D1 => new Optional<int>(1),
             Key.D2 => new Optional<int>(2),
             Key.D3 => new Optional<int>(3),
             Key.D4 => new Optional<int>(4),
             Key.D5 => new Optional<int>(5),
+            Key.D6 => new Optional<int>(6),
+            Key.D7 => new Optional<int>(7),
+            Key.D8 => new Optional<int>(8),
+            Key.D9 => new Optional<int>(9),
             _ => new Optional<int>()
         };
 
         if (!keyVal.HasValue) return;
 
-        PythonEventHandler.Instance.OnPressDetected(keyVal.Value);
+        PythonHandler.Instance.OnPressDetected(keyVal.Value);
     }
 #endif
 }

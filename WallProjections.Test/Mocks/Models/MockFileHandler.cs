@@ -158,6 +158,9 @@ public sealed class MockFileHandler : IFileHandler
     /// <returns>Stored <see cref="IConfig"/></returns>
     public IConfig LoadConfig()
     {
+        if (_exception is not null)
+            throw _exception;
+
         return Config;
     }
 

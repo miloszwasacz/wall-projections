@@ -1,9 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
-using Avalonia.Headless.NUnit;
 using WallProjections.Models;
+using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
+using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Editor;
+using WallProjections.Test.ViewModels.Display;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Editor;
@@ -15,21 +17,15 @@ namespace WallProjections.Test.ViewModels;
 [NonParallelizable]
 public class ViewModelProviderTest
 {
-    [Test]
-    public void SingletonPatternTest()
-    {
-        var instance1 = ViewModelProvider.Instance;
-        var instance2 = ViewModelProvider.Instance;
-
-        Assert.That(instance2, Is.SameAs(instance1));
-    }
-
     #region Display
 
     [Test]
     public void GetDisplayViewModelTest()
     {
-        var displayViewModel = ViewModelProvider.Instance.GetDisplayViewModel(new Config(new List<Hotspot>()));
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var displayViewModel = vmProvider.GetDisplayViewModel(new Config(new List<Hotspot>()));
         Assert.Multiple(() =>
         {
             Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
@@ -41,7 +37,10 @@ public class ViewModelProviderTest
     [Test]
     public void GetImageViewModelTest()
     {
-        var imageViewModel = ViewModelProvider.Instance.GetImageViewModel();
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var imageViewModel = vmProvider.GetImageViewModel();
         Assert.That(imageViewModel, Is.InstanceOf<ImageViewModel>());
         Assert.That(imageViewModel.Image, Is.Null);
     }
@@ -49,9 +48,49 @@ public class ViewModelProviderTest
     [Test]
     public void GetVideoViewModelTest()
     {
-        var videoViewModel = ViewModelProvider.Instance.GetVideoViewModel();
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var videoViewModel = vmProvider.GetVideoViewModel();
         Assert.That(videoViewModel, Is.InstanceOf<VideoViewModel>());
         Assert.That(videoViewModel.MediaPlayer, Is.Not.Null);
+    }
+
+    [Test]
+    public void GetHotspotViewModelTest()
+    {
+        var hotspot = new Hotspot(
+            0,
+            new Coord(0, 0, 0),
+            "Title",
+            "test.txt",
+            ImmutableList<string>.Empty,
+            ImmutableList<string>.Empty
+        );
+        var config = new Config(new List<Hotspot> { hotspot });
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+
+        var hotspotViewModel = vmProvider.GetHotspotViewModel(config);
+        Assert.That(hotspotViewModel, Is.InstanceOf<HotspotViewModel>());
+        Assert.Multiple(() =>
+        {
+            Assert.That(hotspotViewModel.Projections, Has.Count.EqualTo(config.HotspotCount));
+            //TODO Add this assertion when the hiding has been properly implemented
+            // Assert.That(hotspotViewModel.IsVisible, Is.False);
+        });
+        Assert.That(
+            hotspotViewModel.Projections,
+            Is.EquivalentTo(config.Hotspots).Using<HotspotProjectionViewModel, Hotspot>((actual, expected) =>
+            {
+                var id = actual.Id == expected.Id;
+                var x = Math.Abs(actual.X - expected.Position.X) < HotspotViewModelTest.PositionCmpTolerance;
+                var y = Math.Abs(actual.Y - expected.Position.Y) < HotspotViewModelTest.PositionCmpTolerance;
+                var d = Math.Abs(actual.D - 2 * expected.Position.R) < HotspotViewModelTest.PositionCmpTolerance;
+                return id && x && y && d;
+            })
+        );
     }
 
     #endregion
@@ -86,8 +125,11 @@ public class ViewModelProviderTest
     {
         var hotspot = CreateHotspot(0);
         var config = new Config(new List<Hotspot> { hotspot });
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
         var fileHandler = new MockFileHandler(config);
-        var editorViewModel = ViewModelProvider.Instance.GetEditorViewModel(config, fileHandler);
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var editorViewModel = vmProvider.GetEditorViewModel(config, fileHandler);
 
         Assert.That(editorViewModel, Is.InstanceOf<EditorViewModel>());
         Assert.Multiple(() =>
@@ -100,8 +142,11 @@ public class ViewModelProviderTest
     [Test]
     public void GetEmptyEditorViewModelTest()
     {
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
         var fileHandler = new MockFileHandler(new Exception());
-        var editorViewModel = ViewModelProvider.Instance.GetEditorViewModel(fileHandler);
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var editorViewModel = vmProvider.GetEditorViewModel(fileHandler);
 
         Assert.That(editorViewModel, Is.InstanceOf<EditorViewModel>());
         Assert.Multiple(() =>
@@ -115,7 +160,10 @@ public class ViewModelProviderTest
     public void GetEditorHotspotViewModelTest()
     {
         var hotspot = CreateHotspot(1);
-        var editorHotspotViewModel = ViewModelProvider.Instance.GetEditorHotspotViewModel(hotspot);
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var editorHotspotViewModel = vmProvider.GetEditorHotspotViewModel(hotspot);
 
         Assert.That(editorHotspotViewModel, Is.InstanceOf<EditorHotspotViewModel>());
         Assert.Multiple(() =>
@@ -133,7 +181,10 @@ public class ViewModelProviderTest
     public void GetEditorHotspotViewModelFromIdTest()
     {
         const int id = 0;
-        var editorHotspotViewModel = ViewModelProvider.Instance.GetEditorHotspotViewModel(id);
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var editorHotspotViewModel = vmProvider.GetEditorHotspotViewModel(id);
 
         Assert.That(editorHotspotViewModel, Is.InstanceOf<EditorHotspotViewModel>());
         Assert.Multiple(() =>
@@ -150,7 +201,10 @@ public class ViewModelProviderTest
     [Test]
     public void GetDescriptionEditorViewModelTest()
     {
-        var descriptionEditorViewModel = ViewModelProvider.Instance.GetDescriptionEditorViewModel();
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var descriptionEditorViewModel = vmProvider.GetDescriptionEditorViewModel();
         Assert.That(descriptionEditorViewModel, Is.InstanceOf<DescriptionEditorViewModel>());
         Assert.Multiple(() =>
         {
@@ -163,8 +217,11 @@ public class ViewModelProviderTest
     [Test]
     public void GetMediaEditorViewModelTest()
     {
-        var imageEditorViewModel = ViewModelProvider.Instance.GetMediaEditorViewModel(MediaEditorType.Images);
-        var videoEditorViewModel = ViewModelProvider.Instance.GetMediaEditorViewModel(MediaEditorType.Videos);
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var imageEditorViewModel = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
+        var videoEditorViewModel = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
 
         Assert.Multiple(() =>
         {
@@ -183,8 +240,11 @@ public class ViewModelProviderTest
     [Test]
     public void GetMediaEditorViewModelInvalidTypeTest()
     {
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
         Assert.That(
-            () => ViewModelProvider.Instance.GetMediaEditorViewModel((MediaEditorType)2),
+            () => vmProvider.GetMediaEditorViewModel((MediaEditorType)2),
             Throws.InstanceOf<ArgumentOutOfRangeException>()
         );
     }
@@ -194,7 +254,10 @@ public class ViewModelProviderTest
     [TestCase(MediaEditorType.Videos, VideoPath, typeof(VideoThumbnailViewModel), TestName = "Videos")]
     public void GetThumbnailViewModelTest(MediaEditorType type, string filePath, Type expectedType)
     {
-        var thumbnailViewModel = ViewModelProvider.Instance.GetThumbnailViewModel(type, filePath);
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var thumbnailViewModel = vmProvider.GetThumbnailViewModel(type, filePath);
 
         Assert.Multiple(() =>
         {
@@ -206,8 +269,11 @@ public class ViewModelProviderTest
     [Test]
     public void GetThumbnailViewModelInvalidTypeTest()
     {
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
         Assert.That(
-            () => ViewModelProvider.Instance.GetThumbnailViewModel((MediaEditorType)2, ""),
+            () => vmProvider.GetThumbnailViewModel((MediaEditorType)2, ""),
             Throws.InstanceOf<ArgumentOutOfRangeException>()
         );
     }
@@ -215,8 +281,11 @@ public class ViewModelProviderTest
     [Test]
     public void GetImportViewModelTest()
     {
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
         var descriptionEditorViewModel = new MockDescriptionEditorViewModel();
-        var importViewModel = ViewModelProvider.Instance.GetImportViewModel(descriptionEditorViewModel);
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var importViewModel = vmProvider.GetImportViewModel(descriptionEditorViewModel);
 
         Assert.That(importViewModel, Is.InstanceOf<ImportViewModel>());
         Assert.That(importViewModel.DescriptionEditor, Is.EqualTo(descriptionEditorViewModel));
@@ -225,11 +294,16 @@ public class ViewModelProviderTest
     #endregion
 
     [Test]
-    [NonParallelizable]
     public void UsingAfterDisposingTest()
     {
-        ViewModelProvider.Instance.Dispose();
-        Assert.That(ViewModelProvider.Instance, Is.Not.Null);
-        GetVideoViewModelTest();
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        vmProvider.Dispose();
+        Assert.That(vmProvider, Is.Not.Null);
+        var videoViewModel = vmProvider.GetVideoViewModel();
+        Assert.That(videoViewModel, Is.InstanceOf<VideoViewModel>());
+        Assert.That(videoViewModel.MediaPlayer, Is.Not.Null);
+        vmProvider.Dispose();
     }
 }

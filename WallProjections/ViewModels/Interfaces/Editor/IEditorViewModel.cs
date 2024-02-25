@@ -2,6 +2,7 @@
 using Avalonia.Platform.Storage;
 using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
+using WallProjections.Views;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
 
@@ -44,6 +45,8 @@ public interface IEditorViewModel
     /// <summary>
     /// Whether the current state of the viewmodel has been saved.
     /// </summary>
+    /// <seealso cref="CanExport" />
+    /// <seealso cref="CloseButtonText" />
     public bool IsSaved { get; }
 
     /// <summary>
@@ -51,6 +54,12 @@ public interface IEditorViewModel
     /// </summary>
     /// <returns>"Close" if <see cref="IsSaved" /> is <i>true</i>; "Discard" otherwise.</returns>
     public string CloseButtonText => IsSaved ? "Close" : "Discard";
+
+    /// <summary>
+    /// Whether the current config can be exported (i.e. exists and has been saved).
+    /// </summary>
+    /// <seealso cref="IsSaved" />
+    public bool CanExport { get; }
 
     /// <summary>
     /// Adds a new hotspot and selects it.
@@ -99,4 +108,9 @@ public interface IEditorViewModel
     /// <param name="exportPath">A path to a folder where the configuration will be exported.</param>
     /// <returns>Whether the file was exported successfully.</returns>
     public bool ExportConfig(string exportPath);
+
+    /// <summary>
+    /// Closes the <see cref="EditorWindow">Editor</see> and discards any unsaved changes.
+    /// </summary>
+    public void CloseEditor();
 }

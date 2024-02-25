@@ -53,17 +53,19 @@ public partial class EditorWindow : Window
         if (DataContext is not IEditorViewModel vm) return;
         var importer = vm.DescriptionEditor.Importer;
 
+        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select a file to import...",
             AllowMultiple = false,
-            FileTypeFilter = new[] { FilePickerFileTypes.TextPlain }
+            FileTypeFilter = new[] { FilePickerFileTypes.TextPlain },
+            SuggestedStartLocation = startFolder
         });
 
         // No file was selected
         if (files.Count == 0) return;
 
-        var file = files[0].Path.AbsolutePath;
+        var file = files[0].Path.LocalPath;
         var safety = importer.IsImportSafe();
         if (safety is ImportWarningLevel.None)
         {
@@ -115,6 +117,7 @@ public partial class EditorWindow : Window
     {
         FetchMediaFiles(
             new[] { FilePickerFileTypes.ImageAll },
+            WellKnownFolder.Pictures,
             (vm, files) => vm.SelectedHotspot?.AddMedia(MediaEditorType.Images, files)
         );
     }
@@ -128,6 +131,7 @@ public partial class EditorWindow : Window
     {
         FetchMediaFiles(
             new[] { IContentProvider.FilePickerVideoType },
+            WellKnownFolder.Videos,
             (vm, files) => vm.AddMedia(MediaEditorType.Videos, files)
         );
     }
@@ -161,6 +165,7 @@ public partial class EditorWindow : Window
     {
         if (DataContext is not IEditorViewModel vm) return;
 
+        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select a configuration file to import...",
@@ -173,12 +178,13 @@ public partial class EditorWindow : Window
                     AppleUniformTypeIdentifiers = new[] { "public.zip-archive" },
                     MimeTypes = new[] { "application/zip" }
                 }
-            }
+            },
+            SuggestedStartLocation = startFolder
         });
 
         if (files.Count == 0) return;
 
-        var file = files[0].Path.AbsolutePath;
+        var file = files[0].Path.LocalPath;
 
         var dialog = new ConfirmationDialog(
             "Import Configuration",
@@ -208,15 +214,17 @@ public partial class EditorWindow : Window
     {
         if (DataContext is not IEditorViewModel vm) return;
 
+        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
         var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = "Choose export location...",
-            AllowMultiple = false
+            AllowMultiple = false,
+            SuggestedStartLocation = startFolder
         });
 
         if (folders.Count == 0) return;
 
-        var folder = folders[0].Path.AbsolutePath;
+        var folder = folders[0].Path.LocalPath;
         if (vm.ExportConfig(folder)) return; //TODO Show a success message
 
         // An error occurred while exporting
@@ -250,12 +258,11 @@ public partial class EditorWindow : Window
 
         if (vm.IsSaved)
         {
-            Close();
+            vm.CloseEditor();
             return;
         }
 
-        var dialog = CreateDiscardChangesDialog();
-        dialog.Confirm += (_, _) => Close();
+        var dialog = CreateDiscardChangesDialog(vm);
 
         _isDialogShown = true;
         await dialog.ShowDialog(this);
@@ -265,23 +272,32 @@ public partial class EditorWindow : Window
     // ReSharper disable once SuggestBaseTypeForParameter
     /// <summary>
     /// Shows a <see cref="ConfirmationDialog">dialog</see> to confirm discarding changes,
-    /// when the window is being closed. If Editor's state is <see cref="IEditorViewModel.IsSaved">saved</see>
-    /// or the window is being closed programmatically, then the window is closed immediately.
+    /// when the window is being closed. If Editor's state is <see cref="IEditorViewModel.IsSaved">saved</see>,
+    /// then the window is closed immediately.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
+    /// <remarks>
+    /// The window should never be closed using <see cref="Window.Close()" />; instead, the ViewModel's
+    /// <see cref="IEditorViewModel.CloseEditor" /> method should be called.
+    /// </remarks>
     private async void Editor_OnClosing(object? sender, WindowClosingEventArgs e)
     {
         if (DataContext is not IEditorViewModel vm) return;
 
-        // If the configuration is saved or the window is being closed programmatically, then it is safe to close.
-        if (e.IsProgrammatic || vm.IsSaved) return;
+        // The window is being closed programmatically only by ViewModel's Navigator
+        if (e.IsProgrammatic) return;
 
         // Prevent the window from closing
         e.Cancel = true;
 
-        var dialog = CreateDiscardChangesDialog();
-        dialog.Confirm += (_, _) => Close();
+        if (vm.IsSaved)
+        {
+            vm.CloseEditor();
+            return;
+        }
+
+        var dialog = CreateDiscardChangesDialog(vm);
 
         _isDialogShown = true;
         await dialog.ShowDialog(this);
@@ -293,32 +309,43 @@ public partial class EditorWindow : Window
     /// <summary>
     /// Creates a new <see cref="ConfirmationDialog" /> to discard changes.
     /// </summary>
-    private static ConfirmationDialog CreateDiscardChangesDialog() => new(
-        "Discard Changes",
-        WarningIconPath,
-        "Are you sure you want to discard your changes? All unsaved data will be lost.",
-        "Discard"
-    );
+    private static ConfirmationDialog CreateDiscardChangesDialog(IEditorViewModel vm)
+    {
+        var dialog = new ConfirmationDialog(
+            "Discard Changes",
+            WarningIconPath,
+            "Are you sure you want to discard your changes? All unsaved data will be lost.",
+            "Discard"
+        );
+        dialog.Confirm += (_, _) => vm.CloseEditor();
+        return dialog;
+    }
 
     /// <summary>
     /// Opens a file picker to import media files. Then, performs the <paramref name="action" /> on the selected files.
     /// </summary>
     /// <param name="filter">A file type filter <i>(see <see cref="FilePickerOpenOptions.FileTypeFilter" />)</i>.</param>
+    /// <param name="startLocation">
+    /// A <see cref="PickerOptions.SuggestedStartLocation">suggested starting location</see> for the file picker
+    /// </param>
     /// <param name="action">
     /// An action to perform on the selected files using the viewmodel from the <see cref="EditorWindow.DataContext" />.
     /// </param>
     private async void FetchMediaFiles(
         IReadOnlyList<FilePickerFileType> filter,
+        WellKnownFolder startLocation,
         Action<IEditorViewModel, IReadOnlyList<IStorageFile>> action
     )
     {
         if (DataContext is not IEditorViewModel vm) return;
 
+        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(startLocation);
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select media files to import...",
             AllowMultiple = true,
-            FileTypeFilter = filter
+            FileTypeFilter = filter,
+            SuggestedStartLocation = startFolder
         });
 
         action(vm, files);

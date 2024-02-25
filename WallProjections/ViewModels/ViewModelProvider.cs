@@ -1,6 +1,7 @@
 ﻿using System;
 using LibVLCSharp.Shared;
 using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Display;
@@ -11,27 +12,35 @@ using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels;
 
+/// <inheritdoc cref="IViewModelProvider" />
 public sealed class ViewModelProvider : IViewModelProvider, IDisposable
 {
-    /// <summary>
-    /// The backing field for the <see cref="ViewModelProvider" /> property
-    /// </summary>
-    private static ViewModelProvider? _viewModelProvider;
-
     /// <summary>
     /// The backing field for the <see cref="LibVlc" /> property
     /// </summary>
     /// <remarks>Reset when <see cref="Dispose" /> is called so that a new instance can be created if needed</remarks>
     private LibVLC? _libVlc;
 
-    private ViewModelProvider()
-    {
-    }
+    /// <summary>
+    /// The app-wide <see cref="INavigator" /> used for navigation between views
+    /// </summary>
+    private readonly INavigator _navigator;
 
     /// <summary>
-    /// A global instance of <see cref="ViewModelProvider" />
+    /// The app-wide <see cref="IPythonHandler" /> used for Python interop
     /// </summary>
-    public static ViewModelProvider Instance => _viewModelProvider ??= new ViewModelProvider();
+    private readonly IPythonHandler _pythonHandler;
+
+    /// <summary>
+    /// Creates a new <see cref="ViewModelProvider" /> with the given <see cref="INavigator" />
+    /// </summary>
+    /// <param name="navigator">The app-wide <see cref="INavigator" /> used for navigation between views</param>
+    /// <param name="pythonHandler">The app-wide <see cref="IPythonHandler" /> used for Python interop</param>
+    public ViewModelProvider(INavigator navigator, IPythonHandler pythonHandler)
+    {
+        _navigator = navigator;
+        _pythonHandler = pythonHandler;
+    }
 
     /// <summary>
     /// A global instance of <see cref="LibVLC" /> to use for <see cref="LibVLCSharp" /> library
@@ -47,7 +56,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
     public IDisplayViewModel GetDisplayViewModel(IConfig config) =>
-        new DisplayViewModel(this, new ContentProvider(config), PythonEventHandler.Instance);
+        new DisplayViewModel(_navigator, this, new ContentProvider(config), _pythonHandler);
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance
@@ -66,7 +75,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="HotspotViewModel" /> instance</returns>
-    public IHotspotViewModel GetHotspotViewModel(IConfig config) => new HotspotViewModel(config);
+    public IHotspotViewModel GetHotspotViewModel(IConfig config) => new HotspotViewModel(config, _pythonHandler);
 
     #endregion
 
@@ -78,7 +87,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler) =>
-        new EditorViewModel(config, fileHandler, this);
+        new EditorViewModel(config, _navigator, fileHandler, this);
 
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" /> instance
@@ -86,7 +95,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler) =>
-        new EditorViewModel(fileHandler, this);
+        new EditorViewModel(_navigator, fileHandler, this);
 
     /// <summary>
     /// Creates a new <see cref="EditorHotspotViewModel" /> instance

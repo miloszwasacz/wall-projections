@@ -118,13 +118,13 @@ public class FileHandler : IFileHandler
 
         var newConfig = new Config(newHotspots);
 
-#if DEBUG || DEBUGSKIPPYTHON
+#if RELEASE
+        var configString = JsonSerializer.Serialize(newConfig);
+#else
         var configString = JsonSerializer.Serialize(newConfig, new JsonSerializerOptions
         {
             WriteIndented = true
         });
-#else
-        var configString = JsonSerializer.Serialize(newConfig);
 #endif
 
         using var configFile = new StreamWriter(Path.Combine(ConfigFolderPath, ConfigFileName));
@@ -173,16 +173,6 @@ public class FileHandler : IFileHandler
         using var configFile = File.OpenRead(configLocation);
         return JsonSerializer.Deserialize<Config>(configFile) ??
                throw new JsonException("Config format invalid");
-    }
-
-    //TODO Remove this
-    /// <summary>
-    /// Checks if config has already been imported into the app folder.
-    /// </summary>
-    /// <returns>True if config imported, false otherwise.</returns>
-    public bool IsConfigImported()
-    {
-        return File.Exists(Path.Combine(ConfigFolderPath, ConfigFileName));
     }
 }
 

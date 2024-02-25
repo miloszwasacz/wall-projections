@@ -3,6 +3,7 @@ using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 
 namespace WallProjections.Test.Mocks.ViewModels.Display;
@@ -28,22 +29,30 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     private int _currentHotspotId = -1;
 
     /// <summary>
-    /// Initializes a new <see cref="MockDisplayViewModel" /> with <see cref="ImageViewModel" /> set to
-    /// <paramref name="imageViewModel" />, <see cref="VideoViewModel" /> set to <paramref name="videoViewModel" />
-    /// and <see cref="HotspotViewModel"/> set to <paramref name="hotspotViewModel"/>
+    /// The <see cref="INavigator" /> to use for navigation between views
     /// </summary>
+    private readonly INavigator _navigator;
+
+    /// <summary>
+    /// Initializes a new <see cref="MockDisplayViewModel" /> with <see cref="ImageViewModel" /> set to
+    /// <paramref name="imageViewModel" /> and <see cref="VideoViewModel" /> set to <paramref name="videoViewModel" />
+    /// </summary>
+    /// <param name="navigator"><see cref="INavigator" /> to use by the mock</param>
     /// <param name="imageViewModel"><see cref="IImageViewModel" /> to use by the mock</param>
     /// <param name="videoViewModel"><see cref="IVideoViewModel" /> to use by the mock</param>
-    /// <param name="hotspotViewModel"><see cref="IHotspotViewModel"/> to use by the mock</param>
     /// <remarks>
-    /// Uses <see cref="MockImageViewModel" />, <see cref="MockVideoViewModel" /> and <see cref="MockHotspotViewModel"/>
+    /// Uses <see cref="MockImageViewModel" /> and <see cref="MockVideoViewModel" />
     /// if the respective parameters are <i>null</i>
     /// </remarks>
-    public MockDisplayViewModel(IImageViewModel? imageViewModel = null, IVideoViewModel? videoViewModel = null, IHotspotViewModel? hotspotViewModel = null)
+    public MockDisplayViewModel(
+        INavigator? navigator = null,
+        IImageViewModel? imageViewModel = null,
+        IVideoViewModel? videoViewModel = null
+    )
     {
+        _navigator = navigator ?? new MockNavigator();
         ImageViewModel = imageViewModel ?? new MockImageViewModel();
         VideoViewModel = videoViewModel ?? new MockVideoViewModel();
-        HotspotViewModel = hotspotViewModel ?? new MockHotspotViewModel();
     }
 
     // /// <summary>
@@ -96,20 +105,31 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     /// Returns a <see cref="MockVideoViewModel" />
     /// </summary>
     public IVideoViewModel VideoViewModel { get; }
-    
-    /// <summary>
-    /// Returns a <see cref="MockHotspotViewModel" />
-    /// </summary>
-    public IHotspotViewModel HotspotViewModel { get; }
 
     /// <summary>
-    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="IPythonEventHandler.HotspotSelectedArgs.Id" />
+    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="IPythonHandler.HotspotSelectedArgs.Id" />
     /// </summary>
     /// <param name="sender">The caller of the event (not used)</param>
     /// <param name="e">The event args containing the id of a hotspot to be theoretically loaded</param>
-    public void OnHotspotSelected(object? sender, IPythonEventHandler.HotspotSelectedArgs e)
+    public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
     {
         CurrentHotspotId = e.Id;
+    }
+
+    /// <summary>
+    /// Calls <see cref="INavigator.OpenEditor" /> on <see cref="_navigator" />
+    /// </summary>
+    public void OpenEditor()
+    {
+        _navigator.OpenEditor();
+    }
+
+    /// <summary>
+    /// Calls <see cref="INavigator.Shutdown" /> on <see cref="_navigator" />
+    /// </summary>
+    public void CloseDisplay()
+    {
+        _navigator.Shutdown();
     }
 
     /// <summary>

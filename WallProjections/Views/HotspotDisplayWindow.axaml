@@ -2,17 +2,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:WallProjections.ViewModels.Interfaces.Display"
-        xmlns:models="using:WallProjections.Models"
+        xmlns:vm="using:WallProjections.ViewModels"
+        xmlns:dvm="using:WallProjections.ViewModels.Interfaces.Display"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.HotspotDisplayWindow"
-        x:DataType="vm:IHotspotViewModel"
-        Title="HotspotDisplayWindow">
+        x:DataType="dvm:IHotspotViewModel"
+        Title="HotspotDisplayWindow"
+        Background="Black"
+        KeyDown="OnKeyDown"
+        Closing="OnClosing">
 
     <!-- Styles relating to hotspot (ellipse) activation -->
     <Window.Styles>
-        <!-- active animation -->
-        <Style Selector="Ellipse.triggered" x:DataType="models:HotspotProjection">
+        <!-- ACTIVE animation -->
+        <Style Selector="Ellipse.triggered" x:DataType="vm:HotspotProjectionViewModel">
             <Style.Animations>
                 <Animation Duration="0:0:1" Delay="0:0:5" PlaybackDirection="AlternateReverse"
                            IterationCount="INFINITE">
@@ -29,8 +32,8 @@
             </Style.Animations>
         </Style>
 
-        <!-- activating animation -->
-        <Style Selector="Ellipse.activating" x:DataType="models:HotspotProjection">
+        <!-- ACTIVATING animation -->
+        <Style Selector="Ellipse.activating" x:DataType="vm:HotspotProjectionViewModel">
             <Style.Animations>
                 <Animation Duration="0:0:5">
                     <KeyFrame Cue="70%">
@@ -92,7 +95,7 @@
             </Style>
 
             <!-- Positioning of the hotspots -->
-            <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:HotspotProjection">
+            <Style Selector="ItemsControl > ContentPresenter" x:DataType="vm:HotspotProjectionViewModel">
                 <Setter Property="Canvas.Top" Value="{Binding Y}" />
                 <Setter Property="Canvas.Left" Value="{Binding X}" />
             </Style>

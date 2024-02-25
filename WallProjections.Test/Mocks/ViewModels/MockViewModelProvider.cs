@@ -9,8 +9,13 @@ using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
-public class MockViewModelProvider : IViewModelProvider
+public class MockViewModelProvider : IViewModelProvider, IDisposable
 {
+    /// <summary>
+    /// Whether <see cref="Dispose" /> has been called
+    /// </summary>
+    public bool HasBeenDisposed { get; private set; }
+
     #region Display
 
     /// <summary>
@@ -41,15 +46,23 @@ public class MockViewModelProvider : IViewModelProvider
 
     #region Editor
 
-    public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="MockEditorViewModel" /> with the given <see cref="IConfig" />
+    /// </summary>
+    /// <param name="config">The config supplied to the constructor</param>
+    /// <param name="fileHandler">The file handler supplied to the constructor</param>
+    /// <returns>A new <see cref="MockEditorViewModel" /></returns>
+    /// <seealso cref="MockEditorViewModel(IConfig, IViewModelProvider, IFileHandler)" />
+    public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler) =>
+        new MockEditorViewModel(config, this, fileHandler);
 
-    public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler)
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new empty <see cref="MockEditorViewModel" />
+    /// </summary>
+    /// <param name="fileHandler">The file handler supplied to the constructor</param>
+    /// <returns>A new <see cref="MockEditorViewModel" /></returns>
+    /// <seealso cref="MockEditorViewModel(IViewModelProvider, IFileHandler)" />
+    public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler) => new MockEditorViewModel(this, fileHandler);
 
     /// <summary>
     /// Creates a new <see cref="MockEditorHotspotViewModel" />
@@ -110,4 +123,10 @@ public class MockViewModelProvider : IViewModelProvider
     public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new MockImportViewModel(descVm);
 
     #endregion
+
+    public void Dispose()
+    {
+        HasBeenDisposed = true;
+        GC.SuppressFinalize(this);
+    }
 }
