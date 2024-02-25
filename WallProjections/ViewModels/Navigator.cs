@@ -205,16 +205,12 @@ public sealed class Navigator : ViewModelBase, INavigator
     private static void OpenHotspotWindow(Window hotspotWindow, WindowBase owner)
     {
         var screens = owner.Screens;
-        var secondaryScreen = screens.All.FirstOrDefault(s => s is
-        {
-            IsPrimary: false,
-            Bounds.Position: { X: > 0 } or { Y: > 0 }
-        });
+        var secondaryScreen = screens.All.FirstOrDefault(s => !s.IsPrimary);
         if (secondaryScreen is not null)
         {
             hotspotWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-            hotspotWindow.Show();
             hotspotWindow.Position = secondaryScreen.Bounds.Position;
+            hotspotWindow.Show();
             hotspotWindow.WindowState = WindowState.FullScreen;
         }
         else
