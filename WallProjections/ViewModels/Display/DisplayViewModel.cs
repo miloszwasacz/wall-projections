@@ -36,6 +36,8 @@ Please report this to the museum staff.";
 
     private readonly IViewModelProvider _vmProvider;
 
+    private readonly ILayoutProvider _layoutProvider;
+
     private ILayout _contentViewModel;
 
     /// <summary>
@@ -56,12 +58,14 @@ Please report this to the museum staff.";
         INavigator navigator,
         IViewModelProvider vmProvider,
         IContentProvider contentProvider,
+        ILayoutProvider layoutProvider,
         IPythonHandler pythonHandler
     )
     {
         _navigator = navigator;
         _contentProvider = contentProvider;
         _vmProvider = vmProvider;
+        _layoutProvider = layoutProvider;
         _pythonHandler = pythonHandler;
         _pythonHandler.HotspotSelected += OnHotspotSelected;
 
@@ -92,14 +96,7 @@ Please report this to the museum staff.";
             var media = _contentProvider.GetMedia(hotspotId);
             ContentViewModel.Dispose();
 
-            if (!media.VideoPaths.IsEmpty)
-            {
-                ContentViewModel = new VideoPlusDescriptionViewModel(_vmProvider, media.Description, media.VideoPaths.First());
-            }
-            else
-            {
-                ContentViewModel = new DescriptionViewModel(media.Description);
-            }
+            ContentViewModel = _layoutProvider.GetLayout(_vmProvider, media);
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {

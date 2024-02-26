@@ -4,6 +4,7 @@ using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Models.LayoutFactories;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces;
@@ -56,7 +57,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
     public IDisplayViewModel GetDisplayViewModel(IConfig config) =>
-        new DisplayViewModel(_navigator, this, new ContentProvider(config), _pythonHandler);
+        new DisplayViewModel(_navigator, this, new ContentProvider(config), new LayoutProvider(), _pythonHandler);
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance
