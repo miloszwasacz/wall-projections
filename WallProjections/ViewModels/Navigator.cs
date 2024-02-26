@@ -8,6 +8,7 @@ using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Views;
+using WallProjections.Views.EditorUserControls;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 
 namespace WallProjections.ViewModels;
@@ -44,11 +45,6 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// Currently loaded configuration.
     /// </summary>
     private IConfig? _config;
-
-    /// <summary>
-    /// Currently opened windows (a main window, and a child hotspot window, if any).
-    /// </summary>
-    private (Window mainWindow, Window? hotspotWindow)? _currentWindows;
 
     /// <summary>
     /// Creates a new instance of <see cref="Navigator" />.
@@ -119,7 +115,6 @@ public sealed class Navigator : ViewModelBase, INavigator
         };
         Navigate(displayWindow);
         OpenHotspotWindow(hotspotWindow, displayWindow);
-        _currentWindows = (displayWindow, hotspotWindow);
 
         _windowMutex.ReleaseMutex();
     }
@@ -145,8 +140,12 @@ public sealed class Navigator : ViewModelBase, INavigator
         {
             DataContext = vm
         };
+        var positionEditorWindow = new PositionEditorWindow
+        {
+            DataContext = vm.PositionEditor
+        };
         Navigate(editorWindow);
-        _currentWindows = (editorWindow, null);
+        OpenHotspotWindow(positionEditorWindow, editorWindow);
 
         _windowMutex.ReleaseMutex();
     }
@@ -190,10 +189,10 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <param name="newWindow">The new window to open.</param>
     private void Navigate(Window newWindow)
     {
+        var currentWindow = _appLifetime.MainWindow;
         newWindow.Show();
         _appLifetime.MainWindow = newWindow;
-        _currentWindows?.hotspotWindow?.CloseAndDispose();
-        _currentWindows?.mainWindow.CloseAndDispose();
+        currentWindow?.CloseAndDispose();
     }
 
     /// <summary>
@@ -204,6 +203,8 @@ public sealed class Navigator : ViewModelBase, INavigator
     [ExcludeFromCodeCoverage(Justification = "Headless mode doesn't support multiple screens")]
     private static void OpenHotspotWindow(Window hotspotWindow, WindowBase owner)
     {
+        owner.Closed += (_, _) => hotspotWindow.CloseAndDispose();
+
         var screens = owner.Screens;
         var secondaryScreen = screens.All.FirstOrDefault(s => !s.IsPrimary);
         if (secondaryScreen is not null)
@@ -215,6 +216,8 @@ public sealed class Navigator : ViewModelBase, INavigator
         }
         else
             hotspotWindow.Show();
+
+        owner.Activate();
     }
 
     /// <inheritdoc />

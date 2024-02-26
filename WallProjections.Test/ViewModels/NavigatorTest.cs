@@ -9,6 +9,7 @@ using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.Views;
+using WallProjections.Views.EditorUserControls;
 
 namespace WallProjections.Test.ViewModels;
 
@@ -59,8 +60,9 @@ public class NavigatorTest
             Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
-        Assert.That(lifetime.Windows, Has.Count.EqualTo(1));
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
         Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
+        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<PositionEditorWindow>());
     }
 
     [AvaloniaTest]
@@ -87,8 +89,9 @@ public class NavigatorTest
             Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
-        Assert.That(lifetime.Windows, Has.Count.EqualTo(1));
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
         Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
+        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<PositionEditorWindow>());
     }
 
     [AvaloniaTest]
@@ -153,7 +156,7 @@ public class NavigatorTest
     /// Runs jobs on the UI thread and waits for them to finish.
     /// </summary>
     /// <param name="delay">The delay in milliseconds.</param>
-    private static async Task FlushUIThread(int delay = 400)
+    private static async Task FlushUIThread(int delay = 1000)
     {
         Dispatcher.UIThread.RunJobs();
         await Task.Delay(delay);

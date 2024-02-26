@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using ReactiveUI;
@@ -10,10 +11,18 @@ namespace WallProjections.ViewModels.Editor;
 /// <inheritdoc cref="IPositionEditorViewModel" />
 public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
 {
+    /// <inheritdoc />
+    public event EventHandler? HotspotPositionChanged;
+
     /// <summary>
     /// A mutex ensuring sequential access to the position and radius of the hotspot.
     /// </summary>
     private readonly Mutex _mutex = new();
+
+    /// <summary>
+    /// The backing field for <see cref="IsInEditMode" />.
+    /// </summary>
+    private bool _isInEditMode;
 
     /// <summary>
     /// The backing field for <see cref="SelectedHotspot" />.
@@ -40,7 +49,20 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     /// </summary>
     private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
 
-    public bool IsInEditMode { get; set; }
+    /// <inheritdoc />
+    public bool IsInEditMode
+    {
+        get => _isInEditMode;
+        set
+        {
+            if (_selectedHotspot is null) return;
+
+            _isInEditMode = value;
+
+            // Reset the position and radius if the user cancels the edit
+            SelectedHotspot = _selectedHotspot;
+        }
+    }
 
     /// <inheritdoc />
     public IEditorHotspotViewModel? SelectedHotspot
@@ -83,7 +105,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     public double R
     {
         get => _r;
-        private set => this.RaiseAndSetIfChanged(ref _r, _r + value);
+        private set => this.RaiseAndSetIfChanged(ref _r, Math.Max(value, 0));
     }
 
     /// <inheritdoc />
@@ -115,5 +137,8 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
         _mutex.WaitOne();
         _selectedHotspot.Position = new Coord(X, Y, R);
         _mutex.ReleaseMutex();
+
+        IsInEditMode = false;
+        HotspotPositionChanged?.Invoke(this, EventArgs.Empty);
     }
 }

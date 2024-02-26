@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WallProjections.Models;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
@@ -8,6 +9,11 @@ namespace WallProjections.ViewModels.Interfaces.Editor;
 /// </summary>
 public interface IPositionEditorViewModel
 {
+    /// <summary>
+    /// An event that is raised when <see cref="UpdateSelectedHotspot" /> is called.
+    /// </summary>
+    public event EventHandler? HotspotPositionChanged;
+
     /// <summary>
     /// Whether the position of the hotspot can be changed.
     /// </summary>
@@ -42,7 +48,7 @@ public interface IPositionEditorViewModel
     public double Y { get; }
 
     /// <summary>
-    /// The current radius of the hotspot.
+    /// The current radius of the hotspot (non-negative).
     /// </summary>
     /// <remarks>
     /// This is not the same as <see cref="SelectedHotspot" />.<see cref="IEditorHotspotViewModel.Position" />.<see cref="Coord.R" />!
@@ -75,6 +81,7 @@ public interface IPositionEditorViewModel
     /// <summary>
     /// Changes the position of the <see cref="SelectedHotspot" /> to the current
     /// <see cref="X" />, <see cref="Y" />, and <see cref="R" /> values.
+    /// Then, sets <see cref="IsInEditMode" /> to <i>false</i> and raises the <see cref="HotspotPositionChanged" /> event.
     /// </summary>
     public void UpdateSelectedHotspot();
 }

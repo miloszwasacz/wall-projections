@@ -5,6 +5,7 @@ namespace WallProjections.Test.Mocks.ViewModels.Editor;
 
 public class MockPositionEditorViewModel : IPositionEditorViewModel
 {
+    public event EventHandler? HotspotPositionChanged;
     public bool IsInEditMode { get; set; }
     public IEditorHotspotViewModel? SelectedHotspot { get; set; }
     public IEnumerable<Coord> UnselectedHotspots { get; set; }
