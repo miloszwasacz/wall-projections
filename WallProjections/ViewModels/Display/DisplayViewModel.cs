@@ -4,8 +4,10 @@ using System.Linq;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
 namespace WallProjections.ViewModels.Display;
 
@@ -13,6 +15,8 @@ namespace WallProjections.ViewModels.Display;
 public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
 {
     //TODO Localized strings?
+    internal const string PromptMessage = @"Please select a hotspot to start";
+
     internal const string GenericError = @"An error occurred while loading this content.
 Please report this to the museum staff.";
 
@@ -30,15 +34,14 @@ Please report this to the museum staff.";
     /// </summary>
     private readonly IContentProvider _contentProvider;
 
+    private readonly IViewModelProvider _vmProvider;
+
+    private ILayout _contentViewModel;
+
     /// <summary>
     /// The <see cref="IPythonHandler" /> used to listen for Python events
     /// </summary>
     private readonly IPythonHandler _pythonHandler;
-
-    /// <summary>
-    /// The backing field for <see cref="Description" />
-    /// </summary>
-    private string _description = string.Empty;
 
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> with <see cref="ImageViewModel" />
@@ -57,25 +60,19 @@ Please report this to the museum staff.";
     )
     {
         _navigator = navigator;
-        ImageViewModel = vmProvider.GetImageViewModel();
-        VideoViewModel = vmProvider.GetVideoViewModel();
         _contentProvider = contentProvider;
+        _vmProvider = vmProvider;
         _pythonHandler = pythonHandler;
         _pythonHandler.HotspotSelected += OnHotspotSelected;
+
+        ContentViewModel = new DescriptionViewModel(PromptMessage);
     }
 
-    /// <inheritdoc />
-    public string Description
+    public ILayout ContentViewModel
     {
-        get => _description;
-        private set => this.RaiseAndSetIfChanged(ref _description, value);
+        get => _contentViewModel;
+        set => this.RaiseAndSetIfChanged(ref _contentViewModel, value);
     }
-
-    /// <inheritdoc />
-    public IImageViewModel ImageViewModel { get; }
-
-    /// <inheritdoc />
-    public IVideoViewModel VideoViewModel { get; }
 
     /// <inheritdoc />
     public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
@@ -91,28 +88,30 @@ Please report this to the museum staff.";
     {
         try
         {
-            ImageViewModel.HideImage();
-            VideoViewModel.StopVideo();
-            var media = _contentProvider.GetMedia(hotspotId);
 
-            Description = media.Description;
-            // TODO Add support for multiple images/videos
-            if (!media.ImagePaths.IsEmpty)
-                ImageViewModel.ShowImage(media.ImagePaths.First());
-            else if (!media.VideoPaths.IsEmpty)
-                VideoViewModel.PlayVideo(media.VideoPaths.First());
+            var media = _contentProvider.GetMedia(hotspotId);
+            ContentViewModel.Dispose();
+
+            if (!media.VideoPaths.IsEmpty)
+            {
+                ContentViewModel = new VideoPlusDescriptionViewModel(_vmProvider, media.Description, media.VideoPaths.First());
+            }
+            else
+            {
+                ContentViewModel = new DescriptionViewModel(media.Description);
+            }
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
-            Description = NotFound;
+            ContentViewModel = new DescriptionViewModel(NotFound);
         }
         catch (Exception e)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
-            Description = GenericError;
+            ContentViewModel = new DescriptionViewModel(GenericError);
         }
     }
 
@@ -134,6 +133,6 @@ Please report this to the museum staff.";
     public void Dispose()
     {
         _pythonHandler.HotspotSelected -= OnHotspotSelected;
-        VideoViewModel.Dispose();
+        ContentViewModel.Dispose();
     }
 }

@@ -83,6 +83,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <inheritdoc />
     public bool PlayVideo(string path)
     {
+        Console.WriteLine($"Attempting to start playing video with _isDisposed={_isDisposed}");
         if (_isDisposed) return false;
 
         HasVideos = true;
@@ -90,6 +91,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         var success = MediaPlayer?.Play(media);
         media.Dispose();
         return success ?? false;
+
     }
 
     /// <inheritdoc />

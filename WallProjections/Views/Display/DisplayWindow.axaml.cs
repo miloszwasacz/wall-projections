@@ -14,13 +14,10 @@ namespace WallProjections.Views;
 
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
-    private VideoView _videoViewer;
     
     public DisplayWindow()
     {
         InitializeComponent();
-
-        _videoViewer = this.Get<VideoView>("VideoViewer");
     }
 
     // ReSharper disable UnusedParameter.Local
@@ -93,27 +90,6 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
         e.Cancel = true;
 
         viewModel.CloseDisplay();
-    }
-
-    internal void Window_OnOpened(object? sender, System.EventArgs e)
-    {
-        if (_videoViewer != null && ViewModel.VideoViewModel.MediaPlayer != null)
-        {
-            Console.WriteLine(_videoViewer.MediaPlayer);
-            ViewModel.VideoViewModel.MediaPlayer.SetHandle(_videoViewer.Hndl);
-        }
-    }
-
-    /// <summary>
-    /// Resizes the video view to maintain a 16:9 aspect ratio.
-    /// </summary>
-    /// <param name="sender">The sender of the event (unused).</param>
-    /// <param name="e">The event arguments containing the new size of the video view.</param>
-    internal void OnVideoViewResize(object? sender, SizeChangedEventArgs e)
-    {
-        if (e.WidthChanged)
-            //TODO Don't use hardcoded ratio
-            VideoView.Height = e.NewSize.Width * 9 / 16;
     }
 
     // ReSharper restore UnusedParameter.Local
