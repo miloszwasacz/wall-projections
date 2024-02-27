@@ -153,7 +153,7 @@ public sealed class PythonProxy : IPythonProxy
         /// </summary>
         public sealed class HotspotDetectionModule : PythonModule
         {
-            public HotspotDetectionModule() : base("hotspot_detection")
+            public HotspotDetectionModule() : base("temp.hotspot_detection")
             {
             }
         }
@@ -163,7 +163,7 @@ public sealed class PythonProxy : IPythonProxy
         /// </summary>
         public sealed class CalibrationModule : PythonModule
         {
-            public CalibrationModule() : base("calibration")
+            public CalibrationModule() : base("temp.calibration")
             {
             }
         }

@@ -17,12 +17,16 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
-        <Content Include="Scripts\"/>
-        <None Update="Scripts\*">
+        <Content Include="Scripts\**\*" Exclude="Scripts\Internal\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+        </Content>
     </ItemGroup>
 
+    <Target Name="GenerateArUcos" BeforeTargets="CoreCompile">
+        <Exec Command="pip install opencv-python"/>
+        <Exec Command="py Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!$([MSBuild]::IsOsPlatform('Windows'))"/>
+    </Target>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.0.5"/>
@@ -37,5 +41,108 @@
         <PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="VideoLAN.LibVLC.Windows" Version="3.0.20"/>
         <PackageReference Condition="$([MSBuild]::IsOsPlatform('OSX'))" Include="VideoLAN.LibVLC.Mac" Version="3.1.3.1"/>
         <PackageReference Include="pythonnet" Version="3.0.3"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_0.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_1.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_10.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_11.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_12.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_13.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_14.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_15.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_16.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_17.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_18.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_19.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_2.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_20.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_21.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_22.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_23.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_24.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_25.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_26.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_27.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_28.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_29.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_3.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_30.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_31.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_32.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_33.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_34.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_35.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_36.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_37.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_38.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_39.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_4.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_40.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_41.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_42.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_43.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_44.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_45.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_46.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_47.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_48.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_49.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_5.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_50.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_51.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_52.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_53.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_54.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_55.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_56.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_57.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_58.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_59.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_6.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_60.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_61.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_62.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_63.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_64.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_65.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_66.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_67.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_68.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_69.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_7.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_70.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_71.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_72.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_73.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_74.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_75.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_76.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_77.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_78.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_79.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_8.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_80.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_81.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_82.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_83.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_84.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_85.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_86.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_87.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_88.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_89.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_9.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_90.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_91.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_92.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_93.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_94.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_95.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_96.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_97.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_98.png" />
+      <UpToDateCheckInput Remove="Assets\ArUcos\ArUco_99.png" />
     </ItemGroup>
 </Project>
