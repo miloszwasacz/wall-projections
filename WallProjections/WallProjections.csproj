@@ -23,8 +23,7 @@
     </ItemGroup>
 
     <Target Name="GenerateArUcos" BeforeTargets="CoreCompile">
-        <Exec Command="pip install opencv-python"/>
-        <Exec Command="py Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="python Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
         <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!$([MSBuild]::IsOsPlatform('Windows'))"/>
     </Target>
 

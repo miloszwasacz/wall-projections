@@ -1,6 +1,5 @@
 import os.path
-from cv2 import aruco
-import cv2
+from cv2 import aruco, imwrite
 
 NUMBER = 100  # max ArUco ID to gen
 DICT = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)  # ArUco dict used
@@ -25,7 +24,7 @@ if not all_exist:
     os.makedirs(FOLDER, exist_ok=True)
     for code in range(NUMBER):
         arucoImage = aruco.generateImageMarker(DICT, code, ARUCO_SIZE, borderBits=ARUCO_BORDER)  # fetch ArUco
-        cv2.imwrite(get_aruco_path(code), arucoImage)
+        imwrite(get_aruco_path(code), arucoImage)
     print("Generated " + str(NUMBER) + " ArUcos")
 
 else:
