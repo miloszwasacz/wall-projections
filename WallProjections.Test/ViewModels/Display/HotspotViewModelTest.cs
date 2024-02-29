@@ -53,8 +53,8 @@ public class HotspotViewModelTest
                     var id = actual.Id == expected.Id;
                     var x = Math.Abs(actual.X - expected.Position.X) < PositionCmpTolerance;
                     var y = Math.Abs(actual.Y - expected.Position.Y) < PositionCmpTolerance;
-                    var d = Math.Abs(actual.D - 2 * expected.Position.R) < PositionCmpTolerance;
-                    return id && x && y && d;
+                    var r = Math.Abs(actual.R - expected.Position.R) < PositionCmpTolerance;
+                    return id && x && y && r;
                 })
             );
             //TODO Add this assertion when the hiding has been properly implemented

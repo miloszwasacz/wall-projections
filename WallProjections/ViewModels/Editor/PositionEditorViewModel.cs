@@ -47,6 +47,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     /// <summary>
     /// The backing field for <see cref="UnselectedHotspots" />.
     /// </summary>
+    /// TODO implement this to be a list of all the non selected hotspots
     private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
 
     /// <inheritdoc />
