@@ -9,7 +9,7 @@ using WallProjections.Views;
 namespace WallProjections.Test.Views;
 
 [TestFixture]
-public class VideoViewTest
+public class NativeVideoViewTest
 {
     // ReSharper disable once InconsistentNaming
     private readonly ViewModelProvider VMProvider = new(new MockNavigator(), new MockPythonHandler());

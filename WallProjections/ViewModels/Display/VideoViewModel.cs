@@ -1,8 +1,9 @@
 ﻿using System;
-using Avalonia.Platform;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
 using LibVLCSharp.Shared;
 using ReactiveUI;
-using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 
@@ -22,9 +23,24 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     private bool _isDisposed;
 
     /// <summary>
-    /// Whether or not a video is currently playing
+    /// Mutex for <see cref="HasVideos"/>, <see cref="_hasVideos"/> and <see cref="_isLoaded"/>
     /// </summary>
-    private bool _isPlaying;
+    private readonly Mutex _stateMutex;
+
+    /// <summary>
+    /// Whether or not a videos are queued
+    /// </summary>
+    private bool _hasVideos;
+
+    /// <summary>
+    /// Whether the video player has loaded
+    /// </summary>
+    private bool _isLoaded;
+
+    /// <summary>
+    /// All the videos queued to play
+    /// </summary>
+    private readonly ConcurrentQueue<string> _playQueue;
 
     /// <summary>
     /// The backing field for <see cref="MediaPlayer" />
@@ -35,6 +51,9 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     {
         _libVlc = libVlc;
         _mediaPlayer = mediaPlayer;
+        _stateMutex = new Mutex();
+        _playQueue = new ConcurrentQueue<string>();
+        _mediaPlayer.EndReached += PlayNextVideoEvent;
 
         this.RaisePropertyChanged(nameof(MediaPlayer));
     }
@@ -61,10 +80,18 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <inheritdoc />
     public bool HasVideos
     {
-        get => _isPlaying;
+        get
+        {
+            _stateMutex.WaitOne();
+            var temp = _hasVideos;
+            _stateMutex.ReleaseMutex();
+            return temp;
+        }
         private set
         {
-            this.RaiseAndSetIfChanged(ref _isPlaying, value);
+            _stateMutex.WaitOne();
+            this.RaiseAndSetIfChanged(ref _hasVideos, value);
+            _stateMutex.ReleaseMutex();
             this.RaisePropertyChanged(nameof(Volume));
         }
     }
@@ -80,18 +107,40 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         }
     }
 
+    public void Loaded()
+    {
+        _stateMutex.WaitOne();
+        if (HasVideos)
+        {
+            PlayNextVideo();
+        }
+        _isLoaded = true;
+        _stateMutex.ReleaseMutex();
+    }
+
     /// <inheritdoc />
     public bool PlayVideo(string path)
     {
-        Console.WriteLine($"Attempting to start playing video with _isDisposed={_isDisposed}");
-        if (_isDisposed) return false;
+        return PlayVideos(new List<string>{ path });
+    }
 
+    public bool PlayVideos(IEnumerable<string> paths)
+    {
+        foreach (var path in paths)
+        {
+            _playQueue.Enqueue(path);
+        }
+
+        _stateMutex.WaitOne();
+        if (_isLoaded && !HasVideos)
+        {
+            PlayNextVideo();
+        }
+        
         HasVideos = true;
-        var media = new Media(_libVlc, path);
-        var success = MediaPlayer?.Play(media);
-        media.Dispose();
-        return success ?? false;
+        _stateMutex.ReleaseMutex();
 
+        return true;
     }
 
     /// <inheritdoc />
@@ -102,6 +151,36 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         MediaPlayer?.Stop();
         HasVideos = false;
     }
+    
+    /// <inheritdoc />
+    public bool PlayNextVideo()
+    {
+
+        // End of queue reached
+        if (_isDisposed || MediaPlayer is null || !_playQueue.TryDequeue(out var nextVideo))
+        {
+            HasVideos = false;
+            return false;
+        }
+
+        var media = new Media(_libVlc, nextVideo);
+        var success = MediaPlayer.Play(media);
+        _hasVideos = true;
+        media.Dispose();
+        return success;
+    }
+
+    /// <summary>
+    /// Event handler wrapper for playing the next video in the sequence when one ends.
+    /// </summary>
+    /// <param name="sender">Object who sent request</param>
+    /// <param name="e">Arguments for the event</param>
+    private void PlayNextVideoEvent(object? sender, EventArgs e)
+    {
+        var success = PlayNextVideo();
+
+        if (!success) Console.WriteLine("Could not play next video");
+    }
 
     public void Dispose()
     {
@@ -109,6 +188,9 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             return;
 
         StopVideo();
+        MediaPlayer.DisposeHandle();
+        MediaPlayer.EndReached -= PlayNextVideoEvent;
+
         _isDisposed = true;
         var mediaPlayer = MediaPlayer;
         MediaPlayer = null;

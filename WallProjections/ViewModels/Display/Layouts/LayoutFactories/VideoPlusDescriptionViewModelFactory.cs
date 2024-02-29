@@ -21,6 +21,6 @@ public class VideoPlusDescriptionViewModelFactory : ILayoutFactory
     {
         if (!IsCompatibleData(hotspot)) throw new ArgumentException("Hotspot invalid for layout type.");
 
-        return new VideoPlusDescriptionViewModel(vmProvider, hotspot.Description, hotspot.VideoPaths.First());
+        return new VideoPlusDescriptionViewModel(vmProvider, hotspot.Description, hotspot.VideoPaths);
     }
 }

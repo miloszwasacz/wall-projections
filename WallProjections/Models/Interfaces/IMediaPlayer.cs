@@ -22,4 +22,7 @@ public interface IMediaPlayer : IDisposable
     public void SetHandle(IPlatformHandle handle);
 
     public void DisposeHandle();
+
+    /// <inheritdoc cref="MediaPlayer.EndReached"/>
+    public event EventHandler<EventArgs> EndReached;
 }

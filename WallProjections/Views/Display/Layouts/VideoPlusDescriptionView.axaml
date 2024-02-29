@@ -2,12 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:models="clr-namespace:WallProjections.Models"
              xmlns:layouts="clr-namespace:WallProjections.ViewModels.Display.Layouts"
+             xmlns:display="clr-namespace:WallProjections.Views.Display"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.Display.Layouts.VideoPlusDescriptionView"
-             x:DataType="layouts:VideoPlusDescriptionViewModel"
-             Loaded="Control_OnLoaded">
+             x:DataType="layouts:VideoPlusDescriptionViewModel">
 
     <Grid ColumnDefinitions="*, *" RowDefinitions="*, 2*, *">
         <TextBlock Name="Description" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
@@ -17,12 +16,10 @@
                    FontSize="24"
                    TextAlignment="Start" />
 
-        <models:VideoView Name="VideoViewer" Grid.Column="1" Grid.Row="1"
-                          x:Name="VideoView"
-                          DataContext="{Binding VideoViewModel}"
-                          MediaPlayer="{Binding MediaPlayer}"
-                          IsVisible="{Binding HasVideos, FallbackValue=False}"
-                          SizeChanged="OnVideoViewResize" />
+        <display:VideoView DataContext="{Binding VideoViewModel}"
+                           Grid.Column="1"
+                           Grid.Row="1"/>
+
     </Grid>
 
 </UserControl>

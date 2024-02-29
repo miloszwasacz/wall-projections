@@ -25,11 +25,11 @@ namespace WallProjections.Models;
 /// <summary>
 ///     Avalonia VideoView for Windows, Linux and Mac.
 /// </summary>
-public class VideoView : NativeControlHost
+public class NativeVideoView : NativeControlHost
 {
     
-    public static readonly DirectProperty<VideoView, Maybe<IMediaPlayer>> MediaPlayerProperty =
-        AvaloniaProperty.RegisterDirect<VideoView, Maybe<IMediaPlayer>>(
+    public static readonly DirectProperty<NativeVideoView, Maybe<IMediaPlayer>> MediaPlayerProperty =
+        AvaloniaProperty.RegisterDirect<NativeVideoView, Maybe<IMediaPlayer>>(
             nameof(MediaPlayer),
             o => Maybe.From(o.MediaPlayer),
             (o, v) => o.MediaPlayer = v.GetValueOrDefault(),
@@ -42,10 +42,10 @@ public class VideoView : NativeControlHost
     public IPlatformHandle Hndl;
 
     public static readonly StyledProperty<object> ContentProperty =
-        ContentControl.ContentProperty.AddOwner<VideoView>();
+        ContentControl.ContentProperty.AddOwner<NativeVideoView>();
 
     public static readonly StyledProperty<IBrush> BackgroundProperty =
-        Panel.BackgroundProperty.AddOwner<VideoView>();
+        Panel.BackgroundProperty.AddOwner<NativeVideoView>();
 
     private Window _floatingContent;
     private IDisposable _disposables;
@@ -53,7 +53,7 @@ public class VideoView : NativeControlHost
     private IDisposable _isEffectivelyVisible;
 
     
-    public VideoView()
+    public NativeVideoView()
     {            
 
         attacher = platformHandles.WithLatestFrom(mediaPlayers).Subscribe(x =>
@@ -65,8 +65,8 @@ public class VideoView : NativeControlHost
             playerAndHandle.Execute(a => a.m.SetHandle(a.n));
         });
 
-        ContentProperty.Changed.AddClassHandler<VideoView>((s, e) => s.InitializeNativeOverlay());
-        IsVisibleProperty.Changed.AddClassHandler<VideoView>((s, e) => s.ShowNativeOverlay(s.IsVisible));
+        ContentProperty.Changed.AddClassHandler<NativeVideoView>((s, e) => s.InitializeNativeOverlay());
+        IsVisibleProperty.Changed.AddClassHandler<NativeVideoView>((s, e) => s.ShowNativeOverlay(s.IsVisible));
     }
 
     public IMediaPlayer MediaPlayer
