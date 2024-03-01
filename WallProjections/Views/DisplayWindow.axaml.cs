@@ -128,7 +128,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 
         if (!keyVal.HasValue) return;
 
-        PythonHandler.Instance.OnPressDetected(keyVal.Value);
+        PythonHandler.Instance.OnHotspotPressed(keyVal.Value);
     }
 #endif
 }

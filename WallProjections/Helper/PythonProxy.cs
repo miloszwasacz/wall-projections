@@ -1,6 +1,6 @@
 ﻿using System;
-#if !DEBUGSKIPPYTHON
 using System.Collections.Generic;
+#if !DEBUGSKIPPYTHON
 using System.Threading;
 using System.Diagnostics;
 using Python.Runtime;
@@ -163,9 +163,15 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Prints a message to the console
     /// </summary>
-    public void CalibrateCamera()
+    public float[,] CalibrateCamera(Dictionary<int, (float, float)> arucoPositions)
     {
         Console.WriteLine("Calibrating camera");
+        return new float[,]
+        {
+            { 1, 0, 0 },
+            { 0, 1, 0 },
+            { 0, 0, 1 }
+        };
     }
 
     /// <summary>

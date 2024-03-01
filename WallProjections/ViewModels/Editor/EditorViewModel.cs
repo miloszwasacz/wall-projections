@@ -37,6 +37,10 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// </summary>
     private readonly IPythonHandler _pythonHandler;
 
+    //TODO Add calibration API
+    /// <inheritdoc cref="IConfig.HomographyMatrix" />
+    private float[,] _homographyMatrix;
+
     /// <summary>
     /// The backing field for <see cref="Hotspots" />.
     /// </summary>
@@ -189,7 +193,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         try
         {
             var hotspots = Hotspots.Select(hotspot => hotspot.ToHotspot());
-            var config = new Config(hotspots);
+            var config = new Config(_homographyMatrix, hotspots);
 
             // Set IsSaved to the result of SaveConfig and return the same value
             return IsSaved = _fileHandler.SaveConfig(config);
@@ -267,6 +271,12 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
         _pythonHandler = pythonHandler;
+        _homographyMatrix = new float[,]
+        {
+            { 1, 0, 0 },
+            { 0, 1, 0 },
+            { 0, 0, 1 }
+        };
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>();
         DescriptionEditor = vmProvider.GetDescriptionEditorViewModel();
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
@@ -298,6 +308,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
         _pythonHandler = pythonHandler;
+        _homographyMatrix = config.HomographyMatrix;
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>(
             config.Hotspots.Select(hotspot => _vmProvider.GetEditorHotspotViewModel(hotspot))
         );

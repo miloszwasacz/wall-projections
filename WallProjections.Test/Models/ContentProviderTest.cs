@@ -61,7 +61,7 @@ public class ContentProviderTest
         Directory.CreateDirectory(invalid);
         ZipFile.ExtractToDirectory(TestInvalidZipPath, invalid);
 
-        _mockValidConfig = new Config(new List<Hotspot>
+        _mockValidConfig = new Config(new float[3, 3], new List<Hotspot>
         {
             NewTestHotspot(
                 0,
@@ -92,7 +92,7 @@ public class ContentProviderTest
             )
         });
 
-        _mockInvalidConfig = new Config(new List<Hotspot>
+        _mockInvalidConfig = new Config(new float[3, 3], new List<Hotspot>
         {
             NewTestHotspot(
                 0,

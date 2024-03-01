@@ -1,12 +1,13 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Text.Json;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks.Helper;
 
 namespace WallProjections.Test.Models;
 
+//TODO Add assertions for homography matrix in the Config
 /// <summary>
 /// Tests for the <see cref="FileHandler" /> class.
 /// </summary>
@@ -17,6 +18,7 @@ public class FileHandlerTest
     private const string TestTxtFile = "text_0.txt";
     private const string TestTxtFileContents = "Hello World\n";
     private static string HotspotTitle(int id) => $"Hotspot {id}";
+    private static readonly float[,] TestMatrix = MockPythonProxy.CalibrationResult;
 
     /// <summary>
     /// Location of the zip file for testing
@@ -44,7 +46,7 @@ public class FileHandlerTest
     {
         IFileHandler fileHandler = new FileHandler();
         var config = fileHandler.ImportConfig(TestZip);
-        var config2 = new Config(new List<Hotspot>
+        var config2 = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(1, 2, 3),
@@ -125,7 +127,7 @@ public class FileHandlerTest
     public void ImportConfigInvalidConfigTest()
     {
         var fileHandler = new FileHandler();
-        Assert.Throws<JsonException>(() => fileHandler.ImportConfig(TestZipInvalidConfig));
+        Assert.Throws<ArgumentNullException>(() => fileHandler.ImportConfig(TestZipInvalidConfig));
     }
 
     /// <summary>
@@ -298,7 +300,7 @@ public class FileHandlerTest
         #endregion
 
         var fileHandler = new FileHandler();
-        var config = new Config(ImmutableList<Hotspot>.Empty);
+        var config = new Config(TestMatrix, ImmutableList<Hotspot>.Empty);
 
         fileHandler.SaveConfig(config);
 
@@ -328,7 +330,7 @@ public class FileHandlerTest
         #endregion
 
         var fileHandler = new FileHandler();
-        var config = new Config(ImmutableList<Hotspot>.Empty);
+        var config = new Config(TestMatrix, ImmutableList<Hotspot>.Empty);
 
         fileHandler.SaveConfig(config);
 
@@ -361,7 +363,7 @@ public class FileHandlerTest
 
         var fileHandler = new FileHandler();
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
-        var config = new Config(new List<Hotspot>
+        var config = new Config(TestMatrix, new List<Hotspot>
         {
             new(0, new Coord(0, 0, 0), "Hotspot 0", textFilePath, ImmutableList<string>.Empty,
                 ImmutableList<string>.Empty)
@@ -379,7 +381,7 @@ public class FileHandlerTest
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
-        var newConfig = new Config(new List<Hotspot>
+        var newConfig = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -418,7 +420,7 @@ public class FileHandlerTest
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
         var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
 
-        var config = new Config(new List<Hotspot>
+        var config = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -447,7 +449,7 @@ public class FileHandlerTest
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
-        var newConfig = new Config(new List<Hotspot>
+        var newConfig = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -487,7 +489,7 @@ public class FileHandlerTest
         var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
         var imageFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image_2.jpg");
 
-        var config = new Config(new List<Hotspot>
+        var config = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -519,7 +521,7 @@ public class FileHandlerTest
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
-        var newConfig = new Config(new List<Hotspot>
+        var newConfig = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -558,7 +560,7 @@ public class FileHandlerTest
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
         var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
 
-        var config = new Config(new List<Hotspot>
+        var config = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -587,7 +589,7 @@ public class FileHandlerTest
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
-        var newConfig = new Config(new List<Hotspot>
+        var newConfig = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -628,7 +630,7 @@ public class FileHandlerTest
         var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
         var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
 
-        var config = new Config(new List<Hotspot>
+        var config = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -669,7 +671,7 @@ public class FileHandlerTest
         Assert.That(savedTextFileContents, Is.EqualTo("This is a second test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
-        var newConfig = new Config(new List<Hotspot>
+        var newConfig = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -716,7 +718,7 @@ public class FileHandlerTest
         var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
         var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
 
-        var config = new Config(new List<Hotspot>
+        var config = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -734,7 +736,7 @@ public class FileHandlerTest
 
         fileHandler.SaveConfig(config);
 
-        config = new Config(new List<Hotspot>
+        config = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),
@@ -766,7 +768,7 @@ public class FileHandlerTest
             Assert.That(!File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
         });
 
-        config = new Config(new List<Hotspot>
+        config = new Config(TestMatrix, new List<Hotspot>
         {
             new(0,
                 new Coord(0, 0, 0),

@@ -25,7 +25,7 @@ public class ViewModelProviderTest
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
         using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
-        var displayViewModel = vmProvider.GetDisplayViewModel(new Config(new List<Hotspot>()));
+        var displayViewModel = vmProvider.GetDisplayViewModel(new Config(new float[3, 3], new List<Hotspot>()));
         Assert.Multiple(() =>
         {
             Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
@@ -67,7 +67,7 @@ public class ViewModelProviderTest
             ImmutableList<string>.Empty,
             ImmutableList<string>.Empty
         );
-        var config = new Config(new List<Hotspot> { hotspot });
+        var config = new Config(new float[3, 3], new List<Hotspot> { hotspot });
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
         using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
@@ -124,7 +124,7 @@ public class ViewModelProviderTest
     public void GetEditorViewModelTest()
     {
         var hotspot = CreateHotspot(0);
-        var config = new Config(new List<Hotspot> { hotspot });
+        var config = new Config(new float[3, 3], new List<Hotspot> { hotspot });
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
         var fileHandler = new MockFileHandler(config);

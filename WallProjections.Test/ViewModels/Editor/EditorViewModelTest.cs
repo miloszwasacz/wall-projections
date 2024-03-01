@@ -18,6 +18,7 @@ using Has = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
 
 namespace WallProjections.Test.ViewModels.Editor
 {
+    //TODO Add assertions for the homography matrix in the Config & VM
     [TestFixture]
     public class EditorViewModelTest
     {
@@ -58,7 +59,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 viewmodels.Add(vm);
             }
 
-            return (new Config(hotspots), viewmodels.ToImmutable());
+            return (new Config(MockPythonProxy.CalibrationResult, hotspots), viewmodels.ToImmutable());
         }
 
         /// <summary>
@@ -585,7 +586,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(true)
             {
-                Config = new Config(new List<Hotspot>())
+                Config = new Config(MockPythonProxy.CalibrationResult, new List<Hotspot>())
             };
             var pythonHandler = new MockPythonHandler();
             IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);

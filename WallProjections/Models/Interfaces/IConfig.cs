@@ -6,6 +6,11 @@ namespace WallProjections.Models.Interfaces;
 public interface IConfig
 {
     /// <summary>
+    /// A 3x3 matrix used for camera calibration.
+    /// </summary>
+    public float[,] HomographyMatrix { get; }
+
+    /// <summary>
     /// List of all hotspots (their locations and content).
     /// </summary>
     public ImmutableList<Hotspot> Hotspots { get; }
