@@ -6,6 +6,7 @@ using System.Linq;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
 using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
@@ -32,6 +33,11 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     private readonly IFileHandler _fileHandler;
 
     /// <summary>
+    /// A <see cref="IPythonHandler" /> used for calibrating the camera.
+    /// </summary>
+    private readonly IPythonHandler _pythonHandler;
+
+    /// <summary>
     /// The backing field for <see cref="Hotspots" />.
     /// </summary>
     private ObservableHotspotCollection<IEditorHotspotViewModel> _hotspots;
@@ -48,7 +54,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
     /// <summary>
     /// Whether the config exists, i.e. is not empty
-    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IViewModelProvider)" />)</i>.
+    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IPythonHandler, IViewModelProvider)" />)</i>.
     /// </summary>
     private bool _configExists;
 
@@ -248,12 +254,19 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// </summary>
     /// <param name="navigator">A <see cref="INavigator" /> used for closing the Editor.</param>
     /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
+    /// <param name="pythonHandler">A <see cref="IPythonHandler" /> used for calibrating the camera.</param>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
-    public EditorViewModel(INavigator navigator, IFileHandler fileHandler, IViewModelProvider vmProvider)
+    public EditorViewModel(
+        INavigator navigator,
+        IFileHandler fileHandler,
+        IPythonHandler pythonHandler,
+        IViewModelProvider vmProvider
+    )
     {
         _navigator = navigator;
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
+        _pythonHandler = pythonHandler;
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>();
         DescriptionEditor = vmProvider.GetDescriptionEditorViewModel();
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
@@ -271,17 +284,20 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <param name="config">The <see cref="IConfig" /> providing initial state of the editor.</param>
     /// <param name="navigator">A <see cref="INavigator" /> used for closing the Editor.</param>
     /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
+    /// <param name="pythonHandler">A <see cref="IPythonHandler" /> used for calibrating the camera.</param>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
     public EditorViewModel(
         IConfig config,
         INavigator navigator,
         IFileHandler fileHandler,
+        IPythonHandler pythonHandler,
         IViewModelProvider vmProvider
     )
     {
         _navigator = navigator;
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
+        _pythonHandler = pythonHandler;
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>(
             config.Hotspots.Select(hotspot => _vmProvider.GetEditorHotspotViewModel(hotspot))
         );

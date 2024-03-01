@@ -139,8 +139,7 @@ public sealed class Navigator : ViewModelBase, INavigator
             ? _vmProvider.GetEditorViewModel(config, fileHandler)
             : _vmProvider.GetEditorViewModel(fileHandler);
 
-        //TODO Don't start calibration here (it's here temporarily, just for showcasing Python interop)
-        _pythonHandler.RunCalibration();
+        _pythonHandler.CancelCurrentTask();
         var editorWindow = new EditorWindow
         {
             DataContext = vm

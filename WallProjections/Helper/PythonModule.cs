@@ -1,6 +1,7 @@
 ﻿#if !DEBUGSKIPPYTHON
 
 using System;
+using System.Collections.Generic;
 using Python.Runtime;
 using WallProjections.Helper.Interfaces;
 
@@ -49,11 +50,18 @@ public abstract class PythonModule
         {
         }
 
+        /// <summary>
+        /// Starts the detection of hotspots using computer vision
+        /// </summary>
+        /// <param name="eventListener">The event listener to notify when a hotspot press is detected</param>
         public void StartDetection(IPythonHandler eventListener)
         {
             _rawModule.hotspot_detection(eventListener.ToPython());
         }
 
+        /// <summary>
+        /// Stops the detection of hotspots (if it is currently running)
+        /// </summary>
         public void StopDetection()
         {
             _rawModule.stop_hotspot_detection();
@@ -69,9 +77,14 @@ public abstract class PythonModule
         {
         }
 
-        public void Calibrate()
+        /// <summary>
+        /// Calibrates the camera and returns the homography matrix
+        /// </summary>
+        /// <param name="arucoPositions">The positions of the ArUco markers (ID, top-left corner)</param>
+        public float[,]? CalibrateCamera(Dictionary<int, (float, float)> arucoPositions)
         {
-            _rawModule.calibrate();
+            PyObject? homography = _rawModule.calibrate(arucoPositions.ToPython());
+            return homography?.As<float[,]>();
         }
     }
 }

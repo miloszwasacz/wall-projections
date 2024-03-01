@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using NUnit.Framework.Constraints;
 using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.Helper;
@@ -10,6 +11,14 @@ namespace WallProjections.Test.Helper;
 [TestFixture]
 public class PythonHandlerTest
 {
+    /// <summary>
+    /// A constraint for <see cref="TaskCanceledException" /> or
+    /// <see cref="AggregateException" /> with <see cref="TaskCanceledException" /> as inner exception
+    /// </summary>
+    private static readonly InstanceOfTypeConstraint IsTaskCanceledException = Is
+        .InstanceOf<TaskCanceledException>().Or
+        .InstanceOf<AggregateException>().With.InnerException.InstanceOf<TaskCanceledException>();
+
     private static readonly int[] Ids = { 0, 1, 2, 1000, -100 };
 
     [Test]
@@ -65,7 +74,7 @@ public class PythonHandlerTest
     public async Task RunCalibrationTest()
     {
         var (handler, python) = CreateInstance();
-        await handler.RunCalibration();
+        await handler.RunCalibration(new Dictionary<int, (float, float)>());
         Assert.That(python.IsCameraCalibrated, Is.True);
     }
 
@@ -81,14 +90,7 @@ public class PythonHandlerTest
         handler.CancelCurrentTask();
         await Task.Delay(100);
         python.Exception = new Exception("Test exception");
-
-        // If the task finishes execution, any exceptions are caught
-        // If it doesn't, there should be no side effects
-        AwaitCancelledTask(
-            task,
-            () => Assert.That(python.IsHotspotDetectionRunning, Is.True),
-            () => Assert.That(python.IsHotspotDetectionRunning, Is.False)
-        );
+        Assert.ThrowsAsync(IsTaskCanceledException, async () => await task);
     }
 
     /// <summary>
@@ -103,24 +105,10 @@ public class PythonHandlerTest
         var task = handler.RunHotspotDetection();
         await Task.Delay(100);
         python.Delay = 0;
-        await handler.RunCalibration();
+        await handler.RunCalibration(new Dictionary<int, (float, float)>());
         python.Exception = new Exception("Test exception");
-
-        // If the task finishes execution, any exceptions are caught
-        // If it doesn't, there should be no side effects
-        AwaitCancelledTask(
-            task,
-            () => Assert.Multiple(() =>
-            {
-                Assert.That(python.IsHotspotDetectionRunning, Is.True);
-                Assert.That(python.IsCameraCalibrated, Is.True);
-            }),
-            () => Assert.Multiple(() =>
-            {
-                Assert.That(python.IsHotspotDetectionRunning, Is.False);
-                Assert.That(python.IsCameraCalibrated, Is.True);
-            })
-        );
+        // Assert.That(async () => { await task; }, ThrowsTaskCanceledException);
+        Assert.ThrowsAsync(IsTaskCanceledException, async () => await task);
     }
 
     [Test]
@@ -171,26 +159,5 @@ public class PythonHandlerTest
                        ?? throw new MissingMethodException("Could not construct PythonEventHandler");
 
         return (instance, python);
-    }
-
-    /// <summary>
-    /// Waits for the <paramref name="task" /> to finish execution, catching any <see cref="TaskCanceledException" />
-    /// </summary>
-    /// <param name="task">The task to wait for</param>
-    /// <param name="onFinished">Action to execute if the task finishes successfully</param>
-    /// <param name="onCancelled">Action to execute if the task hasn't finished before being cancelled</param>
-    private static void AwaitCancelledTask(Task task, Action? onFinished, Action? onCancelled)
-    {
-        try
-        {
-            task.Wait();
-            onFinished?.Invoke();
-        }
-        catch (AggregateException e)
-        {
-            if (e.InnerException is not TaskCanceledException) throw;
-
-            onCancelled?.Invoke();
-        }
     }
 }

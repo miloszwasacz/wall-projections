@@ -1,7 +1,7 @@
 ﻿from typing import List
 import numpy as np
 # noinspection PyPackages
-from . import importme
+from . import importme, numpy_dotnet_converters as npnet
 
 
 def calibrate(aruco_dict) -> np.ndarray:
@@ -10,7 +10,7 @@ def calibrate(aruco_dict) -> np.ndarray:
     returns a 3x3 np array of 32 bit numpy floats
     """
 
-    return np.array(calibrate2(aruco_dict), dtype=np.float32)
+    return npnet.asNetArray(np.array(calibrate2(aruco_dict), dtype=np.float32))
 
 
 def calibrate2(aruco_dict) -> List[List[float]]:

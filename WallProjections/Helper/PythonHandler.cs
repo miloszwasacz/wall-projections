@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using WallProjections.Helper.Interfaces;
@@ -67,10 +68,37 @@ public sealed class PythonHandler : IPythonHandler
     public Task RunHotspotDetection() => RunNewPythonAction(python => python.StartHotspotDetection(this));
 
     /// <inheritdoc />
-    public Task RunCalibration() => RunNewPythonAction(python => python.CalibrateCamera());
+    public Task<float[,]?> RunCalibration(Dictionary<int, (float, float)> arucoPositions) =>
+        RunNewPythonAction(python => python.CalibrateCamera(arucoPositions));
+
+    /// <inheritdoc />
+    public void CancelCurrentTask()
+    {
+        _taskMutex.WaitOne();
+        if (_currentTask is null)
+        {
+            _taskMutex.ReleaseMutex();
+            return;
+        }
+
+        try
+        {
+            RunPythonAction(python => python.StopCurrentAction());
+        }
+        finally
+        {
+            _currentTask?.Cancel();
+            _currentTask?.Dispose();
+            _currentTask = null;
+
+            _taskMutex.ReleaseMutex();
+        }
+    }
+
+    #region Running Python Actions
 
     /// <summary>
-    /// Cancels the current task and calls <see cref="RunPythonAction" /> on a separate thread.
+    /// Cancels the current task and calls <see cref="RunPythonAction">RunPythonAction</see> on a separate thread.
     /// </summary>
     /// <param name="action">The action passed to <see cref="RunPythonAction" /></param>
     private async Task RunNewPythonAction(Action<IPythonProxy> action)
@@ -88,11 +116,37 @@ public sealed class PythonHandler : IPythonHandler
             catch (Exception)
             {
                 if (task.IsCancellationRequested)
-                {
-                    //TODO Log to file
-                    Console.Out.WriteLine("Task was cancelled");
-                }
-                else throw;
+                    throw new TaskCanceledException();
+
+                throw;
+            }
+        }, task.Token);
+    }
+
+    /// <summary>
+    /// Cancels the current task and calls <see cref="RunPythonAction{TR}">RunPythonAction</see> on a separate thread.
+    /// </summary>
+    /// <param name="action">The action passed to <see cref="RunPythonAction{TR}" /></param>
+    /// <typeparam name="TR">The return type of the action</typeparam>
+    /// <returns>The result of the action</returns>
+    private Task<TR?> RunNewPythonAction<TR>(Func<IPythonProxy, TR?> action)
+    {
+        CancelCurrentTask();
+        _taskMutex.WaitOne();
+        var task = _currentTask = new CancellationTokenSource();
+        _taskMutex.ReleaseMutex();
+        return Task.Run(() =>
+        {
+            try
+            {
+                return RunPythonAction(action);
+            }
+            catch (Exception)
+            {
+                if (task.IsCancellationRequested)
+                    throw new TaskCanceledException();
+
+                throw;
             }
         }, task.Token);
     }
@@ -117,23 +171,29 @@ public sealed class PythonHandler : IPythonHandler
         }
     }
 
-    /// <inheritdoc />
-    public void CancelCurrentTask()
+    /// <summary>
+    /// Runs the given action using a <see cref="IPythonProxy" /> and returns the result.
+    /// </summary>
+    /// <param name="action">
+    /// The action to execute (it should involve calling a method on the input <see cref="IPythonProxy" />)
+    /// </param>
+    /// <typeparam name="TR">The return type of the action</typeparam>
+    /// <returns>The result of the action</returns>
+    private TR RunPythonAction<TR>(Func<IPythonProxy, TR> action)
     {
-        _taskMutex.WaitOne();
-        if (_currentTask is null)
+        try
         {
-            _taskMutex.ReleaseMutex();
-            return;
+            return action(_pythonProxy);
         }
-
-        RunPythonAction(python => python.StopCurrentAction());
-        _currentTask?.Cancel();
-        _currentTask?.Dispose();
-        _currentTask = null;
-
-        _taskMutex.ReleaseMutex();
+        catch (Exception e)
+        {
+            //TODO Log to file
+            Console.Error.WriteLine(e);
+            throw;
+        }
     }
+
+    #endregion
 
     /// <inheritdoc />
     public event EventHandler<IPythonHandler.HotspotSelectedArgs>? HotspotSelected;

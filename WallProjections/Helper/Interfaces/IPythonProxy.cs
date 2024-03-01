@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace WallProjections.Helper.Interfaces;
 
@@ -7,10 +8,7 @@ namespace WallProjections.Helper.Interfaces;
 /// </summary>
 public interface IPythonProxy : IDisposable
 {
-    /// <summary>
-    /// Starts the detection of hotspots using computer vision
-    /// </summary>
-    /// <param name="eventListener">The event listener to notify when a hotspot press is detected</param>
+    /// <inheritdoc cref="PythonModule.HotspotDetectionModule.StartDetection" />
     public void StartHotspotDetection(IPythonHandler eventListener);
 
     /// <summary>
@@ -18,8 +16,6 @@ public interface IPythonProxy : IDisposable
     /// </summary>
     public void StopCurrentAction();
 
-    /// <summary>
-    /// Calibrates the camera
-    /// </summary>
-    public void CalibrateCamera();
+    /// <inheritdoc cref="PythonModule.CalibrationModule.CalibrateCamera" />
+    public float[,]? CalibrateCamera(Dictionary<int, (float, float)> arucoPositions);
 }

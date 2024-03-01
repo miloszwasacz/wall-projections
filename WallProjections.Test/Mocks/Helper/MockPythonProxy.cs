@@ -8,6 +8,16 @@ namespace WallProjections.Test.Mocks.Helper;
 public class MockPythonProxy : IPythonProxy
 {
     /// <summary>
+    /// The returned result of the <see cref="CalibrateCamera" /> method when the input is not empty
+    /// </summary>
+    public static readonly float[,] CalibrationResult =
+    {
+        { 0.0f, 0.1f, 0.2f },
+        { 1.0f, 1.1f, 1.2f },
+        { 2.0f, 2.1f, 2.2f }
+    };
+
+    /// <summary>
     /// Whether <see cref="Dispose" /> has been called
     /// </summary>
     public bool IsDisposed { get; private set; }
@@ -47,13 +57,14 @@ public class MockPythonProxy : IPythonProxy
         Task.Delay(Delay).Wait();
     }
 
-    public void CalibrateCamera()
+    public float[,]? CalibrateCamera(Dictionary<int, (float, float)> arucoPositions)
     {
         Task.Delay(Delay).Wait();
         if (Exception != null)
             throw Exception;
 
         IsCameraCalibrated = true;
+        return arucoPositions.Count > 0 ? CalibrationResult : null;
     }
 
     public void Dispose()

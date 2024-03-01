@@ -87,7 +87,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler) =>
-        new EditorViewModel(config, _navigator, fileHandler, this);
+        new EditorViewModel(config, _navigator, fileHandler, _pythonHandler, this);
 
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" /> instance
@@ -95,7 +95,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler) =>
-        new EditorViewModel(_navigator, fileHandler, this);
+        new EditorViewModel(_navigator, fileHandler, _pythonHandler, this);
 
     /// <summary>
     /// Creates a new <see cref="EditorHotspotViewModel" /> instance

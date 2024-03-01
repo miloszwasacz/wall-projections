@@ -1,5 +1,6 @@
 ﻿using System;
 #if !DEBUGSKIPPYTHON
+using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
 using Python.Runtime;
@@ -55,10 +56,10 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public void CalibrateCamera()
+    public float[,]? CalibrateCamera(Dictionary<int, (float, float)> arucoPositions)
     {
         //TODO Change to the actual entrypoint
-        RunPythonAction(PythonModule.Calibration, module => { module.Calibrate(); });
+        return RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));
     }
 
     /// <summary>
@@ -76,6 +77,25 @@ public sealed class PythonProxy : IPythonProxy
             var module = moduleFactory();
             _currentModule.Set(module);
             action(module);
+        }
+    }
+
+    /// <summary>
+    /// Runs the given action after acquiring the Python GIL importing the given module and returns the result
+    /// </summary>
+    /// <param name="moduleFactory">A factory for creating the Python module</param>
+    /// <param name="action">The action to run using the Python module</param>
+    /// <typeparam name="T">The type of the Python module</typeparam>
+    /// <typeparam name="TR">The return type of the action</typeparam>
+    /// <remarks><see cref="AtomicPythonModule.Set">Sets</see> <see cref="_currentModule" /> to the imported module</remarks>
+    private TR RunPythonAction<T, TR>(Func<T> moduleFactory, Func<T, TR> action) where T : PythonModule
+    {
+        using (Py.GIL())
+        {
+            //TODO Maybe Import a module once and reuse it?
+            var module = moduleFactory();
+            _currentModule.Set(module);
+            return action(module);
         }
     }
 

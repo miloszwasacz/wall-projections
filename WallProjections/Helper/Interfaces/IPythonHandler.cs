@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace WallProjections.Helper.Interfaces;
@@ -18,7 +19,8 @@ public interface IPythonHandler : IDisposable
     /// <summary>
     /// Starts an asynchronous Python task that calibrates the camera
     /// </summary>
-    public Task RunCalibration();
+    /// <param name="arucoPositions">The positions of the ArUco markers (ID, top-left corner)</param>
+    public Task<float[,]?> RunCalibration(Dictionary<int, (float, float)> arucoPositions);
 
     /// <summary>
     /// Stops the currently running Python task, if any
