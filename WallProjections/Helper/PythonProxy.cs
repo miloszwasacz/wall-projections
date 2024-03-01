@@ -39,7 +39,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <inheritdoc />
     public void StartHotspotDetection(IPythonHandler eventListener)
     {
-        RunPythonAction(PythonModule.HotspotDetection, module => { module.hotspot_detection(eventListener.ToPython()); });
+        RunPythonAction(PythonModule.HotspotDetection, module => { module.StartDetection(eventListener); });
     }
 
     /// <inheritdoc />
@@ -50,7 +50,7 @@ public sealed class PythonProxy : IPythonProxy
 
         using (Py.GIL())
         {
-            module.Module.stop_hotspot_detection();
+            module.StopDetection();
         }
     }
 
@@ -58,7 +58,7 @@ public sealed class PythonProxy : IPythonProxy
     public void CalibrateCamera()
     {
         //TODO Change to the actual entrypoint
-        RunPythonAction(PythonModule.Calibration, module => { module.calibrate(); });
+        RunPythonAction(PythonModule.Calibration, module => { module.Calibrate(); });
     }
 
     /// <summary>
@@ -66,15 +66,16 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     /// <param name="moduleFactory">A factory for creating the Python module</param>
     /// <param name="action">The action to run using the Python module</param>
+    /// <typeparam name="T">The type of the Python module</typeparam>
     /// <remarks><see cref="AtomicPythonModule.Set">Sets</see> <see cref="_currentModule" /> to the imported module</remarks>
-    private void RunPythonAction(Func<PythonModule> moduleFactory, Action<dynamic> action)
+    private void RunPythonAction<T>(Func<T> moduleFactory, Action<T> action) where T : PythonModule
     {
         using (Py.GIL())
         {
             //TODO Maybe Import a module once and reuse it?
             var module = moduleFactory();
             _currentModule.Set(module);
-            action(module.Module);
+            action(module);
         }
     }
 
@@ -113,59 +114,6 @@ public sealed class PythonProxy : IPythonProxy
             _module = null;
             _mutex.ReleaseMutex();
             return module;
-        }
-    }
-
-    /// <summary>
-    /// Available Python modules
-    /// </summary>
-    private abstract class PythonModule
-    {
-        /// <summary>
-        /// The base for importing Python modules
-        /// </summary>
-        /// <seealso cref="PythonModule(string)" />
-        private const string ScriptPath = "Scripts";
-
-        /// <inheritdoc cref="HotspotDetectionModule" />
-        public static Func<PythonModule> HotspotDetection => () => new HotspotDetectionModule();
-
-        /// <inheritdoc cref="CalibrationModule" />
-        public static Func<PythonModule> Calibration => () => new CalibrationModule();
-
-        /// <summary>
-        /// The Python module object that this class wraps
-        /// </summary>
-        public dynamic Module { get; }
-
-        /// <summary>
-        /// <see cref="Py.Import">Imports</see> the Python module with the given <paramref name="name" />
-        /// using the <see cref="ScriptPath" /> as the base (i.e. <i>{ScriptPath}.{name}</i>)
-        /// </summary>
-        /// <param name="name">The name of the Python module</param>
-        private PythonModule(string name)
-        {
-            Module = Py.Import($"{ScriptPath}.{name}");
-        }
-
-        /// <summary>
-        /// A module that provides hotspot detection functionality using Computer Vision
-        /// </summary>
-        public sealed class HotspotDetectionModule : PythonModule
-        {
-            public HotspotDetectionModule() : base("hotspot_detection")
-            {
-            }
-        }
-
-        /// <summary>
-        /// A module that calibrates the camera to correct offset from the projector
-        /// </summary>
-        public sealed class CalibrationModule : PythonModule
-        {
-            public CalibrationModule() : base("calibration")
-            {
-            }
         }
     }
 }
