@@ -19,6 +19,11 @@ public interface IVideoViewModel : IDisposable
     /// Whether or not the viewmodel has a video to display
     /// </summary>
     public bool HasVideos { get; }
+    
+    /// <summary>
+    /// Whether the player should be shown
+    /// </summary>
+    public bool IsVisible { get; }
 
     /// <summary>
     /// The volume of the video.

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using LibVLCSharp.Shared;
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
@@ -76,6 +77,9 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             this.RaiseAndSetIfChanged(ref _mediaPlayer, null);
         }
     }
+
+    /// <inheritdoc />
+    public bool IsVisible => _isLoaded && !_isDisposed;
 
     /// <inheritdoc />
     public bool HasVideos

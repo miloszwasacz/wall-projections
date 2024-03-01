@@ -11,6 +11,11 @@
         WindowState="FullScreen"
         Closing="Window_OnClosing"
         KeyDown="OnKeyDown"
-        Content="{Binding ContentViewModel}">
-
+        Padding="42"
+        FontFamily="">
+    <TransitioningContentControl Content="{Binding ContentViewModel}">
+        <TransitioningContentControl.PageTransition>
+            <CrossFade Duration="0:00:00.500"/>
+        </TransitioningContentControl.PageTransition>
+    </TransitioningContentControl>
 </Window>

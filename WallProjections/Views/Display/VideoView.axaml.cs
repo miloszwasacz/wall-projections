@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+using System.Timers;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using WallProjections.Models;
@@ -12,7 +14,6 @@ public partial class VideoView : UserControl
 
     private readonly NativeVideoView _nativeVideoView;
     private IVideoViewModel _viewModel;
-    private IVideoViewModel _previousViewModel;
 
     public VideoView()
     {
@@ -22,15 +23,15 @@ public partial class VideoView : UserControl
 
     }
 
-    internal void Control_OnLoaded(object? sender, RoutedEventArgs e)
+    internal async void Control_OnLoaded(object? sender, RoutedEventArgs e)
     {
         _viewModel = DataContext as VideoViewModel;
 
-        if (_nativeVideoView is not null && _viewModel?.MediaPlayer != null)
+        await Task.Delay(1000);
+
+        if ( _viewModel?.MediaPlayer != null)
         {
             _viewModel.MediaPlayer.SetHandle(_nativeVideoView.Hndl);
-            Console.WriteLine("Handle set for video");
-
             _viewModel.Loaded();
         }
     }

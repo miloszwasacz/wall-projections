@@ -6,12 +6,13 @@
              xmlns:display="clr-namespace:WallProjections.ViewModels.Interfaces.Display"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="display:IVideoViewModel"
-             x:Class="WallProjections.Views.Display.VideoView">
+             x:Class="WallProjections.Views.Display.VideoView"
+             Background="Black">
 
     <models:NativeVideoView Name="VideoViewer"
                             x:Name="VideoViewer"
                             MediaPlayer="{Binding MediaPlayer}"
-                            IsVisible="{Binding HasVideos, FallbackValue=False}"
+                            IsVisible="{Binding IsVisible}"
                             SizeChanged="OnVideoViewResize"
                             Loaded="Control_OnLoaded"
     />

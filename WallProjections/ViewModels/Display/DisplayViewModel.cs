@@ -69,7 +69,7 @@ Please report this to the museum staff.";
         _pythonHandler = pythonHandler;
         _pythonHandler.HotspotSelected += OnHotspotSelected;
 
-        ContentViewModel = new DescriptionViewModel(PromptMessage);
+        ContentViewModel = new DescriptionViewModel("Select hotspot", PromptMessage);
     }
 
     public ILayout ContentViewModel
@@ -102,13 +102,13 @@ Please report this to the museum staff.";
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
-            ContentViewModel = new DescriptionViewModel(NotFound);
+            ContentViewModel = new DescriptionViewModel("Error", NotFound);
         }
         catch (Exception e)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
-            ContentViewModel = new DescriptionViewModel(GenericError);
+            ContentViewModel = new DescriptionViewModel("Error", GenericError);
         }
     }
 

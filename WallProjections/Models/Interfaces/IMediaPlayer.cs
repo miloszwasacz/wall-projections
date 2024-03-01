@@ -13,6 +13,9 @@ public interface IMediaPlayer : IDisposable
     /// <inheritdoc cref="MediaPlayer.Volume" />
     public int Volume { get; set; }
 
+    /// <inheritdoc cref="MediaPlayer.IsPlaying"/>
+    public bool IsPlaying { get; }
+
     /// <inheritdoc cref="MediaPlayer.Play(Media)" />
     public bool Play(Media media);
 

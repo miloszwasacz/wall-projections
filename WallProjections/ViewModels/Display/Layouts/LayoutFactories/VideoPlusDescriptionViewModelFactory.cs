@@ -1,11 +1,10 @@
 using System;
-using System.Linq;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
-using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
-namespace WallProjections.Models.LayoutFactories;
+namespace WallProjections.ViewModels.Display.Layouts.LayoutFactories;
 
 public class VideoPlusDescriptionViewModelFactory : ILayoutFactory
 {

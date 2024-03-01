@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
-using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
-namespace WallProjections.Models.LayoutFactories;
+namespace WallProjections.ViewModels.Display.Layouts.LayoutFactories;
 
 public class LayoutProvider : ILayoutProvider
 {
@@ -45,7 +45,7 @@ public class LayoutProvider : ILayoutProvider
             }
         }
 
-        return new DescriptionViewModel("Cannot show the information for this hotspot." +
+        return new DescriptionViewModel("Error", "Cannot show the information for this hotspot." +
                                         "\nPlease ask a member of staff for help.");
     }
 }

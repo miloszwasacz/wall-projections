@@ -1,11 +1,10 @@
 using System;
-using System.Linq;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
-using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
-namespace WallProjections.Models.LayoutFactories;
+namespace WallProjections.ViewModels.Display.Layouts.LayoutFactories;
 
 public class DescriptionViewModelFactory : ILayoutFactory
 {
@@ -21,6 +20,6 @@ public class DescriptionViewModelFactory : ILayoutFactory
     {
         if (!IsCompatibleData(hotspot)) throw new ArgumentException("Hotspot invalid for layout type.");
 
-        return new DescriptionViewModel(hotspot.Description);
+        return new DescriptionViewModel(hotspot.Title, hotspot.Description);
     }
 }
