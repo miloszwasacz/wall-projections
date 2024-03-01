@@ -140,12 +140,12 @@ public class PythonHandlerTest
         HotspotSelectedArgs? eventFiredArgs = null;
         handler.HotspotSelected += (_, a) => eventFiredArgs = a;
 
-        handler.OnPressDetected(id);
+        handler.OnHotspotPressed(id);
         Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
         Assert.That(eventFiredArgs!.Id, Is.EqualTo(id));
         eventFiredArgs = null;
 
-        handler.OnPressDetected(id2);
+        handler.OnHotspotPressed(id2);
         Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
         Assert.That(eventFiredArgs!.Id, Is.EqualTo(id2));
     }

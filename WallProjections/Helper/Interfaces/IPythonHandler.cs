@@ -29,7 +29,13 @@ public interface IPythonHandler : IDisposable
     /// Called by Python when a hotspot press is detected
     /// </summary>
     /// <param name="id">The ID of the pressed hotspot</param>
-    public void OnPressDetected(int id);
+    public void OnHotspotPressed(int id);
+
+    /// <summary>
+    /// Called by Python when a hotspot press is released
+    /// </summary>
+    /// <param name="id">The ID of the released hotspot</param>
+    public void OnHotspotUnpressed(int id);
 
     /// <summary>
     /// Arguments for the <see cref="HotspotSelected" /> event

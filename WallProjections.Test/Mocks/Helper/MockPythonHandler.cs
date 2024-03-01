@@ -37,9 +37,15 @@ public class MockPythonHandler : IPythonHandler
     }
 
     /// <inheritdoc />
-    public void OnPressDetected(int id)
+    public void OnHotspotPressed(int id)
     {
         HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
+    }
+
+    /// <inheritdoc />
+    public void OnHotspotUnpressed(int id)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>

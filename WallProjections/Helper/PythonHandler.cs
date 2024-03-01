@@ -139,9 +139,17 @@ public sealed class PythonHandler : IPythonHandler
     public event EventHandler<IPythonHandler.HotspotSelectedArgs>? HotspotSelected;
 
     /// <inheritdoc />
-    public void OnPressDetected(int id)
+    public void OnHotspotPressed(int id)
     {
         HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
+    }
+
+    /// <inheritdoc />
+    public void OnHotspotUnpressed(int id)
+    {
+        //TODO Implement OnHotspotUnpressed
+        Console.WriteLine($"Hotspot {id} was unpressed");
+        // HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
     }
 
     public void Dispose()

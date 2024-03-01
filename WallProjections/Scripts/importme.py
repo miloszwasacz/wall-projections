@@ -1,3 +1,7 @@
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 
 def import_me():
-    print("i've been imported!")
+    logging.warning("i've been imported!")

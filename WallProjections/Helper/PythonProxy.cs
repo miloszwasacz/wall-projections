@@ -39,7 +39,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <inheritdoc />
     public void StartHotspotDetection(IPythonHandler eventListener)
     {
-        RunPythonAction(PythonModule.HotspotDetection, module => { module.run(eventListener.ToPython()); });
+        RunPythonAction(PythonModule.HotspotDetection, module => { module.hotspot_detection(eventListener.ToPython()); });
     }
 
     /// <inheritdoc />
@@ -58,7 +58,7 @@ public sealed class PythonProxy : IPythonProxy
     public void CalibrateCamera()
     {
         //TODO Change to the actual entrypoint
-        RunPythonAction(PythonModule.Calibration, module => { module.test(); });
+        RunPythonAction(PythonModule.Calibration, module => { module.calibrate(); });
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ public sealed class PythonProxy : IPythonProxy
         /// </summary>
         public sealed class HotspotDetectionModule : PythonModule
         {
-            public HotspotDetectionModule() : base("temp.hotspot_detection")
+            public HotspotDetectionModule() : base("hotspot_detection")
             {
             }
         }
@@ -163,7 +163,7 @@ public sealed class PythonProxy : IPythonProxy
         /// </summary>
         public sealed class CalibrationModule : PythonModule
         {
-            public CalibrationModule() : base("temp.calibration")
+            public CalibrationModule() : base("calibration")
             {
             }
         }
