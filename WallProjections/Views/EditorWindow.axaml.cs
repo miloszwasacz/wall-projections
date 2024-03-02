@@ -12,15 +12,32 @@ namespace WallProjections.Views;
 
 public partial class EditorWindow : Window
 {
+    private const string ExplorerErrorMessage = "Could not open the File Explorer";
+    private const string ImportErrorMessage = "An error occured while importing the configuration file";
+    private const string ExportErrorMessage = "An error occured while exporting configuration to a file";
+    private const string CalibrationErrorMessage = "An error occured while calibrating the camera";
+    private const string SaveErrorMessage = "An error occured while saving the configuration";
+
     /// <summary>
     /// The path to the warning icon.
     /// </summary>
     private static readonly Uri WarningIconPath = new("avares://WallProjections/Assets/warning-icon.ico");
 
+    //TODO Change to an actual icon
+    /// <summary>
+    /// The path to the camera calibration icon.
+    /// </summary>
+    private static readonly Uri CalibrationIconPath = new("avares://WallProjections/Assets/warning-icon.ico");
+
     /// <summary>
     /// Whether any dialog is currently shown.
     /// </summary>
     private bool _isDialogShown;
+
+    /// <summary>
+    /// Whether calibration is currently running.
+    /// </summary>
+    private bool _isCalibrationRunning;
 
     public EditorWindow()
     {
@@ -30,12 +47,12 @@ public partial class EditorWindow : Window
     // ReSharper disable UnusedParameter.Local
 
     /// <summary>
-    /// A callback for showing a <see cref="ExplorerErrorToast">toast</see>
-    /// saying that the explorer could not be opened.
+    /// A callback for showing a toast saying that the explorer could not be opened.
     /// </summary>
     private void MediaEditor_OnOpenExplorerFailed(object? sender, RoutedEventArgs e)
     {
-        ExplorerErrorToast.Show(Toast.ShowDuration.Short);
+        Toast.Text = ExplorerErrorMessage;
+        Toast.Show(Toast.ShowDuration.Short);
     }
 
     /// <summary>
@@ -197,7 +214,8 @@ public partial class EditorWindow : Window
             if (vm.ImportConfig(file)) return;
 
             // An error occurred while importing
-            ImportErrorToast.Show(Toast.ShowDuration.Short);
+            Toast.Text = ImportErrorMessage;
+            Toast.Show(Toast.ShowDuration.Short);
         };
 
         _isDialogShown = true;
@@ -228,7 +246,44 @@ public partial class EditorWindow : Window
         if (vm.ExportConfig(folder)) return; //TODO Show a success message
 
         // An error occurred while exporting
-        ExportErrorToast.Show(Toast.ShowDuration.Short);
+        Toast.Text = ExportErrorMessage;
+        Toast.Show(Toast.ShowDuration.Short);
+    }
+
+    /// <summary>
+    /// Starts camera calibration.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private async void Calibrate_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+        if (_isCalibrationRunning || _isDialogShown) return;
+
+        _isCalibrationRunning = true;
+        vm.ShowCalibrationMarkers();
+
+        var dialog = new ConfirmationDialog(
+            "Camera calibration",
+            CalibrationIconPath,
+            "Ensure that the window with calibration patterns is on the right screen and is in fullscreen mode.",
+            "Continue"
+        );
+        dialog.Confirm += async (_, _) =>
+        {
+            var success = await vm.CalibrateCamera();
+            _isCalibrationRunning = false;
+            if (success) return; //TODO Show a success message
+
+            // An error occurred while calibrating
+            Toast.Text = CalibrationErrorMessage;
+            Toast.Show(Toast.ShowDuration.Short);
+        };
+        dialog.Cancel += (_, _) => _isCalibrationRunning = false;
+
+        _isDialogShown = true;
+        await dialog.ShowDialog(this);
+        _isDialogShown = false;
     }
 
     /// <summary>
@@ -243,7 +298,8 @@ public partial class EditorWindow : Window
         if (vm.SaveConfig()) return;
 
         // An error occurred while saving
-        SaveErrorToast.Show(Toast.ShowDuration.Short);
+        Toast.Text = SaveErrorMessage;
+        Toast.Show(Toast.ShowDuration.Short);
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -45,6 +46,7 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     private IConfig? _config;
 
+    //TODO Make hotspot window persistent with changing content
     /// <summary>
     /// Currently opened windows (a main window, and a child hotspot window, if any).
     /// </summary>
@@ -171,6 +173,24 @@ public sealed class Navigator : ViewModelBase, INavigator
             //TODO Show error message
             Shutdown();
         }
+    }
+
+    /// <inheritdoc />
+    public void ShowCalibrationMarkers()
+    {
+        //TODO Switch secondary screen to calibration patterns
+    }
+
+    /// <inheritdoc />
+    public void HideCalibrationMarkers()
+    {
+        //TODO Switch secondary screen to an appropriate secondary view (depending on the current main window)
+    }
+
+    /// <inheritdoc />
+    public Dictionary<int, (float, float)>? GetArUcoPositions()
+    {
+        throw new NotImplementedException("Get ArUco positions");
     }
 
     /// <summary>

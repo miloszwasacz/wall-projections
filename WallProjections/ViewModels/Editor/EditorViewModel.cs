@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
 using WallProjections.Helper;
@@ -246,6 +247,22 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             return false;
         }
     }
+
+    /// <inheritdoc />
+    public void ShowCalibrationMarkers() => _navigator.ShowCalibrationMarkers();
+
+    /// <inheritdoc />
+    public Task<bool> CalibrateCamera() => Task.Run(async () =>
+    {
+        var arUcoPositions = _navigator.GetArUcoPositions();
+        if (arUcoPositions is null) return false;
+
+        var matrix = await _pythonHandler.RunCalibration(arUcoPositions);
+        if (matrix is not null)
+            _homographyMatrix = matrix;
+
+        return matrix is not null;
+    });
 
     /// <inheritdoc />
     public void CloseEditor()

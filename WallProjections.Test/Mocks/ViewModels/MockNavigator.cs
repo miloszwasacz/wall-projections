@@ -54,6 +54,21 @@ public class MockNavigator : INavigator
         IsEditorOpen = false;
     }
 
+    public void ShowCalibrationMarkers()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void HideCalibrationMarkers()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Dictionary<int, (float, float)>? GetArUcoPositions()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Sets <see cref="HasBeenShutDown"/> to true and calls <see cref="Dispose"/>.
     /// </summary>

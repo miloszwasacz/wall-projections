@@ -20,28 +20,41 @@
                 BorderThickness="0 0 0 2"
                 Padding="8">
 
-            <Grid ColumnDefinitions="Auto, 15, Auto, *, Auto, 15, Auto">
+            <Grid ColumnDefinitions="Auto, *, Auto">
 
-                <Button Grid.Column="0" Grid.Row="0"
-                        Click="ConfigImport_OnClick">
-                    Import Config
-                </Button>
+                <StackPanel Grid.Column="0" Grid.Row="0"
+                            Orientation="Horizontal"
+                            Spacing="15">
 
-                <Button Grid.Column="2" Grid.Row="0"
-                        IsEnabled="{Binding CanExport}"
-                        Click="ConfigExport_OnClick">
-                    Export Config
-                </Button>
+                    <Button Click="ConfigImport_OnClick">
+                        Import Config
+                    </Button>
 
-                <Button Grid.Column="4" Grid.Row="0"
-                        IsEnabled="{Binding !IsSaved}"
-                        Click="Save_OnClick">
-                    Save
-                </Button>
+                    <Button IsEnabled="{Binding CanExport}"
+                            Click="ConfigExport_OnClick">
+                        Export Config
+                    </Button>
 
-                <Button Grid.Column="6" Grid.Row="0"
-                        Click="Close_OnClick"
-                        Content="{Binding CloseButtonText}" />
+                    <Button IsEnabled="{Binding }"
+                            Click="Calibrate_OnClick">
+                        Calibrate camera
+                    </Button>
+
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Grid.Row="0"
+                            Orientation="Horizontal"
+                            Spacing="15">
+
+                    <Button IsEnabled="{Binding !IsSaved}"
+                            Click="Save_OnClick">
+                        Save
+                    </Button>
+
+                    <Button Content="{Binding CloseButtonText}"
+                            Click="Close_OnClick" />
+
+                </StackPanel>
 
             </Grid>
 
@@ -84,28 +97,9 @@
                                 RemoveMedia="VideoEditor_OnRemoveMedia"
                                 OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
 
-            <views:Toast Name="ExplorerErrorToast"
+            <views:Toast Name="Toast"
                          Grid.Column="0" Grid.Row="0"
-                         Grid.ColumnSpan="5" Grid.RowSpan="3"
-                         Text="Could not open the File Explorer" />
-
-
-            <views:Toast Name="ImportErrorToast"
-                         Grid.Column="0" Grid.Row="0"
-                         Grid.ColumnSpan="5" Grid.RowSpan="3"
-                         Text="An error occured while importing the configuration file" />
-
-
-            <views:Toast Name="ExportErrorToast"
-                         Grid.Column="0" Grid.Row="0"
-                         Grid.ColumnSpan="5" Grid.RowSpan="3"
-                         Text="An error occured while exporting configuration" />
-
-
-            <views:Toast Name="SaveErrorToast"
-                         Grid.Column="0" Grid.Row="0"
-                         Grid.ColumnSpan="5" Grid.RowSpan="3"
-                         Text="An error occured while saving" />
+                         Grid.ColumnSpan="5" Grid.RowSpan="3" />
 
         </Grid>
 

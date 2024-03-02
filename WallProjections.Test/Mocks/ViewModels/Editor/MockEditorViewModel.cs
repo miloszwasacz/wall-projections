@@ -69,6 +69,16 @@ public class MockEditorViewModel : IEditorViewModel
         throw new NotImplementedException();
     }
 
+    public void ShowCalibrationMarkers()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> CalibrateCamera()
+    {
+        throw new NotImplementedException();
+    }
+
     public void CloseEditor()
     {
         throw new NotImplementedException();
