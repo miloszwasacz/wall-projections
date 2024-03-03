@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
+        xmlns:models="using:WallProjections.Models"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.EditorUserControls.PositionEditorWindow"
         x:DataType="vm:IPositionEditorViewModel"
@@ -14,15 +15,20 @@
 
     <!-- Use {Binding X} {Binding Y} {Binding R} for the currently selected hotspot -->
     <!-- Use {Binding UnselectedHotspots} for a list of all other hotspots -->
-    <Canvas>
-        <Ellipse Height="{Binding R}"
-                 Width="{Binding R}"
-                 Fill="Gray"
-                 Canvas.Left="{Binding X}"
-                 Canvas.Top="{Binding Y}"/>
-        
+    <Grid ColumnDefinitions="*" RowDefinitions="*">
+        <Canvas Grid.Column="0" Grid.Row="0">
+
+            <Ellipse Height="{Binding R}"
+                     Width="{Binding R}"
+                     Fill="Gray"
+                     Canvas.Left="{Binding X}"
+                     Canvas.Top="{Binding Y}" />
+
+        </Canvas>
+
         <!-- Mapping coordinates onto the display  -->
         <ItemsControl Name="HotspotList"
+                      Grid.Column="0" Grid.Row="0"
                       ItemsSource="{Binding UnselectedHotspots}">
 
             <ItemsControl.ItemsPanel>
@@ -35,20 +41,20 @@
                 <DataTemplate>
                     <Ellipse Height="{Binding R}"
                              Width="{Binding R}"
-                             Fill="White"/>
+                             Fill="White" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-            
+
             <!-- Styles for ItemsControl (all circles rather than individual) -->
             <ItemsControl.Styles>
                 <!-- Positioning of the hotspots -->
-                <Style Selector="ItemsControl > ContentPresenter" >
+                <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:Coord">
                     <Setter Property="Canvas.Top" Value="{Binding Y}" />
                     <Setter Property="Canvas.Left" Value="{Binding X}" />
                 </Style>
             </ItemsControl.Styles>
         </ItemsControl>
-    </Canvas>
-    
-    
+
+    </Grid>
+
 </Window>
