@@ -24,6 +24,8 @@ def get_aruco_path(aruco_id):
     return FOLDER + os.path.normpath("/ArUco_" + str(aruco_id) + ".png")
 
 def generate_arucos():
+    """Generates ArUco pngs (for use in calibration) in FOLDER if they don't already exist"""
+
     # Check if any ArUco images missing from FOLDER
     arucos_missing = False
     for code in range(ARUCO_COUNT):

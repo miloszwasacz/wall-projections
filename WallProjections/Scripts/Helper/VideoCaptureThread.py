@@ -69,19 +69,19 @@ class VideoCaptureThread(threading.Thread):
         """
         self.stopping = True
 
+    @staticmethod
+    def take_photo() -> np.ndarray:
+        """
+        Returns a photo from a detectable camera
+        """
 
-def takePhoto() -> np.ndarray:
-    """
-    Returns a photo from a detectable camera
-    """
+        videoCaptureThread = VideoCaptureThread()
+        videoCaptureThread.start()
+        image = None
+        while image is None:
+            image = videoCaptureThread.current_frame
+            cv2.waitKey(500)
+        videoCaptureThread.stop()
+        videoCaptureThread.join()
 
-    videoCaptureThread = VideoCaptureThread()
-    videoCaptureThread.start()
-    image = None
-    while image is None:
-        image = videoCaptureThread.current_frame
-        cv2.waitKey(500)
-    videoCaptureThread.stop()
-    videoCaptureThread.join()
-
-    return image
+        return image

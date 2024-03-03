@@ -3,8 +3,8 @@ import numpy as np
 import cv2
 from cv2 import aruco
 # noinspection PyPackages
-from . import importme, numpy_dotnet_converters as npnet
-from VideoCaptureThread import VideoCaptureThread
+import WallProjections.Scripts.Helper.numpy_dotnet_converters as npnet
+from WallProjections.Scripts.Helper.VideoCaptureThread import VideoCaptureThread
 
 DICT = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
 """The CV2 ArUco dictionary, which we detect for. Must match the one used in Internal/aruco_generator.
@@ -17,11 +17,10 @@ class Calibrator:
     #Methods for generating transformation matrix
 
     @staticmethod
-    def calibrate(projector_id_to_coord : dict[int, tuple[int, int]]): #TODO typing returns a clr system array
-        photo = VideoCaptureThread.takePhoto()
+    def calibrate(projector_id_to_coord : dict[int, tuple[int, int]]) -> np.ndarray: #returns a 3x3 array of 32bit floats 
+        photo = VideoCaptureThread.take_photo()
         camera_id_to_coord = Calibrator._detectArUcos(photo)
-        transformation_matrix = Calibrator._get_transformation_matrix(projector_id_to_coord, camera_id_to_coord)
-        return npnet.asNetArray(transformation_matrix)
+        return Calibrator._get_transformation_matrix(projector_id_to_coord, camera_id_to_coord)
 
     @staticmethod
     def _detect_ArUcos(img: np.ndarray) -> dict[int, tuple[np.float32, np.float32]]:
@@ -44,7 +43,7 @@ class Calibrator:
         return detectedCoords
 
     @staticmethod
-    def _get_transformation_matrix(from_coords : dict[int, tuple[int, int]], to_coords : dict[int, tuple[np.float32, np.float32]]) -> np.ndarray:
+    def _get_transformation_matrix(from_coords : dict[int, tuple[int, int]], to_coords : dict[int, tuple[np.float32, np.float32]]) -> np.ndarray: #returns a 3x3 array of 32bit floats
         """
         Returns a transformation matrix from the coords stored in one dictionary to another
         """
@@ -103,4 +102,4 @@ class Calibrator:
         return self.cam_to_proj(cam_coords)
 
 def calibrate(projector_id_to_coord : dict[int, tuple[int, int]]): #TODO typing returns a clr system array
-    return Calibrator.calibrate(projector_id_to_coord)
+    return npnet.asNetArray(Calibrator.calibrate(projector_id_to_coord))
