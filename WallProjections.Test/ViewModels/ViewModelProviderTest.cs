@@ -291,7 +291,7 @@ public class ViewModelProviderTest
         Assert.That(hotspotViewModel, Is.InstanceOf<HotspotDisplayViewModel>());
         Assert.Multiple(() =>
         {
-            Assert.That(hotspotViewModel.Projections, Has.Count.EqualTo(config.HotspotCount));
+            Assert.That(hotspotViewModel.Projections, Has.Count.EqualTo(config.Hotspots.Count));
             //TODO Add this assertion when the hiding has been properly implemented
             // Assert.That(hotspotViewModel.IsVisible, Is.False);
         });

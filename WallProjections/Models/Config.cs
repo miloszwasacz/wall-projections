@@ -26,10 +26,6 @@ public class Config : IConfig
     [JsonInclude]
     public ImmutableList<Hotspot> Hotspots { get; }
 
-    /// <inheritdoc />
-    [JsonIgnore]
-    public int HotspotCount => Hotspots.Count;
-
     /// <summary>
     /// Constructs a new Config object using list of hotspots and a custom location.
     /// </summary>

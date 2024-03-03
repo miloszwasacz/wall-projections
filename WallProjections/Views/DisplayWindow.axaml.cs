@@ -108,7 +108,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     /// Mocks the input from the Python script for testing purposes.
     /// </summary>
     /// <param name="key"></param>
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Mock keyboard input for manual testing")]
     private static void MockPythonInput(Key key)
     {
         var keyVal = key switch

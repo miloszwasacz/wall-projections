@@ -14,7 +14,7 @@ public class ConfigTest
     private static readonly float[,] TestMatrix = MockPythonProxy.CalibrationResult;
 
     /// <summary>
-    /// Test to ensure the correct count is returned from <see cref="Config.HotspotCount"/>
+    /// Test to ensure the correct count is returned from <see cref="Config.Hotspots"/>.Count
     /// </summary>
     [Test]
     public void HotspotCountTest()
@@ -24,8 +24,11 @@ public class ConfigTest
         for (var i = 0; i < 5; i++)
         {
             var config = new Config(TestMatrix, hotspots);
-            Assert.That(config.HomographyMatrix, Is.EquivalentTo(TestMatrix));
-            Assert.That(config.HotspotCount, Is.EqualTo(i));
+            Assert.Multiple(() =>
+            {
+                Assert.That(config.HomographyMatrix, Is.EquivalentTo(TestMatrix));
+                Assert.That(config.Hotspots, Has.Count.EqualTo(i));
+            });
             hotspots.Add(
                 new Hotspot(
                     i,

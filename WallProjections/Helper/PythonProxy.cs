@@ -141,7 +141,7 @@ public sealed class PythonProxy : IPythonProxy
 /// <summary>
 /// A mock of <see cref="IPythonProxy" /> in an environment without Python
 /// </summary>
-[ExcludeFromCodeCoverage]
+[ExcludeFromCodeCoverage(Justification = "Mock Python proxy for manual testing")]
 public sealed class PythonProxy : IPythonProxy
 {
     /// <summary>

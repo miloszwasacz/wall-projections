@@ -797,9 +797,9 @@ public class FileHandlerTest
     /// <param name="config2">Second <see cref="Config"/> class to compare</param>
     private static void AssertConfigsEqual(IConfig config1, IConfig config2)
     {
-        Assert.That(config1.HotspotCount, Is.EqualTo(config2.HotspotCount));
+        Assert.That(config1.Hotspots, Has.Count.EqualTo(config2.Hotspots.Count));
 
-        for (var i = 0; i < config1.HotspotCount; i++)
+        for (var i = 0; i < config1.Hotspots.Count; i++)
         {
             Assert.Multiple(() =>
             {
