@@ -1,21 +1,18 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:WallProjections.ViewModels"
-        xmlns:dvm="using:WallProjections.ViewModels.Interfaces.Display"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="WallProjections.Views.HotspotDisplayWindow"
-        x:DataType="dvm:IHotspotViewModel"
-        Title="HotspotDisplayWindow"
-        Background="Black"
-        KeyDown="OnKeyDown"
-        Closing="OnClosing">
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:WallProjections.ViewModels.Interfaces.SecondaryScreens"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="WallProjections.Views.SecondaryScreens.HotspotDisplayView"
+             x:DataType="vm:IHotspotDisplayViewModel"
+             Background="Black">
 
     <!-- Styles relating to hotspot (ellipse) activation -->
-    <Window.Styles>
+    <UserControl.Styles>
+
         <!-- ACTIVE animation -->
-        <Style Selector="Ellipse.triggered" x:DataType="vm:HotspotProjectionViewModel">
+        <Style Selector="Ellipse.triggered" x:DataType="vm:IHotspotProjectionViewModel">
             <Style.Animations>
                 <Animation Duration="0:0:1" Delay="0:0:5" PlaybackDirection="AlternateReverse"
                            IterationCount="INFINITE">
@@ -33,7 +30,7 @@
         </Style>
 
         <!-- ACTIVATING animation -->
-        <Style Selector="Ellipse.activating" x:DataType="vm:HotspotProjectionViewModel">
+        <Style Selector="Ellipse.activating" x:DataType="vm:IHotspotProjectionViewModel">
             <Style.Animations>
                 <Animation Duration="0:0:5">
                     <KeyFrame Cue="70%">
@@ -47,7 +44,8 @@
                 </Animation>
             </Style.Animations>
         </Style>
-    </Window.Styles>
+
+    </UserControl.Styles>
 
     <!-- Mapping coordinates onto the display  -->
     <ItemsControl Name="HotspotList"
@@ -61,11 +59,10 @@
 
         <ItemsControl.ItemTemplate>
             <DataTemplate>
-                <Ellipse Height="{Binding D}"
-                         Width="{Binding D}"
-                         Fill="White"
-                         Stroke="LightGray"
 
+                <Ellipse Width="{Binding D}"
+                         Height="{Binding D}"
+                         Fill="White" Stroke="LightGray"
                          Classes.activating="{Binding IsActive}"
                          Classes.triggered="{Binding IsActive}">
 
@@ -74,12 +71,15 @@
                             <ScaleTransform />
                         </TransformGroup>
                     </Ellipse.RenderTransform>
+
                 </Ellipse>
+
             </DataTemplate>
         </ItemsControl.ItemTemplate>
 
         <!-- Styles for ItemsControl (all circles rather than individual) -->
         <ItemsControl.Styles>
+
             <Style Selector="ItemsControl">
                 <Setter Property="IsVisible" Value="{Binding IsVisible}" />
                 <Setter Property="Opacity" Value="0.0" />
@@ -95,10 +95,13 @@
             </Style>
 
             <!-- Positioning of the hotspots -->
-            <Style Selector="ItemsControl > ContentPresenter" x:DataType="vm:HotspotProjectionViewModel">
+            <Style Selector="ItemsControl > ContentPresenter" x:DataType="vm:IHotspotProjectionViewModel">
                 <Setter Property="Canvas.Top" Value="{Binding Y}" />
                 <Setter Property="Canvas.Left" Value="{Binding X}" />
             </Style>
+
         </ItemsControl.Styles>
+
     </ItemsControl>
-</Window>
+
+</UserControl>

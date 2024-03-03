@@ -2,19 +2,21 @@ using System.Collections.Immutable;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
-using WallProjections.ViewModels;
-using WallProjections.ViewModels.Display;
-using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.ViewModels.SecondaryScreens;
 
-namespace WallProjections.Test.ViewModels.Display;
+namespace WallProjections.Test.ViewModels.SecondaryScreens;
 
 [TestFixture]
-public class HotspotViewModelTest
+public class HotspotDisplayViewModelTest
 {
+    // ReSharper disable once InconsistentNaming
     /// <summary>
-    /// The tolerance for comparing floating point numbers (i.e. hotspot positions)
+    /// A mock viewmodel provider
     /// </summary>
-    public const double PositionCmpTolerance = 0.001;
+    private static readonly MockViewModelProvider VMProvider = new();
 
     /// <summary>
     /// Creates a new config with 3 hotspots
@@ -43,19 +45,14 @@ public class HotspotViewModelTest
     {
         var config = CreateConfig();
         var pythonHandler = new MockPythonHandler();
-        var hotspotViewModel = new HotspotViewModel(config, pythonHandler);
+        var hotspotViewModel = new HotspotDisplayViewModel(config, pythonHandler, VMProvider);
         Assert.Multiple(() =>
         {
             Assert.That(
                 hotspotViewModel.Projections,
-                Is.EquivalentTo(config.Hotspots).Using<HotspotProjectionViewModel, Hotspot>((actual, expected) =>
-                {
-                    var id = actual.Id == expected.Id;
-                    var x = Math.Abs(actual.X - expected.Position.X) < PositionCmpTolerance;
-                    var y = Math.Abs(actual.Y - expected.Position.Y) < PositionCmpTolerance;
-                    var d = Math.Abs(actual.D - 2 * expected.Position.R) < PositionCmpTolerance;
-                    return id && x && y && d;
-                })
+                Is.EquivalentTo(config.Hotspots).Using<IHotspotProjectionViewModel, Hotspot>(
+                    (actual, expected) => actual.IsSameAsHotspot(expected)
+                )
             );
             //TODO Add this assertion when the hiding has been properly implemented
             // Assert.That(hotspotViewModel.IsVisible, Is.False);
@@ -63,18 +60,22 @@ public class HotspotViewModelTest
     }
 
     [Test]
-    public void ActivateDeactivateHotspotsTest()
+    public async Task ActivateDeactivateHotspotsTest()
     {
         var config = CreateConfig();
         var pythonHandler = new MockPythonHandler();
-        var hotspotViewModel = new HotspotViewModel(config, pythonHandler);
+        var hotspotViewModel = new HotspotDisplayViewModel(config, pythonHandler, VMProvider);
 
+        // Activate directly
         hotspotViewModel.ActivateHotspot(0);
         AssertActiveHotspot(hotspotViewModel, 0);
 
-        hotspotViewModel.ActivateHotspot(1);
+        // Activate through the PythonHandler
+        pythonHandler.OnHotspotPressed(1);
+        await Task.Delay(50);
         AssertActiveHotspot(hotspotViewModel, 1);
 
+        // Deactivate all hotspots
         hotspotViewModel.DeactivateHotspots();
         AssertActiveHotspot(hotspotViewModel, null);
     }
@@ -85,10 +86,24 @@ public class HotspotViewModelTest
     public void DisplayHotspotsTest()
     {
         var pythonHandler = new MockPythonHandler();
-        var hotspotViewModel = new HotspotViewModel(CreateConfig(), pythonHandler);
+        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), pythonHandler, VMProvider);
         Assert.That(hotspotViewModel.IsVisible, Is.False);
         hotspotViewModel.DisplayHotspots();
         Assert.That(hotspotViewModel.IsVisible, Is.True);
+    }
+
+    [Test]
+    public void DisposeTest()
+    {
+        var pythonHandler = new MockPythonHandler();
+        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), pythonHandler, VMProvider);
+        AssertActiveHotspot(hotspotViewModel, null);
+
+        hotspotViewModel.Dispose();
+
+        // The event is ignored, so it should not have any effect
+        pythonHandler.OnHotspotPressed(0);
+        AssertActiveHotspot(hotspotViewModel, null);
     }
 
     /// <summary>
@@ -98,7 +113,7 @@ public class HotspotViewModelTest
     /// <param name="activeId">
     /// The id of the hotspot that should be active. If <i>null</i>, no hotspots should be active.
     /// </param>
-    private static void AssertActiveHotspot(IHotspotViewModel vm, int? activeId)
+    private static void AssertActiveHotspot(IHotspotDisplayViewModel vm, int? activeId)
     {
         var projections = vm.Projections.GroupBy(h => h.IsActive).ToImmutableList();
         var active = projections.Where(g => g.Key).SelectMany(g => g).ToImmutableList();

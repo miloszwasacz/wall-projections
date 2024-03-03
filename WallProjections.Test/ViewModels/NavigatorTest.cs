@@ -6,9 +6,12 @@ using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.Views;
 using WallProjections.ViewModels;
+using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.Views;
+using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 
 namespace WallProjections.Test.ViewModels;
 
@@ -28,16 +31,8 @@ public class NavigatorTest
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
         Dispatcher.UIThread.RunJobs();
-        var window = lifetime.MainWindow;
-        Assert.Multiple(() =>
-        {
-            Assert.That(window, Is.InstanceOf<DisplayWindow>());
-            Assert.That(window?.DataContext, Is.InstanceOf<IDisplayViewModel>());
-            Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
-        });
-        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
-        Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
-        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<HotspotDisplayWindow>());
+        lifetime.AssertOpenedWindows<DisplayWindow, IDisplayViewModel, IHotspotDisplayViewModel>();
+        Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
     }
 
     [AvaloniaTest]
@@ -52,15 +47,9 @@ public class NavigatorTest
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
         Dispatcher.UIThread.RunJobs();
-        var window = lifetime.MainWindow;
-        Assert.Multiple(() =>
-        {
-            Assert.That(window, Is.InstanceOf<EditorWindow>());
-            Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
-            Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
-        });
-        Assert.That(lifetime.Windows, Has.Count.EqualTo(1));
-        Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
+        //TODO Change TSecondaryVM to the correct type
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IHotspotDisplayViewModel>();
+        Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
     }
 
     [AvaloniaTest]
@@ -81,15 +70,9 @@ public class NavigatorTest
 
         Dispatcher.UIThread.RunJobs();
         await Task.Delay(400);
-        var window = lifetime.MainWindow;
-        Assert.Multiple(() =>
-        {
-            Assert.That(window, Is.InstanceOf<EditorWindow>());
-            Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
-            Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
-        });
-        Assert.That(lifetime.Windows, Has.Count.EqualTo(1));
-        Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
+        //TODO Change TSecondaryVM to the correct type
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IHotspotDisplayViewModel>();
+        Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
     }
 
     [AvaloniaTest]
@@ -110,16 +93,13 @@ public class NavigatorTest
 
         Dispatcher.UIThread.RunJobs();
         await Task.Delay(400);
+        lifetime.AssertOpenedWindows<DisplayWindow, IDisplayViewModel, IHotspotDisplayViewModel>();
         Assert.Multiple(() =>
         {
-            Assert.That(lifetime.Shutdowns, Is.Empty);
-            Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
-            Assert.That(vmProvider.HasBeenDisposed, Is.False);
             Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
+            Assert.That(lifetime.Shutdowns, Is.Empty);
+            Assert.That(vmProvider.HasBeenDisposed, Is.False);
         });
-        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
-        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<DisplayWindow>());
-        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<HotspotDisplayWindow>());
     }
 
     [AvaloniaTest]
@@ -188,4 +168,45 @@ public class NavigatorTest
             }
         }
     }
+}
+
+/// <summary>
+/// Extension methods for <see cref="NavigatorTest" />s.
+/// </summary>
+internal static class NavigatorAssertions
+{
+    // ReSharper disable InconsistentNaming
+
+    /// <summary>
+    /// Asserts that <paramref name="lifetime" />'s <see cref="AppLifetime.MainWindow" />
+    /// has the correct type and data context, and that the secondary window's data context is of correct type.
+    /// </summary>
+    /// <param name="lifetime">The <see cref="AppLifetime" /> to check.</param>
+    /// <typeparam name="TMain">The expected type of the main window.</typeparam>
+    /// <typeparam name="TMainVM">The expected type of the main window's data context.</typeparam>
+    /// <typeparam name="TSecondaryVM">The expected type of the secondary window's data context.</typeparam>
+    public static void AssertOpenedWindows<TMain, TMainVM, TSecondaryVM>(this AppLifetime lifetime)
+    {
+        var mainWindow = lifetime.MainWindow;
+        Assert.Multiple(() =>
+        {
+            Assert.That(mainWindow, Is.InstanceOf<TMain>());
+            Assert.That(mainWindow?.DataContext, Is.InstanceOf<TMainVM>());
+        });
+
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
+        Assert.That(lifetime.Windows, Has.One.Items.SameAs(mainWindow));
+
+        var window = lifetime.Windows.OfType<SecondaryWindow>().FirstOrDefault();
+        Assert.That(window, Is.Not.SameAs(mainWindow));
+
+        Assert.That(window, Is.InstanceOf<SecondaryWindow>());
+        Assert.That(window?.DataContext, Is.InstanceOf<ISecondaryWindowViewModel>());
+
+        //TODO Uncomment when SecondaryWindowViewModel is fully implemented
+        // var secondaryVM = window?.DataContext as ISecondaryWindowViewModel;
+        // Assert.That(secondaryVM!.Content, Is.InstanceOf<TSecondaryVM>());
+    }
+
+    // ReSharper restore InconsistentNaming
 }

@@ -1,12 +1,11 @@
 using ReactiveUI;
 using WallProjections.Models;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.SecondaryScreens;
 
-/// <summary>
-/// A record of all the parameters required to display the hotspots
-/// </summary>
-public class HotspotProjectionViewModel : ViewModelBase
+/// <inheritdoc cref="IHotspotProjectionViewModel" />
+public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewModel
 {
     /// <summary>
     /// The backing field for <see cref="IsActive" />

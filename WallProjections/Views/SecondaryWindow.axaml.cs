@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 
 namespace WallProjections.Views;
 
-public partial class HotspotDisplayWindow : Window
+public partial class SecondaryWindow : Window
 {
-    public HotspotDisplayWindow()
+    public SecondaryWindow()
     {
         InitializeComponent();
     }
@@ -28,12 +28,20 @@ public partial class HotspotDisplayWindow : Window
     }
 
     /// <summary>
-    /// Disposes the viewmodel when the window is closed.
+    /// Disposes the viewmodel when the window is being closed programmatically;
+    /// otherwise, cancels the close event.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
     private void OnClosing(object? sender, WindowClosingEventArgs e)
     {
+        // Unless the window is being closed programmatically (i.e. by the Navigator), cancel the close event.
+        if (!e.IsProgrammatic)
+        {
+            e.Cancel = true;
+            return;
+        }
+
         if (DataContext is IDisposable disposable)
             disposable.Dispose();
     }

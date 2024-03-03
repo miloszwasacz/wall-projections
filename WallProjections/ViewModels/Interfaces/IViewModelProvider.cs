@@ -3,6 +3,7 @@ using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.ViewModels.Interfaces;
 
@@ -31,13 +32,6 @@ public interface IViewModelProvider
     /// </summary>
     /// <returns>A new <see cref="IVideoViewModel" /> instance</returns>
     public IVideoViewModel GetVideoViewModel();
-
-    /// <summary>
-    /// Creates a new <see cref="IHotspotViewModel" /> instance
-    /// </summary>
-    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
-    /// <returns>A new <see cref="IHotspotViewModel" /> instance</returns>
-    public IHotspotViewModel GetHotspotViewModel(IConfig config);
 
     #endregion
 
@@ -105,6 +99,30 @@ public interface IViewModelProvider
     /// <param name="descVm">The parent <see cref="IDescriptionEditorViewModel"/> to which the data is imported.</param>
     /// <returns>A new <see cref="IImportViewModel" /> instance</returns>
     IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm);
+
+    #endregion
+
+    #region Secondary screens
+
+    /// <summary>
+    /// Creates a new <see cref="ISecondaryWindowViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="ISecondaryWindowViewModel" /> instance</returns>
+    public ISecondaryWindowViewModel GetSecondaryWindowViewModel();
+
+    /// <summary>
+    /// Creates a new <see cref="IHotspotDisplayViewModel" /> instance
+    /// </summary>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
+    /// <returns>A new <see cref="IHotspotDisplayViewModel" /> instance</returns>
+    public IHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config);
+
+    /// <summary>
+    /// Creates a new <see cref="IHotspotProjectionViewModel" /> instance
+    /// </summary>
+    /// <param name="hotspot">The hotspot to be projected</param>
+    /// <returns>A new <see cref="IHotspotProjectionViewModel" /> instance</returns>
+    public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot);
 
     #endregion
 }

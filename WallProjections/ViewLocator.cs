@@ -10,6 +10,12 @@ public class ViewLocator : IDataTemplate
     public Control Build(object? data)
     {
         var name = data?.GetType().FullName!.Replace("ViewModel", "View");
+
+// Used only in unit tests
+#if !RELEASE
+        name = name?.Replace(".Test.Mocks", "").Replace("Mock", "");
+#endif
+
         var type = name != null ? Type.GetType(name) : null;
 
         if (type != null)

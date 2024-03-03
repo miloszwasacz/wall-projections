@@ -1,18 +1,17 @@
 using System.Collections.Immutable;
 using WallProjections.Models;
-using WallProjections.ViewModels;
-using WallProjections.ViewModels.Display;
-using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.ViewModels.SecondaryScreens;
 
-namespace WallProjections.Test.Mocks.ViewModels;
+namespace WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
 
 /// <summary>
-/// A mock of <see cref="HotspotViewModel" />
+/// A mock of <see cref="HotspotDisplayViewModel" />
 /// </summary>
-public class MockHotspotViewModel : ViewModelBase, IHotspotViewModel
+public class MockHotspotDisplayViewModel : IHotspotDisplayViewModel
 {
     /// <inheritdoc/>
-    public ImmutableList<HotspotProjectionViewModel> Projections { get; } = new[]
+    public override ImmutableList<IHotspotProjectionViewModel> Projections { get; } = new[]
     {
         (0, 10.0, 10.0, 10.0),
         (1, 90.0, 130.0, 30.0),
@@ -28,34 +27,34 @@ public class MockHotspotViewModel : ViewModelBase, IHotspotViewModel
             ImmutableList<string>.Empty,
             ImmutableList<string>.Empty
         );
-        return new HotspotProjectionViewModel(hotspot);
+        return new HotspotProjectionViewModel(hotspot) as IHotspotProjectionViewModel;
     }).ToImmutableList();
 
     /// <inheritdoc/>
-    public bool IsVisible { get; private set; }
+    public override bool IsVisible { get; protected set; }
 
     /// <summary>
-    /// Mock version of the ActivateHotspot function in <see cref="HotspotViewModel"/> which just
+    /// Mock version of the ActivateHotspot function in <see cref="HotspotDisplayViewModel"/> which just
     /// sets the first hotspot in the list to true, takes in the param <paramref name="id"></paramref>
     /// to uphold the interface but does not use this parameter 
     /// </summary>
     /// <param name="id">The id of the hotspot to be activated</param>
-    public void ActivateHotspot(int id)
+    public override void ActivateHotspot(int id)
     {
         Projections.First().IsActive = true;
     }
 
     /// <summary>
-    /// Mock version of the DeactivateHotspot function in <see cref="HotspotViewModel"/> which just
+    /// Mock version of the DeactivateHotspot function in <see cref="HotspotDisplayViewModel"/> which just
     /// sets the first hotspot in the list to false
     /// </summary>
-    public void DeactivateHotspots()
+    public override void DeactivateHotspots()
     {
         Projections.First().IsActive = false;
     }
 
     /// <inheritdoc/>
-    public void DisplayHotspots()
+    public override void DisplayHotspots()
     {
         IsVisible = true;
     }

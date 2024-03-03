@@ -1,10 +1,13 @@
 ﻿using System.Reflection;
+using Avalonia.Threading;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.Views;
+using WallProjections.Test.ViewModels;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.Views;
 
 namespace WallProjections.Test.InternalTests;
@@ -16,7 +19,8 @@ public class NavigatorInternalTest
     /// Tests the scenario where the Display window is opened, but no configuration file is loaded.
     /// </summary>
     [AvaloniaTest]
-    public void OpenDisplayNoConfigTest()
+    [NonParallelizable]
+    public async Task OpenDisplayNoConfigTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
@@ -32,13 +36,14 @@ public class NavigatorInternalTest
             ?? throw new InvalidOperationException("Method not found");
         openDisplayMethod.Invoke(navigator, null);
 
-        var window = lifetime.MainWindow;
-        Assert.That(window, Is.InstanceOf<EditorWindow>());
+        Dispatcher.UIThread.RunJobs();
+        await Task.Delay(400);
+        //TODO Change TSecondaryVM to the correct type
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IHotspotDisplayViewModel>();
         Assert.Multiple(() =>
         {
-            Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
-            Assert.That(lifetime.Shutdowns, Is.Empty);
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
+            Assert.That(lifetime.Shutdowns, Is.Empty);
         });
     }
 }

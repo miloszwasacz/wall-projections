@@ -46,11 +46,15 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     private IConfig? _config;
 
-    //TODO Make hotspot window persistent with changing content
     /// <summary>
-    /// Currently opened windows (a main window, and a child hotspot window, if any).
+    /// Currently opened main window
     /// </summary>
-    private (Window mainWindow, Window? hotspotWindow)? _currentWindows;
+    private Window? _mainWindow;
+
+    /// <summary>
+    /// Secondary screen window and its viewmodel
+    /// </summary>
+    private readonly (Window window, ISecondaryWindowViewModel viewModel) _secondaryScreen;
 
     /// <summary>
     /// Creates a new instance of <see cref="Navigator" />.
@@ -70,6 +74,7 @@ public sealed class Navigator : ViewModelBase, INavigator
         _pythonHandler = pythonHandler;
         _fileHandlerFactory = fileHandlerFactory;
         _vmProvider = vmProviderFactory(this, pythonHandler);
+        _secondaryScreen = OpenSecondaryWindow(_vmProvider);
         _appLifetime.Exit += OnExit;
 
         Initialize();
@@ -115,13 +120,8 @@ public sealed class Navigator : ViewModelBase, INavigator
         {
             DataContext = _vmProvider.GetDisplayViewModel(config)
         };
-        var hotspotWindow = new HotspotDisplayWindow
-        {
-            DataContext = _vmProvider.GetHotspotViewModel(config)
-        };
         Navigate(displayWindow);
-        OpenHotspotWindow(hotspotWindow, displayWindow);
-        _currentWindows = (displayWindow, hotspotWindow);
+        _secondaryScreen.viewModel.ShowHotspotDisplay(config);
 
         _windowMutex.ReleaseMutex();
     }
@@ -147,7 +147,7 @@ public sealed class Navigator : ViewModelBase, INavigator
             DataContext = vm
         };
         Navigate(editorWindow);
-        _currentWindows = (editorWindow, null);
+        _secondaryScreen.viewModel.ShowPositionEditor();
 
         _windowMutex.ReleaseMutex();
     }
@@ -178,13 +178,13 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <inheritdoc />
     public void ShowCalibrationMarkers()
     {
-        //TODO Switch secondary screen to calibration patterns
+        _secondaryScreen.viewModel.ShowArUcoGrid();
     }
 
     /// <inheritdoc />
     public void HideCalibrationMarkers()
     {
-        //TODO Switch secondary screen to an appropriate secondary view (depending on the current main window)
+        _secondaryScreen.viewModel.ShowPositionEditor();
     }
 
     /// <inheritdoc />
@@ -199,41 +199,53 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <seealso cref="AppLifetime.Shutdown(int)"/>
     public void Shutdown()
     {
+        _secondaryScreen.window.Close();
         _appLifetime.Shutdown();
     }
 
     /// <summary>
-    /// Opens the specified window, sets it as the <see cref="AppLifetime.MainWindow" />,
+    /// Opens the specified window, sets it as the <see cref="_mainWindow" /> and the <see cref="AppLifetime.MainWindow" />,
     /// and <see cref="WindowExtensions.CloseAndDispose">closes</see> the currently opened window.
     /// </summary>
     /// <param name="newWindow">The new window to open.</param>
     private void Navigate(Window newWindow)
     {
+        var currentWindow = _mainWindow;
+        _mainWindow = newWindow;
         newWindow.Show();
         _appLifetime.MainWindow = newWindow;
-        _currentWindows?.hotspotWindow?.CloseAndDispose();
-        _currentWindows?.mainWindow.CloseAndDispose();
+        currentWindow?.CloseAndDispose();
     }
 
     /// <summary>
-    /// Opens a new window for projecting hotspots on a secondary screen (if available).
+    /// Opens a <see cref="SecondaryWindow" /> on the secondary screen (if available).
     /// </summary>
-    /// <param name="hotspotWindow">The window for projecting hotspots.</param>
-    /// <param name="owner">The owner window of the hotspot window.</param>
+    /// <param name="vmProvider">
+    /// The <see cref="IViewModelProvider" /> for creating the <see cref="ISecondaryWindowViewModel" />
+    /// </param>
+    /// <returns>The opened window and its viewmodel</returns>
     [ExcludeFromCodeCoverage(Justification = "Headless mode doesn't support multiple screens")]
-    private static void OpenHotspotWindow(Window hotspotWindow, WindowBase owner)
+    private static (SecondaryWindow, ISecondaryWindowViewModel) OpenSecondaryWindow(IViewModelProvider vmProvider)
     {
-        var screens = owner.Screens;
+        var vm = vmProvider.GetSecondaryWindowViewModel();
+        var window = new SecondaryWindow
+        {
+            DataContext = vm
+        };
+
+        var screens = window.Screens;
         var secondaryScreen = screens.All.FirstOrDefault(s => !s.IsPrimary);
         if (secondaryScreen is not null)
         {
-            hotspotWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-            hotspotWindow.Position = secondaryScreen.Bounds.Position;
-            hotspotWindow.Show();
-            hotspotWindow.WindowState = WindowState.FullScreen;
+            window.WindowStartupLocation = WindowStartupLocation.Manual;
+            window.Position = secondaryScreen.Bounds.Position;
+            window.Show();
+            window.WindowState = WindowState.FullScreen;
         }
         else
-            hotspotWindow.Show();
+            window.Show();
+
+        return (window, vm);
     }
 
     /// <inheritdoc />
