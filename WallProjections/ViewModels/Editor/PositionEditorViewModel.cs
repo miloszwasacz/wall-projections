@@ -47,8 +47,8 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     /// <summary>
     /// The backing field for <see cref="UnselectedHotspots" />.
     /// </summary>
-    /// TODO implement this to be a list of all the non selected hotspots
-    private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
+    // private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
+    private IEnumerable<Coord> _unselectedHotspots = new[] { new Coord(50, 50, 50), new Coord(100, 100, 30) };
 
     /// <inheritdoc />
     public bool IsInEditMode
@@ -70,6 +70,20 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     {
         set
         {
+            //removes the new selected value from UnselectedHotspots if it is present
+            if (value != null && _unselectedHotspots.Contains(value.Position))
+            {
+                _unselectedHotspots = _unselectedHotspots.Where(hotspot => hotspot != value.Position).ToList();
+            }
+
+            //add the old SelectedHotspot to UnselectedHotspots
+            if (_selectedHotspot != null)
+            {
+                _unselectedHotspots = _unselectedHotspots.Concat(new []{_selectedHotspot.Position });
+            }
+            this.RaisePropertyChanged(nameof(_unselectedHotspots));
+            
+            //assigns the new values
             _selectedHotspot = value;
             _x = _selectedHotspot?.Position.X ?? 0;
             _y = _selectedHotspot?.Position.Y ?? 0;
@@ -87,6 +101,10 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
         get => _unselectedHotspots;
         set => this.RaiseAndSetIfChanged(ref _unselectedHotspots, value);
     }
+
+    public List<Coord> UnselectedHotspotsList => UnselectedHotspots.ToList();
+
+    public double HotspotCount => UnselectedHotspots.First().R;
 
     /// <inheritdoc />
     public double X
@@ -136,6 +154,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
         if (!IsInEditMode || _selectedHotspot is null) return;
 
         _mutex.WaitOne();
+        
         _selectedHotspot.Position = new Coord(X, Y, R);
         _mutex.ReleaseMutex();
 

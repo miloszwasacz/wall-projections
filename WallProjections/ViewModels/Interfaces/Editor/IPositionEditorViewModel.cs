@@ -55,6 +55,10 @@ public interface IPositionEditorViewModel
     /// To update the position of the selected hotspot, call <see cref="UpdateSelectedHotspot" />.
     /// </remarks>
     public double R { get; }
+    
+    public List<Coord> UnselectedHotspotsList { get;  }
+    
+    public double HotspotCount { get;  }
 
     /// <summary>
     /// Selects the given <paramref name="hotspot" /> and updates the <see cref="UnselectedHotspots" />.
