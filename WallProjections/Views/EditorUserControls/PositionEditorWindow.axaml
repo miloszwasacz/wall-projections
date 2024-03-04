@@ -13,6 +13,8 @@
         PointerWheelChanged="OnScroll"
         PointerPressed="OnPointerPressed">
 
+    <!-- Use {Binding X} {Binding Y} {Binding R} for the currently selected hotspot -->
+    <!-- Use {Binding UnselectedHotspots} for a list of all other hotspots -->
     <Grid ColumnDefinitions="*" RowDefinitions="*">
         <Canvas Grid.Column="0" Grid.Row="0">
 
@@ -34,6 +36,7 @@
                     <Canvas Background="Transparent" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
+
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Ellipse Height="{Binding R}"
@@ -41,7 +44,6 @@
                              Fill="Gray" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-
 
             <!-- Styles for ItemsControl (all circles rather than individual) -->
             <ItemsControl.Styles>
@@ -52,6 +54,7 @@
                 </Style>
             </ItemsControl.Styles>
         </ItemsControl>
+
     </Grid>
 
 </Window>

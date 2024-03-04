@@ -47,7 +47,6 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     /// <summary>
     /// The backing field for <see cref="UnselectedHotspots" />.
     /// </summary>
-    // private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
     private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
 
     /// <inheritdoc />
@@ -150,7 +149,6 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
         if (!IsInEditMode || _selectedHotspot is null) return;
 
         _mutex.WaitOne();
-        
         _selectedHotspot.Position = new Coord(X, Y, R);
         _mutex.ReleaseMutex();
 
