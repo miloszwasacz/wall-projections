@@ -48,7 +48,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     /// The backing field for <see cref="UnselectedHotspots" />.
     /// </summary>
     // private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
-    private IEnumerable<Coord> _unselectedHotspots = new[] { new Coord(50, 50, 50), new Coord(100, 100, 30) };
+    private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
 
     /// <inheritdoc />
     public bool IsInEditMode
@@ -101,10 +101,6 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
         get => _unselectedHotspots;
         set => this.RaiseAndSetIfChanged(ref _unselectedHotspots, value);
     }
-
-    public List<Coord> UnselectedHotspotsList => UnselectedHotspots.ToList();
-
-    public double HotspotCount => UnselectedHotspots.First().R;
 
     /// <inheritdoc />
     public double X

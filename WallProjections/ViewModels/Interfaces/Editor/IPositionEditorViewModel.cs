@@ -56,9 +56,6 @@ public interface IPositionEditorViewModel
     /// </remarks>
     public double R { get; }
     
-    public List<Coord> UnselectedHotspotsList { get;  }
-    
-    public double HotspotCount { get;  }
 
     /// <summary>
     /// Selects the given <paramref name="hotspot" /> and updates the <see cref="UnselectedHotspots" />.

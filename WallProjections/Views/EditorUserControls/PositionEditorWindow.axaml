@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
-        xmlns:md="using:WallProjections.Models"
+        xmlns:models="using:WallProjections.Models"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.EditorUserControls.PositionEditorWindow"
         x:DataType="vm:IPositionEditorViewModel"
@@ -13,74 +13,45 @@
         PointerWheelChanged="OnScroll"
         PointerPressed="OnPointerPressed">
 
-    <!-- <Canvas> -->
-    <!-- Use {Binding X} {Binding Y} {Binding R} for the currently selected hotspot -->
-    <!-- Use {Binding UnselectedHotspots} for a list of all other hotspots -->
-        <!-- <Ellipse Height="{Binding R}" -->
-        <!--          Width="{Binding R}" -->
-        <!--          Fill="Gray" -->
-        <!--          Canvas.Left="{Binding X}" -->
-        <!--          Canvas.Top="{Binding Y}"/> -->
-        <!-- -->
-    <!--     <TextBlock Foreground="PaleVioletRed" Text="{Binding UnselectedHotspotsList[0]}"></TextBlock> -->
-    <!--      -->
-    <!--     ~1~ Mapping coordinates onto the display  @1@ -->
-    <!--     <ItemsControl ItemsSource="{Binding UnselectedHotspotsList}"> -->
-    <!--      -->
-    <!--         <ItemsControl.ItemsPanel> -->
-    <!--             <ItemsPanelTemplate> -->
-    <!--                 <Canvas Background="Aqua" /> -->
-    <!--             </ItemsPanelTemplate> -->
-    <!--         </ItemsControl.ItemsPanel> -->
-    <!--      -->
-    <!--         <ItemsControl.ItemTemplate> -->
-    <!--             <DataTemplate> -->
-    <!--                 ~1~ <TextBlock Foreground="White" Text="{Binding R}"></TextBlock> @1@ -->
-    <!--                 <Ellipse Height="{Binding R}" -->
-    <!--                          Width="{Binding R}" -->
-    <!--                  -->
-    <!--                          Fill="White"/> -->
-    <!--             </DataTemplate> -->
-    <!--         </ItemsControl.ItemTemplate> -->
-    <!--      -->
-    <!--         ~1~ Styles for ItemsControl (all circles rather than individual) @1@ -->
-    <!--         ~1~ <ItemsControl.Styles> @1@ -->
-    <!--         ~1~     ~2~ Positioning of the hotspots @2@ @1@ -->
-    <!--         ~1~     <Style Selector="ItemsControl > ContentPresenter" > @1@ -->
-    <!--         ~1~         <Setter Property="Canvas.Top" Value="{Binding Y}" /> @1@ -->
-    <!--         ~1~         <Setter Property="Canvas.Left" Value="{Binding X}" /> @1@ -->
-    <!--         ~1~     </Style> @1@ -->
-    <!--         ~1~ </ItemsControl.Styles> @1@ -->
-    <!--     </ItemsControl> -->
-    <!-- </Canvas> -->
-    
-    <!-- Mapping coordinates onto the display  -->
-    <ItemsControl ItemsSource="{Binding UnselectedHotspotsList}">
-    
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <Canvas Background="Transparent" />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-    
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <!-- <TextBlock Foreground="White" Text="{Binding R}"></TextBlock> -->
-                <Ellipse Height="{Binding R}"
-                         Width="{Binding R}"
-    
-                         Fill="White"/>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    
-        <!-- Styles for ItemsControl (all circles rather than individual) -->
-        <ItemsControl.Styles>
-            <!-- Positioning of the hotspots -->
-            <Style Selector="ItemsControl > ContentPresenter" x:DataType="md:Coord">
-                <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                <Setter Property="Canvas.Left" Value="{Binding X}" />
-            </Style>
-        </ItemsControl.Styles>
-    </ItemsControl>
-    
+    <Grid ColumnDefinitions="*" RowDefinitions="*">
+        <Canvas Grid.Column="0" Grid.Row="0">
+
+            <Ellipse Height="{Binding R}"
+                     Width="{Binding R}"
+                     Fill="White"
+                     Canvas.Left="{Binding X}"
+                     Canvas.Top="{Binding Y}" />
+
+        </Canvas>
+
+        <!-- Mapping coordinates onto the display  -->
+        <ItemsControl Name="HotspotList"
+                      Grid.Column="0" Grid.Row="0"
+                      ItemsSource="{Binding UnselectedHotspots}">
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas Background="Transparent" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Ellipse Height="{Binding R}"
+                             Width="{Binding R}"
+                             Fill="Gray" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+
+
+            <!-- Styles for ItemsControl (all circles rather than individual) -->
+            <ItemsControl.Styles>
+                <!-- Positioning of the hotspots -->
+                <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:Coord">
+                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    <Setter Property="Canvas.Left" Value="{Binding X}" />
+                </Style>
+            </ItemsControl.Styles>
+        </ItemsControl>
+    </Grid>
+
 </Window>
