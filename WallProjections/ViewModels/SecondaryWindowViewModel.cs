@@ -56,8 +56,7 @@ public class SecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewModel
     /// <inheritdoc />
     public void ShowArUcoGrid()
     {
-        //TODO Implement ShowArUcoGrid
-        Content = null;
+        Content = _vmProvider.GetArUcoGridViewModel();
     }
 
     public void Dispose()

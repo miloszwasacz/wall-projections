@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.Helper;
@@ -68,7 +69,7 @@ public sealed class PythonHandler : IPythonHandler
     public Task RunHotspotDetection() => RunNewPythonAction(python => python.StartHotspotDetection(this));
 
     /// <inheritdoc />
-    public Task<float[,]?> RunCalibration(Dictionary<int, (float, float)> arucoPositions) =>
+    public Task<float[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions) =>
         RunNewPythonAction(python => python.CalibrateCamera(arucoPositions));
 
     /// <inheritdoc />
@@ -101,13 +102,13 @@ public sealed class PythonHandler : IPythonHandler
     /// Cancels the current task and calls <see cref="RunPythonAction">RunPythonAction</see> on a separate thread.
     /// </summary>
     /// <param name="action">The action passed to <see cref="RunPythonAction" /></param>
-    private async Task RunNewPythonAction(Action<IPythonProxy> action)
+    private Task RunNewPythonAction(Action<IPythonProxy> action)
     {
         CancelCurrentTask();
         _taskMutex.WaitOne();
         var task = _currentTask = new CancellationTokenSource();
         _taskMutex.ReleaseMutex();
-        await Task.Run(() =>
+        return Task.Run(() =>
         {
             try
             {

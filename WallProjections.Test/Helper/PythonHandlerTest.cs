@@ -1,5 +1,6 @@
-﻿using System.Reflection;
-using NUnit.Framework.Constraints;
+﻿using System.Collections.Immutable;
+using System.Reflection;
+using Avalonia;
 using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.Helper;
@@ -11,14 +12,6 @@ namespace WallProjections.Test.Helper;
 [TestFixture]
 public class PythonHandlerTest
 {
-    /// <summary>
-    /// A constraint for <see cref="TaskCanceledException" /> or
-    /// <see cref="AggregateException" /> with <see cref="TaskCanceledException" /> as inner exception
-    /// </summary>
-    private static readonly InstanceOfTypeConstraint IsTaskCanceledException = Is
-        .InstanceOf<TaskCanceledException>().Or
-        .InstanceOf<AggregateException>().With.InnerException.InstanceOf<TaskCanceledException>();
-
     private static readonly int[] Ids = { 0, 1, 2, 1000, -100 };
 
     [Test]
@@ -69,12 +62,12 @@ public class PythonHandlerTest
         Assert.That(python.IsHotspotDetectionRunning, Is.True);
     }
 
-    [Test]
+    [AvaloniaTest]
     [Timeout(2000)]
     public async Task RunCalibrationTest()
     {
         var (handler, python) = CreateInstance();
-        await handler.RunCalibration(new Dictionary<int, (float, float)>());
+        await handler.RunCalibration(ImmutableDictionary.Create<int, Point>());
         Assert.That(python.IsCameraCalibrated, Is.True);
     }
 
@@ -90,13 +83,13 @@ public class PythonHandlerTest
         handler.CancelCurrentTask();
         await Task.Delay(100);
         python.Exception = new Exception("Test exception");
-        Assert.ThrowsAsync(IsTaskCanceledException, async () => await task);
+        AssertThrowsTaskCanceledException(task);
     }
 
     /// <summary>
     /// Tests whether a task is cancelled when another task is started
     /// </summary>
-    [Test]
+    [AvaloniaTest]
     [Timeout(5000)]
     public async Task RunNewPythonActionTest()
     {
@@ -105,10 +98,9 @@ public class PythonHandlerTest
         var task = handler.RunHotspotDetection();
         await Task.Delay(100);
         python.Delay = 0;
-        await handler.RunCalibration(new Dictionary<int, (float, float)>());
+        await handler.RunCalibration(ImmutableDictionary.Create<int, Point>());
         python.Exception = new Exception("Test exception");
-        // Assert.That(async () => { await task; }, ThrowsTaskCanceledException);
-        Assert.ThrowsAsync(IsTaskCanceledException, async () => await task);
+        AssertThrowsTaskCanceledException(task);
     }
 
     [Test]
@@ -159,5 +151,28 @@ public class PythonHandlerTest
                        ?? throw new MissingMethodException("Could not construct PythonEventHandler");
 
         return (instance, python);
+    }
+
+    /// <summary>
+    /// Asserts that either a <see cref="TaskCanceledException" /> or <see cref="AggregateException" />
+    /// with <see cref="TaskCanceledException" /> as inner exception has been thrown
+    /// </summary>
+    private static void AssertThrowsTaskCanceledException(Task task)
+    {
+        try
+        {
+            task.Wait();
+            Assert.Fail("Task did not throw TaskCanceledException");
+        }
+        catch (TaskCanceledException)
+        {
+            // Expected
+            Assert.Pass();
+        }
+        catch (AggregateException e) when (e.InnerException is TaskCanceledException)
+        {
+            // Expected
+            Assert.Pass();
+        }
     }
 }

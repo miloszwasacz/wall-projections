@@ -279,7 +279,11 @@ public partial class EditorWindow : Window
             Toast.Text = CalibrationErrorMessage;
             Toast.Show(Toast.ShowDuration.Short);
         };
-        dialog.Cancel += (_, _) => _isCalibrationRunning = false;
+        dialog.Cancel += (_, _) =>
+        {
+            vm.HideCalibrationMarkers();
+            _isCalibrationRunning = false;
+        };
 
         _isDialogShown = true;
         await dialog.ShowDialog(this);

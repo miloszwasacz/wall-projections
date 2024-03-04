@@ -1,4 +1,6 @@
-﻿using WallProjections.ViewModels.Interfaces;
+﻿using System.Collections.Immutable;
+using Avalonia;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
@@ -64,7 +66,7 @@ public class MockNavigator : INavigator
         throw new NotImplementedException();
     }
 
-    public Dictionary<int, (float, float)>? GetArUcoPositions()
+    public ImmutableDictionary<int, Point>? GetArUcoPositions()
     {
         throw new NotImplementedException();
     }

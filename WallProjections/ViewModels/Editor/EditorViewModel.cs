@@ -252,6 +252,9 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     public void ShowCalibrationMarkers() => _navigator.ShowCalibrationMarkers();
 
     /// <inheritdoc />
+    public void HideCalibrationMarkers() => _navigator.HideCalibrationMarkers();
+
+    /// <inheritdoc />
     public Task<bool> CalibrateCamera() => Task.Run(async () =>
     {
         var arUcoPositions = _navigator.GetArUcoPositions();
@@ -259,8 +262,13 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
         var matrix = await _pythonHandler.RunCalibration(arUcoPositions);
         if (matrix is not null)
+        {
             _homographyMatrix = matrix;
+            _configExists = true;
+            IsSaved = false;
+        }
 
+        _navigator.HideCalibrationMarkers();
         return matrix is not null;
     });
 

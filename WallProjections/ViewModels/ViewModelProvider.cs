@@ -171,6 +171,12 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
         new HotspotProjectionViewModel(hotspot);
 
+    /// <summary>
+    /// Creates a new <see cref="ArUcoGridViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="ArUcoGridViewModel" /> instance</returns>
+    public IArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
+
     #endregion
 
     /// <summary>

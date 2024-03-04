@@ -116,6 +116,11 @@ public interface IEditorViewModel
     public void ShowCalibrationMarkers();
 
     /// <summary>
+    /// Hides the calibration markers if they are currently visible.
+    /// </summary>
+    public void HideCalibrationMarkers();
+
+    /// <summary>
     /// Calibrates the camera, sets the current homography matrix, and hides the calibration markers.
     /// </summary>
     /// <returns>Whether the calibration has been successful.</returns>

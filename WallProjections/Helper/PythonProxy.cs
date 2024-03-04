@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
+using Avalonia;
 #if !DEBUGSKIPPYTHON
 using System.Threading;
 using System.Diagnostics;
@@ -56,7 +57,7 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public float[,]? CalibrateCamera(Dictionary<int, (float, float)> arucoPositions)
+    public float[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         //TODO Change to the actual entrypoint
         return RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));
@@ -163,7 +164,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Prints a message to the console
     /// </summary>
-    public float[,] CalibrateCamera(Dictionary<int, (float, float)> arucoPositions)
+    public float[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         Console.WriteLine("Calibrating camera");
         return new float[,]

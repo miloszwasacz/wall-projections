@@ -1,14 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Views;
+using WallProjections.Views.SecondaryScreens;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 
 namespace WallProjections.ViewModels;
@@ -188,9 +192,16 @@ public sealed class Navigator : ViewModelBase, INavigator
     }
 
     /// <inheritdoc />
-    public Dictionary<int, (float, float)>? GetArUcoPositions()
+    public ImmutableDictionary<int, Point>? GetArUcoPositions()
     {
-        throw new NotImplementedException("Get ArUco positions");
+        var arUcoGridView = _secondaryScreen.window.FindDescendantOfType<ArUcoGridView>();
+        ImmutableDictionary<int, Point>? positions = null;
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            // This has to be run on the UI thread
+            positions = arUcoGridView?.GetArUcoPositions();
+        });
+        return positions;
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
-﻿using WallProjections.Helper;
+﻿using System.Collections.Immutable;
+using Avalonia;
+using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.Test.Mocks.Helper;
@@ -25,7 +27,7 @@ public class MockPythonHandler : IPythonHandler
         return Task.CompletedTask;
     }
 
-    public Task<float[,]?> RunCalibration(Dictionary<int, (float, float)> arucoPositions)
+    public Task<float[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
     {
         CurrentScript = PythonScript.Calibration;
         return Task.FromResult(arucoPositions.Count > 0 ? MockPythonProxy.CalibrationResult : null);

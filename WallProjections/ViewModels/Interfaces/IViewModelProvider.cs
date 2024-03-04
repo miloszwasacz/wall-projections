@@ -124,5 +124,11 @@ public interface IViewModelProvider
     /// <returns>A new <see cref="IHotspotProjectionViewModel" /> instance</returns>
     public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot);
 
+    /// <summary>
+    /// Creates a new <see cref="IArUcoGridViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="IArUcoGridViewModel" /> instance</returns>
+    public IArUcoGridViewModel GetArUcoGridViewModel();
+
     #endregion
 }

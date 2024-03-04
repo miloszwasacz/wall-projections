@@ -142,6 +142,11 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
         new MockHotspotProjectionViewModel(hotspot);
 
+    public IArUcoGridViewModel GetArUcoGridViewModel()
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 
     public void Dispose()

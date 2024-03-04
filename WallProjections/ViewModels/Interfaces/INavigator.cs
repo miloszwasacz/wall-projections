@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
+using Avalonia;
 
 namespace WallProjections.ViewModels.Interfaces;
 
@@ -32,7 +33,7 @@ public interface INavigator : IDisposable
     /// If the calibration markers are visible, returns the positions of the ArUco markers (ID to top-left corner)
     /// otherwise, returns null.
     /// </summary>
-    public Dictionary<int, (float, float)>? GetArUcoPositions();
+    public ImmutableDictionary<int, Point>? GetArUcoPositions();
 
     /// <summary>
     /// Shuts down the application.

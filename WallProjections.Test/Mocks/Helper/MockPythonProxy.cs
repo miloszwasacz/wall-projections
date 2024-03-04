@@ -1,4 +1,6 @@
-﻿using WallProjections.Helper.Interfaces;
+﻿using System.Collections.Immutable;
+using Avalonia;
+using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.Test.Mocks.Helper;
 
@@ -57,7 +59,7 @@ public class MockPythonProxy : IPythonProxy
         Task.Delay(Delay).Wait();
     }
 
-    public float[,]? CalibrateCamera(Dictionary<int, (float, float)> arucoPositions)
+    public float[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         Task.Delay(Delay).Wait();
         if (Exception != null)
