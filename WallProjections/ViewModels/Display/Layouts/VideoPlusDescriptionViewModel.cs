@@ -9,10 +9,12 @@ public class VideoPlusDescriptionViewModel : ViewModelBase, ILayout
 {
     public VideoPlusDescriptionViewModel(
         IViewModelProvider vmProvider,
+        string title,
         string description,
         IEnumerable<string> videoPaths)
     {
         VideoViewModel = vmProvider.GetVideoViewModel();
+        Title = title;
         Description = description;
         VideoPaths = new List<string>(videoPaths);
 
@@ -20,6 +22,8 @@ public class VideoPlusDescriptionViewModel : ViewModelBase, ILayout
     }
 
     public string Description { get; } = string.Empty;
+
+    public string Title { get; } = string.Empty;
 
     public List<string> VideoPaths { get; }
 

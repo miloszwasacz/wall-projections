@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -94,9 +95,10 @@ Please report this to the museum staff.";
         {
 
             var media = _contentProvider.GetMedia(hotspotId);
-            ContentViewModel.Dispose();
+            var oldViewModel = ContentViewModel;
 
             ContentViewModel = _layoutProvider.GetLayout(_vmProvider, media);
+            oldViewModel.Dispose();
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {

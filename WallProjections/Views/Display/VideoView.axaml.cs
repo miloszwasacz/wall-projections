@@ -18,7 +18,6 @@ public partial class VideoView : UserControl
     public VideoView()
     {
         InitializeComponent();
-
         _nativeVideoView = this.Get<NativeVideoView>("VideoViewer");
 
     }
@@ -27,7 +26,7 @@ public partial class VideoView : UserControl
     {
         _viewModel = DataContext as VideoViewModel;
 
-        await Task.Delay(1000);
+        await Task.Delay(500);
 
         if ( _viewModel?.MediaPlayer != null)
         {

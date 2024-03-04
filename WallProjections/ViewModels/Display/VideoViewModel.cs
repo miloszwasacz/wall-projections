@@ -38,6 +38,8 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// </summary>
     private bool _isLoaded;
 
+    private bool _isVisible;
+
     /// <summary>
     /// All the videos queued to play
     /// </summary>
@@ -55,6 +57,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         _stateMutex = new Mutex();
         _playQueue = new ConcurrentQueue<string>();
         _mediaPlayer.EndReached += PlayNextVideoEvent;
+        _isVisible = false;
 
         this.RaisePropertyChanged(nameof(MediaPlayer));
     }
@@ -79,7 +82,11 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     }
 
     /// <inheritdoc />
-    public bool IsVisible => _isLoaded && !_isDisposed;
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set => this.RaiseAndSetIfChanged(ref _isVisible, value);
+    }
 
     /// <inheritdoc />
     public bool HasVideos
@@ -119,6 +126,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             PlayNextVideo();
         }
         _isLoaded = true;
+        IsVisible = true;
         _stateMutex.ReleaseMutex();
     }
 
@@ -188,8 +196,11 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 
     public void Dispose()
     {
+        Console.WriteLine("Disposing VideoViewModel");
         if (_isDisposed)
             return;
+
+        IsVisible = false;
 
         StopVideo();
         MediaPlayer.DisposeHandle();
