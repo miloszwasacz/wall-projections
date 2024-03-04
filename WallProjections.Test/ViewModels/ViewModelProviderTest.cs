@@ -322,6 +322,17 @@ public class ViewModelProviderTest
         });
     }
 
+    [AvaloniaTest]
+    public void GetArUcoGridViewModelTest()
+    {
+        var navigator = new MockNavigator();
+        var pythonHandler = new MockPythonHandler();
+        using var vmProvider = new ViewModelProvider(navigator, pythonHandler);
+        var arUcoGridViewModel = vmProvider.GetArUcoGridViewModel();
+        Assert.That(arUcoGridViewModel, Is.InstanceOf<ArUcoGridViewModel>());
+        Assert.That(arUcoGridViewModel.ArUcoList, Is.Not.Empty);
+    }
+
     #endregion
 
     [Test]

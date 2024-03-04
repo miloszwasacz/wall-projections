@@ -3,7 +3,7 @@ using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
 
-namespace WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
+namespace WallProjections.Test.Mocks.ViewModels;
 
 public class MockSecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewModel
 {
@@ -48,6 +48,6 @@ public class MockSecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewM
     /// <inheritdoc />
     public void ShowArUcoGrid()
     {
-        Content = null;
+        Content = _vmProvider.GetArUcoGridViewModel();
     }
 }

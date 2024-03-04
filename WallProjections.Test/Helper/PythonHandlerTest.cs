@@ -5,6 +5,7 @@ using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using static WallProjections.Test.TestSetup;
+using static WallProjections.Test.TestExtensions;
 using HotspotSelectedArgs = WallProjections.Helper.Interfaces.IPythonHandler.HotspotSelectedArgs;
 
 namespace WallProjections.Test.Helper;
@@ -13,6 +14,21 @@ namespace WallProjections.Test.Helper;
 public class PythonHandlerTest
 {
     private static readonly int[] Ids = { 0, 1, 2, 1000, -100 };
+
+    /// <summary>
+    /// Different types of actions that can be performed on the <see cref="IPythonHandler" />
+    /// </summary>
+    private static IEnumerable<TestCaseData<Func<IPythonHandler, Task>>> AsyncTaskTestCases()
+    {
+        yield return MakeTestData(
+            (IPythonHandler h) => h.RunHotspotDetection(),
+            nameof(IPythonHandler.RunHotspotDetection)
+        );
+        yield return MakeTestData(
+            async (IPythonHandler h) => { await h.RunCalibration(ImmutableDictionary.Create<int, Point>()); },
+            nameof(IPythonHandler.RunCalibration)
+        );
+    }
 
     [Test]
     public void SingletonPatternTest()
@@ -72,12 +88,13 @@ public class PythonHandlerTest
     }
 
     [Test]
+    [TestCaseSource(nameof(AsyncTaskTestCases))]
     [Timeout(5000)]
-    public async Task CancelCurrentTaskTest()
+    public async Task CancelCurrentTaskTest(Func<IPythonHandler, Task> asyncAction)
     {
         var (handler, python) = CreateInstance();
         python.Delay = 2000;
-        var task = handler.RunHotspotDetection();
+        var task = asyncAction(handler);
         await Task.Delay(100);
         python.Delay = 0;
         handler.CancelCurrentTask();
@@ -104,16 +121,18 @@ public class PythonHandlerTest
     }
 
     [Test]
-    public void PythonActionExceptionTest()
+    [TestCaseSource(nameof(AsyncTaskTestCases))]
+    [Timeout(2000)]
+    public void PythonActionExceptionTest(Func<IPythonHandler, Task> asyncAction)
     {
         var (handler, python) = CreateInstance();
         python.Exception = new Exception("Test exception");
-        Assert.ThrowsAsync<Exception>(() => handler.RunHotspotDetection());
+        Assert.ThrowsAsync<Exception>(() => asyncAction(handler));
     }
 
     [Test]
     [TestCaseSource(nameof(Ids))]
-    public void OnPressDetectedTest(int id)
+    public void OnHotspotPressedTest(int id)
     {
         var id2 = id + 1;
         var (handler, _) = CreateInstance();
@@ -128,6 +147,12 @@ public class PythonHandlerTest
         handler.OnHotspotPressed(id2);
         Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
         Assert.That(eventFiredArgs!.Id, Is.EqualTo(id2));
+    }
+
+    [Test]
+    [TestCaseSource(nameof(Ids))]
+    public void OnHotspotUnpressedTest(int id)
+    {
     }
 
     /// <summary>

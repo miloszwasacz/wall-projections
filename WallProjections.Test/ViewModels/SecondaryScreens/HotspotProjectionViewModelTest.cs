@@ -20,11 +20,14 @@ public class HotspotProjectionViewModelTest
     public void ConstructorTest()
     {
         var viewModel = new HotspotProjectionViewModel(Hotspot);
-        Assert.That(viewModel.Id, Is.EqualTo(Hotspot.Id));
-        Assert.That(viewModel.X, Is.EqualTo(Hotspot.Position.X));
-        Assert.That(viewModel.Y, Is.EqualTo(Hotspot.Position.Y));
-        Assert.That(viewModel.D, Is.EqualTo(Hotspot.Position.R * 2));
-        Assert.That(viewModel.IsActive, Is.False);
+        Assert.Multiple(() =>
+        {
+            Assert.That(viewModel.Id, Is.EqualTo(Hotspot.Id));
+            Assert.That(viewModel.X, Is.EqualTo(Hotspot.Position.X));
+            Assert.That(viewModel.Y, Is.EqualTo(Hotspot.Position.Y));
+            Assert.That(viewModel.D, Is.EqualTo(Hotspot.Position.R * 2));
+            Assert.That(viewModel.IsActive, Is.False);
+        });
     }
 
     [Test]

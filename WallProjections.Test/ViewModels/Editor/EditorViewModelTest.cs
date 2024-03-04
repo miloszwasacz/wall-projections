@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using NUnit.Framework.Constraints;
@@ -654,6 +655,62 @@ namespace WallProjections.Test.ViewModels.Editor
             {
                 Assert.That(exported, Is.False);
                 Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.CanExport, Is.False);
+            });
+        }
+
+        [AvaloniaTest]
+        public void ShowHideCalibrationMarkersTest()
+        {
+            var navigator = new MockNavigator();
+            var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            Assert.That(navigator.AreArUcoMarkersVisible, Is.False);
+
+            editorViewModel.ShowCalibrationMarkers();
+            Assert.That(navigator.AreArUcoMarkersVisible, Is.True);
+
+            editorViewModel.HideCalibrationMarkers();
+            Assert.That(navigator.AreArUcoMarkersVisible, Is.False);
+        }
+
+        [AvaloniaTest]
+        public async Task CalibrateCameraTest()
+        {
+            var positionsBuilder = ImmutableDictionary.CreateBuilder<int, Point>();
+            for (var i = 0; i < 5; i++)
+                positionsBuilder.Add(i, new Point(i, i));
+
+            var positions = positionsBuilder.ToImmutable();
+            var navigator = new MockNavigator(positions);
+            var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
+
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            Assert.That(await editorViewModel.CalibrateCamera(), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(editorViewModel.IsSaved, Is.False);
+                Assert.That(editorViewModel.CanExport, Is.False);
+            });
+
+            editorViewModel.SaveConfig();
+            Assert.That(fileHandler.Config.HomographyMatrix, Is.EquivalentTo(MockPythonProxy.CalibrationResult));
+        }
+
+        [AvaloniaTest]
+        public async Task CalibrateCameraNullTest()
+        {
+            var navigator = new MockNavigator();
+            var fileHandler = new MockFileHandler(true);
+            var pythonHandler = new MockPythonHandler();
+
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            Assert.That(await editorViewModel.CalibrateCamera(), Is.False);
+            Assert.Multiple(() =>
+            {
+                Assert.That(editorViewModel.IsSaved, Is.True);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }

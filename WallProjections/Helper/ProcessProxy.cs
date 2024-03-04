@@ -10,6 +10,7 @@ public class ProcessProxy : IProcessProxy
 {
     // ReSharper disable once ConvertIfStatementToReturnStatement
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage(Justification = "Is platform specific (especially Linux) and should be tested manually")]
     public string? GetFileExplorerCommand()
     {
         //TODO Verify this works on all (necessary) platforms

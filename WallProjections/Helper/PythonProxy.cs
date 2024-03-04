@@ -162,7 +162,7 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <summary>
-    /// Prints a message to the console
+    /// Prints a message to the console and returns an identity matrix
     /// </summary>
     public float[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {

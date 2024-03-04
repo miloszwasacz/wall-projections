@@ -7,10 +7,20 @@ namespace WallProjections.Test.Mocks.ViewModels;
 public class MockNavigator : INavigator
 {
     /// <summary>
+    /// The positions returned by <see cref="GetArUcoPositions" />.
+    /// </summary>
+    private readonly ImmutableDictionary<int, Point>? _arucoPositions;
+
+    /// <summary>
     /// Whether the editor is currently open
     /// (i.e. <see cref="OpenEditor"/> has been called and <see cref="CloseEditor"/> has not been called).
     /// </summary>
     public bool IsEditorOpen { get; private set; }
+
+    /// <summary>
+    /// Whether the ArUco markers are currently visible.
+    /// </summary>
+    public bool AreArUcoMarkersVisible { get; private set; }
 
     /// <summary>
     /// Whether the <see cref="Shutdown"/> method has been called.
@@ -21,6 +31,22 @@ public class MockNavigator : INavigator
     /// Whether the <see cref="Dispose"/> method has been called.
     /// </summary>
     public bool HasBeenDisposed { get; private set; }
+
+    /// <summary>
+    /// Initializes a new <see cref="MockNavigator" /> with <i>null</i> <see cref="_arucoPositions" />.
+    /// </summary>
+    public MockNavigator()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new <see cref="MockNavigator" /> with the given <paramref name="arucoPositions" />.
+    /// </summary>
+    /// <param name="arucoPositions">The positions returned by <see cref="GetArUcoPositions" />.</param>
+    public MockNavigator(ImmutableDictionary<int, Point> arucoPositions)
+    {
+        _arucoPositions = arucoPositions;
+    }
 
     /// <summary>
     /// Sets <see cref="IsEditorOpen"/> to true.
@@ -58,18 +84,15 @@ public class MockNavigator : INavigator
 
     public void ShowCalibrationMarkers()
     {
-        throw new NotImplementedException();
+        AreArUcoMarkersVisible = true;
     }
 
     public void HideCalibrationMarkers()
     {
-        throw new NotImplementedException();
+        AreArUcoMarkersVisible = false;
     }
 
-    public ImmutableDictionary<int, Point>? GetArUcoPositions()
-    {
-        throw new NotImplementedException();
-    }
+    public ImmutableDictionary<int, Point>? GetArUcoPositions() => _arucoPositions;
 
     /// <summary>
     /// Sets <see cref="HasBeenShutDown"/> to true and calls <see cref="Dispose"/>.

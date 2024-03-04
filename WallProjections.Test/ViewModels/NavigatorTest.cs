@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System.Runtime.CompilerServices;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using WallProjections.Models;
 using WallProjections.Test.Mocks.Helper;
@@ -62,7 +63,6 @@ public class NavigatorTest
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
-
         Dispatcher.UIThread.RunJobs();
         Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
 
@@ -120,6 +120,130 @@ public class NavigatorTest
         Assert.Multiple(() =>
         {
             Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
+            Assert.That(lifetime.MainWindow, Is.Null);
+            Assert.That(vmProvider.HasBeenDisposed, Is.True);
+            Assert.That(pythonHandler.CurrentScript, Is.Null);
+            Assert.That(pythonHandler.IsDisposed, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    public async Task ShowHideCalibrationMarkersTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var pythonHandler = new MockPythonHandler();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new FileNotFoundException());
+
+        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        Dispatcher.UIThread.RunJobs();
+        //TODO Change TSecondaryVM to the correct type
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IHotspotDisplayViewModel>();
+
+        navigator.ShowCalibrationMarkers();
+        Dispatcher.UIThread.RunJobs();
+        await Task.Delay(400);
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IArUcoGridViewModel>();
+
+        navigator.HideCalibrationMarkers();
+        Dispatcher.UIThread.RunJobs();
+        await Task.Delay(400);
+        //TODO Change TSecondaryVM to the correct type
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IHotspotDisplayViewModel>();
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    public async Task GetArUcoPositionsTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var pythonHandler = new MockPythonHandler();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new FileNotFoundException());
+
+        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        navigator.ShowCalibrationMarkers();
+        Dispatcher.UIThread.RunJobs();
+        await Task.Delay(400);
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IArUcoGridViewModel>();
+
+        var positions = navigator.GetArUcoPositions();
+        Assert.That(positions, Is.Not.Null.And.Not.Empty);
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    public void ShutdownTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var pythonHandler = new MockPythonHandler();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new FileNotFoundException());
+
+        var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        Dispatcher.UIThread.RunJobs();
+        Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
+
+        navigator.Shutdown();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Multiple(() =>
+        {
+            Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
+            Assert.That(lifetime.MainWindow, Is.Null);
+            Assert.That(vmProvider.HasBeenDisposed, Is.True);
+            Assert.That(pythonHandler.CurrentScript, Is.Null);
+            Assert.That(pythonHandler.IsDisposed, Is.False);
+        });
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    [MethodImpl(MethodImplOptions.NoOptimization)] // Prevents the `navigator` from being optimized out
+    public void ShutdownFromAppLifetimeTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var pythonHandler = new MockPythonHandler();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new FileNotFoundException());
+
+        var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        Dispatcher.UIThread.RunJobs();
+        Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
+
+        lifetime.Shutdown();
+        Dispatcher.UIThread.RunJobs();
+        Assert.Multiple(() =>
+        {
+            Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
+            Assert.That(lifetime.MainWindow, Is.Null);
+            Assert.That(vmProvider.HasBeenDisposed, Is.True);
+            Assert.That(pythonHandler.CurrentScript, Is.Null);
+            Assert.That(pythonHandler.IsDisposed, Is.False);
+        });
+
+        // Statement to prevent Garbage Collection of the navigator before the end of the test
+        _ = navigator;
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
+    public void DisposeTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var pythonHandler = new MockPythonHandler();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+
+        var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        Dispatcher.UIThread.RunJobs();
+        Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
+
+        navigator.Dispose();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Multiple(() =>
+        {
             Assert.That(lifetime.MainWindow, Is.Null);
             Assert.That(vmProvider.HasBeenDisposed, Is.True);
             Assert.That(pythonHandler.CurrentScript, Is.Null);

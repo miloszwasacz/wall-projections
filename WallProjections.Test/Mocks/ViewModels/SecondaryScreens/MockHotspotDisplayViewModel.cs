@@ -8,8 +8,13 @@ namespace WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
 /// <summary>
 /// A mock of <see cref="HotspotDisplayViewModel" />
 /// </summary>
-public class MockHotspotDisplayViewModel : IHotspotDisplayViewModel
+public class MockHotspotDisplayViewModel : IHotspotDisplayViewModel, IDisposable
 {
+    /// <summary>
+    /// Whether <see cref="Dispose" /> has been called
+    /// </summary>
+    public bool IsDisposed { get; private set; }
+
     /// <inheritdoc/>
     public override ImmutableList<IHotspotProjectionViewModel> Projections { get; } = new[]
     {
@@ -57,5 +62,11 @@ public class MockHotspotDisplayViewModel : IHotspotDisplayViewModel
     public override void DisplayHotspots()
     {
         IsVisible = true;
+    }
+
+    public void Dispose()
+    {
+        IsDisposed = true;
+        GC.SuppressFinalize(this);
     }
 }

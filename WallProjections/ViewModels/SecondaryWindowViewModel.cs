@@ -64,6 +64,7 @@ public class SecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewModel
         if (_content is IDisposable disposable)
             disposable.Dispose();
 
+        _content = null;
         GC.SuppressFinalize(this);
     }
 }

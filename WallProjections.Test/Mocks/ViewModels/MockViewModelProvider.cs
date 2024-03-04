@@ -8,6 +8,7 @@ using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
@@ -142,10 +143,12 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
         new MockHotspotProjectionViewModel(hotspot);
 
-    public IArUcoGridViewModel GetArUcoGridViewModel()
-    {
-        throw new NotImplementedException();
-    }
+    /// <summary>
+    /// Creates a new <see cref="ArUcoGridViewModel" />
+    /// </summary>
+    /// <returns>A new <see cref="ArUcoGridViewModel" /></returns>
+    /// <remarks>Note that this is not a mock, as the viewmodel is so simple that there is no need for a mock</remarks>
+    public IArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
 
     #endregion
 
