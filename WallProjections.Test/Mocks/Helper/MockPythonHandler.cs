@@ -2,6 +2,7 @@
 using Avalonia;
 using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test.Mocks.Helper;
 
@@ -21,7 +22,7 @@ public class MockPythonHandler : IPythonHandler
     /// <inheritdoc />
     public event EventHandler<IPythonHandler.HotspotSelectedArgs>? HotspotSelected;
 
-    public Task RunHotspotDetection()
+    public Task RunHotspotDetection(IConfig config)
     {
         CurrentScript = PythonScript.HotspotDetection;
         return Task.CompletedTask;

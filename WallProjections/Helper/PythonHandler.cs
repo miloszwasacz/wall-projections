@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper;
 
@@ -66,7 +67,8 @@ public sealed class PythonHandler : IPythonHandler
     private CancellationTokenSource? _currentTask;
 
     /// <inheritdoc />
-    public Task RunHotspotDetection() => RunNewPythonAction(python => python.StartHotspotDetection(this));
+    public Task RunHotspotDetection(IConfig config) =>
+        RunNewPythonAction(python => python.StartHotspotDetection(this, config));
 
     /// <inheritdoc />
     public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions) =>
@@ -202,6 +204,7 @@ public sealed class PythonHandler : IPythonHandler
     /// <inheritdoc />
     public void OnHotspotPressed(int id)
     {
+        Console.WriteLine($"Hotspot {id} was pressed");
         HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
     }
 

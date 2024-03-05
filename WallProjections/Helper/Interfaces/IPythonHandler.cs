@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Avalonia;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper.Interfaces;
 
@@ -15,7 +16,7 @@ public interface IPythonHandler : IDisposable
     /// <summary>
     /// Starts an asynchronous Python task that listens for hotspot presses
     /// </summary>
-    public Task RunHotspotDetection();
+    public Task RunHotspotDetection(IConfig config);
 
     /// <summary>
     /// Starts an asynchronous Python task that calibrates the camera

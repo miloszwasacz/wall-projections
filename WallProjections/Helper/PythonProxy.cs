@@ -2,11 +2,13 @@
 using System.Collections.Immutable;
 using Avalonia;
 #if !DEBUGSKIPPYTHON
+using WallProjections.Models.Interfaces;
 using System.Threading;
 using System.Diagnostics;
 using Python.Runtime;
 #else
 using System.Diagnostics.CodeAnalysis;
+using WallProjections.Models.Interfaces;
 #endif
 using WallProjections.Helper.Interfaces;
 
@@ -39,9 +41,9 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public void StartHotspotDetection(IPythonHandler eventListener)
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
-        RunPythonAction(PythonModule.HotspotDetection, module => { module.StartDetection(eventListener); });
+        RunPythonAction(PythonModule.HotspotDetection, module => { module.StartDetection(eventListener, config); });
     }
 
     /// <inheritdoc />
@@ -148,7 +150,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Prints a message to the console
     /// </summary>
-    public void StartHotspotDetection(IPythonHandler eventListener)
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
         Console.WriteLine("Starting hotspot detection");
     }
@@ -164,10 +166,10 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Prints a message to the console and returns an identity matrix
     /// </summary>
-    public float[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+    public double[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         Console.WriteLine("Calibrating camera");
-        return new float[,]
+        return new double[,]
         {
             { 1, 0, 0 },
             { 0, 1, 0 },

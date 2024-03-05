@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test.Mocks.Helper;
 
@@ -45,7 +46,7 @@ public class MockPythonProxy : IPythonProxy
     /// </summary>
     public Exception? Exception { get; set; }
 
-    public void StartHotspotDetection(IPythonHandler eventListener)
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
         Task.Delay(Delay).Wait();
         IsHotspotDetectionRunning = true;

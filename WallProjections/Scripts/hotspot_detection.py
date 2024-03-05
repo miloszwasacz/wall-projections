@@ -1,18 +1,20 @@
 ﻿import logging
-import time
-# noinspection PyPackages
-from .Helper import numpy_dotnet_converters as npnet
-from .Helper.EventHandler import EventHandler
-from .Helper.Hotspot import Hotspot
-from .Helper.VideoCaptureThread import VideoCaptureThread
-from .calibration import Calibrator
 import cv2
 import mediapipe as mp
-import numpy as np
+
+# noinspection PyPackages
+from .Helper import numpy_dotnet_converters as npnet
+# noinspection PyPackages
+from .Helper.EventHandler import EventHandler
+# noinspection PyPackages
+from .Helper.Hotspot import Hotspot
+# noinspection PyPackages
+from .Helper.VideoCaptureThread import VideoCaptureThread
+# noinspection PyPackages
+from .calibration import Calibrator
 
 logging.basicConfig(level=logging.INFO)
 detection_running = False
-
 
 MAX_NUM_HANDS: int = 4
 """The maximum number of hands to detect."""
@@ -36,22 +38,27 @@ FINGERTIP_INDICES: tuple[int, ...] = (4, 8, 12, 16, 20)
 
 This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
 
-def generate_hotspots(event_handler: EventHandler, calibration_matrix_net_array, hotspot_coords_str: str) -> list[Hotspot]:
 
+def generate_hotspots(
+        event_handler: EventHandler,
+        calibration_matrix_net_array,
+        hotspot_coords_str: str
+) -> list[Hotspot]:
     photo = VideoCaptureThread.take_photo()
-    w,h,d = photo.shape()
+    w, h, d = photo.shape
 
     calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
-    calibrator = Calibrator(calibration_matrix, (w,h))
+    calibrator = Calibrator(calibration_matrix, (w, h))
     hotspots_coords = npnet.json_to_dict(hotspot_coords_str)
 
-    hotspots :list[Hotspot] = []
+    hotspots: list[Hotspot] = []
     for hotspot_id, hotspot_coord_rad in hotspots_coords.items():
         coords = hotspot_coord_rad[0], hotspot_coord_rad[1]
         radius = hotspot_coord_rad[2]
         hotspot = Hotspot(hotspot_id, coords, calibrator, event_handler, radius=radius)
         hotspots.append(hotspot)
     return hotspots
+
 
 def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array, hotspot_coords_str: str) -> None:
     """
@@ -68,8 +75,6 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     hands_model = mp.solutions.hands.Hands(max_num_hands=MAX_NUM_HANDS,
                                            min_detection_confidence=MIN_DETECTION_CONFIDENCE,
                                            min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
-
-
 
     logging.info("Initialising video capture...")
     video_capture = cv2.VideoCapture()
@@ -103,6 +108,8 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
 
             for hotspot in hotspots:
                 hotspot.update(fingertip_coords)
+
+
 def stop_hotspot_detection():
     logging.info("stopping hotspot detection")
     global detection_running

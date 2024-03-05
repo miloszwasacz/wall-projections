@@ -112,14 +112,14 @@ public sealed class Navigator : ViewModelBase, INavigator
     {
         _windowMutex.WaitOne();
         var config = _config;
-        if (config == null)
+        if (config is null)
         {
             _windowMutex.ReleaseMutex();
             OpenEditor();
             return;
         }
 
-        _pythonHandler.RunHotspotDetection();
+        _pythonHandler.RunHotspotDetection(config);
         var displayWindow = new DisplayWindow
         {
             DataContext = _vmProvider.GetDisplayViewModel(config)

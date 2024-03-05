@@ -7,6 +7,7 @@ using System.Text.Json;
 using Avalonia;
 using Python.Runtime;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper;
 
@@ -57,9 +58,16 @@ public abstract class PythonModule
         /// Starts the detection of hotspots using computer vision
         /// </summary>
         /// <param name="eventListener">The event listener to notify when a hotspot press is detected</param>
-        public void StartDetection(IPythonHandler eventListener)
+        /// <param name="config">The config holding the calibration matrix and hotspot positions</param>
+        public void StartDetection(IPythonHandler eventListener, IConfig config)
         {
-            _rawModule.hotspot_detection(eventListener.ToPython());
+            var positions = config.Hotspots.ToDictionary(
+                hotspot => hotspot.Id,
+                hotspot => new[] { hotspot.Position.X, hotspot.Position.Y, hotspot.Position.R }
+            );
+            var serialized = JsonSerializer.Serialize(positions);
+
+            _rawModule.hotspot_detection(eventListener.ToPython(), config.HomographyMatrix, serialized);
         }
 
         /// <summary>

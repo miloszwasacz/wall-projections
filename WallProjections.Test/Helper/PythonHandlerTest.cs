@@ -3,6 +3,8 @@ using System.Reflection;
 using Avalonia;
 using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
+using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using static WallProjections.Test.TestSetup;
 using static WallProjections.Test.TestExtensions;
@@ -13,6 +15,14 @@ namespace WallProjections.Test.Helper;
 [TestFixture]
 public class PythonHandlerTest
 {
+    /// <summary>
+    /// An empty configuration for testing (the mocks ignore it)
+    /// </summary>
+    private static readonly IConfig TestConfig = new Config(new double[,] { }, Enumerable.Empty<Hotspot>());
+
+    /// <summary>
+    /// Test ids of hotspots
+    /// </summary>
     private static readonly int[] Ids = { 0, 1, 2, 1000, -100 };
 
     /// <summary>
@@ -21,7 +31,7 @@ public class PythonHandlerTest
     private static IEnumerable<TestCaseData<Func<IPythonHandler, Task>>> AsyncTaskTestCases()
     {
         yield return MakeTestData(
-            (IPythonHandler h) => h.RunHotspotDetection(),
+            (IPythonHandler h) => h.RunHotspotDetection(TestConfig),
             nameof(IPythonHandler.RunHotspotDetection)
         );
         yield return MakeTestData(
@@ -74,7 +84,7 @@ public class PythonHandlerTest
     public async Task RunHotspotDetectionTest()
     {
         var (handler, python) = CreateInstance();
-        await handler.RunHotspotDetection();
+        await handler.RunHotspotDetection(TestConfig);
         Assert.That(python.IsHotspotDetectionRunning, Is.True);
     }
 
@@ -112,7 +122,7 @@ public class PythonHandlerTest
     {
         var (handler, python) = CreateInstance();
         python.Delay = 2000;
-        var task = handler.RunHotspotDetection();
+        var task = handler.RunHotspotDetection(TestConfig);
         await Task.Delay(100);
         python.Delay = 0;
         await handler.RunCalibration(ImmutableDictionary.Create<int, Point>());

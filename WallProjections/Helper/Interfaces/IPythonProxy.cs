@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using Avalonia;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper.Interfaces;
 
@@ -10,7 +11,7 @@ namespace WallProjections.Helper.Interfaces;
 public interface IPythonProxy : IDisposable
 {
     /// <inheritdoc cref="PythonModule.HotspotDetectionModule.StartDetection" />
-    public void StartHotspotDetection(IPythonHandler eventListener);
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config);
 
     /// <summary>
     /// Tells Python to stop the currently running action
