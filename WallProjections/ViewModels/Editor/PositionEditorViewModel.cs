@@ -47,7 +47,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     /// <summary>
     /// The backing field for <see cref="UnselectedHotspots" />.
     /// </summary>
-    private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
+    private IEnumerable<ViewCoord> _unselectedHotspots = Enumerable.Empty<ViewCoord>();
 
     /// <inheritdoc />
     public bool IsInEditMode
@@ -69,33 +69,16 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     {
         set
         {
-            //removes the new selected value from UnselectedHotspots if it is present
-            if (value != null && _unselectedHotspots.Contains(value.Position))
-            {
-                _unselectedHotspots = _unselectedHotspots.Where(hotspot => hotspot != value.Position).ToList();
-            }
-
-            //add the old SelectedHotspot to UnselectedHotspots
-            if (_selectedHotspot != null)
-            {
-                _unselectedHotspots = _unselectedHotspots.Concat(new []{_selectedHotspot.Position });
-            }
-            this.RaisePropertyChanged(nameof(_unselectedHotspots));
-            
             //assigns the new values
             _selectedHotspot = value;
-            _x = _selectedHotspot?.Position.X ?? 0;
-            _y = _selectedHotspot?.Position.Y ?? 0;
-            _r = _selectedHotspot?.Position.R ?? 0;
-
-            this.RaisePropertyChanged(nameof(X));
-            this.RaisePropertyChanged(nameof(Y));
-            this.RaisePropertyChanged(nameof(R));
+            X = _selectedHotspot?.Position.X ?? 0;
+            Y = _selectedHotspot?.Position.Y ?? 0;
+            R = _selectedHotspot?.Position.R ?? 0;
         }
     }
 
     /// <inheritdoc />
-    public IEnumerable<Coord> UnselectedHotspots
+    public IEnumerable<ViewCoord> UnselectedHotspots
     {
         get => _unselectedHotspots;
         set => this.RaiseAndSetIfChanged(ref _unselectedHotspots, value);
@@ -114,13 +97,26 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
         get => _y;
         private set => this.RaiseAndSetIfChanged(ref _y, value);
     }
-
-    /// <inheritdoc />
-    public double R
+    
+    /// <summary>
+    /// The current radius of the hotspot (non-negative). Notifies <see cref="D" /> about changes.
+    /// </summary>
+    /// <remarks>
+    /// This is not the same as <see cref="SelectedHotspot" />.<see cref="IEditorHotspotViewModel.Position" />.<see cref="Coord.R" />!
+    /// To update the position of the selected hotspot, call <see cref="UpdateSelectedHotspot" />.
+    /// </remarks>
+    private double R
     {
         get => _r;
-        private set => this.RaiseAndSetIfChanged(ref _r, Math.Max(value, 0));
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _r, Math.Max(value, 0));
+            this.RaisePropertyChanged(nameof(D));
+        }
     }
+
+    /// <inheritdoc />
+    public double D => _r * 2;
 
     /// <inheritdoc />
     public void SetPosition(double x, double y)

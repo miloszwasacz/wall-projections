@@ -8,23 +8,43 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
     public event EventHandler? HotspotPositionChanged;
     public bool IsInEditMode { get; set; }
     public IEditorHotspotViewModel? SelectedHotspot { get; set; }
-    public IEnumerable<Coord> UnselectedHotspots { get; set; }
-    public double X { get; }
-    public double Y { get; }
-    public double R { get; }
+    public IEnumerable<ViewCoord> UnselectedHotspots { get; set; } = Enumerable.Empty<ViewCoord>();
+
+    public double X
+    {
+        get;
+        private set;
+    }
+
+    public double Y
+    {
+        get;
+        private set;
+    }
+
+    public double D
+    {
+        get;
+        private set;
+    }
 
     public void SetPosition(double x, double y)
     {
-        throw new NotImplementedException();
+        X = x;
+        Y = y;
     }
 
     public void ChangeRadius(double delta)
     {
-        throw new NotImplementedException();
+        D += delta * 2;
     }
 
     public void UpdateSelectedHotspot()
     {
-        throw new NotImplementedException();
+        SelectedHotspot = new MockEditorHotspotViewModel(
+            1, 
+            new Coord(X, Y, D / 2),
+            "name", 
+            "description");
     }
 }

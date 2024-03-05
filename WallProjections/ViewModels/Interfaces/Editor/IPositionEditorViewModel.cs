@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WallProjections.Models;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
@@ -27,7 +28,7 @@ public interface IPositionEditorViewModel
     /// <summary>
     /// A collection of all hotspots that are not currently selected.
     /// </summary>
-    public IEnumerable<Coord> UnselectedHotspots { get; protected set; }
+    public IEnumerable<ViewCoord> UnselectedHotspots { get; protected set; }
 
     /// <summary>
     /// The current X position of the hotspot.
@@ -48,13 +49,13 @@ public interface IPositionEditorViewModel
     public double Y { get; }
 
     /// <summary>
-    /// The current radius of the hotspot (non-negative).
+    /// The current diameter of the hotspot (non-negative).
     /// </summary>
     /// <remarks>
-    /// This is not the same as <see cref="SelectedHotspot" />.<see cref="IEditorHotspotViewModel.Position" />.<see cref="Coord.R" />!
+    /// This is not the same as twice the <see cref="SelectedHotspot" />.<see cref="IEditorHotspotViewModel.Position" />.<see cref="Coord.R" />!
     /// To update the position of the selected hotspot, call <see cref="UpdateSelectedHotspot" />.
     /// </remarks>
-    public double R { get; }
+    public double D { get; }
     
 
     /// <summary>
@@ -65,7 +66,7 @@ public interface IPositionEditorViewModel
     public void SelectHotspot(IEditorHotspotViewModel? hotspot, IEnumerable<Coord> unselectedHotspots)
     {
         SelectedHotspot = hotspot;
-        UnselectedHotspots = unselectedHotspots;
+        UnselectedHotspots = unselectedHotspots.Select(c => c.ToViewCoord());
     }
 
     /// <summary>
@@ -74,14 +75,14 @@ public interface IPositionEditorViewModel
     public void SetPosition(double x, double y);
 
     /// <summary>
-    /// Adds <paramref name="delta" /> to the <see cref="R">current radius</see>.
+    /// Adds <paramref name="delta" /> to the current radius.
     /// </summary>
     /// <param name="delta">The amount to add to the radius.</param>
     public void ChangeRadius(double delta);
 
     /// <summary>
     /// Changes the position of the <see cref="SelectedHotspot" /> to the current
-    /// <see cref="X" />, <see cref="Y" />, and <see cref="R" /> values.
+    /// <see cref="X" />, <see cref="Y" />, and <see cref="D" /> values.
     /// Then, sets <see cref="IsInEditMode" /> to <i>false</i> and raises the <see cref="HotspotPositionChanged" /> event.
     /// </summary>
     public void UpdateSelectedHotspot();
