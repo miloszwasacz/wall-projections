@@ -29,9 +29,9 @@ public class HotspotProjectionViewModel : ViewModelBase
     public double Y { get; }
 
     /// <summary>
-    /// The radius of the hotspot
+    /// The diameter of the hotspot
     /// </summary>
-    public double R { get; }
+    public double D { get; }
 
     /// <summary>
     /// Shows whether the hotspot is activated or not
@@ -51,6 +51,6 @@ public class HotspotProjectionViewModel : ViewModelBase
         Id = hotspot.Id;
         X = hotspot.Position.X;
         Y = hotspot.Position.Y;
-        R = hotspot.Position.R;
+        D = hotspot.Position.R * 2;
     }
 }

@@ -87,7 +87,7 @@ public class ViewModelProviderTest
                 var id = actual.Id == expected.Id;
                 var x = Math.Abs(actual.X - expected.Position.X) < HotspotViewModelTest.PositionCmpTolerance;
                 var y = Math.Abs(actual.Y - expected.Position.Y) < HotspotViewModelTest.PositionCmpTolerance;
-                var r = Math.Abs(actual.R - expected.Position.R) < HotspotViewModelTest.PositionCmpTolerance;
+                var r = Math.Abs(actual.D - 2 * expected.Position.R) < HotspotViewModelTest.PositionCmpTolerance;
                 return id && x && y && r;
             })
         );

@@ -61,8 +61,8 @@
 
         <ItemsControl.ItemTemplate>
             <DataTemplate>
-                <Ellipse Height="{Binding R}"
-                         Width="{Binding R}"
+                <Ellipse Height="{Binding D}"
+                         Width="{Binding D}"
                          Fill="White"
                          Stroke="LightGray"
 
