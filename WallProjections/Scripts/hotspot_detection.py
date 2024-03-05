@@ -7,6 +7,8 @@ import math
 import time
 from threading import Lock
 
+from VideoCaptureThread import VideoCaptureThread
+
 # To import other project scripts use (e.g. for module `calibration`):
 # from . import calibration
 
@@ -207,8 +209,7 @@ class Hotspot:
 hotspots: list[Hotspot] = []
 """The global list of hotspots."""
 
-video_capture: cv2.VideoCapture | None = None
-video_capture_mutex = Lock()
+video_capture_thread: VideoCaptureThread = VideoCaptureThread()
 
 
 def run(event_listener: EventListener) -> None:  # This function is called by Program.cs
@@ -219,8 +220,6 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
     """
 
     global hotspots
-    global video_capture
-    global video_capture_mutex
 
     # initialise ML hand-tracking model
     logging.info("Initialising hand-tracking model...")
@@ -228,37 +227,24 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
                                            min_detection_confidence=MIN_DETECTION_CONFIDENCE,
                                            min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
 
-    logging.info("Initialising video capture...")
-    video_capture = cv2.VideoCapture()
-    success = video_capture.open(VIDEO_CAPTURE_TARGET, VIDEO_CAPTURE_BACKEND)
-    if not success:
-        video_capture = None
-        raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid.")
-    for prop_id, prop_value in VIDEO_CAPTURE_PROPERTIES.items():
-        supported = video_capture.set(prop_id, prop_value)
-        if not supported:
-            logging.warning(f"Property id {prop_id} is not supported by video capture backend {VIDEO_CAPTURE_BACKEND}.")
-
     hotspots = [Hotspot(0, 0.5, 0.5, event_listener), Hotspot(1, 0.8, 0.8, event_listener)]
 
     logging.info("Initialisation done.")
 
-    # basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
+    # some basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
 
-    with video_capture_mutex:
-        is_opened = video_capture is not None and video_capture.isOpened()
-    while is_opened:
-        with video_capture_mutex:
-            success, video_capture_img = video_capture.read()
-        if not success:
-            logging.warning("Unsuccessful video read; ignoring frame.")
+    video_capture_thread.start()
+
+    while True:
+        # cycle until video capture is open
+        if video_capture_thread.current_frame is None:
+            cv2.waitKey(500)
             continue
 
-        camera_height, camera_width, _ = video_capture_img.shape
+        video_capture_img = video_capture_thread.current_frame
 
         # run model
-        video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
-        model_output = hands_model.process(video_capture_img_rgb)
+        model_output = hands_model.process(video_capture_img)
 
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
@@ -295,26 +281,17 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
         elif key == "q":
             break
 
-        with video_capture_mutex:
-            is_opened = video_capture is not None and video_capture.isOpened()
-
     # clean up
     logging.info("Cleaning up...")
-    with video_capture_mutex:
-        if video_capture is not None:
-            video_capture.release()
-            video_capture = None
+    video_capture_thread.stop()
+    video_capture_thread.join()
     cv2.destroyAllWindows()
     hands_model.close()
 
 
 def stop_hotspot_detection() -> None:
-    global video_capture
-    global video_capture_mutex
-    with video_capture_mutex:
-        if video_capture is not None:
-            video_capture.release()
-            video_capture = None
+    video_capture_thread.stop()
+    video_capture_thread.join()
 
 
 def media_finished() -> None:
