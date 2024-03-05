@@ -1,4 +1,5 @@
 ﻿# Code taken from https://github.com/pythonnet/pythonnet/issues/514#issuecomment-350375105
+import json
 
 import numpy as np
 import ctypes
@@ -101,3 +102,7 @@ def asNetArray(npArray):
     finally:
         if destHandle.IsAllocated: destHandle.Free()
     return netArray
+
+def json_to_dict(json_dict :str) -> dict[int, tuple[float, float, float]]:
+    dict_temp: dict[str, tuple[float, float, float]] = json.loads(json_dict)
+    return {int(k): v for k, v in dict_temp.items()}

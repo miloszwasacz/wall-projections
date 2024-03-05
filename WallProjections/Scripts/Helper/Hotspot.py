@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 # noinspection PyPackages
@@ -14,13 +15,14 @@ class Hotspot:
     def __init__(
             self,
             hotspot_id: int,
-            proj_pos: Tuple[int, int],
+            proj_pos: Tuple[float, float],
             calibrator: Calibrator,
             event_listener: EventHandler,
             radius: float = 0.03
     ):
         self.id: int = hotspot_id
         self._norm_pos: Tuple[float, float] = calibrator.proj_to_norm(proj_pos)
+        logging.info("hotspot with id:"+str(id)+"at norm pos"+str(self._norm_pos))
         self._radius: float = radius
         self._event_handler: EventHandler = event_listener
         self._prev_fingertip_inside = False
