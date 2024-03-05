@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using LibVLCSharp.Shared;
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
@@ -161,6 +160,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         if (_isDisposed) return;
 
         MediaPlayer?.Stop();
+        _playQueue.Clear();
         HasVideos = false;
     }
     
@@ -201,9 +201,8 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             return;
 
         IsVisible = false;
-
-        StopVideo();
         MediaPlayer.DisposeHandle();
+        StopVideo();
         MediaPlayer.EndReached -= PlayNextVideoEvent;
 
         _isDisposed = true;
@@ -211,4 +210,5 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         MediaPlayer = null;
         mediaPlayer?.Dispose();
     }
+
 }

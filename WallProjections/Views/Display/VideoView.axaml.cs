@@ -33,6 +33,7 @@ public partial class VideoView : UserControl
             _viewModel.MediaPlayer.SetHandle(_nativeVideoView.Hndl);
             _viewModel.Loaded();
         }
+
     }
 
     /// <summary>

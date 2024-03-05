@@ -11,7 +11,7 @@ public class VideoPlusDescriptionViewModelFactory : ILayoutFactory
     public bool IsCompatibleData(Hotspot.Media hotspot)
     {
         var imagesCompatible = hotspot.ImagePaths.Count == 0;
-        var videosCompatible = hotspot.VideoPaths.Count == 1;
+        var videosCompatible = hotspot.VideoPaths.Count > 0;
 
         return imagesCompatible && videosCompatible;
     }

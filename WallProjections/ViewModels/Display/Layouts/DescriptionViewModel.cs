@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using ReactiveUI;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
@@ -29,5 +30,6 @@ public class DescriptionViewModel : ViewModelBase, ILayout
 
     public void Dispose()
     {
+
     }
 }

@@ -8,7 +8,7 @@
              x:Class="WallProjections.Views.Display.Layouts.VideoPlusDescriptionView"
              x:DataType="layouts:VideoPlusDescriptionViewModel">
 
-    <Grid ColumnDefinitions="*, *" RowDefinitions="*, 2*, *">
+    <Grid ColumnDefinitions="*, *" RowDefinitions="*">
         <DockPanel>
             <Border BorderThickness="0 0 0 4"
                     BorderBrush="Black"
@@ -30,7 +30,7 @@
 
         <display:VideoView DataContext="{Binding VideoViewModel}"
                            Grid.Column="1"
-                           Grid.Row="1"/>
+                           VerticalAlignment="Center"/>
 
     </Grid>
 

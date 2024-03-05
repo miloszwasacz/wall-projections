@@ -1,6 +1,6 @@
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
@@ -40,6 +40,8 @@ Please report this to the museum staff.";
     private readonly ILayoutProvider _layoutProvider;
 
     private ILayout _contentViewModel;
+
+    private ReadOnlyCollection<ILayout> _contentViewModels;
 
     /// <summary>
     /// The <see cref="IPythonHandler" /> used to listen for Python events
@@ -95,10 +97,13 @@ Please report this to the museum staff.";
         {
 
             var media = _contentProvider.GetMedia(hotspotId);
-            var oldViewModel = ContentViewModel;
 
-            ContentViewModel = _layoutProvider.GetLayout(_vmProvider, media);
-            oldViewModel.Dispose();
+            var contentViewModel = _layoutProvider.GetLayout(_vmProvider, media);
+            var oldContentViewModel = ContentViewModel;
+            oldContentViewModel.Dispose();
+
+            ContentViewModel = contentViewModel;
+
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {
