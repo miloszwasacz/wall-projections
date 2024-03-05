@@ -15,13 +15,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="Assets\"/>
-        <None Update="Assets\*">
+        <Content Include="Assets\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\**\*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>

@@ -22,9 +22,12 @@
         </Content>
     </ItemGroup>
 
-    <Target Name="GenerateArUcos" BeforeTargets="CoreCompile">
+    <Target Name="GenerateArUcos" BeforeTargets="PrepareForBuild">
         <Exec Command="python Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
         <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <ItemGroup>
+            <AvaloniaResource Include="Assets\**"/>
+        </ItemGroup>
     </Target>
 
     <ItemGroup>
