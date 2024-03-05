@@ -57,7 +57,7 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public float[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         //TODO Change to the actual entrypoint
         return RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));

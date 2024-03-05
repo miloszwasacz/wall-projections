@@ -10,7 +10,7 @@ namespace WallProjections.Test.ViewModels;
 [TestFixture]
 public class SecondaryWindowViewModelTest
 {
-    private static IConfig CreateConfig() => new Config(new float[0, 0], Enumerable.Empty<Hotspot>());
+    private static IConfig CreateConfig() => new Config(new double[0, 0], Enumerable.Empty<Hotspot>());
 
     [AvaloniaTest]
     public void ConstructorTest()

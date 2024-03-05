@@ -26,7 +26,6 @@ See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#gaeb8dd9
 https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
 
 
-
 class VideoCaptureThread(threading.Thread):
     def __init__(self):
         super().__init__()
@@ -42,7 +41,9 @@ class VideoCaptureThread(threading.Thread):
         for prop_id, prop_value in VIDEO_CAPTURE_PROPERTIES.items():
             supported = video_capture.set(prop_id, prop_value)
             if not supported:
-                logging.warning(f"Property id {prop_id} is not supported by video capture backend {VIDEO_CAPTURE_BACKEND}.")
+                logging.warning(
+                    f"Property id {prop_id} is not supported by video capture backend {VIDEO_CAPTURE_BACKEND}."
+                )
 
         while video_capture.isOpened():
             success, video_capture_img = video_capture.read()
@@ -52,7 +53,11 @@ class VideoCaptureThread(threading.Thread):
 
             video_capture_img = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
             new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
-            video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)  # normalise size
+            video_capture_img = cv2.resize(
+                video_capture_img,
+                new_dim,
+                interpolation=cv2.INTER_NEAREST
+            )  # normalise size
             self.current_frame = video_capture_img
 
             if self.stopping:
@@ -75,13 +80,13 @@ class VideoCaptureThread(threading.Thread):
         Returns a photo from a detectable camera
         """
 
-        videoCaptureThread = VideoCaptureThread()
-        videoCaptureThread.start()
+        video_capture_thread = VideoCaptureThread()
+        video_capture_thread.start()
         image = None
         while image is None:
-            image = videoCaptureThread.current_frame
+            image = video_capture_thread.current_frame
             cv2.waitKey(500)
-        videoCaptureThread.stop()
-        videoCaptureThread.join()
+        video_capture_thread.stop()
+        video_capture_thread.join()
 
         return image

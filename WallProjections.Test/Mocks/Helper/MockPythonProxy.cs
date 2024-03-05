@@ -12,7 +12,7 @@ public class MockPythonProxy : IPythonProxy
     /// <summary>
     /// The returned result of the <see cref="CalibrateCamera" /> method when the input is not empty
     /// </summary>
-    public static readonly float[,] CalibrationResult =
+    public static readonly double[,] CalibrationResult =
     {
         { 0.0f, 0.1f, 0.2f },
         { 1.0f, 1.1f, 1.2f },
@@ -59,7 +59,7 @@ public class MockPythonProxy : IPythonProxy
         Task.Delay(Delay).Wait();
     }
 
-    public float[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         Task.Delay(Delay).Wait();
         if (Exception != null)

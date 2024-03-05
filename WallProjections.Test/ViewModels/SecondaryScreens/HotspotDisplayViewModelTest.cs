@@ -30,7 +30,7 @@ public class HotspotDisplayViewModelTest
             new Coord(50, 50, 14),
             new Coord(100, 200, 20)
         };
-        return new Config(new float[3, 3], hotspots.Select((coord, i) => new Hotspot(
+        return new Config(new double[3, 3], hotspots.Select((coord, i) => new Hotspot(
             i,
             coord,
             "",

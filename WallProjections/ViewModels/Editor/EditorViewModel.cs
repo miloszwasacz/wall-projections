@@ -40,7 +40,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
     //TODO Add calibration API
     /// <inheritdoc cref="IConfig.HomographyMatrix" />
-    private float[,] _homographyMatrix;
+    private double[,] _homographyMatrix;
 
     /// <summary>
     /// The backing field for <see cref="Hotspots" />.
@@ -296,7 +296,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
         _pythonHandler = pythonHandler;
-        _homographyMatrix = new float[,]
+        _homographyMatrix = new double[,]
         {
             { 1, 0, 0 },
             { 0, 1, 0 },

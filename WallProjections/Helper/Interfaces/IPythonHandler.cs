@@ -21,7 +21,7 @@ public interface IPythonHandler : IDisposable
     /// Starts an asynchronous Python task that calibrates the camera
     /// </summary>
     /// <param name="arucoPositions">The positions of the ArUco markers (ID, top-left corner)</param>
-    public Task<float[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions);
+    public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions);
 
     /// <summary>
     /// Stops the currently running Python task, if any

@@ -8,7 +8,7 @@ public interface IConfig
     /// <summary>
     /// A 3x3 matrix used for camera calibration.
     /// </summary>
-    public float[,] HomographyMatrix { get; }
+    public double[,] HomographyMatrix { get; }
 
     /// <summary>
     /// List of all hotspots (their locations and content).

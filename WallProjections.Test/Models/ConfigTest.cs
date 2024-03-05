@@ -11,7 +11,7 @@ namespace WallProjections.Test.Models;
 [Author(name: "Thomas Parr")]
 public class ConfigTest
 {
-    private static readonly float[,] TestMatrix = MockPythonProxy.CalibrationResult;
+    private static readonly double[,] TestMatrix = MockPythonProxy.CalibrationResult;
 
     /// <summary>
     /// Test to ensure the correct count is returned from <see cref="Config.Hotspots"/>.Count

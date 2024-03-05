@@ -18,5 +18,5 @@ public interface IPythonProxy : IDisposable
     public void StopCurrentAction();
 
     /// <inheritdoc cref="PythonModule.CalibrationModule.CalibrateCamera" />
-    public float[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions);
+    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions);
 }

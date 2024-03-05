@@ -282,7 +282,7 @@ public class DisplayViewModelTest
     {
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
-        var config = new Config(new float[3, 3], Enumerable.Empty<Hotspot>());
+        var config = new Config(new double[3, 3], Enumerable.Empty<Hotspot>());
         var contentProvider = new ContentProvider(config);
 
         var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);

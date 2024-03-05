@@ -1,9 +1,9 @@
 ﻿#if !DEBUGSKIPPYTHON
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json;
 using Avalonia;
 using Python.Runtime;
 using WallProjections.Helper.Interfaces;
@@ -84,15 +84,16 @@ public abstract class PythonModule
         /// Calibrates the camera and returns the homography matrix
         /// </summary>
         /// <param name="arucoPositions">The positions of the ArUco markers (ID, top-left corner)</param>
-        public float[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+        public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
         {
-            Dictionary<int, (double, double)> positions = arucoPositions.ToDictionary(
+            var positions = arucoPositions.ToDictionary(
                 pair => pair.Key,
-                pair => (pair.Value.X, pair.Value.Y)
+                pair => new[] { pair.Value.X, pair.Value.Y }
             );
 
-            PyObject? homography = _rawModule.calibrate(positions.ToPython());
-            return homography?.As<float[,]>();
+            var serialized = JsonSerializer.Serialize(positions);
+            PyObject? homography = _rawModule.calibrate(serialized);
+            return homography?.As<double[,]>();
         }
     }
 }

@@ -18,7 +18,7 @@ public class FileHandlerTest
     private const string TestTxtFile = "text_0.txt";
     private const string TestTxtFileContents = "Hello World\n";
     private static string HotspotTitle(int id) => $"Hotspot {id}";
-    private static readonly float[,] TestMatrix = MockPythonProxy.CalibrationResult;
+    private static readonly double[,] TestMatrix = MockPythonProxy.CalibrationResult;
 
     /// <summary>
     /// Location of the zip file for testing

@@ -69,7 +69,7 @@ public sealed class PythonHandler : IPythonHandler
     public Task RunHotspotDetection() => RunNewPythonAction(python => python.StartHotspotDetection(this));
 
     /// <inheritdoc />
-    public Task<float[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions) =>
+    public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions) =>
         RunNewPythonAction(python => python.CalibrateCamera(arucoPositions));
 
     /// <inheritdoc />

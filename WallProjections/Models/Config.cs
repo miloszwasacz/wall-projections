@@ -16,11 +16,11 @@ public class Config : IConfig
     /// A JSON serializable version of <see cref="HomographyMatrix" />.
     /// </summary>
     [JsonInclude, JsonPropertyName("HomographyMatrix")]
-    public float[][] HomographyMatrixJson { get; }
+    public double[][] HomographyMatrixJson { get; }
 
     /// <inheritdoc />
     [JsonIgnore]
-    public float[,] HomographyMatrix { get; }
+    public double[,] HomographyMatrix { get; }
 
     /// <inheritdoc />
     [JsonInclude]
@@ -31,7 +31,7 @@ public class Config : IConfig
     /// </summary>
     /// <param name="homographyMatrix">Matrix for camera calibration.</param>
     /// <param name="hotspots">Collection of hotspots to create config with.</param>
-    public Config(float[,] homographyMatrix, IEnumerable<Hotspot> hotspots)
+    public Config(double[,] homographyMatrix, IEnumerable<Hotspot> hotspots)
     {
         HomographyMatrixJson = ConvertToArray(homographyMatrix);
         HomographyMatrix = homographyMatrix;
@@ -45,7 +45,7 @@ public class Config : IConfig
     /// <param name="hotspots">List of hotspots.</param>
     /// <exception cref="ArgumentNullException">If any parameters are not defined.</exception>
     [JsonConstructor]
-    public Config(float[][] homographyMatrixJson, ImmutableList<Hotspot> hotspots)
+    public Config(double[][] homographyMatrixJson, ImmutableList<Hotspot> hotspots)
     {
         HomographyMatrixJson = homographyMatrixJson ?? throw new ArgumentNullException(
             nameof(homographyMatrixJson),
@@ -68,9 +68,9 @@ public class Config : IConfig
     /// <summary>
     /// Converts an array of arrays to a 2D array.
     /// </summary>
-    private static float[,] ConvertToMatrix(float[][] array)
+    private static double[,] ConvertToMatrix(double[][] array)
     {
-        var result = new float[array.Length, array[0].Length];
+        var result = new double[array.Length, array[0].Length];
         for (var i = 0; i < array.Length; i++)
         {
             for (var j = 0; j < array[i].Length; j++)
@@ -83,14 +83,14 @@ public class Config : IConfig
     /// <summary>
     /// Converts a 2D array to an array of arrays.
     /// </summary>
-    private static float[][] ConvertToArray(float[,] matrix)
+    private static double[][] ConvertToArray(double[,] matrix)
     {
         var height = matrix.GetLength(0);
         var width = matrix.GetLength(1);
-        var result = new float[height][];
+        var result = new double[height][];
         for (var i = 0; i < height; i++)
         {
-            result[i] = new float[width];
+            result[i] = new double[width];
             for (var j = 0; j < width; j++)
                 result[i][j] = matrix[i, j];
         }

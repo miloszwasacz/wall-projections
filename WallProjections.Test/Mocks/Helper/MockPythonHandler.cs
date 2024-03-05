@@ -27,7 +27,7 @@ public class MockPythonHandler : IPythonHandler
         return Task.CompletedTask;
     }
 
-    public Task<float[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
+    public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
     {
         CurrentScript = PythonScript.Calibration;
         return Task.FromResult(arucoPositions.Count > 0 ? MockPythonProxy.CalibrationResult : null);
