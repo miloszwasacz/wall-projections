@@ -211,6 +211,8 @@ hotspots: list[Hotspot] = []
 
 video_capture_thread: VideoCaptureThread = VideoCaptureThread()
 
+hotspot_detection_stopping = False
+
 
 def run(event_listener: EventListener) -> None:  # This function is called by Program.cs
     """
@@ -219,7 +221,7 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
     :param event_listener: Callbacks for communicating events back to the C# side.
     """
 
-    global hotspots
+    global hotspots, video_capture_thread, hotspot_detection_stopping
 
     # initialise ML hand-tracking model
     logging.info("Initialising hand-tracking model...")
@@ -233,9 +235,14 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 
     # some basic opencv + mediapipe stuff from https://www.youtube.com/watch?v=v-ebX04SNYM
 
+    if video_capture_thread is None:
+        video_capture_thread = VideoCaptureThread()
+    if video_capture_thread.is_alive():
+        video_capture_thread.stop()
+        video_capture_thread.join()
     video_capture_thread.start()
 
-    while True:
+    while not hotspot_detection_stopping:
         # cycle until video capture is open
         if video_capture_thread.current_frame is None:
             cv2.waitKey(500)
@@ -279,10 +286,12 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
         if key == "c":
             media_finished()
         elif key == "q":
-            break
+            hotspot_detection_stopping = True
 
     # clean up
     logging.info("Cleaning up...")
+    if video_capture_thread is None or not video_capture_thread.is_alive():
+        return
     video_capture_thread.stop()
     video_capture_thread.join()
     cv2.destroyAllWindows()
@@ -290,8 +299,8 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 
 
 def stop_hotspot_detection() -> None:
-    video_capture_thread.stop()
-    video_capture_thread.join()
+    global hotspot_detection_stopping
+    hotspot_detection_stopping = True
 
 
 def media_finished() -> None:
