@@ -176,9 +176,12 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         }
 
         var media = new Media(_libVlc, nextVideo);
-        var success = MediaPlayer.Play(media);
+        var success = ThreadPool.QueueUserWorkItem(_ =>
+        {
+            MediaPlayer.Play(media);
+            media.Dispose();
+        });
         _hasVideos = true;
-        media.Dispose();
         return success;
     }
 
@@ -201,8 +204,9 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             return;
 
         IsVisible = false;
-        MediaPlayer.DisposeHandle();
+
         StopVideo();
+        MediaPlayer?.DisposeHandle();
         MediaPlayer.EndReached -= PlayNextVideoEvent;
 
         _isDisposed = true;

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Threading.Tasks;
+using System.Threading;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -84,7 +84,7 @@ Please report this to the museum staff.";
     /// <inheritdoc />
     public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
     {
-        ShowHotspot(e.Id);
+        ThreadPool.QueueUserWorkItem(_ => ShowHotspot(e.Id));
     }
 
     /// <summary>
