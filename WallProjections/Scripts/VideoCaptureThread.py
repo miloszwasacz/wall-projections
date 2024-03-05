@@ -26,12 +26,12 @@ See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#gaeb8dd9
 https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
 
 
-
 class VideoCaptureThread(threading.Thread):
     def __init__(self):
         super().__init__()
-        self.current_frame = None
-        self.stopping = False
+        self._current_frame = None
+        """The current frame in BGR."""
+        self._stopping = False
 
     def run(self):
         logging.info("Initialising video capture...")
@@ -50,16 +50,21 @@ class VideoCaptureThread(threading.Thread):
                 logging.warning("Unsuccessful video read; ignoring frame.")
                 continue
 
-            video_capture_img = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
+            # normalise and downscale resolution
             new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
-            video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)  # normalise size
-            self.current_frame = video_capture_img
+            video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)
 
-            if self.stopping:
+            self._current_frame = video_capture_img
+
+            if self._stopping:
                 logging.info("Stopping video capture.")
                 break
 
         video_capture.release()
+
+    def get_current_frame(self):
+        """Get the current frame in BGR."""
+        return self._current_frame
 
     def stop(self):
         """
@@ -67,7 +72,7 @@ class VideoCaptureThread(threading.Thread):
 
         Call `Thread.join` after this to block until the thread has stopped.
         """
-        self.stopping = True
+        self._stopping = True
 
 
 def takePhoto() -> np.ndarray:
@@ -79,7 +84,8 @@ def takePhoto() -> np.ndarray:
     videoCaptureThread.start()
     image = None
     while image is None:
-        image = videoCaptureThread.current_frame
+        image_bgr = videoCaptureThread.get_current_frame()
+        image = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
         cv2.waitKey(500)
     videoCaptureThread.stop()
     videoCaptureThread.join()

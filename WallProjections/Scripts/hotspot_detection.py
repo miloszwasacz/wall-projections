@@ -244,14 +244,15 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 
     while not hotspot_detection_stopping:
         # cycle until video capture is open
-        if video_capture_thread.current_frame is None:
+        if video_capture_thread.get_current_frame() is None:
             cv2.waitKey(500)
             continue
 
-        video_capture_img = video_capture_thread.current_frame
+        video_capture_img_bgr = video_capture_thread.get_current_frame()
+        video_capture_img_rgb = cv2.cvtColor(video_capture_img_bgr, cv2.COLOR_BGR2RGB)
 
         # run model
-        model_output = hands_model.process(video_capture_img)
+        model_output = hands_model.process(video_capture_img_rgb)
 
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
@@ -272,14 +273,14 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 
             # draw hand landmarks
             for landmarks in model_output.multi_hand_landmarks:
-                mp.solutions.drawing_utils.draw_landmarks(video_capture_img, landmarks,
+                mp.solutions.drawing_utils.draw_landmarks(video_capture_img_bgr, landmarks,
                                                           connections=mp.solutions.hands.HAND_CONNECTIONS)
 
         # draw hotspot
         for hotspot in hotspots:
-            hotspot.draw(video_capture_img)
+            hotspot.draw(video_capture_img_bgr)
 
-        cv2.imshow("Projected Hotspots", video_capture_img)
+        cv2.imshow("Projected Hotspots", video_capture_img_bgr)
 
         # development key inputs
         key = chr(cv2.waitKey(1) & 0xFF).lower()
