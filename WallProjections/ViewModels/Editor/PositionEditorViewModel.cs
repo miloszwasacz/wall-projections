@@ -73,7 +73,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
             _selectedHotspot = value;
             X = _selectedHotspot?.Position.X ?? 0;
             Y = _selectedHotspot?.Position.Y ?? 0;
-            R = _selectedHotspot?.Position.R ?? 0;
+            R = _selectedHotspot?.Position.R ?? 30;
         }
     }
 
