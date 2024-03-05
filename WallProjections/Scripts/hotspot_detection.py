@@ -4,6 +4,7 @@ import time
 from .Helper import numpy_dotnet_converters as npnet
 from .Helper.EventHandler import EventHandler
 from .Helper.Hotspot import Hotspot
+from .Helper.VideoCaptureThread import VideoCaptureThread
 from .calibration import Calibrator
 import cv2
 import mediapipe as mp
@@ -35,17 +36,13 @@ FINGERTIP_INDICES: tuple[int, ...] = (4, 8, 12, 16, 20)
 
 This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
 
-def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array, hotspot_coords_str: str) -> None:
-    """
-    Given hotspot projector coords, a transformation matrix and an event_handler
-    calls events when hotspots are pressed or unpressed
-    """
-    global detection_running
-    detection_running = True
+def generate_hotspots(event_handler: EventHandler, calibration_matrix_net_array, hotspot_coords_str: str) -> list[Hotspot]:
 
-    #setup hotspots
+    photo = VideoCaptureThread.take_photo()
+    w,h,d = photo.shape()
+
     calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
-    calibrator = Calibrator(calibration_matrix)
+    calibrator = Calibrator(calibration_matrix, (w,h))
     hotspots_coords = npnet.json_to_dict(hotspot_coords_str)
 
     hotspots :list[Hotspot] = []
@@ -54,6 +51,17 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
         radius = hotspot_coord_rad[2]
         hotspot = Hotspot(hotspot_id, coords, calibrator, event_handler, radius=radius)
         hotspots.append(hotspot)
+    return hotspots
+
+def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array, hotspot_coords_str: str) -> None:
+    """
+    Given hotspot projector coords, a transformation matrix and an event_handler
+    calls events when hotspots are pressed or unpressed
+    """
+    global detection_running
+    detection_running = True
+
+    hotspots = generate_hotspots(event_handler, calibration_matrix_net_array, hotspot_coords_str)
 
     # initialise ML hand-tracking model
     logging.info("Initialising hand-tracking model...")
