@@ -90,7 +90,7 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     logging.info("Initialisation done.")
 
     # TODO: use capture class to take photos on another thread
-    while video_capture.isOpened():
+    while video_capture.isOpened() and detection_running:
         success, video_capture_img = video_capture.read()
         if not success:
             logging.warning("Unsuccessful video read; ignoring frame.")
@@ -109,7 +109,7 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
 
             for hotspot in hotspots:
                 hotspot.update(fingertip_coords)
-
+    video_capture.release()
 
 def stop_hotspot_detection():
     logging.info("stopping hotspot detection")

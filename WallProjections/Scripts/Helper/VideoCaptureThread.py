@@ -80,13 +80,7 @@ class VideoCaptureThread(threading.Thread):
         Returns a photo from a detectable camera
         """
 
-        video_capture_thread = VideoCaptureThread()
-        video_capture_thread.start()
-        image = None
-        while image is None:
-            image = video_capture_thread.current_frame
-            cv2.waitKey(500)
-        video_capture_thread.stop()
-        video_capture_thread.join()
+        cap = cv2.VideoCapture(0)
+        ret, image = cap.read()
 
         return image
