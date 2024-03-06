@@ -21,7 +21,7 @@ class Calibrator:
 
         photo = VideoCaptureThread.take_photo()
         camera_id_to_coord = Calibrator._detect_ArUcos(photo)
-        return Calibrator._get_transformation_matrix(projector_id_to_coord, camera_id_to_coord)
+        return Calibrator._get_transformation_matrix(camera_id_to_coord, projector_id_to_coord)
 
     @staticmethod
     def _detect_ArUcos(img: np.ndarray) -> dict[int, tuple[np.float32, np.float32]]:
@@ -45,8 +45,8 @@ class Calibrator:
 
     @staticmethod
     def _get_transformation_matrix(
-            from_coords: dict[int, tuple[float, float]],
-            to_coords: dict[int, tuple[np.float32, np.float32]]
+            from_coords: dict[int, tuple[np.float32, np.float32]],
+            to_coords: dict[int, tuple[float, float]]
     ) -> np.ndarray:  # returns a 3x3 array of 32bit floats
         """
         Returns a transformation matrix from the coords stored in one dictionary to another
@@ -76,6 +76,7 @@ class Calibrator:
         self._transformation_matrix = transformation_matrix
         self._inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
         self._camera_res = camera_res
+
 
     def proj_to_cam(self, proj_coords: tuple[int, int]) -> tuple[np.float32, np.float32]:
         """

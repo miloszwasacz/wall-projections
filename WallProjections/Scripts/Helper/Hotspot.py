@@ -21,9 +21,8 @@ class Hotspot:
             radius: float = 0.03
     ):
         self.id: int = hotspot_id
-        self._norm_pos: Tuple[float, float] = calibrator.proj_to_norm(proj_pos)
-        logging.info("hotspot with id: "+str(self.id)+" at norm pos"+str(self._norm_pos))
-        self._radius: float = calibrator.scaler_to_norm(radius)
+        self._proj_pos: Tuple[float, float] = proj_pos
+        self._radius: float = radius
         self._event_handler: EventHandler = event_listener
         self._prev_fingertip_inside = False
 
@@ -54,5 +53,5 @@ class Hotspot:
         """
         Returns true if given point is inside hotspot
         """
-        squared_dist = (self._norm_pos[0] - point.x) ** 2 + (self._norm_pos[1] - point.y) ** 2
+        squared_dist = (self._proj_pos[0] - point.x) ** 2 + (self._proj_pos[1] - point.y) ** 2
         return squared_dist <= self._radius ** 2

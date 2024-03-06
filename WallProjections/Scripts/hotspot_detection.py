@@ -69,6 +69,7 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     global detection_running
     detection_running = True
 
+    calibrator = Calibrator(calibration_matrix, (w, h))
     hotspots = generate_hotspots(event_handler, calibration_matrix_net_array, hotspot_coords_str)
 
     # initialise ML hand-tracking model
@@ -104,11 +105,11 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
 
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
-            fingertip_coords = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
+            fingertip_coords_norm = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
                                 model_output.multi_hand_landmarks]
-
+            fingertip_coords_proj = [calibrator.norm_to_proj(fingertip) for fingertip in fingertip_coords_norm]
             for hotspot in hotspots:
-                hotspot.update(fingertip_coords)
+                hotspot.update(fingertip_coords_proj)
     video_capture.release()
 
 def stop_hotspot_detection():

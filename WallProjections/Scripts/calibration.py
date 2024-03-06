@@ -1,6 +1,6 @@
-﻿import logging
-from Helper.Calibrator import Calibrator
-from Interop.json_dict_converters import json_to_2dict
+import logging
+from .Helper.Calibrator import Calibrator
+from .Interop.json_dict_converters import json_to_2dict
 
 # noinspection PyPackages
 from .Interop import numpy_dotnet_converters as npnet
