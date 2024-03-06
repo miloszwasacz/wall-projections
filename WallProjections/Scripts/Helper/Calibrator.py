@@ -107,3 +107,8 @@ class Calibrator:
         """
         cam_coords = (norm_coords[0] * self._camera_res[0], norm_coords[1] * self._camera_res[1])
         return self.cam_to_proj(cam_coords)
+
+    def scaler_to_norm(self, scaler : float) -> float:
+        det = np.linalg.det(self._transformation_matrix)
+        return scaler*det
+

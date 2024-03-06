@@ -23,7 +23,7 @@ class Hotspot:
         self.id: int = hotspot_id
         self._norm_pos: Tuple[float, float] = calibrator.proj_to_norm(proj_pos)
         logging.info("hotspot with id: "+str(self.id)+" at norm pos"+str(self._norm_pos))
-        self._radius: float = radius
+        self._radius: float = calibrator.scaler_to_norm(radius)
         self._event_handler: EventHandler = event_listener
         self._prev_fingertip_inside = False
 
