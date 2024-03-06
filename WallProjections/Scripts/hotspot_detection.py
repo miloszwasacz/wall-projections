@@ -46,7 +46,7 @@ def generate_hotspots(
         hotspot_coords_str: str
 ) -> list[Hotspot]:
     photo = VideoCaptureThread.take_photo() #TODO: there has got to be a better way of getting camera width and height
-    w, h, d = photo.shape
+    h, w, d = photo.shape
 
     calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
     calibrator = Calibrator(calibration_matrix, (w, h))
@@ -68,6 +68,11 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     """
     global detection_running
     detection_running = True
+
+    photo = VideoCaptureThread.take_photo() #TODO: there has got to be a better way of getting camera width and height
+    h, w, d = photo.shape
+    logging.info(f"Camera width: {w}, height: {h}")
+    calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
 
     calibrator = Calibrator(calibration_matrix, (w, h))
     hotspots = generate_hotspots(event_handler, calibration_matrix_net_array, hotspot_coords_str)
@@ -107,7 +112,8 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
             # update hotspots
             fingertip_coords_norm = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
                                 model_output.multi_hand_landmarks]
-            fingertip_coords_proj = [calibrator.norm_to_proj(fingertip) for fingertip in fingertip_coords_norm]
+            fingertip_coords_proj = [calibrator.norm_to_proj((fingertip.x, fingertip.y)) for fingertip in fingertip_coords_norm]
+            logging.info(f"Fingertip coords: {fingertip_coords_proj}")
             for hotspot in hotspots:
                 hotspot.update(fingertip_coords_proj)
     video_capture.release()

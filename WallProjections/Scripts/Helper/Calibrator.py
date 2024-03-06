@@ -74,7 +74,8 @@ class Calibrator:
 
     def __init__(self, transformation_matrix: np.ndarray, camera_res: tuple[int, int]):
         self._transformation_matrix = transformation_matrix
-        self._inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
+        # self._inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
+        self._inverse_transformation_matrix = transformation_matrix
         self._camera_res = camera_res
 
 

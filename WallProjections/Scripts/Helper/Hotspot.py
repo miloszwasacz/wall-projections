@@ -53,5 +53,5 @@ class Hotspot:
         """
         Returns true if given point is inside hotspot
         """
-        squared_dist = (self._proj_pos[0] - point.x) ** 2 + (self._proj_pos[1] - point.y) ** 2
+        squared_dist = (self._proj_pos[0] - point[0]) ** 2 + (self._proj_pos[1] - point[1]) ** 2
         return squared_dist <= self._radius ** 2
