@@ -3,13 +3,14 @@ import cv2
 import mediapipe as mp
 
 # noinspection PyPackages
-from .Helper import numpy_dotnet_converters as npnet
+from .Interop import numpy_dotnet_converters as npnet
 # noinspection PyPackages
 from .Helper.EventHandler import EventHandler
 # noinspection PyPackages
 from .Helper.Hotspot import Hotspot
 # noinspection PyPackages
 from .Helper.VideoCaptureThread import VideoCaptureThread
+from .Interop.json_dict_converters import json_to_3dict
 # noinspection PyPackages
 from .calibration import Calibrator
 
@@ -44,12 +45,12 @@ def generate_hotspots(
         calibration_matrix_net_array,
         hotspot_coords_str: str
 ) -> list[Hotspot]:
-    photo = VideoCaptureThread.take_photo()
+    photo = VideoCaptureThread.take_photo() #TODO: there has got to be a better way of getting camera width and height
     w, h, d = photo.shape
 
     calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
     calibrator = Calibrator(calibration_matrix, (w, h))
-    hotspots_coords = npnet.json_to_dict(hotspot_coords_str)
+    hotspots_coords = json_to_3dict(hotspot_coords_str)
 
     hotspots: list[Hotspot] = []
     for hotspot_id, hotspot_coord_rad in hotspots_coords.items():
