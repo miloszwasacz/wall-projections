@@ -9,6 +9,7 @@ from threading import Lock
 
 from VideoCaptureThread import VideoCaptureThread
 
+
 # To import other project scripts use (e.g. for module `calibration`):
 # from . import calibration
 
@@ -222,6 +223,8 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
     """
 
     global hotspots, video_capture_thread, hotspot_detection_stopping
+
+    hotspot_detection_stopping = False
 
     # initialise ML hand-tracking model
     logging.info("Initialising hand-tracking model...")
