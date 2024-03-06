@@ -8,6 +8,11 @@ namespace WallProjections.Test.ViewModels.Editor;
 [TestFixture]
 public class PositionEditorViewModelTest
 {
+    /// <summary>
+    /// Creates a <see cref="IPositionEditorViewModel"/> and selects a hotspot
+    /// so <see cref="IPositionEditorViewModel.SelectedHotspot"/> is not null
+    /// </summary>
+    /// <returns><see cref="IPositionEditorViewModel"/></returns>
     private static IPositionEditorViewModel SetupPositionEditorViewModel()
     {
         IPositionEditorViewModel positionEditor = new PositionEditorViewModel();
