@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia;
 using WallProjections.Models;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
@@ -57,6 +58,10 @@ public interface IPositionEditorViewModel
     /// </remarks>
     public double D { get; }
     
+    /// <summary>
+    /// The combination of the X and Y coordinates into a single point 
+    /// </summary>
+    public Point Coord { get; }
 
     /// <summary>
     /// Selects the given <paramref name="hotspot" /> and updates the <see cref="UnselectedHotspots" />.

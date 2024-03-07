@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Avalonia;
 using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -88,16 +89,27 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     public double X
     {
         get => _x;
-        private set => this.RaiseAndSetIfChanged(ref _x, value);
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _x, value);
+            this.RaisePropertyChanged(nameof(Coord));
+        }
     }
 
     /// <inheritdoc />
     public double Y
     {
         get => _y;
-        private set => this.RaiseAndSetIfChanged(ref _y, value);
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _y, value);
+            this.RaisePropertyChanged(nameof(Coord));
+        }
     }
-    
+
+    /// <inheritdoc/>
+    public Point Coord => new Point(X, Y);
+
     /// <summary>
     /// The current radius of the hotspot (non-negative). Notifies <see cref="D" /> about changes.
     /// </summary>

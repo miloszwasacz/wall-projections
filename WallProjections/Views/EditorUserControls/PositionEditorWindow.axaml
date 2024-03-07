@@ -29,9 +29,13 @@
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Ellipse Height="{Binding D}"
-                             Width="{Binding D}"
-                             Fill="Gray" />
+                    <Path Fill="Gray" >
+                        <Path.Data>
+                            <EllipseGeometry 
+                                RadiusX="{Binding D}" 
+                                RadiusY="{Binding D}" />
+                        </Path.Data>
+                    </Path>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
 
@@ -46,13 +50,14 @@
         </ItemsControl>
         
         <Canvas Grid.Column="0" Grid.Row="0">
-
-            <Ellipse Height="{Binding D}"
-                     Width="{Binding D}"
-                     Fill="White"
-                     Canvas.Left="{Binding X}"
-                     Canvas.Top="{Binding Y}" />
-
+            <Path Fill="White" >
+                <Path.Data>
+                    <EllipseGeometry 
+                        Center="{Binding Coord}" 
+                        RadiusX="{Binding D}" 
+                        RadiusY="{Binding D}" />
+                </Path.Data>
+            </Path>
         </Canvas>
 
     </Grid>

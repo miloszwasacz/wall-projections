@@ -1,6 +1,7 @@
 ﻿using WallProjections.Models;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
+using Point = Avalonia.Point;
 
 namespace WallProjections.Test.Mocks.ViewModels.Editor;
 
@@ -31,6 +32,9 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
         get;
         private set;
     }
+
+    /// <inheritdoc/>
+    public Point Coord => new Point(X, Y);
 
     /// <inheritdoc/>
     public double D
