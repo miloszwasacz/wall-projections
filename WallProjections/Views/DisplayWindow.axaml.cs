@@ -1,11 +1,9 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
-using System.Diagnostics.CodeAnalysis;
-using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Display;
 #if DEBUGSKIPPYTHON
+using System.Diagnostics.CodeAnalysis;
 using Avalonia.Data;
 using WallProjections.Helper;
 #endif
@@ -14,7 +12,6 @@ namespace WallProjections.Views;
 
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
-    
     public DisplayWindow()
     {
         InitializeComponent();

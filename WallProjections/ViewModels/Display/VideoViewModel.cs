@@ -23,7 +23,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     private bool _isDisposed;
 
     /// <summary>
-    /// Mutex for <see cref="HasVideos"/>, <see cref="_hasVideos"/> and <see cref="_isLoaded"/>
+    /// Mutex for <see cref="HasVideos"/>, <see cref="_hasVideos"/>, <see cref="_isLoaded"/> and <see cref="_isDisposed" />
     /// </summary>
     private readonly Mutex _stateMutex;
 
@@ -37,6 +37,9 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// </summary>
     private bool _isLoaded;
 
+    /// <summary>
+    /// The backing field for <see cref="IsVisible" />
+    /// </summary>
     private bool _isVisible;
 
     /// <summary>
@@ -48,7 +51,12 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// The backing field for <see cref="MediaPlayer" />
     /// </summary>
     private IMediaPlayer? _mediaPlayer;
-    
+
+    /// <summary>
+    /// Creates a new <see cref="VideoViewModel" /> with the given <see cref="IMediaPlayer" />
+    /// </summary>
+    /// <param name="libVlc"></param>
+    /// <param name="mediaPlayer"></param>
     public VideoViewModel(LibVLC libVlc, IMediaPlayer mediaPlayer)
     {
         _libVlc = libVlc;
@@ -56,7 +64,6 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         _stateMutex = new Mutex();
         _playQueue = new ConcurrentQueue<string>();
         _mediaPlayer.EndReached += PlayNextVideoEvent;
-        _isVisible = false;
 
         this.RaisePropertyChanged(nameof(MediaPlayer));
     }
@@ -75,6 +82,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         {
             if (value is not null)
                 throw new InvalidOperationException("MediaPlayer cannot be set to a non-null value");
+
             HasVideos = false;
             this.RaiseAndSetIfChanged(ref _mediaPlayer, null);
         }
@@ -83,8 +91,8 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <inheritdoc />
     public bool IsVisible
     {
-        get => _isVisible;
-        set => this.RaiseAndSetIfChanged(ref _isVisible, value);
+        get => _isVisible && _hasVideos;
+        private set => this.RaiseAndSetIfChanged(ref _isVisible, value);
     }
 
     /// <inheritdoc />
@@ -102,6 +110,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             _stateMutex.WaitOne();
             this.RaiseAndSetIfChanged(ref _hasVideos, value);
             _stateMutex.ReleaseMutex();
+            IsVisible = value;
             this.RaisePropertyChanged(nameof(Volume));
         }
     }
@@ -117,37 +126,30 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         }
     }
 
-    public void Loaded()
+    /// <inheritdoc />
+    public void IsLoaded()
     {
         _stateMutex.WaitOne();
         if (HasVideos)
-        {
             PlayNextVideo();
-        }
+
         _isLoaded = true;
-        IsVisible = true;
         _stateMutex.ReleaseMutex();
     }
 
     /// <inheritdoc />
-    public bool PlayVideo(string path)
-    {
-        return PlayVideos(new List<string>{ path });
-    }
-
     public bool PlayVideos(IEnumerable<string> paths)
     {
         foreach (var path in paths)
-        {
             _playQueue.Enqueue(path);
-        }
 
         _stateMutex.WaitOne();
         if (_isLoaded && !HasVideos)
         {
             PlayNextVideo();
+            IsVisible = true;
         }
-        
+
         HasVideos = true;
         _stateMutex.ReleaseMutex();
 
@@ -157,31 +159,46 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <inheritdoc />
     public void StopVideo()
     {
-        if (_isDisposed) return;
+        _stateMutex.WaitOne();
+        if (_isDisposed)
+        {
+            _stateMutex.ReleaseMutex();
+            return;
+        }
 
-        MediaPlayer?.Stop();
-        _playQueue.Clear();
-        HasVideos = false;
+        ForceStopVideo();
+        _stateMutex.ReleaseMutex();
     }
-    
+
+    /// <summary>
+    /// <inheritdoc cref="StopVideo" />(but without if the viewmodel has been disposed).
+    /// <b>SHOULD ONLY BE USED IN <see cref="StopVideo" /> and <see cref="Dispose" />!</b>
+    /// </summary>
+    private void ForceStopVideo()
+    {
+        IsVisible = false;
+        MediaPlayer?.Stop();
+        _hasVideos = false;
+    }
+
     /// <inheritdoc />
     public bool PlayNextVideo()
     {
-
         // End of queue reached
+        _stateMutex.WaitOne();
         if (_isDisposed || MediaPlayer is null || !_playQueue.TryDequeue(out var nextVideo))
         {
-            HasVideos = false;
+            _hasVideos = false;
+            _stateMutex.ReleaseMutex();
             return false;
         }
 
+        _stateMutex.ReleaseMutex();
+
         var media = new Media(_libVlc, nextVideo);
-        var success = ThreadPool.QueueUserWorkItem(_ =>
-        {
-            MediaPlayer.Play(media);
-            media.Dispose();
-        });
-        _hasVideos = true;
+        var success = MediaPlayer.Play(media);
+        HasVideos = true;
+        media.Dispose();
         return success;
     }
 
@@ -194,25 +211,28 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     {
         var success = PlayNextVideo();
 
-        if (!success) Console.WriteLine("Could not play next video");
+        //TODO Log to file
+        if (!success)
+            Console.WriteLine("Could not play next video");
     }
 
     public void Dispose()
     {
-        Console.WriteLine("Disposing VideoViewModel");
+        _stateMutex.WaitOne();
         if (_isDisposed)
+        {
+            _stateMutex.ReleaseMutex();
             return;
+        }
 
-        IsVisible = false;
-
-        StopVideo();
-        MediaPlayer?.DisposeHandle();
-        MediaPlayer.EndReached -= PlayNextVideoEvent;
-
+        ForceStopVideo();
         _isDisposed = true;
-        var mediaPlayer = MediaPlayer;
-        MediaPlayer = null;
-        mediaPlayer?.Dispose();
-    }
+        _stateMutex.ReleaseMutex();
 
+        var player = MediaPlayer;
+        MediaPlayer = null;
+        if (player is null) return;
+        player.EndReached -= PlayNextVideoEvent;
+        player.Dispose();
+    }
 }

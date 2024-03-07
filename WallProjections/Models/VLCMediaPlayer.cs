@@ -21,21 +21,31 @@ public sealed class VLCMediaPlayer : MediaPlayer, IMediaPlayer
     {
     }
 
+    /// <inheritdoc />
     public void SetHandle(IPlatformHandle handle)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             Hwnd = handle.Handle;
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            NsObject = handle.Handle;
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             XWindow = (uint)handle.Handle;
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) NsObject = handle.Handle;
     }
 
+    /// <inheritdoc />
     public void DisposeHandle()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             Hwnd = IntPtr.Zero;
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            NsObject = IntPtr.Zero;
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             XWindow = 0;
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) NsObject = IntPtr.Zero;
+    }
+
+    public new void Dispose()
+    {
+        DisposeHandle();
+        base.Dispose();
     }
 }

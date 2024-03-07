@@ -7,24 +7,25 @@
              x:Class="WallProjections.Views.Display.Layouts.DescriptionView"
              x:DataType="layouts:DescriptionViewModel">
 
-    <DockPanel MaxWidth="1200">
-        <Border BorderThickness="0 0 0 4" 
-                BorderBrush="Black" 
-                Padding="0 0 0 12"
+    <Grid ColumnDefinitions="*, 10, *" RowDefinitions="Auto, *">
+
+        <Border Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
                 Margin="0 0 0 24"
-                DockPanel.Dock="Top" >
-            <TextBlock Name="Title"
-                       Text="{Binding Title}"
-                       FontSize="42"
-                       FontWeight="Bold"/>
+                Padding="0 0 0 12"
+                BorderThickness="0 0 0 4"
+                BorderBrush="Black">
+
+            <TextBlock FontSize="42"
+                       FontWeight="Bold"
+                       Text="{Binding Title}" />
         </Border>
-    
-        <TextBlock Name="Description"
+
+        <TextBlock Grid.Column="0" Grid.Row="1"
                    Text="{Binding Description}"
                    TextWrapping="Wrap"
-                   FontSize="24"
-                   TextAlignment="Start" />
-    </DockPanel>
-    
-</UserControl>
+                   TextAlignment="Start"
+                   FontSize="24" />
 
+    </Grid>
+
+</UserControl>

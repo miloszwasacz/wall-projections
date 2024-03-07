@@ -13,9 +13,11 @@
         KeyDown="OnKeyDown"
         Padding="42"
         FontFamily="">
+
     <TransitioningContentControl Content="{Binding ContentViewModel}">
         <TransitioningContentControl.PageTransition>
             <CrossFade Duration="0:00:00.250"/>
         </TransitioningContentControl.PageTransition>
     </TransitioningContentControl>
+
 </Window>

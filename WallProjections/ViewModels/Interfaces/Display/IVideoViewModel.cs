@@ -1,27 +1,26 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Reactive;
-using Avalonia.Platform;
-using ReactiveUI;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.ViewModels.Interfaces.Display;
 
+/// <summary>
+/// A viewmodel for displaying videos.
+/// </summary>
 public interface IVideoViewModel : IDisposable
 {
     /// <summary>
-    /// The <see cref="IMediaPlayer" /> used to play videos
+    /// The <see cref="IMediaPlayer" /> used to play videos.
     /// </summary>
     public IMediaPlayer? MediaPlayer { get; }
 
     /// <summary>
-    /// Whether or not the viewmodel has a video to display
+    /// Whether or not the viewmodel has a video to display.
     /// </summary>
     public bool HasVideos { get; }
     
     /// <summary>
-    /// Whether the player should be shown
+    /// Whether the player should be shown.
     /// </summary>
     public bool IsVisible { get; }
 
@@ -31,32 +30,32 @@ public interface IVideoViewModel : IDisposable
     public int Volume { get; set; }
 
     /// <summary>
-    /// Tells the view model the video player is loaded
+    /// Whether the video player has been loaded properly.
     /// </summary>
-    public void Loaded();
+    public void IsLoaded();
 
     /// <summary>
-    /// Plays the video at the given path
+    /// Plays the video at the given path.
     /// </summary>
     /// <param name="path">The path to the video.</param>
     /// <returns>Whether or not the video has successfully started playing.</returns>
-    public bool PlayVideo(string path);
+    public bool PlayVideo(string path) => PlayVideos(new[] { path });
 
     /// <summary>
-    /// Plays the videos in order at the given paths
+    /// Plays the videos in order at the given paths.
     /// </summary>
-    /// <param name="paths">The paths to the videos</param>
+    /// <param name="paths">The paths to the videos.</param>
     /// <returns>Whether or not the videos have successfully started playing.</returns>
     public bool PlayVideos(IEnumerable<string> paths);
 
     /// <summary>
-    /// Plays the next video in the queue
+    /// Plays the next video in the queue.
     /// </summary>
-    /// <returns><i>true</i> if video is played successfully, <i>false</i> otherwise.</returns>
+    /// <returns>Whether the video has started playing successfully.</returns>
     public bool PlayNextVideo();
 
     /// <summary>
-    /// Stops the currently playing video
+    /// Stops the currently playing video.
     /// </summary>
     public void StopVideo();
 }

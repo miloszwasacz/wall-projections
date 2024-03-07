@@ -5,7 +5,7 @@ using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Display;
-using WallProjections.ViewModels.Display.Layouts.LayoutFactories;
+using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
@@ -51,6 +51,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
 
     #region Display
 
+    //TODO Refactor this to use DI
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> instance
     /// </summary>
