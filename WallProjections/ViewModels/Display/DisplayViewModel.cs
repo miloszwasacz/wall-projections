@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
@@ -24,6 +25,11 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     internal const string NotFound = "Hmm...\n" +
                                      "Looks like this hotspot has missing content.\n" +
                                      "Please report this to the museum staff.";
+
+    /// <summary>
+    /// A mutex to ensure sequential access to the <see cref="ContentViewModel" />
+    /// </summary>
+    private readonly Mutex _mutex = new();
 
     /// <summary>
     /// The <see cref="INavigator" /> used for opening the Editor and closing the Display.
@@ -111,21 +117,27 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
         try
         {
             var media = _contentProvider.GetMedia(hotspotId);
+            _mutex.WaitOne();
             if (ContentViewModel is IDisposable disposable)
                 disposable.Dispose();
             ContentViewModel = _layoutProvider.GetLayout(_vmProvider, media);
+            _mutex.ReleaseMutex();
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
+            _mutex.WaitOne();
             ContentViewModel = _layoutProvider.GetErrorLayout(NotFound);
+            _mutex.ReleaseMutex();
         }
         catch (Exception e)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
+            _mutex.WaitOne();
             ContentViewModel = _layoutProvider.GetErrorLayout(GenericError);
+            _mutex.ReleaseMutex();
         }
     });
 
@@ -147,8 +159,10 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     public void Dispose()
     {
         _pythonHandler.HotspotSelected -= OnHotspotSelected;
+        _mutex.WaitOne();
         if (ContentViewModel is IDisposable disposable)
             disposable.Dispose();
         ContentViewModel = CreateWelcomeLayout(_layoutProvider);
+        _mutex.ReleaseMutex();
     }
 }
