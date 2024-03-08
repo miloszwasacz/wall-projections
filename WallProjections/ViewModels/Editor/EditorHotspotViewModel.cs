@@ -77,7 +77,7 @@ public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
     {
         _vmProvider = vmProvider;
         Id = id;
-        _position = new Coord(0, 0, 30);
+        _position = new Coord();
         _title = "";
         _description = "";
         Images = new ObservableCollection<IThumbnailViewModel>();

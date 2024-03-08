@@ -8,6 +8,9 @@ namespace WallProjections.Models;
 /// <param name="R">The radius of the hotspot</param>
 public record Coord(double X, double Y, double R)
 {
+    //Default Constructor
+    public Coord() : this(0, 0, 30) {}
+
     /// <summary>
     /// Converts the coordinates to use diameter instead of radius
     /// </summary>
