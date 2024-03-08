@@ -1,0 +1,63 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
+        xmlns:models="using:WallProjections.Models"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WallProjections.Views.EditorUserControls.PositionEditorWindow"
+        x:DataType="vm:IPositionEditorViewModel"
+        Title="PositionEditor"
+        Background="Black"
+        PointerMoved="OnPointerMoved"
+        PointerWheelChanged="OnScroll"
+        PointerPressed="OnPointerPressed">
+    
+    <Grid ColumnDefinitions="*" RowDefinitions="*">
+        <!-- Mapping coordinates onto the display  -->
+        <ItemsControl Name="HotspotList"
+                      Grid.Column="0" Grid.Row="0"
+                      ItemsSource="{Binding UnselectedHotspots}">
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas Background="Transparent" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Path Fill="Gray" >
+                        <Path.Data>
+                            <EllipseGeometry 
+                                RadiusX="{Binding D}" 
+                                RadiusY="{Binding D}" />
+                        </Path.Data>
+                    </Path>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+
+            <!-- Styles for ItemsControl (all circles rather than individual) -->
+            <ItemsControl.Styles>
+                <!-- Positioning of the hotspots -->
+                <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:ViewCoord">
+                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    <Setter Property="Canvas.Left" Value="{Binding X}" />
+                </Style>
+            </ItemsControl.Styles>
+        </ItemsControl>
+        
+        <Canvas Grid.Column="0" Grid.Row="0">
+            <Path Fill="White" >
+                <Path.Data>
+                    <EllipseGeometry 
+                        Center="{Binding Coord}" 
+                        RadiusX="{Binding D}" 
+                        RadiusY="{Binding D}" />
+                </Path.Data>
+            </Path>
+        </Canvas>
+
+    </Grid>
+
+</Window>

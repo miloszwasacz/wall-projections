@@ -10,6 +10,7 @@ public class MockEditorViewModel : IEditorViewModel
 {
     public ObservableHotspotCollection<IEditorHotspotViewModel> Hotspots { get; set; }
     public IEditorHotspotViewModel? SelectedHotspot { get; set; }
+    public IPositionEditorViewModel PositionEditor { get; }
     public IDescriptionEditorViewModel DescriptionEditor { get; }
     public IMediaEditorViewModel ImageEditor { get; }
     public IMediaEditorViewModel VideoEditor { get; }
@@ -29,6 +30,7 @@ public class MockEditorViewModel : IEditorViewModel
         //TODO Do something with the fileHandler
 
         Hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>();
+        PositionEditor = vmProvider.GetPositionEditorViewModel();
         DescriptionEditor = vmProvider.GetDescriptionEditorViewModel();
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);

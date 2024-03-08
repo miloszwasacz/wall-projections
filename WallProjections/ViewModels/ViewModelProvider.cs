@@ -114,6 +114,13 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         new EditorHotspotViewModel(hotspot, this);
 
     /// <summary>
+    /// Creates a new <see cref="PositionEditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="PositionEditorViewModel" /> instance</returns>
+    public IPositionEditorViewModel GetPositionEditorViewModel() => new PositionEditorViewModel();
+
+    /// <summary>
     /// Creates a new <see cref="DescriptionEditorViewModel" /> instance
     /// </summary>
     /// <inheritdoc />

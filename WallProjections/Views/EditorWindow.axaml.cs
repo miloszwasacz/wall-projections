@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using WallProjections.Models.Interfaces;
@@ -139,7 +140,7 @@ public partial class EditorWindow : Window
     /// <summary>
     /// Removes media from the <see cref="IEditorHotspotViewModel.Images" /> collection.
     /// </summary>
-    /// <param name="sender"></param>
+    /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments holding the media to remove.</param>
     private void ImagesEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e)
     {
@@ -267,6 +268,30 @@ public partial class EditorWindow : Window
         _isDialogShown = true;
         await dialog.ShowDialog(this);
         _isDialogShown = false;
+    }
+
+    //TODO Refactor this callback when the button is refactored
+    private void EditPosition_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        vm.PositionEditor.IsInEditMode = true;
+    }
+
+    /// <summary>
+    /// Handles key presses:
+    /// <ul>
+    ///     <li><b>Escape</b>: Exit <see cref="IPositionEditorViewModel.IsInEditMode">edit mode</see> for <see cref="IEditorViewModel.PositionEditor" /></li>
+    /// </ul>
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the key that was pressed.</param>
+    private void Editor_OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        if (e.Key == Key.Escape)
+            vm.PositionEditor.IsInEditMode = false;
     }
 
     // ReSharper disable once SuggestBaseTypeForParameter
