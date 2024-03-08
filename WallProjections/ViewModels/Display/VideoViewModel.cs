@@ -23,14 +23,9 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     private bool _isDisposed;
 
     /// <summary>
-    /// Mutex for <see cref="HasVideos"/>, <see cref="_hasVideos"/>, <see cref="_isLoaded"/> and <see cref="_isDisposed" />
+    /// Mutex for <see cref="_isLoaded"/> and <see cref="_isDisposed" />
     /// </summary>
     private readonly Mutex _stateMutex;
-
-    /// <summary>
-    /// Whether or not a videos are queued
-    /// </summary>
-    private bool _hasVideos;
 
     /// <summary>
     /// Whether the video player has loaded
@@ -83,7 +78,8 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             if (value is not null)
                 throw new InvalidOperationException("MediaPlayer cannot be set to a non-null value");
 
-            HasVideos = false;
+            _playQueue.Clear();
+            IsVisible = false;
             this.RaiseAndSetIfChanged(ref _mediaPlayer, null);
         }
     }
@@ -91,34 +87,21 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <inheritdoc />
     public bool IsVisible
     {
-        get => _isVisible && _hasVideos;
-        private set => this.RaiseAndSetIfChanged(ref _isVisible, value);
-    }
-
-    /// <inheritdoc />
-    public bool HasVideos
-    {
-        get
-        {
-            _stateMutex.WaitOne();
-            var temp = _hasVideos;
-            _stateMutex.ReleaseMutex();
-            return temp;
-        }
+        get => _isVisible;
         private set
         {
-            _stateMutex.WaitOne();
-            this.RaiseAndSetIfChanged(ref _hasVideos, value);
-            _stateMutex.ReleaseMutex();
-            IsVisible = value;
+            this.RaiseAndSetIfChanged(ref _isVisible, value);
             this.RaisePropertyChanged(nameof(Volume));
         }
     }
 
     /// <inheritdoc />
+    public bool HasVideos => !_playQueue.IsEmpty;
+
+    /// <inheritdoc />
     public int Volume
     {
-        get => HasVideos ? MediaPlayer?.Volume ?? 0 : 0;
+        get => IsVisible ? MediaPlayer?.Volume ?? 0 : 0;
         set
         {
             if (MediaPlayer is not null)
@@ -127,7 +110,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     }
 
     /// <inheritdoc />
-    public void IsLoaded()
+    public void MarkLoaded()
     {
         _stateMutex.WaitOne();
         if (HasVideos)
@@ -144,16 +127,14 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             _playQueue.Enqueue(path);
 
         _stateMutex.WaitOne();
-        if (_isLoaded && !HasVideos)
-        {
-            PlayNextVideo();
-            IsVisible = true;
-        }
+        var success = false;
+        if (_isLoaded && HasVideos)
+            success = PlayNextVideo();
 
-        HasVideos = true;
+        IsVisible = success;
         _stateMutex.ReleaseMutex();
 
-        return true;
+        return success;
     }
 
     /// <inheritdoc />
@@ -178,7 +159,6 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     {
         IsVisible = false;
         MediaPlayer?.Stop();
-        _hasVideos = false;
     }
 
     /// <inheritdoc />
@@ -188,7 +168,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         _stateMutex.WaitOne();
         if (_isDisposed || MediaPlayer is null || !_playQueue.TryDequeue(out var nextVideo))
         {
-            _hasVideos = false;
+            IsVisible = false;
             _stateMutex.ReleaseMutex();
             return false;
         }
@@ -197,7 +177,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 
         var media = new Media(_libVlc, nextVideo);
         var success = MediaPlayer.Play(media);
-        HasVideos = true;
+        IsVisible = success;
         media.Dispose();
         return success;
     }

@@ -1,5 +1,5 @@
 using WallProjections.Test.Mocks.ViewModels;
-using WallProjections.Views;
+using HotspotDisplayWindow = WallProjections.Views.Display.HotspotDisplayWindow;
 
 namespace WallProjections.Test.Views;
 

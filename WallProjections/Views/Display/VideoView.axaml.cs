@@ -25,7 +25,7 @@ public partial class VideoView : UserControl
         if (viewModel?.MediaPlayer is null || handle is null) return;
 
         viewModel.MediaPlayer.SetHandle(handle);
-        viewModel.IsLoaded();
+        viewModel.MarkLoaded();
     }
 
     /// <summary>

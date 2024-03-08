@@ -30,9 +30,9 @@ public interface IVideoViewModel : IDisposable
     public int Volume { get; set; }
 
     /// <summary>
-    /// Whether the video player has been loaded properly.
+    /// Marks the video player as properly loaded.
     /// </summary>
-    public void IsLoaded();
+    public void MarkLoaded();
 
     /// <summary>
     /// Plays the video at the given path.

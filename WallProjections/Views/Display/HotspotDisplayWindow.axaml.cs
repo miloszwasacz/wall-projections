@@ -2,7 +2,7 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 
-namespace WallProjections.Views;
+namespace WallProjections.Views.Display;
 
 public partial class HotspotDisplayWindow : Window
 {

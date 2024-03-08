@@ -29,8 +29,7 @@ public class ViewModelProviderTest
         Assert.Multiple(() =>
         {
             Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
-            Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
-            Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
+            Assert.That(displayViewModel.ContentViewModel, Is.Not.Null);
         });
     }
 

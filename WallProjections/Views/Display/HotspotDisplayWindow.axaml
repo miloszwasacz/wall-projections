@@ -5,7 +5,7 @@
         xmlns:vm="using:WallProjections.ViewModels"
         xmlns:dvm="using:WallProjections.ViewModels.Interfaces.Display"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="WallProjections.Views.HotspotDisplayWindow"
+        x:Class="WallProjections.Views.Display.HotspotDisplayWindow"
         x:DataType="dvm:IHotspotViewModel"
         Title="HotspotDisplayWindow"
         Background="Black"

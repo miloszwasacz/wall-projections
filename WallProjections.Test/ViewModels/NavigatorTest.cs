@@ -9,6 +9,7 @@ using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.Views;
+using WallProjections.Views.Display;
 
 namespace WallProjections.Test.ViewModels;
 
