@@ -20,6 +20,20 @@ public class PositionEditorViewModelTest
         positionEditor.SelectHotspot(new EditorHotspotViewModel(0, new MockViewModelProvider()), Enumerable.Empty<Coord>());
         return positionEditor;
     }
+
+    [AvaloniaTest]
+    public void ConstructorTest()
+    {
+        IPositionEditorViewModel positionEditor = new PositionEditorViewModel();
+        Assert.Multiple(() =>
+        {
+            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
+            Assert.That(positionEditor.UnselectedHotspots, Is.Empty);
+            Assert.That(positionEditor.X, Is.EqualTo(0));
+            Assert.That(positionEditor.Y, Is.EqualTo(0));
+            Assert.That(positionEditor.D, Is.EqualTo(0));
+        });
+    }
     
     [AvaloniaTest]
     public void SetPositionTest()
