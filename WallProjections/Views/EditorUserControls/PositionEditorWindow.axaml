@@ -12,9 +12,7 @@
         PointerMoved="OnPointerMoved"
         PointerWheelChanged="OnScroll"
         PointerPressed="OnPointerPressed">
-
-    <!-- Use {Binding X} {Binding Y} {Binding R} for the currently selected hotspot -->
-    <!-- Use {Binding UnselectedHotspots} for a list of all other hotspots -->
+    
     <Grid ColumnDefinitions="*" RowDefinitions="*">
         <!-- Mapping coordinates onto the display  -->
         <ItemsControl Name="HotspotList"

@@ -1,3 +1,4 @@
+using Avalonia;
 using WallProjections.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels.Editor;
@@ -28,6 +29,7 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
+            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
         });
         
         positionEditor.SetPosition(50, 40);
@@ -35,6 +37,7 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
+            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
         });
         
         positionEditor.IsInEditMode = true;
@@ -43,6 +46,7 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(50));
             Assert.That(positionEditor.Y, Is.EqualTo(40));
+            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(50,40)));
         });
     }
 
@@ -108,6 +112,8 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
+            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
+            Assert.That(positionEditor.D, Is.EqualTo(0));
         });
         positionEditor.IsInEditMode = true;
         positionEditor.SetPosition(30,30);
@@ -115,6 +121,8 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
+            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
+            Assert.That(positionEditor.D, Is.EqualTo(0));
         });
         
         //testing changing IsInEditMode when _selectedHotspot is not null
@@ -125,6 +133,8 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(30));
             Assert.That(positionEditor.Y, Is.EqualTo(30));
+            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(30,30)));
+            Assert.That(positionEditor.D, Is.EqualTo(60));
         });
     }
     
