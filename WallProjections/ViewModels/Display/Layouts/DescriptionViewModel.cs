@@ -1,4 +1,3 @@
-using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
@@ -10,16 +9,6 @@ namespace WallProjections.ViewModels.Display.Layouts;
 /// </summary>
 public class DescriptionViewModel : Layout
 {
-    /// <summary>
-    /// The backing field for the <see cref="Description" />.
-    /// </summary>
-    private string _description;
-
-    /// <summary>
-    /// The backing field for the <see cref="Title" />.
-    /// </summary>
-    private string _title;
-
     // ReSharper disable once MemberCanBePrivate.Global
     /// <summary>
     /// Creates a new <see cref="DescriptionViewModel" />
@@ -29,27 +18,19 @@ public class DescriptionViewModel : Layout
     /// <param name="description">The description of the hotspot.</param>
     public DescriptionViewModel(string title, string description)
     {
-        _description = description;
-        _title = title;
+        Title = title;
+        Description = description;
     }
 
     /// <summary>
     /// The title of the hotspot.
     /// </summary>
-    public string Title
-    {
-        get => _title;
-        set => this.RaiseAndSetIfChanged(ref _title, value);
-    }
+    public string Title { get; }
 
     /// <summary>
     /// The description of the hotspot.
     /// </summary>
-    public string Description
-    {
-        get => _description;
-        set => this.RaiseAndSetIfChanged(ref _description, value);
-    }
+    public string Description { get; }
 
     // ReSharper disable once UnusedType.Global
     /// <summary>

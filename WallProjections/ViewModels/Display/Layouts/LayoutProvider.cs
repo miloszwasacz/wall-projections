@@ -13,8 +13,8 @@ public class LayoutProvider : ILayoutProvider
     /// <summary>
     /// Description for when no layout could be found for a hotspot
     /// </summary>
-    private const string ErrorDescription = "Cannot show the information for this hotspot.\n" +
-                                            "Please ask a member of staff for help.";
+    internal const string ErrorDescription = "Cannot show the information for this hotspot.\n" +
+                                             "Please ask a member of staff for help.";
 
     /// <summary>
     /// All available <see cref="LayoutFactory">Layout Factories</see>

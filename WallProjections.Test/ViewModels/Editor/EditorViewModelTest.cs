@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using NUnit.Framework.Constraints;
@@ -17,7 +18,6 @@ using Has = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
 
 namespace WallProjections.Test.ViewModels.Editor
 {
-    //TODO Add tests for PositionEditor
     [TestFixture]
     public class EditorViewModelTest
     {
@@ -91,6 +91,7 @@ namespace WallProjections.Test.ViewModels.Editor
                     (editorViewModel.DescriptionEditor as MockDescriptionEditorViewModel)!.Hotspot,
                     Is.Null
                 );
+                AssertPositionEditor(editorViewModel, new ViewCoord(0, 0, 0), Enumerable.Empty<ViewCoord>());
                 Assert.That(editorViewModel.DescriptionEditor.Description, Is.Empty);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
@@ -105,13 +106,18 @@ namespace WallProjections.Test.ViewModels.Editor
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var (config, expectedViewModels) = CreateConfig();
+            var expectedSelectedCoord = config.Hotspots[0].Position.ToViewCoord();
+            var expectedUnselectedCoord = config.Hotspots.Skip(1).Select(h => h.Position.ToViewCoord());
             IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
 
+            var descriptionEditor = (MockDescriptionEditorViewModel)editorViewModel.DescriptionEditor;
             Assert.That(editorViewModel.Hotspots, Is.Not.Empty);
             Assert.Multiple(() =>
             {
                 Assert.That(editorViewModel.Hotspots, Has.EquivalentHotspots(expectedViewModels));
                 Assert.That(editorViewModel.SelectedHotspot, Is.SameAs(editorViewModel.Hotspots[0]));
+                AssertPositionEditor(editorViewModel, expectedSelectedCoord, expectedUnselectedCoord);
+                Assert.That(descriptionEditor.Hotspot, Is.SameAs(editorViewModel.Hotspots[0]));
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(editorViewModel.Hotspots[0].Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(editorViewModel.Hotspots[0].Videos));
                 Assert.That(editorViewModel, Is.Saved);
@@ -638,6 +644,33 @@ namespace WallProjections.Test.ViewModels.Editor
             editorViewModel.CloseEditor();
 
             Assert.That(navigator.IsEditorOpen, Is.False);
+        }
+
+        /// <summary>
+        /// Asserts that the <see cref="IEditorViewModel.PositionEditor" /> has the expected values.
+        /// </summary>
+        /// <param name="editorViewModel">The checked <see cref="IEditorViewModel" />.</param>
+        /// <param name="expectedSelectedCoord">The expected coordinates of the selected hotspot.</param>
+        /// <param name="expectedUnselectedCoord">The expected coordinates of unselected hotspots.</param>
+        private static void AssertPositionEditor(
+            IEditorViewModel editorViewModel,
+            ViewCoord expectedSelectedCoord,
+            IEnumerable<ViewCoord> expectedUnselectedCoord
+        )
+        {
+            var positionEditor = editorViewModel.PositionEditor;
+            Assert.Multiple(() =>
+            {
+                Assert.That(positionEditor, Is.Not.Null);
+                Assert.That(positionEditor.X, Is.EqualTo(expectedSelectedCoord.X));
+                Assert.That(positionEditor.Y, Is.EqualTo(expectedSelectedCoord.Y));
+                Assert.That(positionEditor.D, Is.EqualTo(expectedSelectedCoord.D));
+                Assert.That(
+                    positionEditor.Coord,
+                    Is.EqualTo(new Point(expectedSelectedCoord.X, expectedSelectedCoord.Y))
+                );
+                Assert.That(positionEditor.UnselectedHotspots, Is.EquivalentTo(expectedUnselectedCoord));
+            });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using NUnit.Framework.Constraints;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.ViewModels.Editor;
@@ -63,7 +64,7 @@ public class ThumbnailViewModelTest
     [TestCase(MockProcessProxy.OS.Windows, TestName = "Windows")]
     [TestCase(MockProcessProxy.OS.MacOS, TestName = "MacOS")]
     [TestCase(MockProcessProxy.OS.Linux, TestName = "Linux")]
-    [TestCase(null, TestName = "Unknown OS")]
+    [TestCase(null, TestName = "UnknownOS")]
     public void OpenInExplorerTest(MockProcessProxy.OS? os)
     {
         var path = Path.Combine(TestAssets, _testFile);
@@ -74,50 +75,46 @@ public class ThumbnailViewModelTest
 
         var thumbnailViewModel = _constructor(path, proxy);
 
-#pragma warning disable NUnit2045
         Assert.That(thumbnailViewModel.OpenInExplorer(), Is.EqualTo(expected));
-        Assert.That(
-            proxy.LastStart,
-            command is not null
-                ? Is.EqualTo((command, dir))
-                : Is.Null
-        );
-#pragma warning restore NUnit2045
+        IResolveConstraint lastStartConstraint = command is not null
+            ? Is.EqualTo((command, dir))
+            : Is.Null;
+        Assert.That(proxy.LastStart, lastStartConstraint);
     }
-}
 
-/// <summary>
-/// Fixture setup data for <see cref="ThumbnailViewModelTest" />.
-/// </summary>
-public class ThumbnailViewModelFixtureData
-{
-    private const string TestImage = "test_image.png";
-    private const string NonexistentImage = "nonexistent.png";
-
-    private const string TestVideo = "test_video.mp4";
-    private const string NonexistentVideo = "nonexistent.mp4";
-
-    public static IEnumerable FixtureParams
+    /// <summary>
+    /// Fixture setup data for <see cref="ThumbnailViewModelTest" />.
+    /// </summary>
+    private class ThumbnailViewModelFixtureData
     {
-        get
-        {
-            yield return new TestFixtureData(
-                new ThumbnailVmFactory((path, proxy) => new ImageThumbnailViewModel(path, proxy)),
-                TestImage,
-                NonexistentImage
-            )
-            {
-                TestName = "ImageThumbnailViewModel"
-            };
+        private const string TestImage = "test_image.png";
+        private const string NonexistentImage = "nonexistent.png";
 
-            yield return new TestFixtureData(
-                new ThumbnailVmFactory((path, proxy) => new VideoThumbnailViewModel(path, proxy)),
-                TestVideo,
-                NonexistentVideo
-            )
+        private const string TestVideo = "test_video.mp4";
+        private const string NonexistentVideo = "nonexistent.mp4";
+
+        public static IEnumerable FixtureParams
+        {
+            get
             {
-                TestName = "VideoThumbnailViewModel"
-            };
+                yield return new TestFixtureData(
+                    new ThumbnailVmFactory((path, proxy) => new ImageThumbnailViewModel(path, proxy)),
+                    TestImage,
+                    NonexistentImage
+                )
+                {
+                    TestName = "ImageThumbnailViewModel"
+                };
+
+                yield return new TestFixtureData(
+                    new ThumbnailVmFactory((path, proxy) => new VideoThumbnailViewModel(path, proxy)),
+                    TestVideo,
+                    NonexistentVideo
+                )
+                {
+                    TestName = "VideoThumbnailViewModel"
+                };
+            }
         }
     }
 }
