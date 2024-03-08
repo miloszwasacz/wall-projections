@@ -189,7 +189,7 @@ public class ViewModelProviderTest
         Assert.Multiple(() =>
         {
             Assert.That(editorHotspotViewModel.Id, Is.EqualTo(id));
-            Assert.That(editorHotspotViewModel.Position, Is.EqualTo(new Coord(0, 0, 0)));
+            Assert.That(editorHotspotViewModel.Position, Is.EqualTo(new Coord()));
             Assert.That(editorHotspotViewModel.Title, Is.Empty);
             Assert.That(editorHotspotViewModel.Description, Is.Empty);
             Assert.That(editorHotspotViewModel.Images, Is.Empty);

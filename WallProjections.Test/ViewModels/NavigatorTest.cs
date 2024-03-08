@@ -10,6 +10,7 @@ using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.Views;
 using WallProjections.Views.Display;
+using WallProjections.Views.EditorUserControls;
 
 namespace WallProjections.Test.ViewModels;
 
@@ -19,7 +20,7 @@ public class NavigatorTest
 {
     [AvaloniaTest]
     [NonParallelizable]
-    public void ConstructorTest()
+    public async Task ConstructorTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
@@ -28,7 +29,7 @@ public class NavigatorTest
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
-        Dispatcher.UIThread.RunJobs();
+        await FlushUIThread(100);
         var window = lifetime.MainWindow;
         Assert.Multiple(() =>
         {
@@ -43,7 +44,7 @@ public class NavigatorTest
 
     [AvaloniaTest]
     [NonParallelizable]
-    public void ConstructorNoConfigTest()
+    public async Task ConstructorNoConfigTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
@@ -52,7 +53,7 @@ public class NavigatorTest
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
-        Dispatcher.UIThread.RunJobs();
+        await FlushUIThread(100);
         var window = lifetime.MainWindow;
         Assert.Multiple(() =>
         {
@@ -60,8 +61,9 @@ public class NavigatorTest
             Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
-        Assert.That(lifetime.Windows, Has.Count.EqualTo(1));
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
         Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
+        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<PositionEditorWindow>());
     }
 
     [AvaloniaTest]
@@ -75,13 +77,12 @@ public class NavigatorTest
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
-        Dispatcher.UIThread.RunJobs();
+        await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
 
         navigator.OpenEditor();
 
-        Dispatcher.UIThread.RunJobs();
-        await Task.Delay(400);
+        await FlushUIThread();
         var window = lifetime.MainWindow;
         Assert.Multiple(() =>
         {
@@ -89,8 +90,9 @@ public class NavigatorTest
             Assert.That(window?.DataContext, Is.InstanceOf<IEditorViewModel>());
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
         });
-        Assert.That(lifetime.Windows, Has.Count.EqualTo(1));
+        Assert.That(lifetime.Windows, Has.Count.EqualTo(2));
         Assert.That(lifetime.Windows, Has.One.Items.SameAs(window));
+        Assert.That(lifetime.Windows, Has.One.Items.InstanceOf<PositionEditorWindow>());
     }
 
     [AvaloniaTest]
@@ -104,13 +106,13 @@ public class NavigatorTest
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
         navigator.OpenEditor();
-        Dispatcher.UIThread.RunJobs();
+
+        await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
 
         navigator.CloseEditor();
 
-        Dispatcher.UIThread.RunJobs();
-        await Task.Delay(400);
+        await FlushUIThread();
         Assert.Multiple(() =>
         {
             Assert.That(lifetime.Shutdowns, Is.Empty);
@@ -125,7 +127,7 @@ public class NavigatorTest
 
     [AvaloniaTest]
     [NonParallelizable]
-    public void CloseEditorNoConfigTest()
+    public async Task CloseEditorNoConfigTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
@@ -133,11 +135,13 @@ public class NavigatorTest
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
         var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
-        Dispatcher.UIThread.RunJobs();
+
+        await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
 
         navigator.CloseEditor();
-        Dispatcher.UIThread.RunJobs();
+
+        await FlushUIThread();
         Assert.Multiple(() =>
         {
             Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
@@ -146,6 +150,18 @@ public class NavigatorTest
             Assert.That(pythonHandler.CurrentScript, Is.Null);
             Assert.That(pythonHandler.IsDisposed, Is.False);
         });
+    }
+
+    // ReSharper disable once InconsistentNaming
+    /// <summary>
+    /// Runs jobs on the UI thread and waits for them to finish.
+    /// </summary>
+    /// <param name="delay">The delay in milliseconds.</param>
+    private static async Task FlushUIThread(int delay = 1000)
+    {
+        Dispatcher.UIThread.RunJobs();
+        await Task.Delay(delay);
+        Dispatcher.UIThread.RunJobs();
     }
 
     [TestFixture]

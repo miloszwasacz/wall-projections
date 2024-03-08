@@ -73,6 +73,12 @@ public interface IViewModelProvider
     public IEditorHotspotViewModel GetEditorHotspotViewModel(Hotspot hotspot);
 
     /// <summary>
+    /// Creates a new <see cref="IPositionEditorViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="IPositionEditorViewModel" /> instance</returns>
+    public IPositionEditorViewModel GetPositionEditorViewModel();
+
+    /// <summary>
     /// Creates a new <see cref="IDescriptionEditorViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="IDescriptionEditorViewModel" /> instance</returns>

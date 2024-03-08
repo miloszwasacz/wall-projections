@@ -46,7 +46,7 @@ public class EditorHotspotViewModelTest
     public void IdConstructorTest()
     {
         const int id = 1;
-        var position = new Coord(0, 0, 0);
+        var position = new Coord();
         IEditorHotspotViewModel editorHotspotViewModel = new EditorHotspotViewModel(id, new MockViewModelProvider());
 
         Assert.Multiple(() =>
@@ -90,7 +90,7 @@ public class EditorHotspotViewModelTest
         var hotspot = CreateHotspot();
         var originalDescription = File.ReadAllText(hotspot.DescriptionPath);
 
-        var position = new Coord(0, 0, 0);
+        var position = new Coord();
         const string title = "New Title";
         const string description = "New Description";
 

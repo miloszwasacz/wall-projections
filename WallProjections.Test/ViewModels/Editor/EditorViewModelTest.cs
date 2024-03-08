@@ -17,6 +17,7 @@ using Has = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
 
 namespace WallProjections.Test.ViewModels.Editor
 {
+    //TODO Add tests for PositionEditor
     [TestFixture]
     public class EditorViewModelTest
     {
