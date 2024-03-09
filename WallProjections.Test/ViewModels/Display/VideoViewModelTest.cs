@@ -1,6 +1,7 @@
 ﻿using LibVLCSharp.Shared;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Interfaces.Display;
 
 namespace WallProjections.Test.ViewModels.Display;
 
@@ -54,11 +55,11 @@ public class VideoViewModelTest
     public void PlayVideoTest()
     {
         var mediaPlayer = new MockMediaPlayer();
-        using var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
+        using IVideoViewModel videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
         videoViewModel.MarkLoaded();
         Assert.Multiple(() =>
         {
-            Assert.That(videoViewModel.PlayVideos(new[] { VideoPath }), Is.True);
+            Assert.That(videoViewModel.PlayVideo(VideoPath), Is.True);
             Assert.That(mediaPlayer.HasPlayedOnly(VideoPath), Is.True);
             Assert.That(videoViewModel.IsVisible, Is.True);
         });

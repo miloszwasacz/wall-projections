@@ -39,7 +39,8 @@ public class VideoWithDescriptionViewModel : Layout, IDisposable
         IViewModelProvider vmProvider,
         string title,
         string description,
-        IEnumerable<string> videoPaths)
+        IEnumerable<string> videoPaths
+    )
     {
         VideoViewModel = vmProvider.GetVideoViewModel();
         Title = title;
@@ -63,7 +64,7 @@ public class VideoWithDescriptionViewModel : Layout, IDisposable
         public override bool IsCompatibleData(Hotspot.Media hotspot)
         {
             var imagesCompatible = hotspot.ImagePaths.Count == 0;
-            var videosCompatible = hotspot.VideoPaths.Count == 1;
+            var videosCompatible = hotspot.VideoPaths.Count >= 1;
 
             return imagesCompatible && videosCompatible;
         }

@@ -33,7 +33,7 @@ public sealed class MockVideoViewModel : IVideoViewModel
     }
 
     /// <summary>
-    /// A list of paths to the videos the viewmodel has played
+    /// A list of paths to the videos the viewmodel has played or will play
     /// </summary>
     public IReadOnlyList<string> VideoPaths => _videoPaths.Select(v => v.path).ToList();
 
