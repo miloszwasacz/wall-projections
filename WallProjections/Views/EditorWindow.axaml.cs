@@ -8,6 +8,9 @@ using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.Views.EditorUserControls;
 using ImportWarningDialog = WallProjections.Views.EditorUserControls.ImportWarningDialog;
+#if !RELEASE
+using Avalonia;
+#endif
 
 namespace WallProjections.Views;
 
@@ -26,6 +29,9 @@ public partial class EditorWindow : Window
     public EditorWindow()
     {
         InitializeComponent();
+#if !RELEASE
+        this.AttachDevTools();
+#endif
     }
 
     // ReSharper disable UnusedParameter.Local
@@ -270,12 +276,14 @@ public partial class EditorWindow : Window
         _isDialogShown = false;
     }
 
-    //TODO Refactor this callback when the button is refactored
     private void EditPosition_OnClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not IEditorViewModel vm) return;
 
-        vm.PositionEditor.IsInEditMode = true;
+        //TODO Show some indication that the PositionEditor is in edit mode
+        //TODO Add focus management to Navigator so that focus is automatically set to the PositionEditor
+
+        vm.PositionEditor.IsInEditMode = !vm.PositionEditor.IsInEditMode;
     }
 
     /// <summary>

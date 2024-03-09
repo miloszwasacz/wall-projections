@@ -58,7 +58,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
         {
             if (_selectedHotspot is null) return;
 
-            _isInEditMode = value;
+            this.RaiseAndSetIfChanged(ref _isInEditMode, value);
 
             // Reset the position and radius if the user cancels the edit
             SelectedHotspot = _selectedHotspot;

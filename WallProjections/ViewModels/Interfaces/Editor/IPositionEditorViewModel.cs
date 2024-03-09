@@ -19,7 +19,7 @@ public interface IPositionEditorViewModel
     /// <summary>
     /// Whether the position of the hotspot can be changed.
     /// </summary>
-    public bool IsInEditMode { protected get; set; }
+    public bool IsInEditMode { get; set; }
 
     /// <summary>
     /// The currently selected hotspot in the Editor.
@@ -72,6 +72,7 @@ public interface IPositionEditorViewModel
     {
         SelectedHotspot = hotspot;
         UnselectedHotspots = unselectedHotspots.Select(c => c.ToViewCoord());
+        IsInEditMode = false;
     }
 
     /// <summary>

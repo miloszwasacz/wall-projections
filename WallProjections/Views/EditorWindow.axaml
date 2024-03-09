@@ -12,7 +12,17 @@
         Title="EditorWindow"
         WindowState="Maximized"
         KeyDown="Editor_OnKeyDown"
-        Closing="Editor_OnClosing">
+        Closing="Editor_OnClosing"
+        Name="Editor"
+        Tag="{Binding PositionEditor.IsInEditMode}">
+    <!-- This `Tag` is by the button for toggling position edit mode because it has a different DataContext -->
+
+    <Window.Styles>
+        <!--TODO Change to a reasonable style -->
+        <Style Selector=".edit-mode-toggled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Firebrick" />
+        </Style>
+    </Window.Styles>
 
     <Grid RowDefinitions="Auto, *">
 
@@ -71,20 +81,14 @@
             <editor:DescriptionEditor Grid.Column="2" Grid.Row="0" Grid.RowSpan="3"
                                       Spacing="15"
                                       DataContext="{Binding DescriptionEditor}"
-                                      ImportDescription="DescriptionEditor_OnImportDescription" />
+                                      ImportDescription="DescriptionEditor_OnImportDescription">
 
-            <!--TODO Refactor appearance, placement, and behavior of this button -->
-            <Button Grid.Column="2" Grid.Row="0"
-                    HorizontalAlignment="Left" VerticalAlignment="Top"
-                    ToolTip.Tip="Open position edit mode"
-                    Padding="4"
-                    Background="Firebrick"
-                    Click="EditPosition_OnClick">
+                <views:IconButton ToolTip.Tip="Edit position"
+                                  Classes.edit-mode-toggled="{Binding #Editor.Tag}"
+                                  IconData="{StaticResource my_location_regular}"
+                                  Click="EditPosition_OnClick" />
 
-                <PathIcon Width="32" Height="32"
-                          Data="{StaticResource my_location_regular}" />
-
-            </Button>
+            </editor:DescriptionEditor>
 
             <editor:MediaEditor Grid.Column="4" Grid.Row="0"
                                 DataContext="{Binding ImageEditor}"

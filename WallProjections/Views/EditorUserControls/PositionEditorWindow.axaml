@@ -11,7 +11,8 @@
         Background="Black"
         PointerMoved="OnPointerMoved"
         PointerWheelChanged="OnScroll"
-        PointerPressed="OnPointerPressed">
+        PointerPressed="OnPointerPressed"
+        KeyDown="OnKeyDown">
     
     <Grid ColumnDefinitions="*" RowDefinitions="*">
         <!-- Mapping coordinates onto the display  -->

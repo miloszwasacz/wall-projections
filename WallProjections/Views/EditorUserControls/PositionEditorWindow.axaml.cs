@@ -52,5 +52,24 @@ public partial class PositionEditorWindow : Window
         vm.UpdateSelectedHotspot();
     }
 
+    /// <summary>
+    /// Handles key presses:
+    /// <ul>
+    ///     <li>
+    ///         <b>Escape</b>: Exit <see cref="IPositionEditorViewModel.IsInEditMode">edit mode</see>
+    ///                        for <see cref="PositionEditorWindow.DataContext" />
+    ///     </li>
+    /// </ul>
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the key that was pressed.</param>
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not IPositionEditorViewModel vm) return;
+
+        if (e.Key == Key.Escape)
+            vm.IsInEditMode = false;
+    }
+
     // ReSharper restore UnusedParameter.Local
 }
