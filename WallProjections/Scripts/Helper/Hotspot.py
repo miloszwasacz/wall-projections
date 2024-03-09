@@ -16,7 +16,6 @@ class Hotspot:
             self,
             hotspot_id: int,
             proj_pos: Tuple[float, float],
-            calibrator: Calibrator,
             event_listener: EventHandler,
             radius: float = 0.03
     ):

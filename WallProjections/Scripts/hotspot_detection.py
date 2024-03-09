@@ -42,21 +42,15 @@ This shouldn't need to be changed unless there's a breaking change upstream in m
 
 def generate_hotspots(
         event_handler: EventHandler,
-        calibration_matrix_net_array,
         hotspot_coords_str: str
 ) -> list[Hotspot]:
-    photo = VideoCaptureThread.take_photo() #TODO: there has got to be a better way of getting camera width and height
-    h, w, d = photo.shape
-
-    calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
-    calibrator = Calibrator(calibration_matrix, (w, h))
     hotspots_coords = json_to_3dict(hotspot_coords_str)
 
     hotspots: list[Hotspot] = []
     for hotspot_id, hotspot_coord_rad in hotspots_coords.items():
         coords = hotspot_coord_rad[0], hotspot_coord_rad[1]
         radius = hotspot_coord_rad[2]
-        hotspot = Hotspot(hotspot_id, coords, calibrator, event_handler, radius=radius)
+        hotspot = Hotspot(hotspot_id, coords, event_handler, radius=radius)
         hotspots.append(hotspot)
     return hotspots
 
@@ -75,7 +69,7 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
 
     calibrator = Calibrator(calibration_matrix, (w, h))
-    hotspots = generate_hotspots(event_handler, calibration_matrix_net_array, hotspot_coords_str)
+    hotspots = generate_hotspots(event_handler, hotspot_coords_str)
 
     # initialise ML hand-tracking model
     logging.info("Initialising hand-tracking model...")
@@ -102,7 +96,7 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
             logging.warning("Unsuccessful video read; ignoring frame.")
             continue
 
-        camera_height, camera_width, _ = video_capture_img.shape
+        # camera_height, camera_width, _ = video_capture_img.shape
 
         # run model
         video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
@@ -113,7 +107,6 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
             fingertip_coords_norm = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
                                 model_output.multi_hand_landmarks]
             fingertip_coords_proj = [calibrator.norm_to_proj((fingertip.x, fingertip.y)) for fingertip in fingertip_coords_norm]
-            logging.info(f"Fingertip coords: {fingertip_coords_proj}")
             for hotspot in hotspots:
                 hotspot.update(fingertip_coords_proj)
     video_capture.release()

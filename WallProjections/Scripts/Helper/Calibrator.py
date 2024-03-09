@@ -17,11 +17,13 @@ class Calibrator:
     # Methods for generating transformation matrix
 
     @staticmethod
-    def calibrate(projector_id_to_coord: dict[int, tuple[float, float]]) -> np.ndarray:  # returns a 3x3 array of 32bit floats
-
+    def calibrate(projector_id_to_coord: dict[int, tuple[float, float]]) -> np.ndarray:
+        """
+        Takes a photo, detects ArUcos and returns a transformation matrix between provided and detected coordinates.
+        """
         photo = VideoCaptureThread.take_photo()
         camera_id_to_coord = Calibrator._detect_ArUcos(photo)
-        return Calibrator._get_transformation_matrix(camera_id_to_coord, projector_id_to_coord)
+        return Calibrator._get_transformation_matrix(projector_id_to_coord, camera_id_to_coord)
 
     @staticmethod
     def _detect_ArUcos(img: np.ndarray) -> dict[int, tuple[np.float32, np.float32]]:
@@ -40,13 +42,13 @@ class Calibrator:
         for i in range(ids.size):
             aruco_id = int(ids[i][0])
             top_left_corner = (corners[i][0][0][0], corners[i][0][0][1])
-            detected_coords[aruco_id] = top_left_corner
+            detected_coords[aruco_id] = np.float32(top_left_corner[0]), np.float32(top_left_corner[1])
         return detected_coords
 
     @staticmethod
     def _get_transformation_matrix(
-            from_coords: dict[int, tuple[np.float32, np.float32]],
-            to_coords: dict[int, tuple[float, float]]
+            from_coords: dict[int, tuple[float, float]],
+            to_coords: dict[int, tuple[np.float32, np.float32]]
     ) -> np.ndarray:  # returns a 3x3 array of 32bit floats
         """
         Returns a transformation matrix from the coords stored in one dictionary to another
@@ -74,8 +76,7 @@ class Calibrator:
 
     def __init__(self, transformation_matrix: np.ndarray, camera_res: tuple[int, int]):
         self._transformation_matrix = transformation_matrix
-        # self._inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
-        self._inverse_transformation_matrix = transformation_matrix
+        self._inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
         self._camera_res = camera_res
 
 
@@ -84,8 +85,8 @@ class Calibrator:
         Transforms a coordinate in projector space to a coordinate in camera space
         """
         rotated_vector = np.array(proj_coords, np.float32).reshape(-1, 1, 2)
-        transformed_vector = cv2.perspectiveTransform(rotated_vector, self._transformation_matrix)[0][0]
-        return transformed_vector[0], transformed_vector[1]
+        transformed_vector = cv2.perspectiveTransform(rotated_vector, self._inverse_transformation_matrix)[0][0]
+        return np.float32(transformed_vector[0]), np.float32(transformed_vector[1])
 
     def proj_to_norm(self, proj_coords: tuple[int, int]) -> tuple[float, float]:
         """
@@ -100,7 +101,7 @@ class Calibrator:
         Transforms a coordinate in camera space to a coordinate in projector space
         """
         rotated_vector = np.array(cam_coords, np.float32).reshape(-1, 1, 2)
-        transformed_vector = cv2.perspectiveTransform(rotated_vector, self._inverse_transformation_matrix)[0][0]
+        transformed_vector = cv2.perspectiveTransform(rotated_vector, self._transformation_matrix)[0][0]
         return int(transformed_vector[0]), int(transformed_vector[1])
 
     def norm_to_proj(self, norm_coords: tuple[float, float]) -> tuple[int, int]:
@@ -110,7 +111,4 @@ class Calibrator:
         cam_coords = (norm_coords[0] * self._camera_res[0], norm_coords[1] * self._camera_res[1])
         return self.cam_to_proj(cam_coords)
 
-    def scaler_to_norm(self, scaler : float) -> float:
-        det = np.linalg.det(self._transformation_matrix)
-        return scaler*det
 
