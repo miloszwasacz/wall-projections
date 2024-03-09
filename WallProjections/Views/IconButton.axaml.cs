@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Layout;
 using Avalonia.Media;
 
 namespace WallProjections.Views;
 
-public class IconButton : Button
+public partial class IconButton : Button
 {
     protected override Type StyleKeyOverride => typeof(Button);
 
@@ -31,20 +29,6 @@ public class IconButton : Button
 
     public IconButton()
     {
-        VerticalAlignment = VerticalAlignment.Stretch;
-        Padding = new Thickness(10);
-
-        // Maintain square aspect ratio based on height
-        var actualHeightProperty = this.GetObservable(BoundsProperty).Select(b => b.Height);
-        Bind(WidthProperty, actualHeightProperty);
-
-        Content = new Viewbox
-        {
-            Child = new PathIcon
-            {
-                Width = 20, Height = 20,
-                [!PathIcon.DataProperty] = this[!IconDataProperty]
-            }
-        };
+        InitializeComponent();
     }
 }
