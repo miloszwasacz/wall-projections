@@ -15,7 +15,7 @@
         Closing="Editor_OnClosing"
         Name="Editor"
         Tag="{Binding PositionEditor.IsInEditMode}">
-    <!-- This `Tag` is by the button for toggling position edit mode because it has a different DataContext -->
+    <!-- This `Tag` is used by the button for toggling position edit mode because it has a different DataContext -->
 
     <Window.Styles>
         <!--TODO Change to a reasonable style -->

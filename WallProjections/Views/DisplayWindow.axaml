@@ -9,10 +9,9 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="WallProjections"
         WindowState="FullScreen"
-        Closing="Window_OnClosing"
-        KeyDown="OnKeyDown"
         Padding="42"
-        FontFamily="">
+        Closing="Window_OnClosing"
+        KeyDown="OnKeyDown">
 
     <TransitioningContentControl Content="{Binding ContentViewModel}">
         <TransitioningContentControl.PageTransition>

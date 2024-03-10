@@ -34,6 +34,9 @@ public abstract class LayoutFactory
     /// <param name="vmProvider"><see cref="IViewModelProvider"/> to use to produce internal view models.</param>
     /// <param name="hotspot"><see cref="Hotspot"/> to generate layout for.</param>
     /// <returns>Layout with input data and using input view models.</returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the input hotspot is not compatible with this layout type.
+    /// </exception>
     public Layout CreateLayout(IViewModelProvider vmProvider, Hotspot.Media hotspot)
     {
         if (!IsCompatibleData(hotspot)) throw new ArgumentException("Hotspot invalid for layout type.");
