@@ -49,11 +49,6 @@ public sealed class MockMediaPlayer : IMediaPlayer
             _mrlList.Add(media.Mrl);
         media.Dispose();
         IsPlaying = true;
-        Task.Run(async () =>
-        {
-            await Task.Delay(100);
-            EndReached?.Invoke(this, EventArgs.Empty);
-        });
         return _fileExists;
     }
 
@@ -85,6 +80,11 @@ public sealed class MockMediaPlayer : IMediaPlayer
         DisposeHandle();
         _disposedCount++;
     }
+
+    /// <summary>
+    /// Invokes <see cref="EndReached"/>
+    /// </summary>
+    public void MarkVideoAsEnded() => EndReached?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
     /// Whether <see cref="SetHandle" /> has been called and <see cref="DisposeHandle" /> has not been called

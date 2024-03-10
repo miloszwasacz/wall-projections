@@ -66,24 +66,28 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public async Task PlayMultipleVideosTest()
+    public void PlayMultipleVideosTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         using var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer);
         videoViewModel.MarkLoaded();
         var paths = new[] { VideoPath, "test2.mp4" };
-        Assert.That(videoViewModel.PlayVideos(paths), Is.True);
-        await Task.Delay(150);
 
-        var lastPlayedVideo = mediaPlayer.LastPlayedVideo;
-        Assert.That(lastPlayedVideo, Is.Not.Null);
+        Assert.That(videoViewModel.PlayVideos(paths), Is.True);
         Assert.Multiple(() =>
         {
-            Assert.That(lastPlayedVideo!, Does.EndWith(paths[1]));
+            Assert.That(mediaPlayer.LastPlayedVideo, Does.EndWith(paths[0]));
             Assert.That(videoViewModel.IsVisible, Is.True);
         });
 
-        await Task.Delay(250);
+        mediaPlayer.MarkVideoAsEnded();
+        Assert.Multiple(() =>
+        {
+            Assert.That(mediaPlayer.LastPlayedVideo, Does.EndWith(paths[1]));
+            Assert.That(videoViewModel.IsVisible, Is.True);
+        });
+
+        mediaPlayer.MarkVideoAsEnded();
         Assert.Multiple(() =>
         {
             Assert.That(videoViewModel.HasVideos, Is.False);
