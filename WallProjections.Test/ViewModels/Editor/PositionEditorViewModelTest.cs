@@ -1,4 +1,3 @@
-using Avalonia;
 using WallProjections.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels.Editor;
@@ -27,11 +26,10 @@ public class PositionEditorViewModelTest
         IPositionEditorViewModel positionEditor = new PositionEditorViewModel();
         Assert.Multiple(() =>
         {
-            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
             Assert.That(positionEditor.UnselectedHotspots, Is.Empty);
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
-            Assert.That(positionEditor.D, Is.EqualTo(0));
+            Assert.That(positionEditor.R, Is.EqualTo(0));
         });
     }
     
@@ -43,7 +41,6 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
-            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
         });
         
         positionEditor.SetPosition(50, 40);
@@ -51,7 +48,6 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
-            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
         });
         
         positionEditor.IsInEditMode = true;
@@ -60,7 +56,6 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(50));
             Assert.That(positionEditor.Y, Is.EqualTo(40));
-            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(50,40)));
         });
     }
 
@@ -68,16 +63,16 @@ public class PositionEditorViewModelTest
     public void ChangeRadiusTest()
     {
         var positionEditor = SetupPositionEditorViewModel();
-        Assert.That(positionEditor.D, Is.EqualTo(60));
+        Assert.That(positionEditor.R, Is.EqualTo(30));
         positionEditor.ChangeRadius(20);
-        Assert.That(positionEditor.D, Is.EqualTo(60));
+        Assert.That(positionEditor.R, Is.EqualTo(30));
         positionEditor.IsInEditMode = true;
         positionEditor.ChangeRadius(20);
-        Assert.That(positionEditor.D, Is.EqualTo(100));
+        Assert.That(positionEditor.R, Is.EqualTo(50));
         positionEditor.ChangeRadius(-40);
-        Assert.That(positionEditor.D, Is.EqualTo(20));
+        Assert.That(positionEditor.R, Is.EqualTo(10));
         positionEditor.ChangeRadius(-50);
-        Assert.That(positionEditor.D, Is.EqualTo(0));
+        Assert.That(positionEditor.R, Is.EqualTo(0));
     }
 
     [AvaloniaTest]
@@ -100,7 +95,7 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.UnselectedHotspots.First().X, Is.EqualTo(0));
             Assert.That(positionEditor.UnselectedHotspots.First().Y, Is.EqualTo(0));
-            Assert.That(positionEditor.UnselectedHotspots.First().D, Is.EqualTo(60));
+            Assert.That(positionEditor.UnselectedHotspots.First().R, Is.EqualTo(30));
         });
         positionEditor.SelectHotspot(hotspot, hotspots.Where(h => h != hotspot).Select(h => h.Position));
         positionEditor.IsInEditMode = true;
@@ -112,7 +107,7 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.UnselectedHotspots.First().X, Is.EqualTo(40));
             Assert.That(positionEditor.UnselectedHotspots.First().Y, Is.EqualTo(50));
-            Assert.That(positionEditor.UnselectedHotspots.First().D, Is.EqualTo(100));
+            Assert.That(positionEditor.UnselectedHotspots.First().R, Is.EqualTo(50));
         });
         
     }
@@ -126,8 +121,7 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
-            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
-            Assert.That(positionEditor.D, Is.EqualTo(0));
+            Assert.That(positionEditor.R, Is.EqualTo(0));
         });
         positionEditor.IsInEditMode = true;
         positionEditor.SetPosition(30,30);
@@ -135,8 +129,7 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(0));
             Assert.That(positionEditor.Y, Is.EqualTo(0));
-            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(0,0)));
-            Assert.That(positionEditor.D, Is.EqualTo(0));
+            Assert.That(positionEditor.R, Is.EqualTo(0));
         });
         
         //testing changing IsInEditMode when _selectedHotspot is not null
@@ -147,8 +140,7 @@ public class PositionEditorViewModelTest
         {
             Assert.That(positionEditor.X, Is.EqualTo(30));
             Assert.That(positionEditor.Y, Is.EqualTo(30));
-            Assert.That(positionEditor.Coord, Is.EqualTo(new Point(30,30)));
-            Assert.That(positionEditor.D, Is.EqualTo(60));
+            Assert.That(positionEditor.R, Is.EqualTo(30));
         });
     }
     

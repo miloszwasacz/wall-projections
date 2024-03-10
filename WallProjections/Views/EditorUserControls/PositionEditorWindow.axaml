@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
-        xmlns:models="using:WallProjections.Models"
+        xmlns:views="using:WallProjections.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.EditorUserControls.PositionEditorWindow"
         x:DataType="vm:IPositionEditorViewModel"
@@ -13,50 +13,27 @@
         PointerWheelChanged="OnScroll"
         PointerPressed="OnPointerPressed"
         KeyDown="OnKeyDown">
-    
+
     <Grid ColumnDefinitions="*" RowDefinitions="*">
-        <!-- Mapping coordinates onto the display  -->
-        <ItemsControl Name="HotspotList"
-                      Grid.Column="0" Grid.Row="0"
-                      ItemsSource="{Binding UnselectedHotspots}">
 
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas Background="Transparent" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+        <!-- Unselected Hotspots -->
+        <views:HotspotView Grid.Column="0" Grid.Row="0"
+                           HotspotFill="Gray"
+                           ItemsSource="{Binding UnselectedHotspots}" />
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Path Fill="Gray" >
-                        <Path.Data>
-                            <EllipseGeometry 
-                                RadiusX="{Binding D}" 
-                                RadiusY="{Binding D}" />
-                        </Path.Data>
-                    </Path>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-
-            <!-- Styles for ItemsControl (all circles rather than individual) -->
-            <ItemsControl.Styles>
-                <!-- Positioning of the hotspots -->
-                <Style Selector="ItemsControl > ContentPresenter" x:DataType="models:ViewCoord">
-                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                    <Setter Property="Canvas.Left" Value="{Binding X}" />
-                </Style>
-            </ItemsControl.Styles>
-        </ItemsControl>
-        
+        <!-- Selected Hotspot -->
         <Canvas Grid.Column="0" Grid.Row="0">
-            <Path Fill="White" >
+
+            <Path Canvas.Left="{Binding X}"
+                  Canvas.Top="{Binding Y}"
+                  Fill="White">
                 <Path.Data>
-                    <EllipseGeometry 
-                        Center="{Binding Coord}" 
-                        RadiusX="{Binding D}" 
-                        RadiusY="{Binding D}" />
+                    <EllipseGeometry
+                        RadiusX="{Binding R}"
+                        RadiusY="{Binding R}" />
                 </Path.Data>
             </Path>
+
         </Canvas>
 
     </Grid>

@@ -1,7 +1,6 @@
 ﻿using WallProjections.Models;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
-using Point = Avalonia.Point;
 
 namespace WallProjections.Test.Mocks.ViewModels.Editor;
 
@@ -17,7 +16,7 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
     public IEditorHotspotViewModel? SelectedHotspot { get; set; }
     
     /// <inheritdoc/>
-    public IEnumerable<ViewCoord> UnselectedHotspots { get; set; } = Enumerable.Empty<ViewCoord>();
+    public IEnumerable<Coord> UnselectedHotspots { get; set; } = Enumerable.Empty<Coord>();
     
     /// <inheritdoc/>
     public double X
@@ -34,10 +33,7 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
     }
 
     /// <inheritdoc/>
-    public Point Coord => new Point(X, Y);
-
-    /// <inheritdoc/>
-    public double D
+    public double R
     {
         get;
         private set;
@@ -63,7 +59,7 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
     /// <param name="delta">The increase in radius</param>
     public void ChangeRadius(double delta)
     {
-        D += delta * 2;
+        R += delta;
     }
 
     /// <summary>
@@ -76,7 +72,7 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
     {
         SelectedHotspot = new MockEditorHotspotViewModel(
             1, 
-            new Coord(X, Y, D / 2),
+            new Coord(X, Y, R),
             "name", 
             "description");
     }

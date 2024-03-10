@@ -1,6 +1,9 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
 using WallProjections.ViewModels.Interfaces.Editor;
+#if !RELEASE
+using Avalonia;
+#endif
 
 namespace WallProjections.Views.EditorUserControls;
 
@@ -9,6 +12,9 @@ public partial class PositionEditorWindow : Window
     public PositionEditorWindow()
     {
         InitializeComponent();
+#if !RELEASE
+        this.AttachDevTools();
+#endif
     }
 
     // ReSharper disable UnusedParameter.Local

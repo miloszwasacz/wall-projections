@@ -1,12 +1,13 @@
 using ReactiveUI;
 using WallProjections.Models;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.ViewModels;
 
 /// <summary>
-/// A record of all the parameters required to display the hotspots
+/// A record of all the parameters required to display a hotspot
 /// </summary>
-public class HotspotProjectionViewModel : ViewModelBase
+public class HotspotProjectionViewModel : ViewModelBase, IPosition
 {
     /// <summary>
     /// The backing field for <see cref="IsActive" />
@@ -19,13 +20,19 @@ public class HotspotProjectionViewModel : ViewModelBase
     public int Id { get; }
 
     /// <summary>
-    /// The number of pixels from the leftmost side
+    /// The X coordinate of an top-left corner of the hotspot in pixels
     /// </summary>
+    /// <remarks>
+    /// Because the hotspot is a circle, this is the X coordinate of the top-left corner of the bounding box
+    /// </remarks>
     public double X { get; }
 
     /// <summary>
-    /// The number of pixels from the top
+    /// The Y coordinate of an top-left corner of the hotspot in pixels
     /// </summary>
+    /// <remarks>
+    /// Because the hotspot is a circle, this is the Y coordinate of the top-left corner of the bounding box
+    /// </remarks>
     public double Y { get; }
 
     /// <summary>
@@ -49,8 +56,8 @@ public class HotspotProjectionViewModel : ViewModelBase
     public HotspotProjectionViewModel(Hotspot hotspot)
     {
         Id = hotspot.Id;
-        X = hotspot.Position.X;
-        Y = hotspot.Position.Y;
+        X = hotspot.Position.X - hotspot.Position.R;
+        Y = hotspot.Position.Y - hotspot.Position.R;
         D = hotspot.Position.R * 2;
     }
 }
