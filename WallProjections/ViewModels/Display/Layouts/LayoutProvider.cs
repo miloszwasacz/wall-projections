@@ -31,7 +31,27 @@ public class LayoutProvider : ILayoutProvider
             .SelectMany(s => s.GetTypes())
             .Where(p => GetType().Namespace?.Equals(p.Namespace) ?? false)
             .Where(p => typeof(LayoutFactory).IsAssignableFrom(p) && p.IsClass)
+#if !RELEASE
+            // In debug, we want to throw an exception if a layout factory is not correctly implemented
             .Select(p => (LayoutFactory)Activator.CreateInstance(p)!);
+#else
+            // In release, we want to ignore any layout factories that are not correctly implemented
+            .Select(p =>
+            {
+                try
+                {
+                    return Activator.CreateInstance(p) as LayoutFactory;
+                }
+                catch (Exception e)
+                {
+                    // TODO Log to file
+                    Console.Error.WriteLine($"Error creating LayoutFactory of type {p.Name}: {e.Message}");
+                    return null;
+                }
+            })
+            .Where(p => p is not null)
+            .Select(p => p!);
+#endif
     }
 
     /// <summary>

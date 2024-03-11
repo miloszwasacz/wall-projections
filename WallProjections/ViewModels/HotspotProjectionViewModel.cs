@@ -20,7 +20,7 @@ public class HotspotProjectionViewModel : ViewModelBase, IPosition
     public int Id { get; }
 
     /// <summary>
-    /// The X coordinate of an top-left corner of the hotspot in pixels
+    /// The X coordinate of the top-left corner of the hotspot in pixels
     /// </summary>
     /// <remarks>
     /// Because the hotspot is a circle, this is the X coordinate of the top-left corner of the bounding box
@@ -28,7 +28,7 @@ public class HotspotProjectionViewModel : ViewModelBase, IPosition
     public double X { get; }
 
     /// <summary>
-    /// The Y coordinate of an top-left corner of the hotspot in pixels
+    /// The Y coordinate of the top-left corner of the hotspot in pixels
     /// </summary>
     /// <remarks>
     /// Because the hotspot is a circle, this is the Y coordinate of the top-left corner of the bounding box

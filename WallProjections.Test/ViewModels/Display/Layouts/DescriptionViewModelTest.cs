@@ -47,19 +47,12 @@ public class DescriptionViewModelTest
 
         [Test]
         [TestCaseSource(nameof(IsCompatibleDataTestCases))]
-        public void IsCompatibleDataTest((Hotspot.Media inputMedia, bool expected) testCase)
-        {
+        public void IsCompatibleDataTest((Hotspot.Media inputMedia, bool expected) testCase) =>
             IsCompatibleDataTestBody(testCase);
-            // var (inputMedia, expected) = testCase;
-            // var factory = new DescriptionViewModel.Factory();
-            //
-            // Assert.That(factory.IsCompatibleData(inputMedia), Is.EqualTo(expected));
-        }
 
         [Test]
         [TestCaseSource(nameof(IsCompatibleDataTestCases))]
-        public void CreateLayoutTest((Hotspot.Media inputMedia, bool expected) testCase)
-        {
+        public void CreateLayoutTest((Hotspot.Media inputMedia, bool expected) testCase) =>
             CreateLayoutTestBody(
                 testCase,
                 (descriptionViewModel, inputMedia) => Assert.Multiple(() =>
@@ -68,25 +61,5 @@ public class DescriptionViewModelTest
                     Assert.That(descriptionViewModel.Description, Is.EqualTo(inputMedia.Description));
                 })
             );
-            // var (inputMedia, expected) = testCase;
-            // var vmProvider = new MockViewModelProvider();
-            // var factory = new DescriptionViewModel.Factory();
-            //
-            // if (!expected)
-            // {
-            //     Assert.That(() => factory.CreateLayout(vmProvider, inputMedia), Throws.ArgumentException);
-            //     return;
-            // }
-            //
-            // var layout = factory.CreateLayout(vmProvider, inputMedia);
-            // Assert.That(layout, Is.TypeOf<DescriptionViewModel>());
-            //
-            // var descriptionViewModel = (DescriptionViewModel)layout;
-            // Assert.Multiple(() =>
-            // {
-            //     Assert.That(descriptionViewModel.Title, Is.EqualTo(inputMedia.Title));
-            //     Assert.That(descriptionViewModel.Description, Is.EqualTo(inputMedia.Description));
-            // });
-        }
     }
 }
