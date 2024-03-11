@@ -1,10 +1,10 @@
 using WallProjections.Test.Mocks.ViewModels;
-using WallProjections.Views;
+using HotspotDisplayWindow = WallProjections.Views.Display.HotspotDisplayWindow;
 
 namespace WallProjections.Test.Views;
 
 [TestFixture]
-public class HotspotWindowTest
+public class HotspotDisplayWindowTest
 {
     [AvaloniaTest]
     public void AllHotspotsDisplayedTest()

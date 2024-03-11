@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Avalonia;
 using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -48,7 +47,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     /// <summary>
     /// The backing field for <see cref="UnselectedHotspots" />.
     /// </summary>
-    private IEnumerable<ViewCoord> _unselectedHotspots = Enumerable.Empty<ViewCoord>();
+    private IEnumerable<Coord> _unselectedHotspots = Enumerable.Empty<Coord>();
 
     /// <inheritdoc />
     public bool IsInEditMode
@@ -58,7 +57,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
         {
             if (_selectedHotspot is null) return;
 
-            _isInEditMode = value;
+            this.RaiseAndSetIfChanged(ref _isInEditMode, value);
 
             // Reset the position and radius if the user cancels the edit
             SelectedHotspot = _selectedHotspot;
@@ -79,7 +78,7 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     }
 
     /// <inheritdoc />
-    public IEnumerable<ViewCoord> UnselectedHotspots
+    public IEnumerable<Coord> UnselectedHotspots
     {
         get => _unselectedHotspots;
         set => this.RaiseAndSetIfChanged(ref _unselectedHotspots, value);
@@ -89,46 +88,22 @@ public class PositionEditorViewModel : ViewModelBase, IPositionEditorViewModel
     public double X
     {
         get => _x;
-        private set
-        {
-            this.RaiseAndSetIfChanged(ref _x, value);
-            this.RaisePropertyChanged(nameof(Coord));
-        }
+        private set => this.RaiseAndSetIfChanged(ref _x, value);
     }
 
     /// <inheritdoc />
     public double Y
     {
         get => _y;
-        private set
-        {
-            this.RaiseAndSetIfChanged(ref _y, value);
-            this.RaisePropertyChanged(nameof(Coord));
-        }
-    }
-
-    /// <inheritdoc/>
-    public Point Coord => new Point(X, Y);
-
-    /// <summary>
-    /// The current radius of the hotspot (non-negative). Notifies <see cref="D" /> about changes.
-    /// </summary>
-    /// <remarks>
-    /// This is not the same as <see cref="SelectedHotspot" />.<see cref="IEditorHotspotViewModel.Position" />.<see cref="Coord.R" />!
-    /// To update the position of the selected hotspot, call <see cref="UpdateSelectedHotspot" />.
-    /// </remarks>
-    private double R
-    {
-        get => _r;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _r, Math.Max(value, 0));
-            this.RaisePropertyChanged(nameof(D));
-        }
+        private set => this.RaiseAndSetIfChanged(ref _y, value);
     }
 
     /// <inheritdoc />
-    public double D => _r * 2;
+    public double R
+    {
+        get => _r;
+        private set => this.RaiseAndSetIfChanged(ref _r, Math.Max(value, 0));
+    }
 
     /// <inheritdoc />
     public void SetPosition(double x, double y)

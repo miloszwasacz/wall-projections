@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
 using LibVLCSharp.Shared;
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
@@ -20,19 +23,43 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     private bool _isDisposed;
 
     /// <summary>
-    /// Whether or not a video is currently playing
+    /// Mutex for <see cref="_isLoaded"/> and <see cref="_isDisposed" />
     /// </summary>
-    private bool _isPlaying;
+    private readonly Mutex _stateMutex;
+
+    /// <summary>
+    /// Whether the video player has loaded
+    /// </summary>
+    private bool _isLoaded;
+
+    /// <summary>
+    /// The backing field for <see cref="IsVisible" />
+    /// </summary>
+    private bool _isVisible;
+
+    /// <summary>
+    /// All the videos queued to play
+    /// </summary>
+    private readonly ConcurrentQueue<string> _playQueue;
 
     /// <summary>
     /// The backing field for <see cref="MediaPlayer" />
     /// </summary>
     private IMediaPlayer? _mediaPlayer;
 
+    /// <summary>
+    /// Creates a new <see cref="VideoViewModel" /> with the given <see cref="IMediaPlayer" />
+    /// </summary>
+    /// <param name="libVlc"></param>
+    /// <param name="mediaPlayer"></param>
     public VideoViewModel(LibVLC libVlc, IMediaPlayer mediaPlayer)
     {
         _libVlc = libVlc;
         _mediaPlayer = mediaPlayer;
+        _stateMutex = new Mutex();
+        _playQueue = new ConcurrentQueue<string>();
+        _mediaPlayer.EndReached += PlayNextVideoEvent;
+
         this.RaisePropertyChanged(nameof(MediaPlayer));
     }
 
@@ -50,26 +77,31 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         {
             if (value is not null)
                 throw new InvalidOperationException("MediaPlayer cannot be set to a non-null value");
-            HasVideos = false;
+
+            _playQueue.Clear();
+            IsVisible = false;
             this.RaiseAndSetIfChanged(ref _mediaPlayer, null);
         }
     }
 
     /// <inheritdoc />
-    public bool HasVideos
+    public bool IsVisible
     {
-        get => _isPlaying;
+        get => _isVisible;
         private set
         {
-            this.RaiseAndSetIfChanged(ref _isPlaying, value);
+            this.RaiseAndSetIfChanged(ref _isVisible, value);
             this.RaisePropertyChanged(nameof(Volume));
         }
     }
 
     /// <inheritdoc />
+    public bool HasVideos => !_playQueue.IsEmpty;
+
+    /// <inheritdoc />
     public int Volume
     {
-        get => HasVideos ? MediaPlayer?.Volume ?? 0 : 0;
+        get => IsVisible ? MediaPlayer?.Volume ?? 0 : 0;
         set
         {
             if (MediaPlayer is not null)
@@ -78,35 +110,109 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     }
 
     /// <inheritdoc />
-    public bool PlayVideo(string path)
+    public void MarkLoaded()
     {
-        if (_isDisposed) return false;
+        _stateMutex.WaitOne();
+        if (HasVideos)
+            PlayNextVideo();
 
-        HasVideos = true;
-        var media = new Media(_libVlc, path);
-        var success = MediaPlayer?.Play(media);
-        media.Dispose();
-        return success ?? false;
+        _isLoaded = true;
+        _stateMutex.ReleaseMutex();
+    }
+
+    /// <inheritdoc />
+    public bool PlayVideos(IEnumerable<string> paths)
+    {
+        foreach (var path in paths)
+            _playQueue.Enqueue(path);
+
+        _stateMutex.WaitOne();
+        var success = false;
+        if (_isLoaded && HasVideos)
+            success = PlayNextVideo();
+
+        IsVisible = success;
+        _stateMutex.ReleaseMutex();
+
+        return success;
     }
 
     /// <inheritdoc />
     public void StopVideo()
     {
-        if (_isDisposed) return;
+        _stateMutex.WaitOne();
+        if (_isDisposed)
+        {
+            _stateMutex.ReleaseMutex();
+            return;
+        }
 
+        ForceStopVideo();
+        _stateMutex.ReleaseMutex();
+    }
+
+    /// <summary>
+    /// <inheritdoc cref="StopVideo" />(but without if the viewmodel has been disposed).
+    /// <b>SHOULD ONLY BE USED IN <see cref="StopVideo" /> and <see cref="Dispose" />!</b>
+    /// </summary>
+    private void ForceStopVideo()
+    {
+        IsVisible = false;
         MediaPlayer?.Stop();
-        HasVideos = false;
+    }
+
+    /// <inheritdoc />
+    public bool PlayNextVideo()
+    {
+        // End of queue reached
+        _stateMutex.WaitOne();
+        if (_isDisposed || MediaPlayer is null || !_playQueue.TryDequeue(out var nextVideo))
+        {
+            IsVisible = false;
+            _stateMutex.ReleaseMutex();
+            return false;
+        }
+
+        _stateMutex.ReleaseMutex();
+
+        var media = new Media(_libVlc, nextVideo);
+        var success = MediaPlayer.Play(media);
+        IsVisible = success;
+        media.Dispose();
+        return success;
+    }
+
+    /// <summary>
+    /// Event handler wrapper for playing the next video in the sequence when one ends.
+    /// </summary>
+    /// <param name="sender">Object who sent request</param>
+    /// <param name="e">Arguments for the event</param>
+    private void PlayNextVideoEvent(object? sender, EventArgs e)
+    {
+        var success = PlayNextVideo();
+
+        //TODO Log to file
+        if (!success)
+            Console.WriteLine("Could not play next video");
     }
 
     public void Dispose()
     {
+        _stateMutex.WaitOne();
         if (_isDisposed)
+        {
+            _stateMutex.ReleaseMutex();
             return;
+        }
 
-        StopVideo();
+        ForceStopVideo();
         _isDisposed = true;
-        var mediaPlayer = MediaPlayer;
+        _stateMutex.ReleaseMutex();
+
+        var player = MediaPlayer;
         MediaPlayer = null;
-        mediaPlayer?.Dispose();
+        if (player is null) return;
+        player.EndReached -= PlayNextVideoEvent;
+        player.Dispose();
     }
 }

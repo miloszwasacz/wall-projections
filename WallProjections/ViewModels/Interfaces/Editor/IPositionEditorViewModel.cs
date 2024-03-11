@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Avalonia;
 using WallProjections.Models;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
@@ -19,7 +17,7 @@ public interface IPositionEditorViewModel
     /// <summary>
     /// Whether the position of the hotspot can be changed.
     /// </summary>
-    public bool IsInEditMode { protected get; set; }
+    public bool IsInEditMode { get; set; }
 
     /// <summary>
     /// The currently selected hotspot in the Editor.
@@ -29,7 +27,7 @@ public interface IPositionEditorViewModel
     /// <summary>
     /// A collection of all hotspots that are not currently selected.
     /// </summary>
-    public IEnumerable<ViewCoord> UnselectedHotspots { get; protected set; }
+    public IEnumerable<Coord> UnselectedHotspots { get; protected set; }
 
     /// <summary>
     /// The current X position of the hotspot.
@@ -50,18 +48,13 @@ public interface IPositionEditorViewModel
     public double Y { get; }
 
     /// <summary>
-    /// The current diameter of the hotspot (non-negative).
+    /// The current radius of the hotspot (non-negative).
     /// </summary>
     /// <remarks>
-    /// This is not the same as twice the <see cref="SelectedHotspot" />.<see cref="IEditorHotspotViewModel.Position" />.<see cref="Coord.R" />!
+    /// This is not the same as <see cref="SelectedHotspot" />.<see cref="IEditorHotspotViewModel.Position" />.<see cref="Coord.R" />!
     /// To update the position of the selected hotspot, call <see cref="UpdateSelectedHotspot" />.
     /// </remarks>
-    public double D { get; }
-    
-    /// <summary>
-    /// The combination of the X and Y coordinates into a single point 
-    /// </summary>
-    public Point Coord { get; }
+    public double R { get; }
 
     /// <summary>
     /// Selects the given <paramref name="hotspot" /> and updates the <see cref="UnselectedHotspots" />.
@@ -71,7 +64,8 @@ public interface IPositionEditorViewModel
     public void SelectHotspot(IEditorHotspotViewModel? hotspot, IEnumerable<Coord> unselectedHotspots)
     {
         SelectedHotspot = hotspot;
-        UnselectedHotspots = unselectedHotspots.Select(c => c.ToViewCoord());
+        UnselectedHotspots = unselectedHotspots;
+        IsInEditMode = false;
     }
 
     /// <summary>
@@ -87,7 +81,7 @@ public interface IPositionEditorViewModel
 
     /// <summary>
     /// Changes the position of the <see cref="SelectedHotspot" /> to the current
-    /// <see cref="X" />, <see cref="Y" />, and <see cref="D" /> values.
+    /// <see cref="X" />, <see cref="Y" />, and <see cref="R" /> values.
     /// Then, sets <see cref="IsInEditMode" /> to <i>false</i> and raises the <see cref="HotspotPositionChanged" /> event.
     /// </summary>
     public void UpdateSelectedHotspot();

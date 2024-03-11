@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
+             xmlns:views="using:WallProjections.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.EditorUserControls.MediaEditor"
              x:DataType="vm:IMediaEditorViewModel">
@@ -31,30 +32,23 @@
                                 Orientation="Horizontal"
                                 Spacing="10">
 
+                        <!--TODO Get rid of this - use proper styling on IconButton -->
                         <StackPanel.Styles>
-                            <Style Selector="Button[IsEnabled=False] > PathIcon">
+                            <Style Selector="PathIcon:disabled">
                                 <Setter Property="Foreground" Value="Transparent" />
                             </Style>
                         </StackPanel.Styles>
 
-                        <Button ToolTip.Tip="{Binding AddMediaButtonLabel}"
-                                Padding="2"
-                                Click="AddMedia_OnClick">
+                        <views:IconButton ToolTip.Tip="{Binding AddMediaButtonLabel}"
+                                          Padding="2"
+                                          IconData="{StaticResource add_regular}"
+                                          Click="AddMedia_OnClick" />
 
-                            <PathIcon Width="16" Height="16"
-                                      Data="{StaticResource add_regular}" />
-
-                        </Button>
-
-                        <Button ToolTip.Tip="{Binding RemoveMediaButtonLabel}"
-                                Padding="2"
-                                IsEnabled="{Binding CanRemoveMedia}"
-                                Click="RemoveMedia_OnClick">
-
-                            <PathIcon Width="16" Height="16"
-                                      Data="{StaticResource delete_regular}" />
-
-                        </Button>
+                        <views:IconButton ToolTip.Tip="{Binding RemoveMediaButtonLabel}"
+                                          Padding="2"
+                                          IsEnabled="{Binding CanRemoveMedia}"
+                                          IconData="{StaticResource delete_regular}"
+                                          Click="RemoveMedia_OnClick" />
 
                     </StackPanel>
 
@@ -106,17 +100,11 @@
                                                    TextTrimming="CharacterEllipsis"
                                                    Text="{Binding Name}" />
 
-                                        <Button Grid.Column="1" Grid.Row="0"
-                                                ToolTip.Tip="Open in File Explorer"
-                                                Padding="2"
-                                                Click="ItemOpenExplorer_OnClick">
-
-                                            <!--TODO Style this properly -->
-                                            <PathIcon Height="16" Width="16"
-                                                      Foreground="Black"
-                                                      Data="{StaticResource open_folder_regular}" />
-
-                                        </Button>
+                                        <views:IconButton Grid.Column="1" Grid.Row="0"
+                                                          ToolTip.Tip="Open in File Explorer"
+                                                          Padding="2"
+                                                          IconData="{StaticResource open_folder_regular}"
+                                                          Click="ItemOpenExplorer_OnClick" />
 
                                     </Grid>
 

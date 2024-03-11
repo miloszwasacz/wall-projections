@@ -1,14 +1,20 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Input;
+#if !RELEASE
+using Avalonia;
+#endif
 
-namespace WallProjections.Views;
+namespace WallProjections.Views.Display;
 
 public partial class HotspotDisplayWindow : Window
 {
     public HotspotDisplayWindow()
     {
         InitializeComponent();
+#if !RELEASE
+        this.AttachDevTools();
+#endif
     }
 
     // ReSharper disable UnusedParameter.Local

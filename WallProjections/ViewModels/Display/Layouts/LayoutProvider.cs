@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using WallProjections.Models;
+using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Display.Layouts;
+
+namespace WallProjections.ViewModels.Display.Layouts;
+
+/// <inheritdoc cref="ILayoutProvider" />
+public class LayoutProvider : ILayoutProvider
+{
+    /// <summary>
+    /// Description for when no layout could be found for a hotspot
+    /// </summary>
+    internal const string ErrorDescription = "Cannot show the information for this hotspot.\n" +
+                                             "Please ask a member of staff for help.";
+
+    /// <summary>
+    /// All available <see cref="LayoutFactory">Layout Factories</see>
+    /// </summary>
+    private readonly IEnumerable<LayoutFactory> _layoutFactories;
+
+    /// <summary>
+    /// Finds all <see cref="LayoutFactory">Layout Factories</see> that can make layouts automatically.
+    /// </summary>
+    public LayoutProvider()
+    {
+        // From: https://stackoverflow.com/questions/67079586/get-all-classes-that-implement-an-interface-and-call-a-function-in-net-core
+        _layoutFactories = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(s => s.GetTypes())
+            .Where(p => GetType().Namespace?.Equals(p.Namespace) ?? false)
+            .Where(p => typeof(LayoutFactory).IsAssignableFrom(p) && p.IsClass)
+#if !RELEASE
+            // In debug, we want to throw an exception if a layout factory is not correctly implemented
+            .Select(p => (LayoutFactory)Activator.CreateInstance(p)!);
+#else
+            // In release, we want to ignore any layout factories that are not correctly implemented
+            .Select(p =>
+            {
+                try
+                {
+                    return Activator.CreateInstance(p) as LayoutFactory;
+                }
+                catch (Exception e)
+                {
+                    // TODO Log to file
+                    Console.Error.WriteLine($"Error creating LayoutFactory of type {p.Name}: {e.Message}");
+                    return null;
+                }
+            })
+            .Where(p => p is not null)
+            .Select(p => p!);
+#endif
+    }
+
+    /// <summary>
+    /// Creates <see cref="LayoutProvider"/> with passed in <see cref="LayoutFactory">Layout Factories</see>
+    /// </summary>
+    /// <param name="layoutFactories">Collection of <see cref="LayoutFactory"/></param>
+    public LayoutProvider(IEnumerable<LayoutFactory> layoutFactories)
+    {
+        _layoutFactories = layoutFactories;
+    }
+
+    /// <inheritdoc />
+    public Layout GetLayout(IViewModelProvider vmProvider, Hotspot.Media hotspot)
+    {
+        foreach (var layoutFactory in _layoutFactories)
+        {
+            if (layoutFactory.IsCompatibleData(hotspot))
+                return layoutFactory.CreateLayout(vmProvider, hotspot);
+        }
+
+        return ((ILayoutProvider)this).GetErrorLayout(ErrorDescription);
+    }
+
+    /// <inheritdoc />
+    public Layout GetSimpleDescriptionLayout(string title, string description) =>
+        new DescriptionViewModel(title, description);
+}

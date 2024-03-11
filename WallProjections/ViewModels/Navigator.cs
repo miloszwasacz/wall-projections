@@ -9,6 +9,7 @@ using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Views;
 using WallProjections.Views.EditorUserControls;
+using WallProjections.Views.Display;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 
 namespace WallProjections.ViewModels;

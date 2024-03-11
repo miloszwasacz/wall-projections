@@ -19,7 +19,6 @@ public class HotspotViewModelTest
     /// <summary>
     /// Creates a new config with 3 hotspots
     /// </summary>
-    /// <returns></returns>
     private static IConfig CreateConfig()
     {
         var hotspots = new[]
@@ -51,8 +50,8 @@ public class HotspotViewModelTest
                 Is.EquivalentTo(config.Hotspots).Using<HotspotProjectionViewModel, Hotspot>((actual, expected) =>
                 {
                     var id = actual.Id == expected.Id;
-                    var x = Math.Abs(actual.X - expected.Position.X) < PositionCmpTolerance;
-                    var y = Math.Abs(actual.Y - expected.Position.Y) < PositionCmpTolerance;
+                    var x = Math.Abs(actual.X - (expected.Position.X - expected.Position.R)) < PositionCmpTolerance;
+                    var y = Math.Abs(actual.Y - (expected.Position.Y - expected.Position.R)) < PositionCmpTolerance;
                     var d = Math.Abs(actual.D - 2 * expected.Position.R) < PositionCmpTolerance;
                     return id && x && y && d;
                 })

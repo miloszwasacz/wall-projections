@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.VisualTree;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Display;
@@ -12,50 +13,28 @@ namespace WallProjections.Test.Views;
 [TestFixture]
 public class DisplayWindowTest
 {
-    private static readonly int[] Ids = { 0, 1, 2, 100, -1000 };
-
     [AvaloniaTest]
     public void ViewModelTest()
     {
         var vm = new MockDisplayViewModel();
+        vm.OnHotspotSelected(null, new IPythonHandler.HotspotSelectedArgs(1));
         var displayWindow = new DisplayWindow
         {
             DataContext = vm
         };
+        displayWindow.Show();
+        var content = displayWindow.FindDescendantOfType<TransitioningContentControl>();
 
+        Assert.That(content, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
-            Assert.That(displayWindow.Description.Text, Is.EqualTo(vm.Description));
-            Assert.That(displayWindow.VideoView.DataContext, Is.Not.Null);
-            Assert.That(displayWindow.VideoView.DataContext, Is.SameAs(vm.VideoViewModel));
+            Assert.That(displayWindow.DataContext, Is.SameAs(vm));
+            Assert.That(content!.Content, Is.SameAs(vm.ContentViewModel));
         });
     }
 
     [AvaloniaTest]
-    public void DescriptionChangedTest()
-    {
-        var vm = new MockDisplayViewModel();
-        var displayWindow = new DisplayWindow
-        {
-            DataContext = vm
-        };
-
-        Assert.That(displayWindow.Description.Text, Is.EqualTo(vm.Description));
-
-        foreach (var id in Ids)
-        {
-            vm.OnHotspotSelected(null, new IPythonHandler.HotspotSelectedArgs(id));
-            Assert.Multiple(() =>
-            {
-                Assert.That(vm.CurrentHotspotId, Is.EqualTo(id));
-                Assert.That(displayWindow.Description.Text, Is.EqualTo(vm.Description));
-            });
-        }
-    }
-
-    [AvaloniaTest]
-    [NonParallelizable]
     public void FullscreenToggleTest()
     {
         var vm = new MockDisplayViewModel();

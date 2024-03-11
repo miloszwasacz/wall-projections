@@ -1,11 +1,14 @@
 using System;
 using System.IO;
-using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
 namespace WallProjections.ViewModels.Display;
 
@@ -13,12 +16,20 @@ namespace WallProjections.ViewModels.Display;
 public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
 {
     //TODO Localized strings?
-    internal const string GenericError = @"An error occurred while loading this content.
-Please report this to the museum staff.";
+    internal const string WelcomeTitle = "Select a hotspot";
+    internal const string WelcomeMessage = "Please select a hotspot to start";
 
-    internal const string NotFound = @"Hmm...
-Looks like this hotspot has missing content.
-Please report this to the museum staff.";
+    internal const string GenericError = "An error occurred while loading this content.\n" +
+                                         "Please report this to the museum staff.";
+
+    internal const string NotFound = "Hmm...\n" +
+                                     "Looks like this hotspot has missing content.\n" +
+                                     "Please report this to the museum staff.";
+
+    /// <summary>
+    /// A mutex to ensure sequential access to the <see cref="ContentViewModel" />
+    /// </summary>
+    private readonly Mutex _mutex = new();
 
     /// <summary>
     /// The <see cref="INavigator" /> used for opening the Editor and closing the Display.
@@ -31,51 +42,65 @@ Please report this to the museum staff.";
     private readonly IContentProvider _contentProvider;
 
     /// <summary>
+    /// The <see cref="IViewModelProvider" /> used to fetch internal viewmodels
+    /// </summary>
+    private readonly IViewModelProvider _vmProvider;
+
+    /// <summary>
+    /// The <see cref="ILayoutProvider" /> used to fetch appropriate child layouts
+    /// </summary>
+    private readonly ILayoutProvider _layoutProvider;
+
+    /// <summary>
     /// The <see cref="IPythonHandler" /> used to listen for Python events
     /// </summary>
     private readonly IPythonHandler _pythonHandler;
 
     /// <summary>
-    /// The backing field for <see cref="Description" />
+    /// The backing field for <see cref="ContentViewModel" />
     /// </summary>
-    private string _description = string.Empty;
+    private Layout _contentViewModel;
+
+    /// <inheritdoc />
+    public Layout ContentViewModel
+    {
+        get => _contentViewModel;
+        private set => this.RaiseAndSetIfChanged(ref _contentViewModel, value);
+    }
 
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> with <see cref="ImageViewModel" />
     /// and <see cref="VideoViewModel" /> fetched by <paramref name="vmProvider" />,
-    /// and starts listening for <see cref="IPythonHandler.HotspotSelected">Python events</see>
+    /// and starts listening for <see cref="IPythonHandler.HotspotSelected">Python events</see>.
     /// </summary>
-    /// <param name="navigator">The <see cref="INavigator" /> used for opening the Editor and closing the Display</param>
-    /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels</param>
+    /// <param name="navigator">The <see cref="INavigator" /> used for opening the Editor and closing the Display.</param>
+    /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels.</param>
     /// <param name="contentProvider">A <see cref="IContentProvider"/> for fetching data about hotspots.</param>
-    /// <param name="pythonHandler">The <see cref="IPythonHandler" /> used to listen for Python events</param>
+    /// <param name="layoutProvider">A <see cref="ILayoutProvider"/> for fetching appropriate child layouts.</param>
+    /// <param name="pythonHandler">The <see cref="IPythonHandler" /> used to listen for Python events.</param>
     public DisplayViewModel(
         INavigator navigator,
         IViewModelProvider vmProvider,
         IContentProvider contentProvider,
+        ILayoutProvider layoutProvider,
         IPythonHandler pythonHandler
     )
     {
         _navigator = navigator;
-        ImageViewModel = vmProvider.GetImageViewModel();
-        VideoViewModel = vmProvider.GetVideoViewModel();
         _contentProvider = contentProvider;
+        _vmProvider = vmProvider;
+        _layoutProvider = layoutProvider;
         _pythonHandler = pythonHandler;
         _pythonHandler.HotspotSelected += OnHotspotSelected;
+        _contentViewModel = CreateWelcomeLayout(layoutProvider);
     }
 
-    /// <inheritdoc />
-    public string Description
-    {
-        get => _description;
-        private set => this.RaiseAndSetIfChanged(ref _description, value);
-    }
-
-    /// <inheritdoc />
-    public IImageViewModel ImageViewModel { get; }
-
-    /// <inheritdoc />
-    public IVideoViewModel VideoViewModel { get; }
+    /// <summary>
+    /// Returns a new <see cref="DescriptionViewModel" /> with a welcome message
+    /// </summary>
+    /// <param name="layoutProvider">The <see cref="ILayoutProvider" /> used to fetch the layout</param>
+    private static Layout CreateWelcomeLayout(ILayoutProvider layoutProvider) =>
+        layoutProvider.GetSimpleDescriptionLayout(WelcomeTitle, WelcomeMessage);
 
     /// <inheritdoc />
     public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
@@ -87,34 +112,34 @@ Please report this to the museum staff.";
     /// Loads the content of the hotspot with the given ID if <see cref="_contentProvider" /> has been set
     /// </summary>
     /// <param name="hotspotId">The ID of a hotspot to show</param>
-    private void ShowHotspot(int hotspotId)
+    private async void ShowHotspot(int hotspotId) => await Task.Run(() =>
     {
         try
         {
-            ImageViewModel.HideImage();
-            VideoViewModel.StopVideo();
             var media = _contentProvider.GetMedia(hotspotId);
-
-            Description = media.Description;
-            // TODO Add support for multiple images/videos
-            if (!media.ImagePaths.IsEmpty)
-                ImageViewModel.ShowImage(media.ImagePaths.First());
-            else if (!media.VideoPaths.IsEmpty)
-                VideoViewModel.PlayVideo(media.VideoPaths.First());
+            _mutex.WaitOne();
+            if (ContentViewModel is IDisposable disposable)
+                disposable.Dispose();
+            ContentViewModel = _layoutProvider.GetLayout(_vmProvider, media);
+            _mutex.ReleaseMutex();
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
-            Description = NotFound;
+            _mutex.WaitOne();
+            ContentViewModel = _layoutProvider.GetErrorLayout(NotFound);
+            _mutex.ReleaseMutex();
         }
         catch (Exception e)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
-            Description = GenericError;
+            _mutex.WaitOne();
+            ContentViewModel = _layoutProvider.GetErrorLayout(GenericError);
+            _mutex.ReleaseMutex();
         }
-    }
+    });
 
     /// <inheritdoc />
     public void OpenEditor()
@@ -134,6 +159,10 @@ Please report this to the museum staff.";
     public void Dispose()
     {
         _pythonHandler.HotspotSelected -= OnHotspotSelected;
-        VideoViewModel.Dispose();
+        _mutex.WaitOne();
+        if (ContentViewModel is IDisposable disposable)
+            disposable.Dispose();
+        ContentViewModel = CreateWelcomeLayout(_layoutProvider);
+        _mutex.ReleaseMutex();
     }
 }
