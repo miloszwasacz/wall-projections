@@ -91,6 +91,12 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     );
 
     /// <summary>
+    /// Creates a new <see cref="MockPositionEditorViewModel" />
+    /// </summary>
+    /// <returns>A new <see cref="MockPositionEditorViewModel" /></returns>
+    public IPositionEditorViewModel GetPositionEditorViewModel() => new MockPositionEditorViewModel();
+
+    /// <summary>
     /// Creates a new <see cref="MockDescriptionEditorViewModel" />
     /// </summary>
     /// <inheritdoc />

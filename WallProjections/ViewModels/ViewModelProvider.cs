@@ -5,6 +5,7 @@ using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
@@ -52,13 +53,14 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
 
     #region Display
 
+    //TODO Refactor this to use DI
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> instance
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
     public IDisplayViewModel GetDisplayViewModel(IConfig config) =>
-        new DisplayViewModel(_navigator, this, new ContentProvider(config), _pythonHandler);
+        new DisplayViewModel(_navigator, this, new ContentProvider(config), new LayoutProvider(), _pythonHandler);
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance
@@ -107,6 +109,13 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <returns>A new <see cref="EditorHotspotViewModel" /> instance</returns>
     public IEditorHotspotViewModel GetEditorHotspotViewModel(Hotspot hotspot) =>
         new EditorHotspotViewModel(hotspot, this);
+
+    /// <summary>
+    /// Creates a new <see cref="PositionEditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="PositionEditorViewModel" /> instance</returns>
+    public IPositionEditorViewModel GetPositionEditorViewModel() => new PositionEditorViewModel();
 
     /// <summary>
     /// Creates a new <see cref="DescriptionEditorViewModel" /> instance

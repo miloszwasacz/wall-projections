@@ -1,8 +1,11 @@
 ﻿using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
+using WallProjections.Test.Mocks.ViewModels.Editor;
 using WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
 using WallProjections.ViewModels;
+using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.Test.ViewModels;
@@ -30,13 +33,15 @@ public class SecondaryWindowViewModelTest
     }
 
     [AvaloniaTest]
-    [Ignore("ShowPositionEditor is not implemented yet")]
     public void ShowPositionEditorTest()
     {
         var vmProvider = new MockViewModelProvider();
+        var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
         using var viewModel = new SecondaryWindowViewModel(vmProvider);
-        // viewModel.ShowPositionEditor();
-        // Assert.That(viewModel.Content, Is.Null);
+        var editorViewModel = new MockEditorViewModel(vmProvider, fileHandler);
+        viewModel.ShowPositionEditor(editorViewModel);
+        Assert.That(viewModel.Content, Is.InstanceOf<IPositionEditorViewModel>());
+        Assert.That(viewModel.Content, Is.SameAs(editorViewModel.PositionEditor));
     }
 
     [AvaloniaTest]

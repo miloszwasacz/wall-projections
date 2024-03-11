@@ -2,6 +2,7 @@
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
@@ -40,9 +41,9 @@ public class MockSecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewM
     }
 
     /// <inheritdoc />
-    public void ShowPositionEditor()
+    public void ShowPositionEditor(IEditorViewModel editorViewModel)
     {
-        Content = null;
+        Content = editorViewModel.PositionEditor;
     }
 
     /// <inheritdoc />

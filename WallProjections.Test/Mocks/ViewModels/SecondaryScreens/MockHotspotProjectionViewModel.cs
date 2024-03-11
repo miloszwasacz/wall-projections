@@ -14,8 +14,8 @@ public class MockHotspotProjectionViewModel : IHotspotProjectionViewModel
     public MockHotspotProjectionViewModel(Hotspot hotspot)
     {
         Id = hotspot.Id;
-        X = hotspot.Position.X;
-        Y = hotspot.Position.Y;
+        X = hotspot.Position.X - hotspot.Position.R;
+        Y = hotspot.Position.Y - hotspot.Position.R;
         D = 2 * hotspot.Position.R;
     }
 }
@@ -33,10 +33,9 @@ public static class MockHotspotProjectionViewModelExtensions
     public static bool IsSameAsHotspot(this IHotspotProjectionViewModel self, Hotspot hotspot)
     {
         var id = self.Id == hotspot.Id;
-        var x = Math.Abs(self.X - hotspot.Position.X) < PositionCmpTolerance;
-        var y = Math.Abs(self.Y - hotspot.Position.Y) < PositionCmpTolerance;
+        var x = Math.Abs(self.X - (hotspot.Position.X - hotspot.Position.R)) < PositionCmpTolerance;
+        var y = Math.Abs(self.Y - (hotspot.Position.Y - hotspot.Position.R)) < PositionCmpTolerance;
         var d = Math.Abs(self.D - 2 * hotspot.Position.R) < PositionCmpTolerance;
         return id && x && y && d;
     }
 }
-

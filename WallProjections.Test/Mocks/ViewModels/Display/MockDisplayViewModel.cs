@@ -1,10 +1,12 @@
-﻿using ReactiveUI;
+﻿using System.Collections.Immutable;
 using WallProjections.Helper.Interfaces;
-using WallProjections.Models.Interfaces;
+using WallProjections.Models;
+using WallProjections.Test.Mocks.ViewModels.Display.Layouts;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
 namespace WallProjections.Test.Mocks.ViewModels.Display;
 
@@ -14,64 +16,33 @@ namespace WallProjections.Test.Mocks.ViewModels.Display;
 public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
 {
     /// <summary>
-    /// A stub for <see cref="Description" /> for testing purposes
-    /// </summary>
-    public const string DefaultDescription = "Default Description: ";
-
-    /// <summary>
-    /// The backing field for <see cref="SetConfigs" />
-    /// </summary>
-    private readonly List<IConfig> _configs = new();
-
-    /// <summary>
-    /// The backing field for <see cref="CurrentHotspotId" />
-    /// </summary>
-    private int _currentHotspotId = -1;
-
-    /// <summary>
     /// The <see cref="INavigator" /> to use for navigation between views
     /// </summary>
     private readonly INavigator _navigator;
 
     /// <summary>
-    /// Initializes a new <see cref="MockDisplayViewModel" /> with <see cref="ImageViewModel" /> set to
-    /// <paramref name="imageViewModel" /> and <see cref="VideoViewModel" /> set to <paramref name="videoViewModel" />
+    /// The <see cref="MockViewModelProvider" /> to pass to <see cref="MockLayoutProvider.GetLayout"/>
     /// </summary>
-    /// <param name="navigator"><see cref="INavigator" /> to use by the mock</param>
-    /// <param name="imageViewModel"><see cref="IImageViewModel" /> to use by the mock</param>
-    /// <param name="videoViewModel"><see cref="IVideoViewModel" /> to use by the mock</param>
-    /// <remarks>
-    /// Uses <see cref="MockImageViewModel" /> and <see cref="MockVideoViewModel" />
-    /// if the respective parameters are <i>null</i>
-    /// </remarks>
-    public MockDisplayViewModel(
-        INavigator? navigator = null,
-        IImageViewModel? imageViewModel = null,
-        IVideoViewModel? videoViewModel = null
-    )
-    {
-        _navigator = navigator ?? new MockNavigator();
-        ImageViewModel = imageViewModel ?? new MockImageViewModel();
-        VideoViewModel = videoViewModel ?? new MockVideoViewModel();
-    }
-
-    // /// <summary>
-    // /// The ID of an hotspot the viewmodel should display data about, or <i>-1</i> if no hotspot has ever been loaded
-    // /// </summary>
-    public int CurrentHotspotId
-    {
-        get => _currentHotspotId;
-        private set
-        {
-            this.RaiseAndSetIfChanged(ref _currentHotspotId, value);
-            this.RaisePropertyChanged(nameof(Description));
-        }
-    }
+    private readonly MockViewModelProvider _viewModelProvider = new();
 
     /// <summary>
-    /// The set of configs the viewmodel has been set to
+    /// The <see cref="MockLayoutProvider" /> to use for loading layouts
     /// </summary>
-    public IReadOnlyList<IConfig> SetConfigs => _configs;
+    private readonly MockLayoutProvider _layoutProvider = new();
+
+    /// <summary>
+    /// Initializes a new <see cref="MockDisplayViewModel" />
+    /// that uses the provided <see cref="INavigator" /> for navigation,
+    /// and a <see cref="MockLayoutProvider" /> for loading layouts.
+    /// </summary>
+    /// <param name="navigator"><see cref="INavigator" /> to use by the mock</param>
+    /// <remarks>
+    /// Uses <see cref="MockNavigator" /> if the provided parameter is <i>null</i>
+    /// </remarks>
+    public MockDisplayViewModel(INavigator? navigator = null)
+    {
+        _navigator = navigator ?? new MockNavigator();
+    }
 
     /// <summary>
     /// The number of times <see cref="Dispose" /> has been called
@@ -79,42 +50,23 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     public int DisposedCount { get; private set; }
 
     /// <summary>
-    /// Adds <paramref name="value" /> to <see cref="SetConfigs" />
+    /// Sets
     /// </summary>
-    public IConfig Config
-    {
-        set => _configs.Add(value);
-    }
-
-    /// <summary>
-    /// Returns whether <see cref="SetConfigs" /> is not empty
-    /// </summary>
-    public bool IsContentLoaded => _configs.Count > 0;
-
-    /// <summary>
-    /// Returns <see cref="DefaultDescription" /> + the ID that the viewmodel was constructed with
-    /// </summary>
-    public string Description => DefaultDescription + CurrentHotspotId;
-
-    /// <summary>
-    /// Returns <see cref="MockImageViewModel" />
-    /// </summary>
-    public IImageViewModel ImageViewModel { get; }
-
-    /// <summary>
-    /// Returns a <see cref="MockVideoViewModel" />
-    /// </summary>
-    public IVideoViewModel VideoViewModel { get; }
-
-    /// <summary>
-    /// Sets <see cref="CurrentHotspotId" /> to <paramref name="e" />.<see cref="IPythonHandler.HotspotSelectedArgs.Id" />
-    /// </summary>
-    /// <param name="sender">The caller of the event (not used)</param>
-    /// <param name="e">The event args containing the id of a hotspot to be theoretically loaded</param>
+    /// <inheritdoc />
     public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
     {
-        CurrentHotspotId = e.Id;
+        var media = new Hotspot.Media(
+            e.Id,
+            $"Hotspot {e.Id}",
+            "",
+            ImmutableList<string>.Empty,
+            ImmutableList<string>.Empty
+        );
+        ContentViewModel = _layoutProvider.GetLayout(_viewModelProvider, media);
     }
+
+    /// <inheritdoc />
+    public Layout? ContentViewModel { get; private set; }
 
     /// <summary>
     /// Calls <see cref="INavigator.OpenEditor" /> on <see cref="_navigator" />
@@ -138,7 +90,6 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     /// </summary>
     public void Dispose()
     {
-        VideoViewModel.Dispose();
         DisposedCount++;
     }
 }

@@ -11,6 +11,7 @@ using Avalonia.VisualTree;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.Views;
 using WallProjections.Views.SecondaryScreens;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
@@ -151,7 +152,7 @@ public sealed class Navigator : ViewModelBase, INavigator
             DataContext = vm
         };
         Navigate(editorWindow);
-        _secondaryScreen.viewModel.ShowPositionEditor();
+        _secondaryScreen.viewModel.ShowPositionEditor(vm);
 
         _windowMutex.ReleaseMutex();
     }
@@ -188,7 +189,16 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <inheritdoc />
     public void HideCalibrationMarkers()
     {
-        _secondaryScreen.viewModel.ShowPositionEditor();
+        IEditorViewModel? vm = null;
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            if (_mainWindow?.DataContext is IEditorViewModel editorViewModel)
+                vm = editorViewModel;
+        });
+
+        // TODO Test this physically
+        if (vm is not null)
+            _secondaryScreen.viewModel.ShowPositionEditor(vm);
     }
 
     /// <inheritdoc />

@@ -29,6 +29,11 @@ public interface IEditorViewModel
     public IEditorHotspotViewModel? SelectedHotspot { get; set; }
 
     /// <summary>
+    /// A <see cref="IPositionEditorViewModel" /> for editing the position of the currently selected hotspot.
+    /// </summary>
+    public IPositionEditorViewModel PositionEditor { get; }
+
+    /// <summary>
     /// A <see cref="IDescriptionEditorViewModel" /> for editing the title and description of the currently selected hotspot.
     /// </summary>
     public IDescriptionEditorViewModel DescriptionEditor { get; }

@@ -1,0 +1,40 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
+        xmlns:views="using:WallProjections.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WallProjections.Views.SecondaryScreens.PositionEditorView"
+        x:DataType="vm:IPositionEditorViewModel"
+        Background="Black"
+        PointerMoved="OnPointerMoved"
+        PointerWheelChanged="OnScroll"
+        PointerPressed="OnPointerPressed"
+        KeyDown="OnKeyDown">
+
+    <Grid ColumnDefinitions="*" RowDefinitions="*">
+
+        <!-- Unselected Hotspots -->
+        <views:HotspotView Grid.Column="0" Grid.Row="0"
+                           HotspotFill="Gray"
+                           ItemsSource="{Binding UnselectedHotspots}" />
+
+        <!-- Selected Hotspot -->
+        <Canvas Grid.Column="0" Grid.Row="0">
+
+            <Path Canvas.Left="{Binding X}"
+                  Canvas.Top="{Binding Y}"
+                  Fill="White">
+                <Path.Data>
+                    <EllipseGeometry
+                        RadiusX="{Binding R}"
+                        RadiusY="{Binding R}" />
+                </Path.Data>
+            </Path>
+
+        </Canvas>
+
+    </Grid>
+
+</UserControl>

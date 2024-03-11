@@ -23,8 +23,8 @@ public class HotspotProjectionViewModelTest
         Assert.Multiple(() =>
         {
             Assert.That(viewModel.Id, Is.EqualTo(Hotspot.Id));
-            Assert.That(viewModel.X, Is.EqualTo(Hotspot.Position.X));
-            Assert.That(viewModel.Y, Is.EqualTo(Hotspot.Position.Y));
+            Assert.That(viewModel.X, Is.EqualTo(Hotspot.Position.X - Hotspot.Position.R));
+            Assert.That(viewModel.Y, Is.EqualTo(Hotspot.Position.Y - Hotspot.Position.R));
             Assert.That(viewModel.D, Is.EqualTo(Hotspot.Position.R * 2));
             Assert.That(viewModel.IsActive, Is.False);
         });

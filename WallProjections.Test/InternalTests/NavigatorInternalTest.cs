@@ -7,7 +7,6 @@ using WallProjections.Test.Mocks.Views;
 using WallProjections.Test.ViewModels;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces.Editor;
-using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.Views;
 
 namespace WallProjections.Test.InternalTests;
@@ -38,8 +37,7 @@ public class NavigatorInternalTest
 
         Dispatcher.UIThread.RunJobs();
         await Task.Delay(400);
-        //TODO Change TSecondaryVM to the correct type
-        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IHotspotDisplayViewModel>();
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IPositionEditorViewModel>();
         Assert.Multiple(() =>
         {
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));

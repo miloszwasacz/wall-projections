@@ -38,7 +38,6 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// </summary>
     private readonly IPythonHandler _pythonHandler;
 
-    //TODO Add calibration API
     /// <inheritdoc cref="IConfig.HomographyMatrix" />
     private double[,] _homographyMatrix;
 
@@ -89,6 +88,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             if (Hotspots.IsItemUpdating) return;
 
             this.RaiseAndSetIfChanged(ref _selectedHotspot, value);
+            PositionEditor.SelectHotspot(value, Hotspots.Where(h => h != value).Select(h => h.Position));
             DescriptionEditor.Hotspot = value;
 
             ImageEditor.Media.CollectionChanged -= SetUnsaved;
@@ -109,6 +109,9 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             VideoEditor.Media.CollectionChanged += SetUnsaved;
         }
     }
+
+    /// <inheritdoc />
+    public IPositionEditorViewModel PositionEditor { get; }
 
     /// <inheritdoc />
     public IDescriptionEditorViewModel DescriptionEditor { get; }
@@ -303,6 +306,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             { 0, 0, 1 }
         };
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>();
+        PositionEditor = vmProvider.GetPositionEditorViewModel();
         DescriptionEditor = vmProvider.GetDescriptionEditorViewModel();
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
@@ -337,6 +341,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         _hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>(
             config.Hotspots.Select(hotspot => _vmProvider.GetEditorHotspotViewModel(hotspot))
         );
+        PositionEditor = vmProvider.GetPositionEditorViewModel();
         DescriptionEditor = vmProvider.GetDescriptionEditorViewModel();
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
@@ -354,6 +359,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     private void InitEventHandlers()
     {
         _hotspots.CollectionChanged += SetUnsaved;
+        PositionEditor.HotspotPositionChanged += SetUnsaved;
         DescriptionEditor.ContentChanged += SetUnsaved;
         ImageEditor.Media.CollectionChanged += SetUnsaved;
         VideoEditor.Media.CollectionChanged += SetUnsaved;

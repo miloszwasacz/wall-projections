@@ -25,7 +25,6 @@ public class MockContentProvider : IContentProvider
     /// Creates a new <see cref="MockContentProvider" /> that will search through the given list of media
     /// when <see cref="GetMedia" /> is called
     /// </summary>
-    /// <param name="result"></param>
     public MockContentProvider(IEnumerable<Hotspot.Media> result)
     {
         _media = new List<Hotspot.Media>(result);

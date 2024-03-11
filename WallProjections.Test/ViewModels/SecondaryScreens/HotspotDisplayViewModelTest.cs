@@ -21,7 +21,6 @@ public class HotspotDisplayViewModelTest
     /// <summary>
     /// Creates a new config with 3 hotspots
     /// </summary>
-    /// <returns></returns>
     private static IConfig CreateConfig()
     {
         var hotspots = new[]

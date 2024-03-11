@@ -1,6 +1,9 @@
 ﻿using System;
 using Avalonia.Controls;
 using Avalonia.Input;
+#if !RELEASE
+using Avalonia;
+#endif
 
 namespace WallProjections.Views;
 
@@ -9,6 +12,9 @@ public partial class SecondaryWindow : Window
     public SecondaryWindow()
     {
         InitializeComponent();
+#if !RELEASE
+        this.AttachDevTools();
+#endif
     }
 
     // ReSharper disable UnusedParameter.Local

@@ -2,6 +2,7 @@
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels;
 
@@ -47,10 +48,9 @@ public class SecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewModel
     }
 
     /// <inheritdoc />
-    public void ShowPositionEditor()
+    public void ShowPositionEditor(IEditorViewModel editorViewModel)
     {
-        //TODO Implement ShowPositionEditor
-        Content = null;
+        Content = editorViewModel.PositionEditor;
     }
 
     /// <inheritdoc />

@@ -31,8 +31,7 @@ public class ViewModelProviderTest
         Assert.Multiple(() =>
         {
             Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
-            Assert.That(displayViewModel.ImageViewModel, Is.Not.Null);
-            Assert.That(displayViewModel.VideoViewModel, Is.Not.Null);
+            Assert.That(displayViewModel.ContentViewModel, Is.Not.Null);
         });
     }
 
@@ -155,7 +154,7 @@ public class ViewModelProviderTest
         Assert.Multiple(() =>
         {
             Assert.That(editorHotspotViewModel.Id, Is.EqualTo(id));
-            Assert.That(editorHotspotViewModel.Position, Is.EqualTo(new Coord(0, 0, 0)));
+            Assert.That(editorHotspotViewModel.Position, Is.EqualTo(new Coord()));
             Assert.That(editorHotspotViewModel.Title, Is.Empty);
             Assert.That(editorHotspotViewModel.Description, Is.Empty);
             Assert.That(editorHotspotViewModel.Images, Is.Empty);

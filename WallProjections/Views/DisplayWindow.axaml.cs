@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
-using System.Diagnostics.CodeAnalysis;
 using WallProjections.ViewModels.Interfaces.Display;
 #if DEBUGSKIPPYTHON
+using System.Diagnostics.CodeAnalysis;
 using Avalonia.Data;
 using WallProjections.Helper;
 #endif
@@ -87,18 +87,6 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
         e.Cancel = true;
 
         viewModel.CloseDisplay();
-    }
-
-    /// <summary>
-    /// Resizes the video view to maintain a 16:9 aspect ratio.
-    /// </summary>
-    /// <param name="sender">The sender of the event (unused).</param>
-    /// <param name="e">The event arguments containing the new size of the video view.</param>
-    internal void OnVideoViewResize(object? sender, SizeChangedEventArgs e)
-    {
-        if (e.WidthChanged)
-            //TODO Don't use hardcoded ratio
-            VideoView.Height = e.NewSize.Width * 9 / 16;
     }
 
     // ReSharper restore UnusedParameter.Local

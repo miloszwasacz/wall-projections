@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.Views.EditorUserControls;
 using ImportWarningDialog = WallProjections.Views.EditorUserControls.ImportWarningDialog;
+#if !RELEASE
+using Avalonia;
+#endif
 
 namespace WallProjections.Views;
 
@@ -42,6 +46,9 @@ public partial class EditorWindow : Window
     public EditorWindow()
     {
         InitializeComponent();
+#if !RELEASE
+        this.AttachDevTools();
+#endif
     }
 
     // ReSharper disable UnusedParameter.Local
@@ -51,8 +58,7 @@ public partial class EditorWindow : Window
     /// </summary>
     private void MediaEditor_OnOpenExplorerFailed(object? sender, RoutedEventArgs e)
     {
-        Toast.Text = ExplorerErrorMessage;
-        Toast.Show(Toast.ShowDuration.Short);
+        ShowToast(ExplorerErrorMessage);
     }
 
     /// <summary>
@@ -156,7 +162,7 @@ public partial class EditorWindow : Window
     /// <summary>
     /// Removes media from the <see cref="IEditorHotspotViewModel.Images" /> collection.
     /// </summary>
-    /// <param name="sender"></param>
+    /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments holding the media to remove.</param>
     private void ImagesEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e)
     {
@@ -214,8 +220,7 @@ public partial class EditorWindow : Window
             if (vm.ImportConfig(file)) return;
 
             // An error occurred while importing
-            Toast.Text = ImportErrorMessage;
-            Toast.Show(Toast.ShowDuration.Short);
+            ShowToast(ImportErrorMessage);
         };
 
         _isDialogShown = true;
@@ -246,8 +251,7 @@ public partial class EditorWindow : Window
         if (vm.ExportConfig(folder)) return; //TODO Show a success message
 
         // An error occurred while exporting
-        Toast.Text = ExportErrorMessage;
-        Toast.Show(Toast.ShowDuration.Short);
+        ShowToast(ExportErrorMessage);
     }
 
     /// <summary>
@@ -276,8 +280,7 @@ public partial class EditorWindow : Window
             if (success) return; //TODO Show a success message
 
             // An error occurred while calibrating
-            Toast.Text = CalibrationErrorMessage;
-            Toast.Show(Toast.ShowDuration.Short);
+            ShowToast(CalibrationErrorMessage);
         };
         dialog.Cancel += (_, _) =>
         {
@@ -302,8 +305,7 @@ public partial class EditorWindow : Window
         if (vm.SaveConfig()) return;
 
         // An error occurred while saving
-        Toast.Text = SaveErrorMessage;
-        Toast.Show(Toast.ShowDuration.Short);
+        ShowToast(SaveErrorMessage);
     }
 
     /// <summary>
@@ -327,6 +329,32 @@ public partial class EditorWindow : Window
         _isDialogShown = true;
         await dialog.ShowDialog(this);
         _isDialogShown = false;
+    }
+
+    private void EditPosition_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        //TODO Show some indication that the PositionEditor is in edit mode
+        //TODO Add focus management to Navigator so that focus is automatically set to the PositionEditor
+
+        vm.PositionEditor.IsInEditMode = !vm.PositionEditor.IsInEditMode;
+    }
+
+    /// <summary>
+    /// Handles key presses:
+    /// <ul>
+    ///     <li><b>Escape</b>: Exit <see cref="IPositionEditorViewModel.IsInEditMode">edit mode</see> for <see cref="IEditorViewModel.PositionEditor" /></li>
+    /// </ul>
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the key that was pressed.</param>
+    private void Editor_OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        if (e.Key == Key.Escape)
+            vm.PositionEditor.IsInEditMode = false;
     }
 
     // ReSharper disable once SuggestBaseTypeForParameter
@@ -434,5 +462,11 @@ public partial class EditorWindow : Window
         _isDialogShown = true;
         await dialog.ShowDialog(this);
         _isDialogShown = false;
+    }
+
+    private void ShowToast(string message, Toast.ShowDuration duration = Toast.ShowDuration.Short)
+    {
+        Toast.Text = message;
+        Toast.Show(duration);
     }
 }

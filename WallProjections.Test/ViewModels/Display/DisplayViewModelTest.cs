@@ -5,9 +5,9 @@ using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
-using WallProjections.Test.Mocks.ViewModels.Display;
+using WallProjections.Test.Mocks.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Display;
-using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Display.Layouts;
 using static WallProjections.Test.TestExtensions;
 
 namespace WallProjections.Test.ViewModels.Display;
@@ -90,6 +90,8 @@ public class DisplayViewModelTest
 
     private static MockViewModelProvider ViewModelProvider => new();
 
+    private static ILayoutProvider LayoutProvider => new MockLayoutProvider();
+
     private static IEnumerable<TestCaseData<ImmutableList<Hotspot.Media>>> CreationTestCases()
     {
         yield return MakeTestData(FilesAll, "AllMediaTypes");
@@ -152,10 +154,15 @@ public class DisplayViewModelTest
         var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(hotspots);
 
-        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
+        using var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            pythonHandler
+        );
 
         AssertJustInitialized(displayViewModel);
-        displayViewModel.Dispose();
     }
 
     [Test]
@@ -163,38 +170,47 @@ public class DisplayViewModelTest
     public void OnHotspotSelectedTest(ImmutableList<Hotspot.Media> hotspots)
     {
         var hotspot = hotspots[0];
+        var hotspot2 = new Hotspot.Media(2, "Test2", "Test2", ImmutableList<string>.Empty, ImmutableList<string>.Empty);
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
-        var contentProvider = new MockContentProvider(hotspots);
+        var contentProvider = new MockContentProvider(hotspots.Add(hotspot2));
 
-        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
-        var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
-        var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
+        using var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            pythonHandler
+        );
 
-        var args = new IPythonHandler.HotspotSelectedArgs(HotspotId);
-        Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
+        var args = new IPythonHandler.HotspotSelectedArgs(hotspot.Id);
+        Assert.DoesNotThrowAsync(async () =>
+        {
+            displayViewModel.OnHotspotSelected(null, args);
+            await Task.Delay(200);
+        });
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
+        var content = (MockGenericLayout)displayViewModel.ContentViewModel;
         Assert.Multiple(() =>
         {
-            Assert.That(displayViewModel.Description, Is.EqualTo(Text));
-
-            Assert.That(imageViewModel.HideCount, Is.EqualTo(1));
-            Assert.That(imageViewModel.ImagePaths, Is.SubsetOf(hotspot.ImagePaths));
-
-            if (hotspot.ImagePaths.IsEmpty)
-            {
-                Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
-            }
-
-
-            Assert.That(videoViewModel.StopCount, Is.EqualTo(1));
-            Assert.That(videoViewModel.VideoPaths, Is.SubsetOf(hotspot.VideoPaths));
-
-            if (hotspot.VideoPaths.IsEmpty)
-            {
-                Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);
-            }
+            Assert.That(content.Media, Is.EqualTo(hotspot));
+            Assert.That(content.IsDisposed, Is.False);
         });
-        displayViewModel.Dispose();
+
+        var args2 = new IPythonHandler.HotspotSelectedArgs(hotspot2.Id);
+        Assert.DoesNotThrowAsync(async () =>
+        {
+            displayViewModel.OnHotspotSelected(null, args2);
+            await Task.Delay(200);
+        });
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
+        var content2 = (MockGenericLayout)displayViewModel.ContentViewModel;
+        Assert.Multiple(() =>
+        {
+            Assert.That(content2.Media, Is.EqualTo(hotspot2));
+            Assert.That(content2.IsDisposed, Is.False);
+            Assert.That(content.IsDisposed, Is.True);
+        });
     }
 
     [Test]
@@ -204,47 +220,61 @@ public class DisplayViewModelTest
         var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(ImmutableList<Hotspot.Media>.Empty);
 
-        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
+        using var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            pythonHandler
+        );
 
         var args = new IPythonHandler.HotspotSelectedArgs(HotspotId);
         AssertJustInitialized(displayViewModel);
-        Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
 
+        Assert.DoesNotThrowAsync(async () =>
+        {
+            displayViewModel.OnHotspotSelected(null, args);
+            await Task.Delay(200);
+        });
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockSimpleDescriptionLayout>());
+        var content = (MockSimpleDescriptionLayout)displayViewModel.ContentViewModel;
         Assert.Multiple(() =>
         {
-            Assert.That(displayViewModel.Description, Is.EqualTo(DisplayViewModel.NotFound));
-            Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
-            Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);
+            Assert.That(content.Title, Is.EqualTo("Error"));
+            Assert.That(content.Description, Is.EqualTo(DisplayViewModel.NotFound));
         });
-
-        displayViewModel.Dispose();
     }
 
     [Test]
     [TestCaseSource(nameof(OnHotspotSelectedExceptionTestCases))]
-    public void OnHotspotSelectedExceptionTest((Exception, string) testCase)
+    public async Task OnHotspotSelectedExceptionTest((Exception, string) testCase)
     {
         var (exception, expectedDescription) = testCase;
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(exception);
 
-        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
-        var imageViewModel = (displayViewModel.ImageViewModel as MockImageViewModel)!;
-        var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
+        using var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            pythonHandler
+        );
 
         var args = new IPythonHandler.HotspotSelectedArgs(HotspotId);
-
         AssertJustInitialized(displayViewModel);
 
         Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
+        await Task.Delay(200);
+
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockSimpleDescriptionLayout>());
+        var content = (MockSimpleDescriptionLayout)displayViewModel.ContentViewModel;
         Assert.Multiple(() =>
         {
-            Assert.That(displayViewModel.Description, Is.EqualTo(expectedDescription));
-            Assert.That(imageViewModel.HideCount, Is.EqualTo(1));
-            Assert.That(videoViewModel.StopCount, Is.EqualTo(1));
+            Assert.That(content.Title, Is.EqualTo("Error"));
+            Assert.That(content.Description, Is.EqualTo(expectedDescription));
         });
-        displayViewModel.Dispose();
     }
 
     [Test]
@@ -255,11 +285,16 @@ public class DisplayViewModelTest
         var contentProvider = new MockContentProvider(FilesAll);
         Assert.That(navigator.IsEditorOpen, Is.False);
 
-        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
+        using var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            pythonHandler
+        );
         displayViewModel.OpenEditor();
 
         Assert.That(navigator.IsEditorOpen, Is.True);
-        displayViewModel.Dispose();
     }
 
     [Test]
@@ -270,39 +305,62 @@ public class DisplayViewModelTest
         var contentProvider = new MockContentProvider(FilesAll);
         Assert.That(navigator.HasBeenShutDown, Is.False);
 
-        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
+        using var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            pythonHandler
+        );
         displayViewModel.CloseDisplay();
 
         Assert.That(navigator.HasBeenShutDown, Is.True);
-        displayViewModel.Dispose();
     }
 
     [Test]
-    public void DisposeTest()
+    public async Task DisposeTest()
     {
+        var hotspots = FilesAll;
+        var hotspot = hotspots[0];
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
-        var config = new Config(new double[3, 3], Enumerable.Empty<Hotspot>());
-        var contentProvider = new ContentProvider(config);
+        var contentProvider = new MockContentProvider(FilesAll);
 
-        var displayViewModel = new DisplayViewModel(navigator, ViewModelProvider, contentProvider, pythonHandler);
-        var videoViewModel = (displayViewModel.VideoViewModel as MockVideoViewModel)!;
+        var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            pythonHandler
+        );
+        displayViewModel.OnHotspotSelected(null, new IPythonHandler.HotspotSelectedArgs(hotspot.Id));
+        await Task.Delay(200);
+
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
+        var content = (MockGenericLayout)displayViewModel.ContentViewModel;
         displayViewModel.Dispose();
 
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockSimpleDescriptionLayout>());
+        AssertJustInitialized(displayViewModel);
         Assert.Multiple(() =>
         {
             Assert.That(pythonHandler.HasSubscribers, Is.False);
-            Assert.That(videoViewModel.DisposeCount, Is.EqualTo(1));
+            Assert.That(content.IsDisposed, Is.True);
         });
     }
 
-    private static void AssertJustInitialized(IDisplayViewModel displayViewModel)
+    // ReSharper disable once SuggestBaseTypeForParameter
+    /// <summary>
+    /// Asserts that the provided <see cref="DisplayViewModel"/> is in a just-initialized state.
+    /// </summary>
+    private static void AssertJustInitialized(DisplayViewModel displayViewModel)
     {
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockSimpleDescriptionLayout>());
+        var content = (MockSimpleDescriptionLayout)displayViewModel.ContentViewModel;
         Assert.Multiple(() =>
         {
-            Assert.That(displayViewModel.Description, Is.Empty);
-            Assert.That(displayViewModel.ImageViewModel.HasImages, Is.False);
-            Assert.That(displayViewModel.VideoViewModel.HasVideos, Is.False);
+            Assert.That(content.Title, Is.EqualTo(DisplayViewModel.WelcomeTitle));
+            Assert.That(content.Description, Is.EqualTo(DisplayViewModel.WelcomeMessage));
         });
     }
 }

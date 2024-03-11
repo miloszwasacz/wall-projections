@@ -12,24 +12,26 @@ public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewM
     /// </summary>
     private bool _isActive;
 
-    /// <summary>
-    /// The id of the hotspot to be activated
-    /// </summary>
+    /// <inheritdoc />
     public int Id { get; }
 
     /// <summary>
-    /// The number of pixels from the leftmost side
+    /// The X coordinate of the top-left corner of the hotspot in pixels
     /// </summary>
+    /// <remarks>
+    /// Because the hotspot is a circle, this is the X coordinate of the top-left corner of the bounding box
+    /// </remarks>
     public double X { get; }
 
     /// <summary>
-    /// The number of pixels from the top
+    /// The Y coordinate of the top-left corner of the hotspot in pixels
     /// </summary>
+    /// <remarks>
+    /// Because the hotspot is a circle, this is the Y coordinate of the top-left corner of the bounding box
+    /// </remarks>
     public double Y { get; }
 
-    /// <summary>
-    /// The diameter of the hotspot
-    /// </summary>
+    /// <inheritdoc />
     public double D { get; }
 
     /// <summary>
@@ -48,8 +50,8 @@ public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewM
     public HotspotProjectionViewModel(Hotspot hotspot)
     {
         Id = hotspot.Id;
-        X = hotspot.Position.X;
-        Y = hotspot.Position.Y;
+        X = hotspot.Position.X - hotspot.Position.R;
+        Y = hotspot.Position.Y - hotspot.Position.R;
         D = hotspot.Position.R * 2;
     }
 }

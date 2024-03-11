@@ -3,15 +3,14 @@ using Avalonia.VisualTree;
 using WallProjections.Models;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.ViewModels;
-using WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.Views;
 using WallProjections.Views.SecondaryScreens;
 
-namespace WallProjections.Test.Views;
+namespace WallProjections.Test.Views.SecondaryScreens;
 
 [TestFixture]
-public class HotspotWindowTest
+public class HotspotDisplayViewTest
 {
     [AvaloniaTest]
     public void AllHotspotsDisplayedTest()
