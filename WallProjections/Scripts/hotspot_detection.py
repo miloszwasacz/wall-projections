@@ -10,6 +10,7 @@ from .Helper.EventHandler import EventHandler
 from .Helper.Hotspot import Hotspot
 # noinspection PyPackages
 from .Helper.VideoCaptureThread import VideoCaptureThread
+# noinspection PyPackages
 from .Interop.json_dict_converters import json_to_3dict
 # noinspection PyPackages
 from .calibration import Calibrator
@@ -63,7 +64,7 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     global detection_running
     detection_running = True
 
-    photo = VideoCaptureThread.take_photo() #TODO: there has got to be a better way of getting camera width and height
+    photo = VideoCaptureThread.take_photo()  # TODO: there has got to be a better way of getting camera width and height
     h, w, d = photo.shape
     logging.info(f"Camera width: {w}, height: {h}")
     calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
@@ -82,10 +83,6 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     success = video_capture.open(0, 0)
     if not success:
         raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid.")
-    # for prop_id, prop_value in VIDEO_CAPTURE_PROPERTIES.items():
-    #     supported = video_capture.set(prop_id, prop_value)
-    #     if not supported:
-    #         logging.warning(f"Property id {prop_id} is not supported by video capture backend {VIDEO_CAPTURE_BACKEND}.")
 
     logging.info("Initialisation done.")
 
@@ -96,20 +93,21 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
             logging.warning("Unsuccessful video read; ignoring frame.")
             continue
 
-        # camera_height, camera_width, _ = video_capture_img.shape
-
         # run model
         video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
         model_output = hands_model.process(video_capture_img_rgb)
 
+        # noinspection PyUnresolvedReferences
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
             fingertip_coords_norm = [landmarks.landmark[i] for i in FINGERTIP_INDICES for landmarks in
-                                model_output.multi_hand_landmarks]
-            fingertip_coords_proj = [calibrator.norm_to_proj((fingertip.x, fingertip.y)) for fingertip in fingertip_coords_norm]
+                                     model_output.multi_hand_landmarks]
+            fingertip_coords_proj = [calibrator.norm_to_proj((fingertip.x, fingertip.y)) for fingertip in
+                                     fingertip_coords_norm]
             for hotspot in hotspots:
                 hotspot.update(fingertip_coords_proj)
     video_capture.release()
+
 
 def stop_hotspot_detection():
     logging.info("stopping hotspot detection")

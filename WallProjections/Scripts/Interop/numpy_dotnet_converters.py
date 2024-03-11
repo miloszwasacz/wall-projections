@@ -1,9 +1,8 @@
 ﻿# Code taken from https://github.com/pythonnet/pythonnet/issues/514#issuecomment-350375105
-import json
-
 import numpy as np
 import ctypes
 import clr
+
 clr.AddReference('System')
 import System
 from System import Array, Int32
@@ -105,6 +104,7 @@ def asNetArray(npArray):
         if destHandle.IsAllocated: destHandle.Free()
     return netArray
 
+
 if __name__ == "__main__":
-    array =np.array([1,2,3,4,5,6,7,8,9])
+    array = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
     print(asNumpyArray(asNetArray(array)))

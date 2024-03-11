@@ -1,10 +1,7 @@
-import logging
 from typing import Tuple
 
 # noinspection PyPackages
 from .EventHandler import EventHandler
-# noinspection PyPackages
-from ..calibration import Calibrator
 
 
 class Hotspot:

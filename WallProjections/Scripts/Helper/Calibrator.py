@@ -59,7 +59,8 @@ class Calibrator:
         logging.info("To Coords " + str(to_coords))
         for iD in from_coords:
             if iD in to_coords:  # if iD in both dictionaries
-                logging.info("Matching coords found: " + str(iD) + " " + str(from_coords[iD]) + " " + str(to_coords[iD]))
+                logging.info(
+                    "Matching coords found: " + str(iD) + " " + str(from_coords[iD]) + " " + str(to_coords[iD]))
                 from_array.append(from_coords[iD])
                 to_array.append(to_coords[iD])
 
@@ -78,7 +79,6 @@ class Calibrator:
         self._transformation_matrix = transformation_matrix
         self._inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
         self._camera_res = camera_res
-
 
     def proj_to_cam(self, proj_coords: tuple[int, int]) -> tuple[np.float32, np.float32]:
         """
@@ -110,5 +110,3 @@ class Calibrator:
         """
         cam_coords = (norm_coords[0] * self._camera_res[0], norm_coords[1] * self._camera_res[1])
         return self.cam_to_proj(cam_coords)
-
-
