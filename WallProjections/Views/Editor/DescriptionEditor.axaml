@@ -1,6 +1,6 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="using:WallProjections.Views.EditorUserControls"
+        xmlns:controls="using:WallProjections.Views.Editor"
         xmlns:converters="using:WallProjections.Views.Converters"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
         xmlns:views="using:WallProjections.Views">

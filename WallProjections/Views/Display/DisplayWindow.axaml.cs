@@ -8,7 +8,7 @@ using Avalonia.Data;
 using WallProjections.Helper;
 #endif
 
-namespace WallProjections.Views;
+namespace WallProjections.Views.Display;
 
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {

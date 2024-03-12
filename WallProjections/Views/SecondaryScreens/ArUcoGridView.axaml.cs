@@ -21,7 +21,7 @@ public partial class ArUcoGridView : UserControl
     /// Gets the positions of all displayed ArUco markers in the grid.
     /// </summary>
     /// <returns>A dictionary of ArUco ids and their positions,
-    /// or <i>null</i> if the <see cref="ArUcoGridView.DataContext" /> is not an <see cref="IArUcoGridViewModel"/>.
+    /// or <i>null</i> if the <see cref="ArUcoGridView.DataContext" /> is not an <see cref="AbsArUcoGridViewModel"/>.
     /// </returns>
     public ImmutableDictionary<int, Point> GetArUcoPositions() => this.GetVisualDescendants().OfType<Image>()
         .Where(image => image.Tag is ArUco)

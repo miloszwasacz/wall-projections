@@ -4,9 +4,8 @@ using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Editor;
 using WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
-using WallProjections.ViewModels;
-using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.Test.ViewModels;
 
@@ -29,7 +28,7 @@ public class SecondaryWindowViewModelTest
         var vmProvider = new MockViewModelProvider();
         using var viewModel = new SecondaryWindowViewModel(vmProvider);
         viewModel.ShowHotspotDisplay(CreateConfig());
-        Assert.That(viewModel.Content, Is.InstanceOf<IHotspotDisplayViewModel>());
+        Assert.That(viewModel.Content, Is.InstanceOf<AbsHotspotDisplayViewModel>());
     }
 
     [AvaloniaTest]
@@ -40,7 +39,7 @@ public class SecondaryWindowViewModelTest
         using var viewModel = new SecondaryWindowViewModel(vmProvider);
         var editorViewModel = new MockEditorViewModel(vmProvider, fileHandler);
         viewModel.ShowPositionEditor(editorViewModel);
-        Assert.That(viewModel.Content, Is.InstanceOf<IPositionEditorViewModel>());
+        Assert.That(viewModel.Content, Is.InstanceOf<AbsPositionEditorViewModel>());
         Assert.That(viewModel.Content, Is.SameAs(editorViewModel.PositionEditor));
     }
 
@@ -50,7 +49,7 @@ public class SecondaryWindowViewModelTest
         var vmProvider = new MockViewModelProvider();
         using var viewModel = new SecondaryWindowViewModel(vmProvider);
         viewModel.ShowArUcoGrid();
-        Assert.That(viewModel.Content, Is.InstanceOf<IArUcoGridViewModel>());
+        Assert.That(viewModel.Content, Is.InstanceOf<AbsArUcoGridViewModel>());
     }
 
     [AvaloniaTest]
@@ -61,12 +60,12 @@ public class SecondaryWindowViewModelTest
 
         viewModel.ShowHotspotDisplay(CreateConfig());
         var hotspotDisplay = viewModel.Content as MockHotspotDisplayViewModel;
-        Assert.That(viewModel.Content, Is.InstanceOf<IHotspotDisplayViewModel>());
+        Assert.That(viewModel.Content, Is.InstanceOf<AbsHotspotDisplayViewModel>());
 
         viewModel.ShowArUcoGrid();
         Assert.Multiple(() =>
         {
-            Assert.That(viewModel.Content, Is.InstanceOf<IArUcoGridViewModel>());
+            Assert.That(viewModel.Content, Is.InstanceOf<AbsArUcoGridViewModel>());
             Assert.That(hotspotDisplay!.IsDisposed, Is.True);
         });
     }
@@ -79,7 +78,7 @@ public class SecondaryWindowViewModelTest
 
         viewModel.ShowHotspotDisplay(CreateConfig());
         var hotspotDisplay = viewModel.Content as MockHotspotDisplayViewModel;
-        Assert.That(viewModel.Content, Is.InstanceOf<IHotspotDisplayViewModel>());
+        Assert.That(viewModel.Content, Is.InstanceOf<AbsHotspotDisplayViewModel>());
 
         viewModel.Dispose();
         Assert.Multiple(() =>

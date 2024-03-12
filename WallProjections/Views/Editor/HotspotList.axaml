@@ -5,7 +5,7 @@
              xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
              xmlns:views="using:WallProjections.Views"
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
-             x:Class="WallProjections.Views.EditorUserControls.HotspotList"
+             x:Class="WallProjections.Views.Editor.HotspotList"
              x:DataType="vm:IEditorViewModel">
 
     <!--TODO Add proper styles -->

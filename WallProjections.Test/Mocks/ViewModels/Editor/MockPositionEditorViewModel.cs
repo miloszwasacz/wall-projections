@@ -1,10 +1,11 @@
 ﻿using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.Test.Mocks.ViewModels.Editor;
 
-public class MockPositionEditorViewModel : IPositionEditorViewModel
+public class MockPositionEditorViewModel : AbsPositionEditorViewModel
 {
     /// <summary>
     /// The backing field for <see cref="SelectedHotspot" />

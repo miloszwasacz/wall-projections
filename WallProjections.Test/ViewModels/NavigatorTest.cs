@@ -7,11 +7,12 @@ using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.Views;
 using WallProjections.ViewModels;
-using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
-using WallProjections.Views;
+using WallProjections.Views.Display;
+using WallProjections.Views.Editor;
+using WallProjections.Views.SecondaryScreens;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 
 namespace WallProjections.Test.ViewModels;
@@ -32,7 +33,7 @@ public class NavigatorTest
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
         await FlushUIThread(100);
-        lifetime.AssertOpenedWindows<DisplayWindow, IDisplayViewModel, IHotspotDisplayViewModel>();
+        lifetime.AssertOpenedWindows<DisplayWindow, IDisplayViewModel, AbsHotspotDisplayViewModel>();
         Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
     }
 
@@ -48,7 +49,7 @@ public class NavigatorTest
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
 
         await FlushUIThread(100);
-        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IPositionEditorViewModel>();
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>();
         Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
     }
 
@@ -69,7 +70,7 @@ public class NavigatorTest
 
         await FlushUIThread();
         await Task.Delay(400);
-        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IPositionEditorViewModel>();
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>();
         Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
     }
 
@@ -90,7 +91,7 @@ public class NavigatorTest
         navigator.CloseEditor();
 
         await FlushUIThread();
-        lifetime.AssertOpenedWindows<DisplayWindow, IDisplayViewModel, IHotspotDisplayViewModel>();
+        lifetime.AssertOpenedWindows<DisplayWindow, IDisplayViewModel, AbsHotspotDisplayViewModel>();
         Assert.Multiple(() =>
         {
             Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
@@ -136,15 +137,15 @@ public class NavigatorTest
 
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
         await FlushUIThread(100);
-        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IPositionEditorViewModel>();
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>();
 
         navigator.ShowCalibrationMarkers();
         await FlushUIThread();
-        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IArUcoGridViewModel>();
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsArUcoGridViewModel>();
 
         navigator.HideCalibrationMarkers();
         await FlushUIThread();
-        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IPositionEditorViewModel>();
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>();
     }
 
     [AvaloniaTest]
@@ -159,7 +160,7 @@ public class NavigatorTest
         using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
         navigator.ShowCalibrationMarkers();
         await FlushUIThread();
-        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, IArUcoGridViewModel>();
+        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsArUcoGridViewModel>();
 
         var positions = navigator.GetArUcoPositions();
         Assert.That(positions, Is.Not.Null.And.Not.Empty);

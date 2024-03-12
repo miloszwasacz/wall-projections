@@ -1,8 +1,8 @@
 ﻿using ReactiveUI;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels;
-using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 

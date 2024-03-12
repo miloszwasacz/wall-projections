@@ -115,7 +115,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <inheritdoc />
     /// <returns>A new <see cref="PositionEditorViewModel" /> instance</returns>
-    public IPositionEditorViewModel GetPositionEditorViewModel() => new PositionEditorViewModel();
+    public AbsPositionEditorViewModel GetPositionEditorViewModel() => new PositionEditorViewModel();
 
     /// <summary>
     /// Creates a new <see cref="DescriptionEditorViewModel" /> instance
@@ -169,7 +169,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="HotspotDisplayViewModel" /> instance</returns>
-    public IHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
+    public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
         new HotspotDisplayViewModel(config, _pythonHandler, this);
 
     /// <summary>
@@ -184,7 +184,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// Creates a new <see cref="ArUcoGridViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="ArUcoGridViewModel" /> instance</returns>
-    public IArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
+    public AbsArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
 
     #endregion
 

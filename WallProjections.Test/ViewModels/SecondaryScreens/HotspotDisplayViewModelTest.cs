@@ -112,7 +112,7 @@ public class HotspotDisplayViewModelTest
     /// <param name="activeId">
     /// The id of the hotspot that should be active. If <i>null</i>, no hotspots should be active.
     /// </param>
-    private static void AssertActiveHotspot(IHotspotDisplayViewModel vm, int? activeId)
+    private static void AssertActiveHotspot(AbsHotspotDisplayViewModel vm, int? activeId)
     {
         var projections = vm.Projections.GroupBy(h => h.IsActive).ToImmutableList();
         var active = projections.Where(g => g.Key).SelectMany(g => g).ToImmutableList();

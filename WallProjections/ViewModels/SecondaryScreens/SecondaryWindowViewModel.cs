@@ -3,8 +3,9 @@ using ReactiveUI;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
-namespace WallProjections.ViewModels;
+namespace WallProjections.ViewModels.SecondaryScreens;
 
 /// <inheritdoc cref="ISecondaryWindowViewModel" />
 public class SecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewModel, IDisposable

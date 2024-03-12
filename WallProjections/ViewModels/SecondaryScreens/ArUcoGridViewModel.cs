@@ -5,8 +5,8 @@ using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.ViewModels.SecondaryScreens;
 
-/// <inheritdoc cref="IArUcoGridViewModel" />
-public class ArUcoGridViewModel : IArUcoGridViewModel
+/// <inheritdoc cref="AbsArUcoGridViewModel" />
+public class ArUcoGridViewModel : AbsArUcoGridViewModel
 {
     /// <summary>
     /// The number of available ArUco markers.

@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="WallProjections.Views.EditorUserControls.ImportWarningDialog"
+        x:Class="WallProjections.Views.Editor.ImportWarningDialog"
         x:DataType="vm:IImportViewModel"
         WindowStartupLocation="CenterScreen"
         SizeToContent="WidthAndHeight"

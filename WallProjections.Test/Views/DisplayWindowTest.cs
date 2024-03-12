@@ -6,7 +6,7 @@ using Avalonia.VisualTree;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Display;
-using WallProjections.Views;
+using WallProjections.Views.Display;
 
 namespace WallProjections.Test.Views;
 

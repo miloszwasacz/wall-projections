@@ -94,7 +94,7 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     /// Creates a new <see cref="MockPositionEditorViewModel" />
     /// </summary>
     /// <returns>A new <see cref="MockPositionEditorViewModel" /></returns>
-    public IPositionEditorViewModel GetPositionEditorViewModel() => new MockPositionEditorViewModel();
+    public AbsPositionEditorViewModel GetPositionEditorViewModel() => new MockPositionEditorViewModel();
 
     /// <summary>
     /// Creates a new <see cref="MockDescriptionEditorViewModel" />
@@ -139,7 +139,7 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     /// Creates a new <see cref="MockHotspotDisplayViewModel" />
     /// </summary>
     /// <returns>A new <see cref="MockHotspotDisplayViewModel"/></returns>
-    public IHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) => new MockHotspotDisplayViewModel();
+    public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) => new MockHotspotDisplayViewModel();
 
     /// <summary>
     /// Creates a new <see cref="MockHotspotProjectionViewModel" />
@@ -154,7 +154,7 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <returns>A new <see cref="ArUcoGridViewModel" /></returns>
     /// <remarks>Note that this is not a mock, as the viewmodel is so simple that there is no need for a mock</remarks>
-    public IArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
+    public AbsArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
 
     #endregion
 

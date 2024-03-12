@@ -2,11 +2,10 @@ using System.Collections.Immutable;
 
 namespace WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
-// ReSharper disable once InconsistentNaming
 /// <summary>
 /// A viewmodel for projecting hotspots onto the artifact
 /// </summary>
-public abstract class IHotspotDisplayViewModel : ViewModelBase
+public abstract class AbsHotspotDisplayViewModel : ViewModelBase
 {
     /// <summary>
     /// A list of <see cref="IHotspotProjectionViewModel">projections</see> of hotspots to be displayed

@@ -12,7 +12,9 @@ using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
-using WallProjections.Views;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.Views.Display;
+using WallProjections.Views.Editor;
 using WallProjections.Views.SecondaryScreens;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 

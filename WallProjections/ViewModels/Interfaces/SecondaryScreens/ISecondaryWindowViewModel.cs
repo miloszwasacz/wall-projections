@@ -2,7 +2,7 @@
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.Views.SecondaryScreens;
 
-namespace WallProjections.ViewModels.Interfaces;
+namespace WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 /// <summary>
 /// A viewmodel responsible for displaying the correct content on the secondary window.
@@ -25,7 +25,7 @@ public interface ISecondaryWindowViewModel
     /// with <paramref name="editorViewModel" />'s <see cref="IEditorViewModel.PositionEditor" /> as the DataContext.
     /// </summary>
     /// <param name="editorViewModel">
-    /// The parent <see cref="IEditorViewModel" /> owning the <see cref="IPositionEditorViewModel" /> to be displayed.
+    /// The parent <see cref="IEditorViewModel" /> owning the <see cref="AbsPositionEditorViewModel" /> to be displayed.
     /// </param>
     public void ShowPositionEditor(IEditorViewModel editorViewModel);
 

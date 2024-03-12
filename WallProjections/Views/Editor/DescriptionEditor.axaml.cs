@@ -7,7 +7,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
 using Avalonia.Metadata;
 
-namespace WallProjections.Views.EditorUserControls
+namespace WallProjections.Views.Editor
 {
     public class DescriptionEditor : TemplatedControl
     {

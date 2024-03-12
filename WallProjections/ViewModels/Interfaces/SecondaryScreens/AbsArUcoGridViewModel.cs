@@ -3,11 +3,10 @@ using WallProjections.Models;
 
 namespace WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
-// ReSharper disable once InconsistentNaming
 /// <summary>
 /// A viewmodel for displaying a grid of ArUco markers.
 /// </summary>
-public abstract class IArUcoGridViewModel : ViewModelBase
+public abstract class AbsArUcoGridViewModel : ViewModelBase
 {
     /// <summary>
     /// A list of all available ArUco markers.

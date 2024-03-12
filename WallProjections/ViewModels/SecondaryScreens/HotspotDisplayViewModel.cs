@@ -8,8 +8,8 @@ using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.ViewModels.SecondaryScreens;
 
-/// <inheritdoc cref="IHotspotDisplayViewModel" />
-public class HotspotDisplayViewModel : IHotspotDisplayViewModel, IDisposable
+/// <inheritdoc cref="AbsHotspotDisplayViewModel" />
+public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 {
     /// <summary>
     /// The Python handler that invokes events about hotspot activation

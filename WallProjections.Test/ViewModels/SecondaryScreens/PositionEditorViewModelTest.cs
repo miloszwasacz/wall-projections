@@ -2,6 +2,7 @@ using WallProjections.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.Test.ViewModels.SecondaryScreens;
@@ -10,13 +11,13 @@ namespace WallProjections.Test.ViewModels.SecondaryScreens;
 public class PositionEditorViewModelTest
 {
     /// <summary>
-    /// Creates a <see cref="IPositionEditorViewModel"/> and selects a hotspot
-    /// so <see cref="IPositionEditorViewModel.SelectedHotspot"/> is not null
+    /// Creates a <see cref="AbsPositionEditorViewModel"/> and selects a hotspot
+    /// so <see cref="AbsPositionEditorViewModel.SelectedHotspot"/> is not null
     /// </summary>
-    /// <returns><see cref="IPositionEditorViewModel"/></returns>
-    private static IPositionEditorViewModel SetupPositionEditorViewModel()
+    /// <returns><see cref="AbsPositionEditorViewModel"/></returns>
+    private static AbsPositionEditorViewModel SetupPositionEditorViewModel()
     {
-        IPositionEditorViewModel positionEditor = new PositionEditorViewModel();
+        AbsPositionEditorViewModel positionEditor = new PositionEditorViewModel();
         positionEditor.SelectHotspot(new EditorHotspotViewModel(0, new MockViewModelProvider()), Enumerable.Empty<Coord>());
         return positionEditor;
     }
@@ -24,7 +25,7 @@ public class PositionEditorViewModelTest
     [AvaloniaTest]
     public void ConstructorTest()
     {
-        IPositionEditorViewModel positionEditor = new PositionEditorViewModel();
+        AbsPositionEditorViewModel positionEditor = new PositionEditorViewModel();
         Assert.Multiple(() =>
         {
             Assert.That(positionEditor.UnselectedHotspots, Is.Empty);
@@ -116,7 +117,7 @@ public class PositionEditorViewModelTest
     [AvaloniaTest]
     public void IsInEditModeTest()
     {   //testing changing IsInEditMode when _selectedHotspot is null
-        IPositionEditorViewModel positionEditor = new PositionEditorViewModel();
+        AbsPositionEditorViewModel positionEditor = new PositionEditorViewModel();
         positionEditor.SetPosition(30,30);
         Assert.Multiple(() =>
         {

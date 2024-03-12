@@ -5,7 +5,7 @@ using Avalonia.Input;
 using Avalonia;
 #endif
 
-namespace WallProjections.Views;
+namespace WallProjections.Views.SecondaryScreens;
 
 public partial class SecondaryWindow : Window
 {

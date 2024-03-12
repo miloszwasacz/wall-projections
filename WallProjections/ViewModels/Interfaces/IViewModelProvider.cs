@@ -67,10 +67,10 @@ public interface IViewModelProvider
     public IEditorHotspotViewModel GetEditorHotspotViewModel(Hotspot hotspot);
 
     /// <summary>
-    /// Creates a new <see cref="IPositionEditorViewModel" /> instance
+    /// Creates a new <see cref="AbsPositionEditorViewModel" /> instance
     /// </summary>
-    /// <returns>A new <see cref="IPositionEditorViewModel" /> instance</returns>
-    public IPositionEditorViewModel GetPositionEditorViewModel();
+    /// <returns>A new <see cref="AbsPositionEditorViewModel" /> instance</returns>
+    public AbsPositionEditorViewModel GetPositionEditorViewModel();
 
     /// <summary>
     /// Creates a new <see cref="IDescriptionEditorViewModel" /> instance
@@ -117,11 +117,11 @@ public interface IViewModelProvider
     public ISecondaryWindowViewModel GetSecondaryWindowViewModel();
 
     /// <summary>
-    /// Creates a new <see cref="IHotspotDisplayViewModel" /> instance
+    /// Creates a new <see cref="AbsHotspotDisplayViewModel" /> instance
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
-    /// <returns>A new <see cref="IHotspotDisplayViewModel" /> instance</returns>
-    public IHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config);
+    /// <returns>A new <see cref="AbsHotspotDisplayViewModel" /> instance</returns>
+    public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config);
 
     /// <summary>
     /// Creates a new <see cref="IHotspotProjectionViewModel" /> instance
@@ -131,10 +131,10 @@ public interface IViewModelProvider
     public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot);
 
     /// <summary>
-    /// Creates a new <see cref="IArUcoGridViewModel" /> instance
+    /// Creates a new <see cref="AbsArUcoGridViewModel" /> instance
     /// </summary>
-    /// <returns>A new <see cref="IArUcoGridViewModel" /> instance</returns>
-    public IArUcoGridViewModel GetArUcoGridViewModel();
+    /// <returns>A new <see cref="AbsArUcoGridViewModel" /> instance</returns>
+    public AbsArUcoGridViewModel GetArUcoGridViewModel();
 
     #endregion
 }

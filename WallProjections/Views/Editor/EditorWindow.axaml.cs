@@ -6,13 +6,12 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
-using WallProjections.Views.EditorUserControls;
-using ImportWarningDialog = WallProjections.Views.EditorUserControls.ImportWarningDialog;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 #if !RELEASE
 using Avalonia;
 #endif
 
-namespace WallProjections.Views;
+namespace WallProjections.Views.Editor;
 
 public partial class EditorWindow : Window
 {
@@ -343,7 +342,7 @@ public partial class EditorWindow : Window
     /// <summary>
     /// Handles key presses:
     /// <ul>
-    ///     <li><b>Escape</b>: Exit <see cref="IPositionEditorViewModel.IsInEditMode">edit mode</see> for <see cref="IEditorViewModel.PositionEditor" /></li>
+    ///     <li><b>Escape</b>: Exit <see cref="AbAbsPositionEditorViewModelsInEditMode">edit mode</see> for <see cref="IEditorViewModel.PositionEditor" /></li>
     /// </ul>
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>

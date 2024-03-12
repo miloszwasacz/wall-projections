@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
-using WallProjections.Views;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.Views.Editor;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
 
@@ -29,9 +30,9 @@ public interface IEditorViewModel
     public IEditorHotspotViewModel? SelectedHotspot { get; set; }
 
     /// <summary>
-    /// A <see cref="IPositionEditorViewModel" /> for editing the position of the currently selected hotspot.
+    /// A <see cref="AbsPositionEditorViewModel" /> for editing the position of the currently selected hotspot.
     /// </summary>
-    public IPositionEditorViewModel PositionEditor { get; }
+    public AbsPositionEditorViewModel PositionEditor { get; }
 
     /// <summary>
     /// A <see cref="IDescriptionEditorViewModel" /> for editing the title and description of the currently selected hotspot.

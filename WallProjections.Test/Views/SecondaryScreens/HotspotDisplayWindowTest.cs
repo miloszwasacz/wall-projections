@@ -4,7 +4,6 @@ using WallProjections.Models;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
-using WallProjections.Views;
 using WallProjections.Views.SecondaryScreens;
 
 namespace WallProjections.Test.Views.SecondaryScreens;
@@ -30,8 +29,8 @@ public class HotspotDisplayViewTest
 
         var hotspotWindow = secondaryWindow.FindDescendantOfType<HotspotDisplayView>();
         Assert.That(hotspotWindow, Is.Not.Null);
-        Assert.That(hotspotWindow!.DataContext, Is.InstanceOf<IHotspotDisplayViewModel>());
-        var hotspotViewModel = (IHotspotDisplayViewModel)hotspotWindow.DataContext!;
+        Assert.That(hotspotWindow!.DataContext, Is.InstanceOf<AbsHotspotDisplayViewModel>());
+        var hotspotViewModel = (AbsHotspotDisplayViewModel)hotspotWindow.DataContext!;
         Assert.That(hotspotWindow.HotspotList.ItemsSource, Is.SameAs(hotspotViewModel.Projections));
     }
 }

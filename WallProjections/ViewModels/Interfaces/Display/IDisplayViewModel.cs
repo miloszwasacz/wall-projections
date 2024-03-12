@@ -2,7 +2,8 @@
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
-using WallProjections.Views;
+using WallProjections.Views.Display;
+using WallProjections.Views.Editor;
 
 namespace WallProjections.ViewModels.Interfaces.Display;
 

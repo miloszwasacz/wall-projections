@@ -12,6 +12,7 @@ using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.ViewModels.Editor;
 
@@ -111,7 +112,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     }
 
     /// <inheritdoc />
-    public IPositionEditorViewModel PositionEditor { get; }
+    public AbsPositionEditorViewModel PositionEditor { get; }
 
     /// <inheritdoc />
     public IDescriptionEditorViewModel DescriptionEditor { get; }

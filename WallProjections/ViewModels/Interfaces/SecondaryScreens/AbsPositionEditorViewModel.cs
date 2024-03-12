@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using WallProjections.Models;
+using WallProjections.ViewModels.Interfaces.Editor;
 
-namespace WallProjections.ViewModels.Interfaces.Editor;
+namespace WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
-// ReSharper disable once InconsistentNaming
 /// <summary>
 /// A viewmodel for editing the position of a hotspot.
 /// </summary>
-public abstract class IPositionEditorViewModel : ViewModelBase
+public abstract class AbsPositionEditorViewModel : ViewModelBase
 {
     /// <summary>
     /// An event that is raised when <see cref="UpdateSelectedHotspot" /> is called.

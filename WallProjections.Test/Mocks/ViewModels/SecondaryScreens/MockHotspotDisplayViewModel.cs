@@ -8,7 +8,7 @@ namespace WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
 /// <summary>
 /// A mock of <see cref="HotspotDisplayViewModel" />
 /// </summary>
-public class MockHotspotDisplayViewModel : IHotspotDisplayViewModel, IDisposable
+public class MockHotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 {
     /// <summary>
     /// Whether <see cref="Dispose" /> has been called

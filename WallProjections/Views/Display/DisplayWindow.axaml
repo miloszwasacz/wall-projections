@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:WallProjections.ViewModels.Interfaces.Display"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="WallProjections.Views.DisplayWindow"
+        x:Class="WallProjections.Views.Display.DisplayWindow"
         x:DataType="vm:IDisplayViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="WallProjections"

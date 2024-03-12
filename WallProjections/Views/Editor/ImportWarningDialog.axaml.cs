@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using WallProjections.ViewModels.Interfaces.Editor;
 
-namespace WallProjections.Views.EditorUserControls;
+namespace WallProjections.Views.Editor;
 
 public partial class ImportWarningDialog : Window
 {

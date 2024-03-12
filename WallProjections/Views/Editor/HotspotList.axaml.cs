@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using WallProjections.ViewModels.Editor;
 
-namespace WallProjections.Views.EditorUserControls;
+namespace WallProjections.Views.Editor;
 
 public partial class HotspotList : UserControl
 {

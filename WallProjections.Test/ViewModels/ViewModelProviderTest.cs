@@ -103,7 +103,7 @@ public class ViewModelProviderTest
         });
     }
 
-    [Test]
+    [AvaloniaTest]
     public void GetEmptyEditorViewModelTest()
     {
         var navigator = new MockNavigator();

@@ -5,11 +5,12 @@ using System.Threading;
 using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.ViewModels.SecondaryScreens;
 
-/// <inheritdoc cref="IPositionEditorViewModel" />
-public class PositionEditorViewModel : IPositionEditorViewModel
+/// <inheritdoc cref="AbsPositionEditorViewModel" />
+public class PositionEditorViewModel : AbsPositionEditorViewModel
 {
     /// <inheritdoc />
     public override event EventHandler? HotspotPositionChanged;
