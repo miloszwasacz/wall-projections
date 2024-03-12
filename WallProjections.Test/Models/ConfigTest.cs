@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using WallProjections.Models;
+using WallProjections.Test.Mocks.Helper;
 
 namespace WallProjections.Test.Models;
 
@@ -10,8 +11,10 @@ namespace WallProjections.Test.Models;
 [Author(name: "Thomas Parr")]
 public class ConfigTest
 {
+    private static readonly double[,] TestMatrix = MockPythonProxy.CalibrationResult;
+
     /// <summary>
-    /// Test to ensure the correct count is returned from <see cref="Config.HotspotCount"/>
+    /// Test to ensure the correct count is returned from <see cref="Config.Hotspots"/>.Count
     /// </summary>
     [Test]
     public void HotspotCountTest()
@@ -20,8 +23,12 @@ public class ConfigTest
 
         for (var i = 0; i < 5; i++)
         {
-            var config = new Config(hotspots);
-            Assert.That(config.HotspotCount, Is.EqualTo(i));
+            var config = new Config(TestMatrix, hotspots);
+            Assert.Multiple(() =>
+            {
+                Assert.That(config.HomographyMatrix, Is.EquivalentTo(TestMatrix));
+                Assert.That(config.Hotspots, Has.Count.EqualTo(i));
+            });
             hotspots.Add(
                 new Hotspot(
                     i,
@@ -42,23 +49,22 @@ public class ConfigTest
     public void GetHotspotTest()
     {
         const string title = "Hotspot";
-        var config = new Config(
-            hotspots: new List<Hotspot>
-            {
-                new(1,
-                    new Coord(0, 0, 0),
-                    $"{title} 1",
-                    "", new
-                        List<string> { "image_1_0.jpg" }.ToImmutableList(),
-                    ImmutableList<string>.Empty),
-                new(2,
-                    new Coord(0, 0, 0),
-                    $"{title} 2",
-                    "text_2.txt",
-                    ImmutableList<string>.Empty,
-                    ImmutableList<string>.Empty)
-            }
-        );
+        var hotspots = new List<Hotspot>
+        {
+            new(1,
+                new Coord(0, 0, 0),
+                $"{title} 1",
+                "", new
+                    List<string> { "image_1_0.jpg" }.ToImmutableList(),
+                ImmutableList<string>.Empty),
+            new(2,
+                new Coord(0, 0, 0),
+                $"{title} 2",
+                "text_2.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        };
+        var config = new Config(TestMatrix, hotspots);
 
         var hotspot1 = config.GetHotspot(1);
         var hotspot2 = config.GetHotspot(2);

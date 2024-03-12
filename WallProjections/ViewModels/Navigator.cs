@@ -1,15 +1,21 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
-using WallProjections.Views;
-using WallProjections.Views.EditorUserControls;
+using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.Views.Display;
+using WallProjections.Views.Editor;
+using WallProjections.Views.SecondaryScreens;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 
 namespace WallProjections.ViewModels;
@@ -48,6 +54,16 @@ public sealed class Navigator : ViewModelBase, INavigator
     private IConfig? _config;
 
     /// <summary>
+    /// Currently opened main window
+    /// </summary>
+    private Window? _mainWindow;
+
+    /// <summary>
+    /// Secondary screen window and its viewmodel
+    /// </summary>
+    private readonly (Window window, ISecondaryWindowViewModel viewModel) _secondaryScreen;
+
+    /// <summary>
     /// Creates a new instance of <see cref="Navigator" />.
     /// </summary>
     /// <param name="appLifetime">The application lifetime.</param>
@@ -65,6 +81,7 @@ public sealed class Navigator : ViewModelBase, INavigator
         _pythonHandler = pythonHandler;
         _fileHandlerFactory = fileHandlerFactory;
         _vmProvider = vmProviderFactory(this, pythonHandler);
+        _secondaryScreen = OpenSecondaryWindow(_vmProvider);
         _appLifetime.Exit += OnExit;
 
         Initialize();
@@ -98,24 +115,20 @@ public sealed class Navigator : ViewModelBase, INavigator
     {
         _windowMutex.WaitOne();
         var config = _config;
-        if (config == null)
+        if (config is null)
         {
             _windowMutex.ReleaseMutex();
             OpenEditor();
             return;
         }
 
-        _pythonHandler.RunHotspotDetection();
+        _pythonHandler.RunHotspotDetection(config);
         var displayWindow = new DisplayWindow
         {
             DataContext = _vmProvider.GetDisplayViewModel(config)
         };
-        var hotspotWindow = new HotspotDisplayWindow
-        {
-            DataContext = _vmProvider.GetHotspotViewModel(config)
-        };
         Navigate(displayWindow);
-        OpenHotspotWindow(hotspotWindow, displayWindow);
+        _secondaryScreen.viewModel.ShowHotspotDisplay(config);
 
         _windowMutex.ReleaseMutex();
     }
@@ -135,18 +148,13 @@ public sealed class Navigator : ViewModelBase, INavigator
             ? _vmProvider.GetEditorViewModel(config, fileHandler)
             : _vmProvider.GetEditorViewModel(fileHandler);
 
-        //TODO Don't start calibration here (it's here temporarily, just for showcasing Python interop)
-        _pythonHandler.RunCalibration();
+        _pythonHandler.CancelCurrentTask();
         var editorWindow = new EditorWindow
         {
             DataContext = vm
         };
-        var positionEditorWindow = new PositionEditorWindow
-        {
-            DataContext = vm.PositionEditor
-        };
         Navigate(editorWindow);
-        OpenHotspotWindow(positionEditorWindow, editorWindow);
+        _secondaryScreen.viewModel.ShowPositionEditor(vm);
 
         _windowMutex.ReleaseMutex();
     }
@@ -174,51 +182,93 @@ public sealed class Navigator : ViewModelBase, INavigator
         }
     }
 
+    /// <inheritdoc />
+    public void ShowCalibrationMarkers()
+    {
+        _secondaryScreen.viewModel.ShowArUcoGrid();
+    }
+
+    /// <inheritdoc />
+    public void HideCalibrationMarkers()
+    {
+        IEditorViewModel? vm = null;
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            if (_mainWindow?.DataContext is IEditorViewModel editorViewModel)
+                vm = editorViewModel;
+        });
+
+        // TODO Test this physically
+        if (vm is not null)
+            _secondaryScreen.viewModel.ShowPositionEditor(vm);
+    }
+
+    /// <inheritdoc />
+    public ImmutableDictionary<int, Point>? GetArUcoPositions()
+    {
+        var arUcoGridView = _secondaryScreen.window.FindDescendantOfType<ArUcoGridView>();
+        ImmutableDictionary<int, Point>? positions = null;
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            // This has to be run on the UI thread
+            positions = arUcoGridView?.GetArUcoPositions();
+        });
+        return positions;
+    }
+
     /// <summary>
     /// Shuts down the application.
     /// </summary>
     /// <seealso cref="AppLifetime.Shutdown(int)"/>
     public void Shutdown()
     {
+        _secondaryScreen.window.Close();
         _appLifetime.Shutdown();
     }
 
     /// <summary>
-    /// Opens the specified window, sets it as the <see cref="AppLifetime.MainWindow" />,
+    /// Opens the specified window, sets it as the <see cref="_mainWindow" /> and the <see cref="AppLifetime.MainWindow" />,
     /// and <see cref="WindowExtensions.CloseAndDispose">closes</see> the currently opened window.
     /// </summary>
     /// <param name="newWindow">The new window to open.</param>
     private void Navigate(Window newWindow)
     {
-        var currentWindow = _appLifetime.MainWindow;
+        var currentWindow = _mainWindow;
+        _mainWindow = newWindow;
         newWindow.Show();
         _appLifetime.MainWindow = newWindow;
         currentWindow?.CloseAndDispose();
     }
 
     /// <summary>
-    /// Opens a new window for projecting hotspots on a secondary screen (if available).
+    /// Opens a <see cref="SecondaryWindow" /> on the secondary screen (if available).
     /// </summary>
-    /// <param name="hotspotWindow">The window for projecting hotspots.</param>
-    /// <param name="owner">The owner window of the hotspot window.</param>
+    /// <param name="vmProvider">
+    /// The <see cref="IViewModelProvider" /> for creating the <see cref="ISecondaryWindowViewModel" />
+    /// </param>
+    /// <returns>The opened window and its viewmodel</returns>
     [ExcludeFromCodeCoverage(Justification = "Headless mode doesn't support multiple screens")]
-    private static void OpenHotspotWindow(Window hotspotWindow, WindowBase owner)
+    private static (SecondaryWindow, ISecondaryWindowViewModel) OpenSecondaryWindow(IViewModelProvider vmProvider)
     {
-        owner.Closed += (_, _) => hotspotWindow.CloseAndDispose();
+        var vm = vmProvider.GetSecondaryWindowViewModel();
+        var window = new SecondaryWindow
+        {
+            DataContext = vm
+        };
 
-        var screens = owner.Screens;
+        var screens = window.Screens;
         var secondaryScreen = screens.All.FirstOrDefault(s => !s.IsPrimary);
         if (secondaryScreen is not null)
         {
-            hotspotWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-            hotspotWindow.Position = secondaryScreen.Bounds.Position;
-            hotspotWindow.Show();
-            hotspotWindow.WindowState = WindowState.FullScreen;
+            window.WindowStartupLocation = WindowStartupLocation.Manual;
+            window.Position = secondaryScreen.Bounds.Position;
+            window.Show();
+            window.WindowState = WindowState.FullScreen;
         }
         else
-            hotspotWindow.Show();
+            window.Show();
 
-        owner.Activate();
+        return (window, vm);
     }
 
     /// <inheritdoc />

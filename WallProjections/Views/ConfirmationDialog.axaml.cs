@@ -13,6 +13,11 @@ namespace WallProjections.Views;
 public partial class ConfirmationDialog : Window
 {
     /// <summary>
+    /// Whether the dialog has been handled (confirmed or cancelled).
+    /// </summary>
+    private bool _handled;
+
+    /// <summary>
     /// A routed event that is raised when the user confirms the action.
     /// </summary>
     private static readonly RoutedEvent<RoutedEventArgs> ConfirmEvent =
@@ -73,6 +78,9 @@ public partial class ConfirmationDialog : Window
     /// <param name="e">The event arguments (unused).</param>
     private void Confirm_OnClick(object? sender, RoutedEventArgs? e)
     {
+        if (_handled) return;
+
+        _handled = true;
         RaiseEvent(new RoutedEventArgs(ConfirmEvent, this));
         Close();
     }
@@ -84,8 +92,23 @@ public partial class ConfirmationDialog : Window
     /// <param name="e">The event arguments (unused).</param>
     private void Cancel_OnClick(object? sender, RoutedEventArgs? e)
     {
+        if (_handled) return;
+
+        _handled = true;
         RaiseEvent(new RoutedEventArgs(CancelEvent, this));
         Close();
+    }
+
+    /// <summary>
+    /// A callback for when the dialog is closed. Raises the <see cref="Cancel" /> event
+    /// if it hasn't already been <see cref="_handled">handled</see>.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void Dialog_OnClosed(object? sender, EventArgs e)
+    {
+        if (!_handled)
+            RaiseEvent(new RoutedEventArgs(CancelEvent, this));
     }
 
     // ReSharper restore UnusedParameter.Local

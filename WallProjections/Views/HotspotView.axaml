@@ -4,7 +4,7 @@
               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
               xmlns:interfaces="using:WallProjections.Models.Interfaces"
               xmlns:models="using:WallProjections.Models"
-              xmlns:vm="using:WallProjections.ViewModels"
+              xmlns:vm="using:WallProjections.ViewModels.Interfaces.SecondaryScreens"
               xmlns:views="using:WallProjections.Views"
               mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
               x:Class="WallProjections.Views.HotspotView">
@@ -20,7 +20,7 @@
     <ItemsControl.DataTemplates>
 
         <!-- Template for Display -->
-        <DataTemplate DataType="{x:Type vm:HotspotProjectionViewModel}">
+        <DataTemplate DataType="{x:Type vm:IHotspotProjectionViewModel}">
             <Ellipse Fill="{Binding $parent[views:HotspotView].HotspotFill}"
                      Stroke="{Binding $parent[views:HotspotView].HotspotStroke}"
                      Classes.activating="{Binding IsActive}"

@@ -29,7 +29,7 @@ public class App : Application
     /// Initializes the application-wide navigator.
     /// </summary>
     /// <param name="lifetime">The application lifetime.</param>
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Headless lifetime is not a IClassicDesktopStyleApplicationLifetime")]
     private void InitializeNavigator(IApplicationLifetime? lifetime)
     {
         if (lifetime is IClassicDesktopStyleApplicationLifetime desktop)

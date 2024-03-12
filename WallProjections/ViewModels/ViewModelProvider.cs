@@ -10,6 +10,8 @@ using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.ViewModels;
 
@@ -72,13 +74,6 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <returns>A new <see cref="VideoViewModel" /> instance</returns>
     public IVideoViewModel GetVideoViewModel() => new VideoViewModel(LibVlc, new VLCMediaPlayer(LibVlc));
 
-    /// <summary>
-    /// Creates a new <see cref="HotspotViewModel" /> instance
-    /// </summary>
-    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
-    /// <returns>A new <see cref="HotspotViewModel" /> instance</returns>
-    public IHotspotViewModel GetHotspotViewModel(IConfig config) => new HotspotViewModel(config, _pythonHandler);
-
     #endregion
 
     #region Editor
@@ -89,7 +84,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler) =>
-        new EditorViewModel(config, _navigator, fileHandler, this);
+        new EditorViewModel(config, _navigator, fileHandler, _pythonHandler, this);
 
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" /> instance
@@ -97,7 +92,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler) =>
-        new EditorViewModel(_navigator, fileHandler, this);
+        new EditorViewModel(_navigator, fileHandler, _pythonHandler, this);
 
     /// <summary>
     /// Creates a new <see cref="EditorHotspotViewModel" /> instance
@@ -120,7 +115,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <inheritdoc />
     /// <returns>A new <see cref="PositionEditorViewModel" /> instance</returns>
-    public IPositionEditorViewModel GetPositionEditorViewModel() => new PositionEditorViewModel();
+    public AbsPositionEditorViewModel GetPositionEditorViewModel() => new PositionEditorViewModel();
 
     /// <summary>
     /// Creates a new <see cref="DescriptionEditorViewModel" /> instance
@@ -157,6 +152,39 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="ImportViewModel" /> instance</returns>
     public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new ImportViewModel(descVm);
+
+    #endregion
+
+    #region Secondary screens
+
+    /// <summary>
+    /// Creates a new <see cref="SecondaryWindowViewModel" /> instance
+    /// with <i>TH</i> being <see cref="HotspotDisplayViewModel" />
+    /// </summary>
+    /// <returns>A new <see cref="SecondaryWindowViewModel" /> instance</returns>
+    public ISecondaryWindowViewModel GetSecondaryWindowViewModel() => new SecondaryWindowViewModel(this);
+
+    /// <summary>
+    /// Creates a new <see cref="HotspotDisplayViewModel" /> instance
+    /// </summary>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
+    /// <returns>A new <see cref="HotspotDisplayViewModel" /> instance</returns>
+    public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
+        new HotspotDisplayViewModel(config, _pythonHandler, this);
+
+    /// <summary>
+    /// Creates a new <see cref="HotspotProjectionViewModel" /> instance
+    /// </summary>
+    /// <param name="hotspot">The hotspot to be projected</param>
+    /// <returns>A new <see cref="HotspotProjectionViewModel" /> instance</returns>
+    public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
+        new HotspotProjectionViewModel(hotspot);
+
+    /// <summary>
+    /// Creates a new <see cref="ArUcoGridViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="ArUcoGridViewModel" /> instance</returns>
+    public AbsArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
 
     #endregion
 

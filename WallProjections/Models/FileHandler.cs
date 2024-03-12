@@ -24,7 +24,7 @@ public class FileHandler : IFileHandler
         Directory.CreateDirectory(ConfigFolderPath);
 
         ZipFile.ExtractToDirectory(zipPath, ConfigFolderPath);
-        Console.WriteLine("File extracted to {0}", ConfigFolderPath);
+        Console.WriteLine($"File extracted to {ConfigFolderPath}");
         var config = LoadConfig();
         return config;
     }
@@ -51,10 +51,7 @@ public class FileHandler : IFileHandler
         if (!Directory.Exists(ConfigFolderPath))
             Directory.CreateDirectory(ConfigFolderPath);
 
-        var hotspots = config.Hotspots;
-        var newHotspots = new List<Hotspot>();
-
-        foreach (var hotspot in hotspots)
+        var hotspots = config.Hotspots.Select(hotspot =>
         {
             var newDescriptionPath = $"text_{hotspot.Id}.txt";
 
@@ -104,7 +101,7 @@ public class FileHandler : IFileHandler
                 hotspot.Id
             )).ToImmutableList();
 
-            var newHotspot = new Hotspot(
+            return new Hotspot(
                 hotspot.Id,
                 hotspot.Position,
                 hotspot.Title,
@@ -112,11 +109,9 @@ public class FileHandler : IFileHandler
                 newImagePaths,
                 newVideoPaths
             );
+        });
 
-            newHotspots.Add(newHotspot);
-        }
-
-        var newConfig = new Config(newHotspots);
+        var newConfig = new Config(config.HomographyMatrix, hotspots);
 
 #if RELEASE
         var configString = JsonSerializer.Serialize(newConfig);

@@ -3,6 +3,7 @@ using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.Test.Mocks.ViewModels.Editor;
 
@@ -10,7 +11,7 @@ public class MockEditorViewModel : IEditorViewModel
 {
     public ObservableHotspotCollection<IEditorHotspotViewModel> Hotspots { get; set; }
     public IEditorHotspotViewModel? SelectedHotspot { get; set; }
-    public IPositionEditorViewModel PositionEditor { get; }
+    public AbsPositionEditorViewModel PositionEditor { get; }
     public IDescriptionEditorViewModel DescriptionEditor { get; }
     public IMediaEditorViewModel ImageEditor { get; }
     public IMediaEditorViewModel VideoEditor { get; }
@@ -67,6 +68,21 @@ public class MockEditorViewModel : IEditorViewModel
     }
 
     public bool ExportConfig(string exportPath)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ShowCalibrationMarkers()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void HideCalibrationMarkers()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> CalibrateCamera()
     {
         throw new NotImplementedException();
     }

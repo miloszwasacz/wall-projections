@@ -1,10 +1,12 @@
 ﻿using System.Collections.Immutable;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using NUnit.Framework.Constraints;
 using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Editor;
@@ -17,6 +19,7 @@ using Has = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
 
 namespace WallProjections.Test.ViewModels.Editor
 {
+    //TODO Add assertions for the homography matrix in the Config & VM
     [TestFixture]
     public class EditorViewModelTest
     {
@@ -57,7 +60,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 viewmodels.Add(vm);
             }
 
-            return (new Config(hotspots), viewmodels.ToImmutable());
+            return (new Config(MockPythonProxy.CalibrationResult, hotspots), viewmodels.ToImmutable());
         }
 
         /// <summary>
@@ -80,7 +83,8 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
+            var pythonHandler = new MockPythonHandler();
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             Assert.Multiple(() =>
             {
@@ -104,10 +108,12 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
             var expectedSelectedCoord = config.Hotspots[0].Position;
             var expectedUnselectedCoord = config.Hotspots.Skip(1).Select(h => h.Position);
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             var descriptionEditor = (MockDescriptionEditorViewModel)editorViewModel.DescriptionEditor;
             Assert.That(editorViewModel.Hotspots, Is.Not.Empty);
@@ -129,8 +135,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             var hotspots = new[]
             {
@@ -159,8 +167,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             var selected = expectedViewModels[1];
             editorViewModel.SelectedHotspot = selected;
@@ -184,8 +194,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             // Asserts that modifying hotspot's properties doesn't change SelectedHotspot
             // and sets the editor to "unsaved".
@@ -226,8 +238,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
 
@@ -254,8 +268,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.SelectedHotspot = editorViewModel.Hotspots[selectedIndex];
             var deleted = editorViewModel.Hotspots[deletedIndex];
@@ -280,8 +296,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             // Thanks to Dependency Injection we know that the selected hotspot is a MockEditorHotspotViewModel
             var selectedHotspot = editorViewModel.SelectedHotspot as MockEditorHotspotViewModel;
@@ -323,8 +341,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.SelectedHotspot = null;
             editorViewModel.AddMedia(MediaEditorType.Images, Array.Empty<IStorageFile>());
@@ -346,8 +366,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             // Thanks to Dependency Injection we know that the selected hotspot is a MockEditorHotspotViewModel
             var selectedHotspot = editorViewModel.SelectedHotspot as MockEditorHotspotViewModel;
@@ -408,8 +430,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.SelectedHotspot = null;
             editorViewModel.RemoveMedia(MediaEditorType.Images, Array.Empty<IThumbnailViewModel>());
@@ -430,8 +454,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(savingSuccessful);
+            var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.Multiple(() =>
@@ -460,8 +486,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
+            var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             editorViewModel.DeleteHotspot(editorViewModel.Hotspots[^1]);
@@ -482,8 +510,10 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(true);
+            var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel = new EditorViewModel(config, navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.Hotspots.Clear();
             var saved = editorViewModel.SaveConfig();
@@ -503,9 +533,10 @@ namespace WallProjections.Test.ViewModels.Editor
             const string filePath = "test.zip";
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(expectedSuccess);
+            var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
             fileHandler.Config = config;
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             editorViewModel.DeleteHotspot(editorViewModel.Hotspots[^1]);
@@ -539,7 +570,8 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
+            var pythonHandler = new MockPythonHandler();
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.That(editorViewModel, Is.Unsaved);
@@ -561,9 +593,10 @@ namespace WallProjections.Test.ViewModels.Editor
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(true)
             {
-                Config = new Config(new List<Hotspot>())
+                Config = new Config(MockPythonProxy.CalibrationResult, new List<Hotspot>())
             };
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
+            var pythonHandler = new MockPythonHandler();
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.That(editorViewModel, Is.Unsaved);
@@ -587,7 +620,8 @@ namespace WallProjections.Test.ViewModels.Editor
             const string exportPath = "test";
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(expectedSuccess);
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
+            var pythonHandler = new MockPythonHandler();
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.That(editorViewModel, Is.Unsaved);
@@ -611,7 +645,8 @@ namespace WallProjections.Test.ViewModels.Editor
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
+            var pythonHandler = new MockPythonHandler();
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
             Assert.Multiple(() =>
@@ -631,14 +666,71 @@ namespace WallProjections.Test.ViewModels.Editor
         }
 
         [AvaloniaTest]
+        public void ShowHideCalibrationMarkersTest()
+        {
+            var navigator = new MockNavigator();
+            var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            Assert.That(navigator.AreArUcoMarkersVisible, Is.False);
+
+            editorViewModel.ShowCalibrationMarkers();
+            Assert.That(navigator.AreArUcoMarkersVisible, Is.True);
+
+            editorViewModel.HideCalibrationMarkers();
+            Assert.That(navigator.AreArUcoMarkersVisible, Is.False);
+        }
+
+        [AvaloniaTest]
+        public async Task CalibrateCameraTest()
+        {
+            var positionsBuilder = ImmutableDictionary.CreateBuilder<int, Point>();
+            for (var i = 0; i < 5; i++)
+                positionsBuilder.Add(i, new Point(i, i));
+
+            var positions = positionsBuilder.ToImmutable();
+            var navigator = new MockNavigator(positions);
+            var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
+
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            Assert.That(await editorViewModel.CalibrateCamera(), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(editorViewModel.IsSaved, Is.False);
+                Assert.That(editorViewModel.CanExport, Is.False);
+            });
+
+            editorViewModel.SaveConfig();
+            Assert.That(fileHandler.Config.HomographyMatrix, Is.EquivalentTo(MockPythonProxy.CalibrationResult));
+        }
+
+        [AvaloniaTest]
+        public async Task CalibrateCameraNullTest()
+        {
+            var navigator = new MockNavigator();
+            var fileHandler = new MockFileHandler(true);
+            var pythonHandler = new MockPythonHandler();
+
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            Assert.That(await editorViewModel.CalibrateCamera(), Is.False);
+            Assert.Multiple(() =>
+            {
+                Assert.That(editorViewModel.IsSaved, Is.True);
+                Assert.That(editorViewModel.CanExport, Is.False);
+            });
+        }
+
+        [AvaloniaTest]
         public void CloseEditorTest()
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
+            var pythonHandler = new MockPythonHandler();
             navigator.OpenEditor();
             Assert.That(navigator.IsEditorOpen, Is.True);
 
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, VMProvider);
+            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.CloseEditor();
 

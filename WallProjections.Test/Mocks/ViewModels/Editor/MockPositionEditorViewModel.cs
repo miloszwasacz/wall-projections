@@ -1,43 +1,43 @@
 ﻿using WallProjections.Models;
-using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.Test.Mocks.ViewModels.Editor;
 
-public class MockPositionEditorViewModel : IPositionEditorViewModel
+public class MockPositionEditorViewModel : AbsPositionEditorViewModel
 {
+    /// <summary>
+    /// The backing field for <see cref="SelectedHotspot" />
+    /// </summary>
+    private IEditorHotspotViewModel? _selectedHotspot;
+
     /// <inheritdoc/>
-    public event EventHandler? HotspotPositionChanged;
-    
+    public override event EventHandler? HotspotPositionChanged;
+
     /// <inheritdoc/>
-    public bool IsInEditMode { get; set; }
-    
+    public override bool IsInEditMode { get; set; }
+
+    /// <inheritdoc cref="SelectedHotspot" />
+    public IEditorHotspotViewModel? GetSelectedHotspot() => _selectedHotspot;
+
     /// <inheritdoc/>
-    public IEditorHotspotViewModel? SelectedHotspot { get; set; }
-    
-    /// <inheritdoc/>
-    public IEnumerable<Coord> UnselectedHotspots { get; set; } = Enumerable.Empty<Coord>();
-    
-    /// <inheritdoc/>
-    public double X
+    protected override IEditorHotspotViewModel? SelectedHotspot
     {
-        get;
-        private set;
+        set => _selectedHotspot = value;
     }
 
     /// <inheritdoc/>
-    public double Y
-    {
-        get;
-        private set;
-    }
+    public override IEnumerable<Coord> UnselectedHotspots { get; protected set; } = Enumerable.Empty<Coord>();
 
     /// <inheritdoc/>
-    public double R
-    {
-        get;
-        private set;
-    }
+    public override double X { get; protected set; }
+
+    /// <inheritdoc/>
+    public override double Y { get; protected set; }
+
+    /// <inheritdoc/>
+    public override double R { get; protected set; }
 
     /// <summary>
     /// Mock version of the SetPosition function in <see cref="PositionEditorViewModel"/>
@@ -46,7 +46,7 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
     /// </summary>
     /// <param name="x">Changes the X coordinate</param>
     /// <param name="y">Changes the Y coordinate</param>
-    public void SetPosition(double x, double y)
+    public override void SetPosition(double x, double y)
     {
         X = x;
         Y = y;
@@ -57,7 +57,7 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
     /// which adds double <paramref name="delta"/> to D
     /// </summary>
     /// <param name="delta">The increase in radius</param>
-    public void ChangeRadius(double delta)
+    public override void ChangeRadius(double delta)
     {
         R += delta;
     }
@@ -68,12 +68,12 @@ public class MockPositionEditorViewModel : IPositionEditorViewModel
     /// position with the X, Y and half of D provided, along with the
     /// title "name" and description "description
     /// </summary>
-    public void UpdateSelectedHotspot()
+    public override void UpdateSelectedHotspot()
     {
         SelectedHotspot = new MockEditorHotspotViewModel(
-            1, 
+            1,
             new Coord(X, Y, R),
-            "name", 
+            "name",
             "description");
     }
 }
