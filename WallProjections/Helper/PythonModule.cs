@@ -99,9 +99,17 @@ public abstract class PythonModule
                 pair => new[] { pair.Value.X, pair.Value.Y }
             );
 
-            var serialized = JsonSerializer.Serialize(positions);
-            PyObject? homography = _rawModule.calibrate(serialized);
-            return homography?.As<double[,]>();
+            try
+            {
+                var serialized = JsonSerializer.Serialize(positions);
+                PyObject? homography = _rawModule.calibrate(serialized);
+                return homography?.As<double[,]>();
+            }
+            catch (Exception e)
+            {
+                //TODO Refactor to use a custom exceptions based on the reason for the failure
+                throw new Exception($"Failed to calibrate the camera: {e.Message}");
+            }
         }
     }
 }

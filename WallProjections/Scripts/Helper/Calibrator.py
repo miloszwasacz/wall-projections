@@ -22,6 +22,8 @@ class Calibrator:
         Takes a photo, detects ArUcos and returns a transformation matrix between provided and detected coordinates.
         """
         photo = VideoCaptureThread.take_photo()
+        if photo is None:
+            raise Exception("No photo taken, check if Camera is connected")
         camera_id_to_coord = Calibrator._detect_ArUcos(photo)
         return Calibrator._get_transformation_matrix(camera_id_to_coord, projector_id_to_coord)
 
@@ -66,7 +68,7 @@ class Calibrator:
 
         if len(from_array) < 4:
             logging.info(str(len(from_array)) + " matching coords found, at least 4 are required for calibration.")
-            return np.identity(3)  # TODO return identity for now; replace with something more meaningful later
+            raise Exception("Not enough ArUcos detected at least 4 required for calibration.")
 
         from_np_array = np.array(from_array, dtype=np.float32)
         to_np_array = np.array(to_array, dtype=np.float32)
