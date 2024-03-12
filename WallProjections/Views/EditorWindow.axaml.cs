@@ -27,11 +27,10 @@ public partial class EditorWindow : Window
     /// </summary>
     private static readonly Uri WarningIconPath = new("avares://WallProjections/Assets/warning-icon.ico");
 
-    //TODO Change to an actual icon
     /// <summary>
     /// The path to the camera calibration icon.
     /// </summary>
-    private static readonly Uri CalibrationIconPath = new("avares://WallProjections/Assets/warning-icon.ico");
+    private static readonly Uri CalibrationIconPath = new("avares://WallProjections/Assets/webcam-icon.ico");
 
     /// <summary>
     /// Whether any dialog is currently shown.
