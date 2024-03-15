@@ -214,6 +214,8 @@ video_capture_thread: VideoCaptureThread = VideoCaptureThread()
 
 hotspot_detection_stopping = False
 
+hotspot_detection_mutex = Lock()
+
 
 def run(event_listener: EventListener) -> None:  # This function is called by Program.cs
     """
@@ -223,6 +225,11 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
     """
 
     global hotspots, video_capture_thread, hotspot_detection_stopping
+
+    acquired = hotspot_detection_mutex.acquire(timeout=1)
+    if not acquired:
+        logging.error("Failed to acquire mutex for hotspot detection (it's probably already running).")
+        return
 
     hotspot_detection_stopping = False
 
@@ -294,12 +301,12 @@ def run(event_listener: EventListener) -> None:  # This function is called by Pr
 
     # clean up
     logging.info("Cleaning up...")
-    if video_capture_thread is None or not video_capture_thread.is_alive():
-        return
-    video_capture_thread.stop()
-    video_capture_thread.join()
+    if video_capture_thread is not None and video_capture_thread.is_alive():
+        video_capture_thread.stop()
+        video_capture_thread.join()
     cv2.destroyAllWindows()
     hands_model.close()
+    hotspot_detection_mutex.release()
 
 
 def stop_hotspot_detection() -> None:

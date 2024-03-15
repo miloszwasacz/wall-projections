@@ -49,7 +49,8 @@ class VideoCaptureThread(threading.Thread):
         video_capture = cv2.VideoCapture()
         success = video_capture.open(self.target, self.backend)
         if not success:
-            raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid.")
+            raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid, "
+                               "or the camera is already in use.")
         for prop_id, prop_value in self.properties.items():
             supported = video_capture.set(prop_id, prop_value)
             if not supported:
