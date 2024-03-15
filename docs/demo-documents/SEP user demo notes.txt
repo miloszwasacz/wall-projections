@@ -1,0 +1,212 @@
+Viewer introduction:
+Please interact with this exhibition as if you found it inside a museum. Assume the objects are mounted to the table but feel free to touch them.
+
+Editor introduction:
+Could you have a go at following these instructions. If you get stuck, please feel free to skip it.
+
+It took most users some guidance to find out how to move a hotspot.
+
+---user 417---
+- put hand palm-facing-down with fingers together over general area (not close enough)
+- then pointed with index finger (still a bit far from the hotspots)
+	- NB: we should make our system work with this by having the camera fairly square-on and using a large radius for the hotspot detection (but a smaller circle actually displayed to the user on the projector)
+- Hand was roughly 45 degree angle from table
+
+- editor task:
+- add hotspot
+typed title
+typed description
+clicked target button
+confused as nothing seemed to happen
+closed editor
+figured out how to use mouse to drag hotspot on projector
+placed 2 hotspots in position
+calibrated without problems
+imported config using "import config" button with no problems
+
+---user 937---
+picked up artifact
+tapped a few hotspots (didn't leave finger on for long enough)
+watched the video for a bit
+restarted the video accidentally
+activated another one (again hand is fingers-together, not index pointing)
+not always staying on one hotspot long enough so it's not always activating
+app crashed
+
+editor task:
+pressed e to open editor 
+added new hotspot and typed title and description with no problems
+pressed target button to position hotspot
+did calibration
+still not sure how to position hotspot
+tried arrow keys
+hint given: treat the projector as a second monitor
+trying to use hand above hotspot to move the hotspot
+skipped the task
+imported the config with no problems
+calibrated no problems
+closed the editor successfully
+
+
+---user 211---
+putting hand in relaxed pose ~5cm above central hotspot and activated successfully
+watching the video 
+watching the screen to keep hand above hotspot for long enough to see screen change
+hand in relaxed position for whole thing, but activated the hotspots fine
+hand again roughly 45 degrees from horizontal
+
+editor task:
+pressed e to open editor
+edited hotspot 1 instead of adding new one
+filled out title and desc fine
+pressed target button
+confused
+clicking target button a few times
+considered calibrating camera
+didn't manage it
+hint given
+used mouse to position hotspot successfully
+imported config fine
+calibrated camera fine (did double-check that aruco window was positioned correctly when saw dialog)
+
+
+---user 445--- (has had some experience with product)
+hovers hand around 6cm above table
+watching the video
+watching screen to see when the hotspot is triggered
+accidentally activated another hotspot while moving hand across display
+
+Editor task:
+Opens editor with e
+Struggles to find add hotspot button (takes around 10 seconds)
+Adds title and description with no issue
+Pressed target button
+Confused
+Asks for help
+Once hint is given, is able to move hotspot
+
+Struggles to find how to return to the app
+Is given hint on how to return to app
+Clicks save button
+Clicks close button
+
+Finds import button with no issue
+Imports config with no issue
+Clicks calibration button
+Checks if calibration is on correct display
+Waits for calibration to end
+Returns to application
+
+
+---user 346---
+Clicks hotspots with no issue
+Watches video
+Touches artefacts to select hotspot
+Tries to click multiple hotspots quickly with no issue
+Tries to use both hands at the same time (alternates between activating different hotspots)
+Tries to spread hand between multiple hotspot (only tracks 
+Tries to hover hands above the table
+Program crashed
+
+Editor task:
+Presses E to open editor
+Clicks on other hotspots
+Struggles to find Add Hotspot button
+Changes title on Hotspot 1
+Changes description on Hotspot 1
+Clicks target button on Hotspot 1
+Tries to use hand to move hotspot
+Clicks target button again and deactivates it
+Is given hint about the second display
+Moves hotspot 1 to edge of screen
+Clicks text import button
+Clicks Config Import button
+Clicks confirm on modal dialog for importing a config
+Clicks calibrate camera and reads modal. Does not look at secondary display before continuing
+Does not click save or return to application
+
+---user 807---
+Touches hotspot and activates them
+Activates each of the hotspots without looking at the display
+Moves the artefacts
+Looks at the display after a hint
+Activates video hotspot
+Watches video
+Touches another hotspot while video is playing
+Projector low battery warning is displayed (this is fixed by us during the demo)
+Touches hotspot multiple times
+Touches each hotspot in quick succession
+Makes comment about it being "sick"
+
+Editor task:
+Presses E to open editor
+Struggles to find Add Hotspot button
+Changes description for Hotspot 1
+Adds another hotspot
+Clicks target button
+Cannot figure out how to move a hotspot
+Clicks calibrate button by accident
+Confused by modal
+Continues calibration
+Untoggles hotspot move button
+Gives hint for moving hotspot
+Tries to move the mouse to the left to enter the display
+Clicks calibration button
+Clicks continue on the modal
+Completes calibration
+
+---user 950---
+Touches a hotspot
+Reads the display
+Touches each of the hotspots
+Watches the video
+Makes positive comments about the software
+Comments on length of the video used in the demo
+Touches other hotspots
+Multiple hotspots are getting triggered in quick succession, confusing to user
+
+Editor task:
+Presses E to open editor
+Clicks Add Hotspot button
+Adds title for new hotspot
+Adds description for new hotspot
+Clicks target button
+Tries to move hotspot with finger
+Given help with how to move hotspot
+Moves hotspot with mouse
+Clicks import config button
+Clicks file and confirm on modal
+Clicks Calibrate button
+Reads modal and clicks confirm
+Waits for calibration to complete
+Does not click save or close buttons
+
+---user 744---
+Clicks hotspot and reads content
+Clicks a second hotspot
+Clicks between multiple hotspots
+Starts hovering hand over the hotspots
+Makes positive comment when they realise the video plays
+Puts hand in sleeve and tries to press hotspots (does not work)
+
+Editor task:
+Presses E to open editor
+Clicks add hotspot button
+Does not add title for hotspot
+Adds description for new hotspot
+Clicks target button
+Confused about how to move hotspot
+Clicks calibrate button
+Given hint
+Uses moues to move hotspot
+Clicks save button
+Clicks calibrate button
+Clicks Import Config button
+Clicks file and confirm on modal
+Clicks calibrate button
+Waits for calibration to complete
+Cannot find Close button as they have not saved
+Clicks calibrate button and calibrates
+Given hint for closing editor
+Clicks save
+Clicks close
