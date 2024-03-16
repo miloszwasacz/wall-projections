@@ -11,7 +11,8 @@
         ShowInTaskbar="False"
         CanResize="False"
         Icon="{Binding Icon}"
-        Title="{Binding Title}">
+        Title="{Binding Title}"
+        Closed="Dialog_OnClosed">
 
     <!--TODO Style this and children properly -->
     <StackPanel Spacing="20"

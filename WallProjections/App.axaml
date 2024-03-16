@@ -15,6 +15,6 @@
 
         <!-- Templated Controls -->
         <StyleInclude Source="avares://WallProjections/Views/Toast.axaml" />
-        <StyleInclude Source="avares://WallProjections/Views/EditorUserControls/DescriptionEditor.axaml" />
+        <StyleInclude Source="avares://WallProjections/Views/Editor/DescriptionEditor.axaml" />
     </Application.Styles>
 </Application>

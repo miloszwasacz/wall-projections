@@ -1,0 +1,56 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WallProjections.Views.Editor.ImportWarningDialog"
+        x:DataType="vm:IImportViewModel"
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="WidthAndHeight"
+        ShowInTaskbar="False"
+        CanResize="False"
+        Icon="/Assets/warning-icon.ico"
+        Title="Warning">
+
+    <!--TODO Style this and children properly -->
+    <Grid ColumnDefinitions="20, Auto, 10, Auto, 20"
+          RowDefinitions="Auto, 20, Auto, 30, Auto"
+          Margin="30">
+
+        <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"
+                   TextTrimming="CharacterEllipsis"
+                   FontWeight="Bold"
+                   FontSize="20"
+                   Text="Data overwrite" />
+
+        <PathIcon Grid.Column="1" Grid.Row="2"
+                  Width="64" Height="64"
+                  Data="{StaticResource warning_regular}" />
+
+        <TextBlock Name="MessageTextBlock" Grid.Column="3" Grid.Row="2"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   MaxWidth="256"
+                   TextWrapping="Wrap"
+                   Margin="20 20 20 30" />
+
+        <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="5"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="10">
+
+            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Click="ImportButton_OnClick">
+                Import
+            </Button>
+
+            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Click="CancelButton_OnClick">
+                Cancel
+            </Button>
+
+        </StackPanel>
+
+    </Grid>
+
+</Window>

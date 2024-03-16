@@ -1,4 +1,7 @@
-﻿using WallProjections.Helper.Interfaces;
+﻿using System.Collections.Immutable;
+using Avalonia;
+using WallProjections.Helper.Interfaces;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test.Mocks.Helper;
 
@@ -7,6 +10,16 @@ namespace WallProjections.Test.Mocks.Helper;
 /// </summary>
 public class MockPythonProxy : IPythonProxy
 {
+    /// <summary>
+    /// The returned result of the <see cref="CalibrateCamera" /> method when the input is not empty
+    /// </summary>
+    public static readonly double[,] CalibrationResult =
+    {
+        { 0.0f, 0.1f, 0.2f },
+        { 1.0f, 1.1f, 1.2f },
+        { 2.0f, 2.1f, 2.2f }
+    };
+
     /// <summary>
     /// Whether <see cref="Dispose" /> has been called
     /// </summary>
@@ -33,7 +46,7 @@ public class MockPythonProxy : IPythonProxy
     /// </summary>
     public Exception? Exception { get; set; }
 
-    public void StartHotspotDetection(IPythonHandler eventListener)
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
         Task.Delay(Delay).Wait();
         IsHotspotDetectionRunning = true;
@@ -47,13 +60,14 @@ public class MockPythonProxy : IPythonProxy
         Task.Delay(Delay).Wait();
     }
 
-    public void CalibrateCamera()
+    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         Task.Delay(Delay).Wait();
         if (Exception != null)
             throw Exception;
 
         IsCameraCalibrated = true;
+        return arucoPositions.Count > 0 ? CalibrationResult : null;
     }
 
     public void Dispose()

@@ -10,7 +10,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,16 +19,27 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
-      - name: Install Zip
-        run: sudo apt-get install zip
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: .github/requirements.txt
 
-      - uses: actions/cache@v4
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           # Look to see if there is a cache hit for the corresponding requirements file
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget
+
+      - name: Install OpenCV
+        run: pip install opencv-python-headless
+
+      - name: Install Zip
+        run: sudo apt-get install zip
 
       - name: Restore dependencies
         run: dotnet restore -r ${{ inputs.target }}

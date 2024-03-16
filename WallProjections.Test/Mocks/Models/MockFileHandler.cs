@@ -1,5 +1,6 @@
 ﻿using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks.Helper;
 
 namespace WallProjections.Test.Mocks.Models;
 
@@ -70,7 +71,7 @@ public sealed class MockFileHandler : IFileHandler
     public MockFileHandler(List<Hotspot.Media> files)
     {
         _media = files;
-        Config = new Config(Enumerable.Empty<Hotspot>());
+        Config = new Config(MockPythonProxy.CalibrationResult, Enumerable.Empty<Hotspot>());
     }
 
     /// <summary>

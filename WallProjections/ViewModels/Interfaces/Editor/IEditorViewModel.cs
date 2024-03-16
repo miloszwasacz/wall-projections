@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using WallProjections.Helper;
 using WallProjections.Models.Interfaces;
-using WallProjections.Views;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.Views.Editor;
 
 namespace WallProjections.ViewModels.Interfaces.Editor;
 
@@ -26,6 +28,11 @@ public interface IEditorViewModel
     /// The currently selected hotspot (or <i>null</i> if <see cref="Hotspots" /> is empty).
     /// </summary>
     public IEditorHotspotViewModel? SelectedHotspot { get; set; }
+
+    /// <summary>
+    /// A <see cref="AbsPositionEditorViewModel" /> for editing the position of the currently selected hotspot.
+    /// </summary>
+    public AbsPositionEditorViewModel PositionEditor { get; }
 
     /// <summary>
     /// A <see cref="IDescriptionEditorViewModel" /> for editing the title and description of the currently selected hotspot.
@@ -108,6 +115,26 @@ public interface IEditorViewModel
     /// <param name="exportPath">A path to a folder where the configuration will be exported.</param>
     /// <returns>Whether the file was exported successfully.</returns>
     public bool ExportConfig(string exportPath);
+
+    /// <summary>
+    /// Shows the calibration markers on the secondary display.
+    /// </summary>
+    public void ShowCalibrationMarkers();
+
+    /// <summary>
+    /// Hides the calibration markers if they are currently visible.
+    /// </summary>
+    public void HideCalibrationMarkers();
+
+    /// <summary>
+    /// Calibrates the camera, sets the current homography matrix, and hides the calibration markers.
+    /// </summary>
+    /// <returns>Whether the calibration has been successful.</returns>
+    /// <remarks>
+    /// For the calibration to be successful,
+    /// <see cref="ShowCalibrationMarkers">ArUco markers must be visible on the secondary display</see>.
+    /// </remarks>
+    public Task<bool> CalibrateCamera();
 
     /// <summary>
     /// Closes the <see cref="EditorWindow">Editor</see> and discards any unsaved changes.

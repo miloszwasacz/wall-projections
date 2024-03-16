@@ -10,7 +10,7 @@ public class ProcessProxy : IProcessProxy
 {
     // ReSharper disable once ConvertIfStatementToReturnStatement
     /// <inheritdoc />
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Is platform specific (especially Linux) and should be tested manually")]
     public string? GetFileExplorerCommand()
     {
         //TODO Verify this works on all (necessary) platforms
@@ -27,6 +27,6 @@ public class ProcessProxy : IProcessProxy
     }
 
     /// <inheritdoc />
-    [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage(Justification = "Unit tests should not start external processes")]
     public void Start(string fileName, string arguments) => Process.Start(fileName, arguments);
 }

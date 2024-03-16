@@ -3,9 +3,12 @@ using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.ViewModels.Display;
 using WallProjections.Test.Mocks.ViewModels.Editor;
+using WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
@@ -35,12 +38,6 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <returns>A new <see cref="MockVideoViewModel"/></returns>
     public IVideoViewModel GetVideoViewModel() => new MockVideoViewModel();
-
-    /// <summary>
-    /// Creates a new <see cref="MockHotspotViewModel"/>
-    /// </summary>
-    /// <returns>A new <see cref="MockHotspotViewModel"/></returns>
-    public IHotspotViewModel GetHotspotViewModel(IConfig config) => new MockHotspotViewModel();
 
     #endregion
 
@@ -94,6 +91,12 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     );
 
     /// <summary>
+    /// Creates a new <see cref="MockPositionEditorViewModel" />
+    /// </summary>
+    /// <returns>A new <see cref="MockPositionEditorViewModel" /></returns>
+    public AbsPositionEditorViewModel GetPositionEditorViewModel() => new MockPositionEditorViewModel();
+
+    /// <summary>
     /// Creates a new <see cref="MockDescriptionEditorViewModel" />
     /// </summary>
     /// <inheritdoc />
@@ -121,6 +124,37 @@ public class MockViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="descVm">The parent <see cref="IDescriptionEditorViewModel" /></param>
     /// <returns>A new <see cref="MockImportViewModel" /></returns>
     public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new MockImportViewModel(descVm);
+
+    #endregion
+
+    #region Secondary
+
+    /// <summary>
+    /// Creates a new <see cref="MockSecondaryWindowViewModel" />
+    /// </summary>
+    /// <returns>A new <see cref="MockSecondaryWindowViewModel" /></returns>
+    public ISecondaryWindowViewModel GetSecondaryWindowViewModel() => new MockSecondaryWindowViewModel(this);
+
+    /// <summary>
+    /// Creates a new <see cref="MockHotspotDisplayViewModel" />
+    /// </summary>
+    /// <returns>A new <see cref="MockHotspotDisplayViewModel"/></returns>
+    public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) => new MockHotspotDisplayViewModel();
+
+    /// <summary>
+    /// Creates a new <see cref="MockHotspotProjectionViewModel" />
+    /// </summary>
+    /// <param name="hotspot">The hotspot to be projected</param>
+    /// <returns>A new <see cref="MockHotspotProjectionViewModel" /></returns>
+    public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
+        new MockHotspotProjectionViewModel(hotspot);
+
+    /// <summary>
+    /// Creates a new <see cref="ArUcoGridViewModel" />
+    /// </summary>
+    /// <returns>A new <see cref="ArUcoGridViewModel" /></returns>
+    /// <remarks>Note that this is not a mock, as the viewmodel is so simple that there is no need for a mock</remarks>
+    public AbsArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
 
     #endregion
 

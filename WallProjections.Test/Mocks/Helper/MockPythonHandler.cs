@@ -1,5 +1,8 @@
-﻿using WallProjections.Helper;
+﻿using System.Collections.Immutable;
+using Avalonia;
+using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test.Mocks.Helper;
 
@@ -19,16 +22,16 @@ public class MockPythonHandler : IPythonHandler
     /// <inheritdoc />
     public event EventHandler<IPythonHandler.HotspotSelectedArgs>? HotspotSelected;
 
-    public Task RunHotspotDetection()
+    public Task RunHotspotDetection(IConfig config)
     {
         CurrentScript = PythonScript.HotspotDetection;
         return Task.CompletedTask;
     }
 
-    public Task RunCalibration()
+    public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
     {
         CurrentScript = PythonScript.Calibration;
-        return Task.CompletedTask;
+        return Task.FromResult(arucoPositions.Count > 0 ? MockPythonProxy.CalibrationResult : null);
     }
 
     public void CancelCurrentTask()
@@ -37,9 +40,15 @@ public class MockPythonHandler : IPythonHandler
     }
 
     /// <inheritdoc />
-    public void OnPressDetected(int id)
+    public void OnHotspotPressed(int id)
     {
         HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
+    }
+
+    /// <inheritdoc />
+    public void OnHotspotUnpressed(int id)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>

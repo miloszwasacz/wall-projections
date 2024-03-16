@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Immutable;
+using Avalonia;
 #if !DEBUGSKIPPYTHON
+using WallProjections.Models.Interfaces;
 using System.Threading;
 using System.Diagnostics;
 using Python.Runtime;
 #else
 using System.Diagnostics.CodeAnalysis;
+using WallProjections.Models.Interfaces;
 #endif
 using WallProjections.Helper.Interfaces;
 
@@ -37,9 +41,9 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public void StartHotspotDetection(IPythonHandler eventListener)
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
-        RunPythonAction(PythonModule.HotspotDetection, module => { module.run(eventListener.ToPython()); });
+        RunPythonAction(PythonModule.HotspotDetection, module => { module.StartDetection(eventListener, config); });
     }
 
     /// <inheritdoc />
@@ -50,15 +54,15 @@ public sealed class PythonProxy : IPythonProxy
 
         using (Py.GIL())
         {
-            module.Module.stop_hotspot_detection();
+            module.StopDetection();
         }
     }
 
     /// <inheritdoc />
-    public void CalibrateCamera()
+    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         //TODO Change to the actual entrypoint
-        RunPythonAction(PythonModule.Calibration, module => { module.test(); });
+        return RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));
     }
 
     /// <summary>
@@ -66,15 +70,35 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     /// <param name="moduleFactory">A factory for creating the Python module</param>
     /// <param name="action">The action to run using the Python module</param>
+    /// <typeparam name="T">The type of the Python module</typeparam>
     /// <remarks><see cref="AtomicPythonModule.Set">Sets</see> <see cref="_currentModule" /> to the imported module</remarks>
-    private void RunPythonAction(Func<PythonModule> moduleFactory, Action<dynamic> action)
+    private void RunPythonAction<T>(Func<T> moduleFactory, Action<T> action) where T : PythonModule
     {
         using (Py.GIL())
         {
             //TODO Maybe Import a module once and reuse it?
             var module = moduleFactory();
             _currentModule.Set(module);
-            action(module.Module);
+            action(module);
+        }
+    }
+
+    /// <summary>
+    /// Runs the given action after acquiring the Python GIL importing the given module and returns the result
+    /// </summary>
+    /// <param name="moduleFactory">A factory for creating the Python module</param>
+    /// <param name="action">The action to run using the Python module</param>
+    /// <typeparam name="T">The type of the Python module</typeparam>
+    /// <typeparam name="TR">The return type of the action</typeparam>
+    /// <remarks><see cref="AtomicPythonModule.Set">Sets</see> <see cref="_currentModule" /> to the imported module</remarks>
+    private TR RunPythonAction<T, TR>(Func<T> moduleFactory, Func<T, TR> action) where T : PythonModule
+    {
+        using (Py.GIL())
+        {
+            //TODO Maybe Import a module once and reuse it?
+            var module = moduleFactory();
+            _currentModule.Set(module);
+            return action(module);
         }
     }
 
@@ -115,71 +139,18 @@ public sealed class PythonProxy : IPythonProxy
             return module;
         }
     }
-
-    /// <summary>
-    /// Available Python modules
-    /// </summary>
-    private abstract class PythonModule
-    {
-        /// <summary>
-        /// The base for importing Python modules
-        /// </summary>
-        /// <seealso cref="PythonModule(string)" />
-        private const string ScriptPath = "Scripts";
-
-        /// <inheritdoc cref="HotspotDetectionModule" />
-        public static Func<PythonModule> HotspotDetection => () => new HotspotDetectionModule();
-
-        /// <inheritdoc cref="CalibrationModule" />
-        public static Func<PythonModule> Calibration => () => new CalibrationModule();
-
-        /// <summary>
-        /// The Python module object that this class wraps
-        /// </summary>
-        public dynamic Module { get; }
-
-        /// <summary>
-        /// <see cref="Py.Import">Imports</see> the Python module with the given <paramref name="name" />
-        /// using the <see cref="ScriptPath" /> as the base (i.e. <i>{ScriptPath}.{name}</i>)
-        /// </summary>
-        /// <param name="name">The name of the Python module</param>
-        private PythonModule(string name)
-        {
-            Module = Py.Import($"{ScriptPath}.{name}");
-        }
-
-        /// <summary>
-        /// A module that provides hotspot detection functionality using Computer Vision
-        /// </summary>
-        public sealed class HotspotDetectionModule : PythonModule
-        {
-            public HotspotDetectionModule() : base("hotspot_detection")
-            {
-            }
-        }
-
-        /// <summary>
-        /// A module that calibrates the camera to correct offset from the projector
-        /// </summary>
-        public sealed class CalibrationModule : PythonModule
-        {
-            public CalibrationModule() : base("calibration")
-            {
-            }
-        }
-    }
 }
 #else
 /// <summary>
 /// A mock of <see cref="IPythonProxy" /> in an environment without Python
 /// </summary>
-[ExcludeFromCodeCoverage]
+[ExcludeFromCodeCoverage(Justification = "Mock Python proxy for manual testing")]
 public sealed class PythonProxy : IPythonProxy
 {
     /// <summary>
     /// Prints a message to the console
     /// </summary>
-    public void StartHotspotDetection(IPythonHandler eventListener)
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
         Console.WriteLine("Starting hotspot detection");
     }
@@ -193,11 +164,17 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <summary>
-    /// Prints a message to the console
+    /// Prints a message to the console and returns an identity matrix
     /// </summary>
-    public void CalibrateCamera()
+    public double[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
         Console.WriteLine("Calibrating camera");
+        return new double[,]
+        {
+            { 1, 0, 0 },
+            { 0, 1, 0 },
+            { 0, 0, 1 }
+        };
     }
 
     /// <summary>

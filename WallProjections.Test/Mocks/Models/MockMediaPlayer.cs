@@ -1,4 +1,5 @@
-﻿using LibVLCSharp.Shared;
+﻿using Avalonia.Platform;
+using LibVLCSharp.Shared;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Display;
@@ -14,6 +15,7 @@ public sealed class MockMediaPlayer : IMediaPlayer
     private readonly List<string> _mrlList = new();
     private int _stoppedCount;
     private int _disposedCount;
+    private IPlatformHandle? _handle;
 
     /// <summary>
     /// A mock of <see cref="VLCMediaPlayer"/> for injecting into <see cref="VideoViewModel"/>
@@ -24,10 +26,20 @@ public sealed class MockMediaPlayer : IMediaPlayer
         _fileExists = fileExists;
     }
 
+    public event EventHandler<EventArgs>? EndReached;
+
     public int Volume { get; set; }
+
+    public bool IsPlaying { get; private set; }
+
+    /// <summary>
+    /// The path to the last <see cref="Play">played</see> video
+    /// </summary>
+    public string? LastPlayedVideo => _mrlList.LastOrDefault();
 
     /// <summary>
     /// Adds the MRL of the given media to the list of played media
+    /// and invokes <see cref="EndReached"/> after 100 ms (asynchronously)
     /// </summary>
     /// <param name="media">Media whose MRL will be added to the list of played media</param>
     /// <returns>True if the <see cref="MockMediaPlayer(bool)"/> was constructed with <i>true</i></returns>
@@ -36,6 +48,7 @@ public sealed class MockMediaPlayer : IMediaPlayer
         if (_fileExists)
             _mrlList.Add(media.Mrl);
         media.Dispose();
+        IsPlaying = true;
         return _fileExists;
     }
 
@@ -44,7 +57,19 @@ public sealed class MockMediaPlayer : IMediaPlayer
     /// </summary>
     public void Stop()
     {
+        IsPlaying = false;
         _stoppedCount++;
+    }
+
+    public void SetHandle(IPlatformHandle handle)
+    {
+        _handle = handle;
+    }
+
+    public void DisposeHandle()
+    {
+        _handle = null;
+        IsPlaying = false;
     }
 
     /// <summary>
@@ -52,8 +77,19 @@ public sealed class MockMediaPlayer : IMediaPlayer
     /// </summary>
     public void Dispose()
     {
+        DisposeHandle();
         _disposedCount++;
     }
+
+    /// <summary>
+    /// Invokes <see cref="EndReached"/>
+    /// </summary>
+    public void MarkVideoAsEnded() => EndReached?.Invoke(this, EventArgs.Empty);
+
+    /// <summary>
+    /// Whether <see cref="SetHandle" /> has been called and <see cref="DisposeHandle" /> has not been called
+    /// </summary>
+    public bool HasHandle() => _handle != null;
 
     /// <summary>
     /// Checks if the given MRL is the only one that has been played
