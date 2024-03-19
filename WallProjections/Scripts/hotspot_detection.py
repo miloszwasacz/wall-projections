@@ -1,4 +1,6 @@
 ﻿import logging
+import threading
+
 import cv2
 import mediapipe as mp
 
@@ -15,8 +17,6 @@ from .Interop.json_dict_converters import json_to_3dict
 # noinspection PyPackages
 from .calibration import Calibrator
 
-logging.basicConfig(level=logging.INFO)
-detection_running = False
 
 MAX_NUM_HANDS: int = 4
 """The maximum number of hands to detect."""
@@ -41,6 +41,12 @@ FINGERTIP_INDICES: tuple[int, ...] = (4, 8, 12, 16, 20)
 This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
 
 
+logging.basicConfig(level=logging.DEBUG)
+
+detection_running = False
+detection_mutex = threading.Lock()
+
+
 def generate_hotspots(
         event_handler: EventHandler,
         hotspot_coords_str: str
@@ -62,6 +68,12 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     calls events when hotspots are pressed or unpressed
     """
     global detection_running
+
+    acquired = detection_mutex.acquire(timeout=1)
+    if not acquired:
+        logging.error("Failed to acquire mutex for hotspot detection (it's probably already running).")
+        return
+
     detection_running = True
 
     photo = VideoCaptureThread.take_photo()  # TODO: there has got to be a better way of getting camera width and height
@@ -78,23 +90,22 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
                                            min_detection_confidence=MIN_DETECTION_CONFIDENCE,
                                            min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
 
-    logging.info("Initialising video capture...")
-    video_capture = cv2.VideoCapture()
-    success = video_capture.open(0, 0)
-    if not success:
-        raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid.")
+    # initialise video capture
+    video_capture_thread = VideoCaptureThread()
+    video_capture_thread.start()
 
     logging.info("Initialisation done.")
 
-    # TODO: use capture class to take photos on another thread
-    while video_capture.isOpened() and detection_running:
-        success, video_capture_img = video_capture.read()
-        if not success:
-            logging.warning("Unsuccessful video read; ignoring frame.")
+    while detection_running:
+        # cycle until video capture is open
+        if video_capture_thread.get_current_frame() is None:
+            cv2.waitKey(500)
             continue
 
+        video_capture_img_bgr = video_capture_thread.get_current_frame()
+        video_capture_img_rgb = cv2.cvtColor(video_capture_img_bgr, cv2.COLOR_BGR2RGB)
+
         # run model
-        video_capture_img_rgb = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
         model_output = hands_model.process(video_capture_img_rgb)
 
         # noinspection PyUnresolvedReferences
@@ -106,11 +117,19 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
                                      fingertip_coords_norm]
             for hotspot in hotspots:
                 hotspot.update(fingertip_coords_proj)
-    video_capture.release()
+
+    # clean up
+    logging.info("Cleaning up...")
+    if video_capture_thread.is_alive():
+        video_capture_thread.stop()
+        video_capture_thread.join()
+    cv2.destroyAllWindows()  # there shouldn't be any windows but just in case
+    hands_model.close()
+    logging.info("Hotspot detection stopped.")
+    detection_mutex.release()
 
 
 def stop_hotspot_detection():
-    logging.info("stopping hotspot detection")
+    logging.info("Stopping hotspot detection...")
     global detection_running
     detection_running = False
-    pass

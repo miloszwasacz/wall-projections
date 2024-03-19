@@ -29,7 +29,7 @@ https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
 class VideoCaptureThread(threading.Thread):
     def __init__(self):
         super().__init__()
-        self.current_frame = None
+        self._current_frame = None
         self.stopping = False
 
     def run(self):
@@ -58,13 +58,16 @@ class VideoCaptureThread(threading.Thread):
                 new_dim,
                 interpolation=cv2.INTER_NEAREST
             )  # normalise size
-            self.current_frame = video_capture_img
+            self._current_frame = video_capture_img
 
             if self.stopping:
-                logging.info("Stopping video capture.")
                 break
 
         video_capture.release()
+
+    def get_current_frame(self):
+        """Get the current frame in BGR."""
+        return self._current_frame
 
     def stop(self):
         """
@@ -72,6 +75,7 @@ class VideoCaptureThread(threading.Thread):
 
         Call `Thread.join` after this to block until the thread has stopped.
         """
+        logging.info("Stopping video capture...")
         self.stopping = True
 
     @staticmethod
