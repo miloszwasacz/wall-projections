@@ -12,7 +12,7 @@ public interface IFileHandler
     /// Path to the folder containing the config.json and the media files.
     /// </summary>
     public static string ConfigFolderPath =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigFolderName);
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create ), ConfigFolderName);
 
     /// <summary>
     /// Import a zip file of the config file and the media files
