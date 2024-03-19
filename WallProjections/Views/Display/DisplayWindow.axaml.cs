@@ -22,7 +22,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     /// <summary>
     /// Handles key presses:
     /// <ul>
-    ///     <li><b>F11</b>: Toggles fullscreen</li>
+    ///     <li><b>F</b>: Toggles fullscreen</li>
     ///     <li><b>Escape</b>: Closes the display</li>
     ///     <li><b>E</b>: Opens the editor</li>
     /// </ul>
@@ -32,7 +32,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
         // Toggle fullscreen
-        if (e.Key == Key.F11)
+        if (e.Key == Key.F)
         {
             WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
             return;

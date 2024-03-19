@@ -46,10 +46,10 @@ public class DisplayWindowTest
 
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
 
-        displayWindow.KeyPress(Key.F11, RawInputModifiers.None);
+        displayWindow.KeyPress(Key.F, RawInputModifiers.None);
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.Normal));
 
-        displayWindow.KeyPress(Key.F11, RawInputModifiers.None);
+        displayWindow.KeyPress(Key.F, RawInputModifiers.None);
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
     }
 
@@ -87,7 +87,7 @@ public class DisplayWindowTest
     [AvaloniaTheory]
     public void KeyPressTest(Key key)
     {
-        Assume.That(key is not Key.F11);
+        Assume.That(key is not Key.F);
         Assume.That(key is not Key.Escape);
         Assume.That(key is not Key.E);
         Assume.That(key is > Key.D9 or < Key.D0);
@@ -110,7 +110,7 @@ public class DisplayWindowTest
     }
 
     [AvaloniaTest]
-    [TestCase(Key.F11)]
+    [TestCase(Key.F)]
     [TestCase(Key.Escape)]
     [TestCase(Key.E)]
     public void KeyPressInvalidViewModelTest(Key key)
@@ -127,7 +127,7 @@ public class DisplayWindowTest
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (key)
         {
-            case Key.F11:
+            case Key.F:
                 // Toggling fullscreen should still work
                 Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.Normal));
                 break;
