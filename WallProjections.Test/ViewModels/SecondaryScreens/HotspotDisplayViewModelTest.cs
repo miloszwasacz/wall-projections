@@ -43,8 +43,8 @@ public class HotspotDisplayViewModelTest
     public void ConstructorTest()
     {
         var config = CreateConfig();
-        var pythonHandler = new MockPythonHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(config, pythonHandler, VMProvider);
+        var hotspotHandler = new MockHotspotHandler();
+        var hotspotViewModel = new HotspotDisplayViewModel(config, hotspotHandler, VMProvider);
         Assert.Multiple(() =>
         {
             Assert.That(
@@ -59,20 +59,29 @@ public class HotspotDisplayViewModelTest
     }
 
     [Test]
+    [Timeout(2000)]
     public async Task ActivateDeactivateHotspotsTest()
     {
         var config = CreateConfig();
-        var pythonHandler = new MockPythonHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(config, pythonHandler, VMProvider);
+        var hotspotHandler = new MockHotspotHandler();
+        var hotspotViewModel = new HotspotDisplayViewModel(config, hotspotHandler, VMProvider);
 
         // Activate directly
         hotspotViewModel.ActivateHotspot(0);
         AssertActiveHotspot(hotspotViewModel, 0);
 
-        // Activate through the PythonHandler
-        pythonHandler.OnHotspotPressed(1);
+        hotspotHandler.DeactivateHotspot(0);
+        await Task.Delay(50);
+        AssertActiveHotspot(hotspotViewModel, null);
+
+        // Activate through the HotspotHandler
+        hotspotHandler.ActivateHotspot(1);
         await Task.Delay(50);
         AssertActiveHotspot(hotspotViewModel, 1);
+
+        hotspotHandler.DeactivateHotspot(1);
+        await Task.Delay(50);
+        AssertActiveHotspot(hotspotViewModel, null);
 
         // Deactivate all hotspots
         hotspotViewModel.DeactivateHotspots();
@@ -84,8 +93,8 @@ public class HotspotDisplayViewModelTest
     [Ignore("Hiding has not yet been properly implemented")]
     public void DisplayHotspotsTest()
     {
-        var pythonHandler = new MockPythonHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), pythonHandler, VMProvider);
+        var hotspotHandler = new MockHotspotHandler();
+        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), hotspotHandler, VMProvider);
         Assert.That(hotspotViewModel.IsVisible, Is.False);
         hotspotViewModel.DisplayHotspots();
         Assert.That(hotspotViewModel.IsVisible, Is.True);
@@ -94,14 +103,14 @@ public class HotspotDisplayViewModelTest
     [Test]
     public void DisposeTest()
     {
-        var pythonHandler = new MockPythonHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), pythonHandler, VMProvider);
+        var hotspotHandler = new MockHotspotHandler();
+        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), hotspotHandler, VMProvider);
         AssertActiveHotspot(hotspotViewModel, null);
 
         hotspotViewModel.Dispose();
 
         // The event is ignored, so it should not have any effect
-        pythonHandler.OnHotspotPressed(0);
+        hotspotHandler.ActivateHotspot(0);
         AssertActiveHotspot(hotspotViewModel, null);
     }
 
@@ -121,7 +130,7 @@ public class HotspotDisplayViewModelTest
         Assert.Multiple(() =>
         {
             Assert.That(active, Has.Count.EqualTo(expectedActiveCount));
-            Assert.That(inactive, Has.Count.EqualTo(vm.Projections.Count - expectedActiveCount));
+            Assert.That(inactive, Has.Count.EqualTo(vm.Projections.Count() - expectedActiveCount));
         });
         if (activeId is not null)
             Assert.That(active[0].Id, Is.EqualTo(activeId));

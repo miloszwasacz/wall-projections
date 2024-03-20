@@ -8,7 +8,7 @@ using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using static WallProjections.Test.TestSetup;
 using static WallProjections.Test.TestExtensions;
-using HotspotSelectedArgs = WallProjections.Helper.Interfaces.IPythonHandler.HotspotSelectedArgs;
+using HotspotSelectedArgs = WallProjections.Helper.Interfaces.IHotspotHandler.HotspotArgs;
 
 namespace WallProjections.Test.Helper;
 
@@ -147,7 +147,7 @@ public class PythonHandlerTest
         var id2 = id + 1;
         var (handler, _) = CreateInstance();
         HotspotSelectedArgs? eventFiredArgs = null;
-        handler.HotspotSelected += (_, a) => eventFiredArgs = a;
+        handler.HotspotPressed += (_, a) => eventFiredArgs = a;
 
         handler.OnHotspotPressed(id);
         Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());

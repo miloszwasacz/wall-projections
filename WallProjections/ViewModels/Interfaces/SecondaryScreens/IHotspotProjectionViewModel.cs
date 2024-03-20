@@ -22,7 +22,12 @@ public interface IHotspotProjectionViewModel : IPosition
     public double D { get; }
 
     /// <summary>
-    /// Shows whether the hotspot is activated or not
+    /// Whether the hotspot is being activated
+    /// </summary>
+    public bool IsActivating { get; set; }
+
+    /// <summary>
+    /// Whether the hotspot is fully activated
     /// </summary>
     public bool IsActive { get; set; }
 }

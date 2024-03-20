@@ -52,9 +52,9 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     private readonly ILayoutProvider _layoutProvider;
 
     /// <summary>
-    /// The <see cref="IPythonHandler" /> used to listen for Python events
+    /// The <see cref="IHotspotHandler" /> used to listen for hotspot events
     /// </summary>
-    private readonly IPythonHandler _pythonHandler;
+    private readonly IHotspotHandler _hotspotHandler;
 
     /// <summary>
     /// The backing field for <see cref="ContentViewModel" />
@@ -71,27 +71,27 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> with <see cref="ImageViewModel" />
     /// and <see cref="VideoViewModel" /> fetched by <paramref name="vmProvider" />,
-    /// and starts listening for <see cref="IPythonHandler.HotspotSelected">Python events</see>.
+    /// and starts listening for the <see cref="IHotspotHandler.HotspotActivated" /> event.
     /// </summary>
     /// <param name="navigator">The <see cref="INavigator" /> used for opening the Editor and closing the Display.</param>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> used to fetch internal viewmodels.</param>
     /// <param name="contentProvider">A <see cref="IContentProvider"/> for fetching data about hotspots.</param>
     /// <param name="layoutProvider">A <see cref="ILayoutProvider"/> for fetching appropriate child layouts.</param>
-    /// <param name="pythonHandler">The <see cref="IPythonHandler" /> used to listen for Python events.</param>
+    /// <param name="hotspotHandler">A <see cref="IHotspotHandler" /> used to listen for hotspot events.</param>
     public DisplayViewModel(
         INavigator navigator,
         IViewModelProvider vmProvider,
         IContentProvider contentProvider,
         ILayoutProvider layoutProvider,
-        IPythonHandler pythonHandler
+        IHotspotHandler hotspotHandler
     )
     {
         _navigator = navigator;
         _contentProvider = contentProvider;
         _vmProvider = vmProvider;
         _layoutProvider = layoutProvider;
-        _pythonHandler = pythonHandler;
-        _pythonHandler.HotspotSelected += OnHotspotSelected;
+        _hotspotHandler = hotspotHandler;
+        _hotspotHandler.HotspotActivated += OnHotspotActivated;
         _contentViewModel = CreateWelcomeLayout(layoutProvider);
     }
 
@@ -103,7 +103,7 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
         layoutProvider.GetSimpleDescriptionLayout(WelcomeTitle, WelcomeMessage);
 
     /// <inheritdoc />
-    public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
+    public void OnHotspotActivated(object? sender, IHotspotHandler.HotspotArgs e)
     {
         ShowHotspot(e.Id);
     }
@@ -114,31 +114,27 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     /// <param name="hotspotId">The ID of a hotspot to show</param>
     private async void ShowHotspot(int hotspotId) => await Task.Run(() =>
     {
+        _mutex.WaitOne();
         try
         {
             var media = _contentProvider.GetMedia(hotspotId);
-            _mutex.WaitOne();
             if (ContentViewModel is IDisposable disposable)
                 disposable.Dispose();
             ContentViewModel = _layoutProvider.GetLayout(_vmProvider, media);
-            _mutex.ReleaseMutex();
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
-            _mutex.WaitOne();
             ContentViewModel = _layoutProvider.GetErrorLayout(NotFound);
-            _mutex.ReleaseMutex();
         }
         catch (Exception e)
         {
             //TODO Write to Log instead of Console
             Console.Error.WriteLine(e);
-            _mutex.WaitOne();
             ContentViewModel = _layoutProvider.GetErrorLayout(GenericError);
-            _mutex.ReleaseMutex();
         }
+        _mutex.ReleaseMutex();
     });
 
     /// <inheritdoc />
@@ -154,11 +150,11 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     }
 
     /// <summary>
-    /// Unsubscribes from <see cref="IPythonHandler.HotspotSelected" /> and disposes of <see cref="VideoViewModel" />
+    /// Unsubscribes from <see cref="_hotspotHandler" />'s events and disposes of <see cref="VideoViewModel" />
     /// </summary>
     public void Dispose()
     {
-        _pythonHandler.HotspotSelected -= OnHotspotSelected;
+        _hotspotHandler.HotspotActivated -= OnHotspotActivated;
         _mutex.WaitOne();
         if (ContentViewModel is IDisposable disposable)
             disposable.Dispose();

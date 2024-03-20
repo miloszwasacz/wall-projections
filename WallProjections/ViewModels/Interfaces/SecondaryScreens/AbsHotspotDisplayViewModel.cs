@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
@@ -8,9 +8,9 @@ namespace WallProjections.ViewModels.Interfaces.SecondaryScreens;
 public abstract class AbsHotspotDisplayViewModel : ViewModelBase
 {
     /// <summary>
-    /// A list of <see cref="IHotspotProjectionViewModel">projections</see> of hotspots to be displayed
+    /// An interator of <see cref="IHotspotProjectionViewModel">projections</see> of hotspots to be displayed
     /// </summary>
-    public abstract ImmutableList<IHotspotProjectionViewModel> Projections { get; }
+    public abstract IEnumerable<IHotspotProjectionViewModel> Projections { get; }
 
     /// <summary>
     /// Decides whether or not to display the hotspots

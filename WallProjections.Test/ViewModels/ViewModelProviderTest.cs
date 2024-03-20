@@ -24,6 +24,7 @@ public class ViewModelProviderTest
     {
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
+        var hotspotHandler = new MockHotspotHandler();
         var processProxy = new MockProcessProxy();
         var contentProvider = new MockContentProvider(Enumerable.Empty<Hotspot.Media>());
         var layoutProvider = new MockLayoutProvider();
@@ -31,6 +32,7 @@ public class ViewModelProviderTest
             navigator,
             pythonHandler,
             processProxy,
+            _ => hotspotHandler,
             _ => contentProvider,
             () => layoutProvider
         );
@@ -277,7 +279,7 @@ public class ViewModelProviderTest
         Assert.That(hotspotViewModel, Is.InstanceOf<HotspotDisplayViewModel>());
         Assert.Multiple(() =>
         {
-            Assert.That(hotspotViewModel.Projections, Has.Count.EqualTo(config.Hotspots.Count));
+            Assert.That(hotspotViewModel.Projections.Count(), Is.EqualTo(config.Hotspots.Count));
             //TODO Add this assertion when the hiding has been properly implemented
             // Assert.That(hotspotViewModel.IsVisible, Is.False);
         });

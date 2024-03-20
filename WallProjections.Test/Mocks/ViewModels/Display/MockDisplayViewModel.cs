@@ -49,11 +49,8 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     /// </summary>
     public int DisposedCount { get; private set; }
 
-    /// <summary>
-    /// Sets
-    /// </summary>
     /// <inheritdoc />
-    public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
+    public void OnHotspotActivated(object? sender, IHotspotHandler.HotspotArgs e)
     {
         var media = new Hotspot.Media(
             e.Id,

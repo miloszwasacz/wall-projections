@@ -34,6 +34,11 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     private readonly IPythonHandler _pythonHandler;
 
     /// <summary>
+    /// The app-wide <see cref="IHotspotHandler" /> used for handling hotspot events
+    /// </summary>
+    private readonly IHotspotHandler _hotspotHandler;
+
+    /// <summary>
     /// The app-wide <see cref="IProcessProxy" /> used for starting up external processes
     /// </summary>
     private readonly IProcessProxy _processProxy;
@@ -56,6 +61,9 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="processProxy">
     /// The app-wide <see cref="IProcessProxy" /> used for starting up external processes
     /// </param>
+    /// <param name="hotspotHandlerFactory">
+    /// A factory for creating a <see cref="IHotspotHandler" /> based on <paramref name="pythonHandler" />
+    /// </param>
     /// <param name="contentProviderFactory">
     /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
     /// </param>
@@ -64,12 +72,14 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         INavigator navigator,
         IPythonHandler pythonHandler,
         IProcessProxy processProxy,
+        Func<IPythonHandler, IHotspotHandler> hotspotHandlerFactory,
         Func<IConfig, IContentProvider> contentProviderFactory,
         Func<ILayoutProvider> layoutProviderFactory
     )
     {
         _navigator = navigator;
         _pythonHandler = pythonHandler;
+        _hotspotHandler = hotspotHandlerFactory(pythonHandler);
         _processProxy = processProxy;
         _contentProviderFactory = contentProviderFactory;
         _layoutProviderFactory = layoutProviderFactory;
@@ -93,7 +103,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         this,
         _contentProviderFactory(config),
         _layoutProviderFactory(),
-        _pythonHandler
+        _hotspotHandler
     );
 
     /// <summary>
@@ -204,7 +214,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="HotspotDisplayViewModel" /> instance</returns>
     public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
-        new HotspotDisplayViewModel(config, _pythonHandler, this);
+        new HotspotDisplayViewModel(config, _hotspotHandler, this);
 
     /// <summary>
     /// Creates a new <see cref="HotspotProjectionViewModel" /> instance

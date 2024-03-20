@@ -42,6 +42,7 @@ public class App : Application
                     nav,
                     pythonHandler,
                     new ProcessProxy(),
+                    pyHandler => new HotspotHandler(pyHandler),
                     config => new ContentProvider(config),
                     () => new LayoutProvider()
                 ),

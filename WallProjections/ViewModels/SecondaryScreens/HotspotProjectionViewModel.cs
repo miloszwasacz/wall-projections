@@ -8,6 +8,11 @@ namespace WallProjections.ViewModels.SecondaryScreens;
 public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewModel
 {
     /// <summary>
+    /// The backing field for <see cref="IsActivating" />
+    /// </summary>
+    private bool _isActivating;
+
+    /// <summary>
     /// The backing field for <see cref="IsActive" />
     /// </summary>
     private bool _isActive;
@@ -34,9 +39,14 @@ public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewM
     /// <inheritdoc />
     public double D { get; }
 
-    /// <summary>
-    /// Shows whether the hotspot is activated or not
-    /// </summary>
+    /// <inheritdoc />
+    public bool IsActivating
+    {
+        get => _isActivating;
+        set => this.RaiseAndSetIfChanged(ref _isActivating, value);
+    }
+
+    /// <inheritdoc />
     public bool IsActive
     {
         get => _isActive;

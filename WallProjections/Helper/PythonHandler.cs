@@ -199,21 +199,21 @@ public sealed class PythonHandler : IPythonHandler
     #endregion
 
     /// <inheritdoc />
-    public event EventHandler<IPythonHandler.HotspotSelectedArgs>? HotspotSelected;
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotPressed;
+
+    /// <inheritdoc />
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotReleased;
 
     /// <inheritdoc />
     public void OnHotspotPressed(int id)
     {
-        Console.WriteLine($"Hotspot {id} was pressed");
-        HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
+        HotspotPressed?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 
     /// <inheritdoc />
     public void OnHotspotUnpressed(int id)
     {
-        //TODO Implement OnHotspotUnpressed
-        Console.WriteLine($"Hotspot {id} was unpressed");
-        // HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
+        HotspotReleased?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 
     public void Dispose()
