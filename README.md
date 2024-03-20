@@ -1,6 +1,8 @@
-# 2023-WallProjections
+# Wall Projections
 [![.NET CI](https://github.com/spe-uob/2023-WallProjections/actions/workflows/dotnet-ci.yml/badge.svg)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/dotnet-ci.yml)
-[![GitHub Pages Deployment](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml/badge.svg?branch=docs)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml)
+[![Documentation Deployment](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml/badge.svg?branch=docs)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml)
+
+This is a project in collaboration with Bristol Museums, to allow 3D printed replicas of artefacts to be interacted with to display detailed, rich information about the touched area.
 
 > [!Important]
 > Find the complete documentation here: [spe-uob.github.io/2023-WallProjections/](https://spe-uob.github.io/2023-WallProjections/)
@@ -33,11 +35,11 @@
 
 ## Introduction
 
-A project in collaboration with Bristol Museums, to allow 3-D printed replicas of artefacts to be interacted with to 
+A project in collaboration with Bristol Museums, to allow 3D printed replicas of artefacts to be interacted with to 
 display detailed, rich information about the touched area.
 
 The functionality includes a camera and 2 projectors. The first projector overlays hotspots (glowing circles) onto the
-3-D printed replica of the artefact. The camera positioned next to this projector uses computer vision to detect when a 
+3D printed replica of the artefact. The camera positioned next to this projector uses computer vision to detect when a 
 user's hand touches a hotspot, and upon a delay, activates the hotspot. A second project pointed against a wall will 
 display information pertinent to the selected hotspot. This information is displayed in a rich, multimedia format, 
 including text, images, and video.
@@ -91,11 +93,11 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 - As a **museum visitor**, I want to interact with the installation, so that I can learn about the artefacts in an engaging way.
 - As a **museum visitor**, I want to make full use of the system without any prior tutorial or teaching, so that as much time as possible is spent learning about the artefacts.
 - As an **exhibit designer**, I want to integrate the system with the rest of the exhibition, so that it does not look out of place.
-- As an **exhibit designer**, I want to edit the location of hotspots with a graphical interface, so that it is inutitive and takes less time.
+- As an **exhibit designer**, I want to edit the location of hotspots with a graphical interface, so that it is intuitive and takes less time.
 - As an **exhibit designer**, I want to edit hotspot information with a graphical interface, so that it is easier to line up the hotspots with the artefacts.
 - As an **exhibit designer**, I want to package the data, so that the museum curator can load it up without manual editing.
 - As a **museum curator**, I want to quickly setup the installation, so that it is ready to use with minimal effort.
-- As a **museum curator**, I want to be able to easily diagonose any issues with the system, so that it has minimal downtime.
+- As a **museum curator**, I want to be able to easily diagnose any issues with the system, so that it has minimal downtime.
 - As a **museum curator**, I want to spend as little money as possible maintaining the system, so that more money can be spent.
 
 ## Releases
@@ -115,30 +117,28 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 
 #### Editor
 - [x] Configuration for hotspot information is created manually through the creation of a zip file containing a `config.json` file and media files.
-- [x] The configuration is manully loaded from the zip file on every opening of the program.
+- [x] The configuration is manually loaded from the zip file on every opening of the program.
 
 ### First Release
 
 #### Hotspot Input (Computer Vision)
 - [x] Computer vision is used to both calibrate the projector and camera to match.
 - [x] Hand tracking is used to tell when someone is touching a hotspot.
-- [ ] All of the computer vision code runs at a good speed on a Raspberry Pi Model 4B.
-- [ ] The computer vision updates the hotspot and information displays.
+- [x] The computer vision updates the hotspot and information displays.
 
 #### Hotspot Display
-- [ ] Hotspots are projected onto the artefacts.
+- [x] Hotspots are projected onto the artefacts.
 - [x] Animations are added to show users that a hotspot has been activated.
 
 #### Information Display
 - [x] The hotspot data is retained between closing and reopening the software.
-- [ ] Styling is added to make the information display more visually appealing and engaging.
-- [ ] Multiple images and videos can be displayed at the same time, while keeping the content easily readable and digestible.
-- [ ] Animatons/transitions are used to make the software feel less static.
-- [ ] Automatic layouting is used to allow for a more complex and appealing visual presentation.
+- [x] Styling is added to make the information display more visually appealing and engaging.
+- [x] Animations/transitions are used to make the software feel less static.
+- [x] Automatic layouting is used to allow for a more complex and appealing visual presentation.
 
 #### Editor
 - [x] An editor can be used to add text, images, and video to hotspots.
-- [ ] The editor has support to easily reposition hotspot locations relative to the artefact.
+- [x] The editor has support to easily reposition hotspot locations relative to the artefact.
 - [x] Any changes the editor makes can be saved to the disk.
 
 ### Final Release
@@ -146,12 +146,14 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 #### Hotspot Input (Computer Vision)
 - [ ] Crop the camera view to reduce the required processing power for hand tracking.
 - [ ] Use a faster model to quickly find hands, before using the slower model to find a fingertip on a much smaller area of the image.
+- [ ] All of the computer vision code runs at a good speed on a Raspberry Pi Model 5.
 
 #### Hotspot Display
 - [ ] Hotspots illuminate one at a time when a user enters the space of the installation.
 - [ ] Hotspots have a rich, engaging animation making it obvious when it is activated.
 
 #### Information Display
+- [ ] Multiple images and videos can be displayed at the same time, while keeping the content easily readable and digestible.
 - [ ] Transitions upon activation of a hotspot will be eye catching.
 
 #### Editor
