@@ -10,6 +10,7 @@ public class MockHotspotProjectionViewModel : IHotspotProjectionViewModel
     public double Y { get; }
     public double D { get; }
     public bool IsActivating { get; set; }
+    public bool IsDeactivating { get; set; }
     public bool IsActive { get; set; }
 
     public MockHotspotProjectionViewModel(Hotspot hotspot)

@@ -7,6 +7,7 @@ public class MockHotspotHandler : IHotspotHandler
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotActivating;
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotActivated;
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotDeactivating;
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotForcefullyDeactivated;
 
     /// <summary>
     /// Returns if there are any subscribers to <see cref="HotspotActivating" />
@@ -25,6 +26,12 @@ public class MockHotspotHandler : IHotspotHandler
     /// </summary>
     public bool HasDeactivatingSubscribers =>
         HotspotDeactivating is not null && HotspotDeactivating.GetInvocationList().Length > 0;
+
+    /// <summary>
+    /// Returns if there are any subscribers to <see cref="HotspotForcefullyDeactivated" />
+    /// </summary>
+    public bool HasForcefullyDeactivatedSubscribers =>
+        HotspotForcefullyDeactivated is not null && HotspotForcefullyDeactivated.GetInvocationList().Length > 0;
 
     /// <summary>
     /// Invokes the <see cref="HotspotActivating" /> event.
@@ -51,5 +58,14 @@ public class MockHotspotHandler : IHotspotHandler
     public void DeactivateHotspot(int id)
     {
         HotspotDeactivating?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
+    }
+
+    /// <summary>
+    /// Invokes the <see cref="HotspotForcefullyDeactivated" /> event.
+    /// </summary>
+    /// <param name="id">The id of the hotspot passed to <see cref="IHotspotHandler.HotspotArgs" />.</param>
+    public void ForcefullyDeactivateHotspot(int id)
+    {
+        HotspotForcefullyDeactivated?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 }

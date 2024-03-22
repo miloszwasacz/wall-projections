@@ -24,10 +24,24 @@ public interface IHotspotProjectionViewModel : IPosition
     /// <summary>
     /// Whether the hotspot is being activated
     /// </summary>
+    /// <remarks>
+    /// Note that mutating <see cref="IsActive" /> or <see cref="IsDeactivating" /> does not change this property
+    /// </remarks>
     public bool IsActivating { get; set; }
+
+    /// <summary>
+    /// Whether the hotspot is being deactivated
+    /// </summary>
+    /// <remarks>
+    /// Note that mutating <see cref="IsActive" /> or <see cref="IsActivating" /> does not change this property
+    /// </remarks>
+    public bool IsDeactivating { get; set; }
 
     /// <summary>
     /// Whether the hotspot is fully activated
     /// </summary>
+    /// <remarks>
+    /// Note that mutating <see cref="IsActivating" /> or <see cref="IsDeactivating" /> does not change this property
+    /// </remarks>
     public bool IsActive { get; set; }
 }

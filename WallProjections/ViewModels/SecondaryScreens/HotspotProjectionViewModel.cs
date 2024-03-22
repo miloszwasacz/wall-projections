@@ -13,6 +13,11 @@ public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewM
     private bool _isActivating;
 
     /// <summary>
+    /// The backing field for <see cref="IsDeactivating" />
+    /// </summary>
+    private bool _isDeactivating;
+
+    /// <summary>
     /// The backing field for <see cref="IsActive" />
     /// </summary>
     private bool _isActive;
@@ -44,6 +49,13 @@ public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewM
     {
         get => _isActivating;
         set => this.RaiseAndSetIfChanged(ref _isActivating, value);
+    }
+
+    /// <inheritdoc />
+    public bool IsDeactivating
+    {
+        get => _isDeactivating;
+        set => this.RaiseAndSetIfChanged(ref _isDeactivating, value);
     }
 
     /// <inheritdoc />

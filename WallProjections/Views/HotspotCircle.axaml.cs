@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.Shapes;
@@ -7,7 +8,7 @@ using Avalonia.Controls.Shapes;
 namespace WallProjections.Views;
 
 /// <summary>
-/// A circle representing a hotspot
+/// A circle representing a hotspot. Set the <see cref="StyledElement.DataContext" />
 /// </summary>
 public partial class HotspotCircle : Ellipse, IDisposable
 {
@@ -35,6 +36,16 @@ public partial class HotspotCircle : Ellipse, IDisposable
         );
 
     /// <summary>
+    /// A <see cref="DirectProperty{T, TP}">DirectProperty</see> that defines the <see cref="IsDeactivating" /> property.
+    /// </summary>
+    public static readonly DirectProperty<HotspotCircle, bool> IsDeactivatingProperty =
+        AvaloniaProperty.RegisterDirect<HotspotCircle, bool>(
+            nameof(IsDeactivating),
+            o => o.IsDeactivating,
+            (o, v) => o.IsDeactivating = v
+        );
+
+    /// <summary>
     /// A <see cref="DirectProperty{T, TP}">DirectProperty</see> that defines the <see cref="IsActivated" /> property.
     /// </summary>
     public static readonly DirectProperty<HotspotCircle, bool> IsActivatedProperty =
@@ -59,9 +70,19 @@ public partial class HotspotCircle : Ellipse, IDisposable
     #region Backing fields
 
     /// <summary>
+    /// A mutex to prevent multiple threads from pulsing the hotspot at the same time
+    /// </summary>
+    private readonly Mutex _pulseMutex = new();
+
+    /// <summary>
     /// The subject that holds the value of <see cref="IsActivating" />
     /// </summary>
     private readonly BehaviorSubject<bool> _isActivating = new(false);
+
+    /// <summary>
+    /// The subject that holds the value of <see cref="IsDeactivating" />
+    /// </summary>
+    private readonly BehaviorSubject<bool> _isDeactivating = new(false);
 
     /// <summary>
     /// The subject that holds the value of <see cref="IsActivated" />
@@ -99,6 +120,20 @@ public partial class HotspotCircle : Ellipse, IDisposable
     }
 
     /// <summary>
+    /// Whether the hotspot is deactivating
+    /// </summary>
+    public bool IsDeactivating
+    {
+        get => _isDeactivating.Value;
+        set
+        {
+            var oldValue = _isDeactivating.Value;
+            _isDeactivating.OnNext(value);
+            RaisePropertyChanged(IsDeactivatingProperty, oldValue, value);
+        }
+    }
+
+    /// <summary>
     /// Whether the hotspot is fully activated
     /// </summary>
     public bool IsActivated
@@ -108,9 +143,15 @@ public partial class HotspotCircle : Ellipse, IDisposable
         {
             var oldValue = _isActivated.Value;
             _isActivated.OnNext(value);
+            _pulseMutex.WaitOne();
             RaisePropertyChanged(IsActivatedProperty, oldValue, value);
+
             if (value)
                 StartPulsing();
+            else
+                Pulse = false;
+
+            _pulseMutex.ReleaseMutex();
         }
     }
 
@@ -136,19 +177,31 @@ public partial class HotspotCircle : Ellipse, IDisposable
     /// <summary>
     /// Starts pulsing the hotspot
     /// </summary>
-    /// <remarks>Stops pulsing if the hotspot is <see cref="IsActivated">deactivated</see></remarks>
+    /// <remarks>Stops pulsing if the hotspot is no longer <see cref="IsActivated">activated</see></remarks>
     private async void StartPulsing()
     {
         while (true)
         {
-            if (!IsActivated) return;
+            _pulseMutex.WaitOne();
             Pulse = false;
+            if (!IsActivated)
+            {
+                _pulseMutex.ReleaseMutex();
+                return;
+            }
 
+            _pulseMutex.ReleaseMutex();
             await Task.Delay(PulseTime);
 
-            if (!IsActivated) return;
-            Pulse = true;
+            _pulseMutex.WaitOne();
+            if (!IsActivated)
+            {
+                _pulseMutex.ReleaseMutex();
+                return;
+            }
 
+            Pulse = true;
+            _pulseMutex.ReleaseMutex();
             await Task.Delay(PulseTime);
         }
     }

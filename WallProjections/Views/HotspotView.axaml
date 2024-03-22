@@ -23,6 +23,7 @@
         <DataTemplate DataType="{x:Type vm:IHotspotProjectionViewModel}">
             <views:HotspotCircle Diameter="{Binding D}"
                                  IsActivating="{Binding IsActivating}"
+                                 IsDeactivating="{Binding IsDeactivating}"
                                  IsActivated="{Binding IsActive}" />
         </DataTemplate>
 

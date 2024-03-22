@@ -18,6 +18,9 @@ public sealed class HotspotHandler : IHotspotHandler, IDisposable
     /// <inheritdoc />
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotDeactivating;
 
+    /// <inheritdoc />
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotForcefullyDeactivated;
+
     /// <summary>
     /// A <see cref="IPythonHandler" /> which notifies when a hotspot is pressed or released.
     /// </summary>
@@ -27,6 +30,11 @@ public sealed class HotspotHandler : IHotspotHandler, IDisposable
     /// A mutex to ensure thread safety for <see cref="_currentTask" /> and <see cref="_cancelledTasks" />.
     /// </summary>
     private readonly Mutex _taskMutex = new();
+
+    /// <summary>
+    /// The ID of the hotspot that is currently activated.
+    /// </summary>
+    private int? _currentlyActivated;
 
     /// <summary>
     /// The currently running task for activating a hotspot.
@@ -65,8 +73,8 @@ public sealed class HotspotHandler : IHotspotHandler, IDisposable
         _taskMutex.WaitOne();
         var runningTask = _currentTask;
 
-        // If there is a running task, which is not done or the same as the new task, return
-        if (runningTask is not null && (!runningTask.Done || runningTask.Id == e.Id))
+        // If there is a running task which is not done, or the currently activated hotspot has been pressed, return
+        if (_currentlyActivated == e.Id || (runningTask is not null && !runningTask.Done))
         {
             _taskMutex.ReleaseMutex();
             return;
@@ -74,19 +82,17 @@ public sealed class HotspotHandler : IHotspotHandler, IDisposable
 
         // If the same task has been previously cancelled, resume that task; otherwise, create a new task
         _currentTask = _cancelledTasks.TryRemove(e.Id, out var cancelledTask)
-            ? new ActivationTask(cancelledTask, InvokeActivating, InvokeActivated)
-            : new ActivationTask(e.Id, InvokeActivating, InvokeActivated);
+            ? new ActivationTask(cancelledTask, InvokeActivating, InvokeActivatedAndUpdateCurrent)
+            : new ActivationTask(e.Id, InvokeActivating, InvokeActivatedAndUpdateCurrent);
 
         // If there was a running task, it must have already finished, so remove it
         if (runningTask is not null)
-        {
             _cancelledTasks.TryRemove(runningTask.Id, out _);
-            InvokeDeactivating(runningTask.Id);
-        }
 
         _taskMutex.ReleaseMutex();
     }
 
+    //TODO Mark _currentlyActivated as null only when the screen is actually cleared
     /// <summary>
     /// An event callback for when a hotspot is <see cref="IPythonHandler.HotspotReleased">released</see>.
     /// </summary>
@@ -108,7 +114,9 @@ public sealed class HotspotHandler : IHotspotHandler, IDisposable
         currentTask.Cancel();
         _currentTask = null;
         _cancelledTasks.AddOrUpdate(currentTask.Id, currentTask, (_, _) => currentTask);
-        InvokeDeactivating(e.Id);
+
+        if (_currentlyActivated is null || _currentlyActivated != e.Id)
+            InvokeDeactivating(e.Id);
 
         _taskMutex.ReleaseMutex();
     }
@@ -131,16 +139,45 @@ public sealed class HotspotHandler : IHotspotHandler, IDisposable
     private void InvokeActivating(int id) => HotspotActivating?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
 
     /// <summary>
-    /// Invokes the <see cref="HotspotActivated" /> event.
+    /// Invokes the <see cref="HotspotActivated" /> event and updates <see cref="_currentlyActivated" />.
     /// </summary>
     /// <param name="id">The ID of the hotspot that is activated.</param>
-    private void InvokeActivated(int id) => HotspotActivated?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
+    /// <remarks>
+    /// This method uses <see cref="_taskMutex" /> to ensure thread safety. <b>Beware of deadlocks!</b>
+    /// </remarks>
+    private void InvokeActivatedAndUpdateCurrent(int id)
+    {
+        _taskMutex.WaitOne();
+
+        // If there is a currently activated hotspot, deactivate it
+        if (_currentlyActivated is not null)
+            InvokeForcefullyDeactivated(_currentlyActivated.Value);
+
+        // Activate the new hotspot
+        _currentlyActivated = id;
+        HotspotActivated?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
+
+        _taskMutex.ReleaseMutex();
+    }
+
+    // /// <summary>
+    // /// Invokes the <see cref="HotspotActivated" /> event.
+    // /// </summary>
+    // /// <param name="id">The ID of the hotspot that is activated.</param>
+    // private void InvokeActivated(int id) => HotspotActivated?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
 
     /// <summary>
     /// Invokes the <see cref="HotspotDeactivating" /> event.
     /// </summary>
     /// <param name="id">The ID of the hotspot that is deactivating.</param>
     private void InvokeDeactivating(int id) => HotspotDeactivating?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
+
+    /// <summary>
+    /// Invokes the <see cref="HotspotForcefullyDeactivated" /> event.
+    /// </summary>
+    /// <param name="id">The ID of the hotspot that is forcefully deactivated.</param>
+    private void InvokeForcefullyDeactivated(int id) =>
+        HotspotForcefullyDeactivated?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
 
     #endregion
 

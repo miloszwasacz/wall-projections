@@ -9,6 +9,7 @@
          Width="{Binding Diameter, RelativeSource={RelativeSource Self}}"
          Height="{Binding Diameter, RelativeSource={RelativeSource Self}}"
          Classes.activating="{Binding IsActivating, RelativeSource={RelativeSource Self}}"
+         Classes.deactivating="{Binding IsDeactivating, RelativeSource={RelativeSource Self}}"
          Classes.activated="{Binding IsActivated, RelativeSource={RelativeSource Self}}"
          Classes.pulse="{Binding Pulse, RelativeSource={RelativeSource Self}}">
 
@@ -22,10 +23,10 @@
                     <!--TODO Change to an actual transition -->
                     <TransformOperationsTransition
                         Property="RenderTransform"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
+                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
                     <BrushTransition
                         Property="Fill"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
+                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
                 </Transitions>
             </Setter>
             <Setter Property="RenderTransform" Value="scale(1)" />
@@ -33,9 +34,37 @@
 
         <!-- ACTIVATING animation -->
         <Style Selector="views|HotspotCircle.activating">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <!--TODO Change to an actual transition -->
+                    <TransformOperationsTransition
+                        Property="RenderTransform"
+                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
+                    <BrushTransition
+                        Property="Fill"
+                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
+                </Transitions>
+            </Setter>
             <!--TODO Change to an actual animation -->
             <Setter Property="RenderTransform" Value="scale(1.25)" />
             <Setter Property="Fill" Value="Aqua" />
+        </Style>
+
+        <!-- DEACTIVATING animation -->
+        <Style Selector="views|HotspotCircle.deactivating">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <!--TODO Change to an actual transition -->
+                    <TransformOperationsTransition
+                        Property="RenderTransform"
+                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
+                    <BrushTransition
+                        Property="Fill"
+                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
+                </Transitions>
+            </Setter>
+            <!--TODO Change to an actual animation -->
+            <Setter Property="RenderTransform" Value="scale(1)" />
         </Style>
 
         <!-- ACTIVE animation -->

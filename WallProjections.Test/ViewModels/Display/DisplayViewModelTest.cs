@@ -106,7 +106,7 @@ public class DisplayViewModelTest
     /// expected description, expected image files, and expected video files.
     /// </summary>
     /// <returns></returns>
-    private static IEnumerable<TestCaseData<ImmutableList<Hotspot.Media>>> OnHotspotSelectedTestCases()
+    private static IEnumerable<TestCaseData<ImmutableList<Hotspot.Media>>> OnHotspotActivatedTestCases()
     {
         yield return MakeTestData(
             FilesAll,
@@ -130,7 +130,7 @@ public class DisplayViewModelTest
         );
     }
 
-    private static IEnumerable<TestCaseData<(Exception, string)>> OnHotspotSelectedExceptionTestCases()
+    private static IEnumerable<TestCaseData<(Exception, string)>> OnHotspotActivatedExceptionTestCases()
     {
         yield return MakeTestData(
             (new IConfig.HotspotNotFoundException(HotspotId) as Exception, DisplayViewModel.NotFound),
@@ -166,9 +166,48 @@ public class DisplayViewModelTest
     }
 
     [Test]
-    [TestCaseSource(nameof(OnHotspotSelectedTestCases))]
+    [TestCaseSource(nameof(OnHotspotActivatedTestCases))]
     [Timeout(10000)]
-    public async Task OnHotspotSelectedTest(ImmutableList<Hotspot.Media> hotspots)
+    public async Task OnHotspotActivatingTest(ImmutableList<Hotspot.Media> hotspots)
+    {
+        var hotspot = hotspots[0];
+        var navigator = new MockNavigator();
+        var contentProvider = new MockContentProvider(hotspots);
+        var hotspotHandler = new MockHotspotHandler();
+
+        using var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            hotspotHandler
+        );
+
+        hotspotHandler.StartHotspotActivation(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.Not.InstanceOf<MockGenericLayout>());
+
+        hotspotHandler.DeactivateHotspot(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.Not.InstanceOf<MockGenericLayout>());
+
+        hotspotHandler.StartHotspotActivation(hotspot.Id);
+        await Task.Delay(500);
+        hotspotHandler.ActivateHotspot(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
+
+        // No new content should be created if the hotspot is already active
+        var oldContent = displayViewModel.ContentViewModel;
+        hotspotHandler.ActivateHotspot(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.SameAs(oldContent));
+    }
+
+    [Test]
+    [TestCaseSource(nameof(OnHotspotActivatedTestCases))]
+    [Timeout(10000)]
+    public async Task OnHotspotActivatedTest(ImmutableList<Hotspot.Media> hotspots)
     {
         var hotspot = hotspots[0];
         var hotspot2 = new Hotspot.Media(2, "Test2", "Test2", ImmutableList<string>.Empty, ImmutableList<string>.Empty);
@@ -226,8 +265,8 @@ public class DisplayViewModelTest
     }
 
     [Test]
-    [Timeout(5000)]
-    public void OnHotspotSelectedNoConfigTest()
+    [Timeout(2000)]
+    public void OnHotspotActivatedNonexistentHotspotTest()
     {
         var navigator = new MockNavigator();
         var contentProvider = new MockContentProvider(ImmutableList<Hotspot.Media>.Empty);
@@ -259,9 +298,9 @@ public class DisplayViewModelTest
     }
 
     [Test]
-    [TestCaseSource(nameof(OnHotspotSelectedExceptionTestCases))]
+    [TestCaseSource(nameof(OnHotspotActivatedExceptionTestCases))]
     [Timeout(5000)]
-    public async Task OnHotspotSelectedExceptionTest((Exception, string) testCase)
+    public async Task OnHotspotActivatedExceptionTest((Exception, string) testCase)
     {
         var (exception, expectedDescription) = testCase;
         var navigator = new MockNavigator();

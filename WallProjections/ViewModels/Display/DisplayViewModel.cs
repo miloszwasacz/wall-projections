@@ -105,6 +105,8 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     /// <inheritdoc />
     public void OnHotspotActivated(object? sender, IHotspotHandler.HotspotArgs e)
     {
+        if (ContentViewModel.HotspotId == e.Id) return;
+
         ShowHotspot(e.Id);
     }
 
@@ -115,6 +117,7 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     private async void ShowHotspot(int hotspotId) => await Task.Run(() =>
     {
         _mutex.WaitOne();
+
         try
         {
             var media = _contentProvider.GetMedia(hotspotId);
@@ -134,6 +137,7 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
             Console.Error.WriteLine(e);
             ContentViewModel = _layoutProvider.GetErrorLayout(GenericError);
         }
+
         _mutex.ReleaseMutex();
     });
 

@@ -12,11 +12,26 @@ public class DescriptionViewModel : Layout
     // ReSharper disable once MemberCanBePrivate.Global
     /// <summary>
     /// Creates a new <see cref="DescriptionViewModel" />
-    /// with the given <paramref name="title" /> and <paramref name="description" />.
+    /// with the given <paramref name="title" /> and <paramref name="description" />
+    /// not based on a hotspot.
     /// </summary>
     /// <param name="title">The title of the hotspot.</param>
     /// <param name="description">The description of the hotspot.</param>
-    public DescriptionViewModel(string title, string description)
+    public DescriptionViewModel(string title, string description) : base(null)
+    {
+        Title = title;
+        Description = description;
+    }
+
+    // ReSharper disable once MemberCanBePrivate.Global
+    /// <summary>
+    /// Creates a new <see cref="DescriptionViewModel" />
+    /// with the given <paramref name="title" /> and <paramref name="description" />.
+    /// </summary>
+    /// <param name="hotspotId">The id of the hotspot.</param>
+    /// <param name="title">The title of the hotspot.</param>
+    /// <param name="description">The description of the hotspot.</param>
+    public DescriptionViewModel(int hotspotId, string title, string description) : base(hotspotId)
     {
         Title = title;
         Description = description;
@@ -49,6 +64,6 @@ public class DescriptionViewModel : Layout
 
         /// <inheritdoc />
         protected override Layout ConstructLayout(IViewModelProvider vmProvider, Hotspot.Media hotspot) =>
-            new DescriptionViewModel(hotspot.Title, hotspot.Description);
+            new DescriptionViewModel(hotspot.Id, hotspot.Title, hotspot.Description);
     }
 }

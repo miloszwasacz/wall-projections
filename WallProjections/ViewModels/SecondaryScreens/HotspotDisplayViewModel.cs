@@ -40,6 +40,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
         _hotspotHandler.HotspotActivating += HotspotActivating;
         _hotspotHandler.HotspotActivated += HotspotActivated;
         _hotspotHandler.HotspotDeactivating += HotspotDeactivating;
+        _hotspotHandler.HotspotForcefullyDeactivated += HotspotForcefullyDeactivated;
     }
 
     /// <inheritdoc/>
@@ -48,13 +49,6 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     //TODO Make initially hidden, and show when a visitor approaches the artifact
     /// <inheritdoc/>
     public override bool IsVisible { get; protected set; } = true;
-
-    /// <inheritdoc/>
-    public override void ActivateHotspot(int id)
-    {
-        foreach (var coord in Projections)
-            coord.IsActive = coord.Id == id;
-    }
 
     /// <inheritdoc/>
     public override void DeactivateHotspots()
@@ -88,30 +82,67 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
     #region Event Callbacks
 
-    /// <inheritdoc cref="ActivateHotspot" />
+    /// <summary>
+    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.IsActivating" /> to true
+    /// and <see cref="IHotspotProjectionViewModel.IsActive" /> to false.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
     private void HotspotActivating(object? sender, IHotspotHandler.HotspotArgs e)
     {
         if (!_projections.TryGetValue(e.Id, out var hotspot)) return;
 
-        hotspot.IsActivating = true;
+        hotspot.IsDeactivating = false;
         hotspot.IsActive = false;
+        hotspot.IsActivating = true;
     }
 
-    /// <inheritdoc cref="ActivateHotspot" />
+    /// <summary>
+    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.IsActivating" />
+    /// and <see cref="IHotspotProjectionViewModel.IsDeactivating" /> to false,
+    /// and <see cref="IHotspotProjectionViewModel.IsActive" /> to true.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
     private void HotspotActivated(object? sender, IHotspotHandler.HotspotArgs e)
     {
         if (!_projections.TryGetValue(e.Id, out var hotspot)) return;
 
+        hotspot.IsDeactivating = false;
         hotspot.IsActivating = false;
         hotspot.IsActive = true;
     }
 
+    /// <summary>
+    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.IsActive" /> and
+    /// <see cref="IHotspotProjectionViewModel.IsActivating" /> to false,
+    /// and <see cref="IHotspotProjectionViewModel.IsDeactivating" /> to true.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the id of the hotspot to be deactivated.</param>
     private void HotspotDeactivating(object? sender, IHotspotHandler.HotspotArgs e)
     {
         if (!_projections.TryGetValue(e.Id, out var hotspot)) return;
 
         hotspot.IsActivating = false;
         hotspot.IsActive = false;
+        hotspot.IsDeactivating = true;
+    }
+
+    /// <summary>
+    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.IsActive" />,
+    /// <see cref="IHotspotProjectionViewModel.IsActivating" />, and <see cref="IHotspotProjectionViewModel.IsDeactivating" />
+    /// to false.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void HotspotForcefullyDeactivated(object? sender, IHotspotHandler.HotspotArgs e)
+    {
+        if (!_projections.TryGetValue(e.Id, out var hotspot)) return;
+
+        hotspot.IsActivating = false;
+        hotspot.IsActive = false;
+        hotspot.IsDeactivating = false;
     }
 
     #endregion
@@ -121,6 +152,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
         _hotspotHandler.HotspotActivating -= HotspotActivating;
         _hotspotHandler.HotspotActivated -= HotspotActivated;
         _hotspotHandler.HotspotDeactivating -= HotspotDeactivating;
+        _hotspotHandler.HotspotForcefullyDeactivated -= HotspotForcefullyDeactivated;
         GC.SuppressFinalize(this);
     }
 }
