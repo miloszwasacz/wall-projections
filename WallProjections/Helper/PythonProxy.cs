@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Immutable;
 using Avalonia;
+using WallProjections.Helper.Interfaces;
 #if !DEBUGSKIPPYTHON
 using WallProjections.Models.Interfaces;
-using System.Threading;
 using System.Diagnostics;
 using Python.Runtime;
 #else
 using System.Diagnostics.CodeAnalysis;
 using WallProjections.Models.Interfaces;
 #endif
-using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.Helper;
 
@@ -113,7 +112,12 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     private class AtomicPythonModule
     {
-        private readonly Mutex _mutex = new();
+        /// <summary>
+        /// The internal module reference
+        /// </summary>
+        /// <remarks>
+        /// Remember to lock on <i>this</i> when accessing this field
+        /// </remarks>
         private PythonModule? _module;
 
         /// <summary>
@@ -121,9 +125,10 @@ public sealed class PythonProxy : IPythonProxy
         /// </summary>
         public void Set(PythonModule module)
         {
-            _mutex.WaitOne();
-            _module = module;
-            _mutex.ReleaseMutex();
+            lock (this)
+            {
+                _module = module;
+            }
         }
 
         /// <summary>
@@ -132,11 +137,12 @@ public sealed class PythonProxy : IPythonProxy
         /// <returns>The previously held module, or <i>null</i> if there was none</returns>
         public PythonModule? Take()
         {
-            _mutex.WaitOne();
-            var module = _module;
-            _module = null;
-            _mutex.ReleaseMutex();
-            return module;
+            lock (this)
+            {
+                var module = _module;
+                _module = null;
+                return module;
+            }
         }
     }
 }

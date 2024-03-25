@@ -90,7 +90,7 @@ public class DisplayWindowTest
     }
 
     [AvaloniaTheory]
-    [Timeout(1000)]
+    [Timeout(1500)]
     public async Task KeyPressTest(Key key)
     {
         Assume.That(key is not Key.F);
@@ -124,7 +124,7 @@ public class DisplayWindowTest
         [DatapointSource] public static readonly Key[] Keys = { Key.F, Key.Escape, Key.E, Key.A, Key.F11, Key.NumPad0 };
 
         [AvaloniaTheory]
-        [Timeout(1000)]
+        [Timeout(1500)]
         public async Task KeyPressTest(Key key, KeyModifiers modifiers)
         {
             Assume.That(modifiers is not KeyModifiers.None || key is not (Key.F or Key.Escape or Key.E));

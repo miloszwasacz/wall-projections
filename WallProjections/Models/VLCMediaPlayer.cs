@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 using Avalonia.Platform;
 using LibVLCSharp.Shared;
 using WallProjections.Models.Interfaces;
@@ -14,11 +13,6 @@ namespace WallProjections.Models;
 /// </summary>
 public sealed class VLCMediaPlayer : MediaPlayer, IMediaPlayer
 {
-    /// <summary>
-    /// A mutex to ensure sequential access to media player's handle
-    /// </summary>
-    private readonly Mutex _mutex = new();
-
     /// <summary>
     /// Whether the media player has already been disposed
     /// </summary>
@@ -35,37 +29,37 @@ public sealed class VLCMediaPlayer : MediaPlayer, IMediaPlayer
     /// <inheritdoc />
     public void SetHandle(IPlatformHandle handle)
     {
-        _mutex.WaitOne();
-        if (_isDisposed)
+        lock (this)
         {
-            _mutex.ReleaseMutex();
-            return;
+            if (_isDisposed)
+                return;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                Hwnd = handle.Handle;
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                NsObject = handle.Handle;
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                XWindow = (uint)handle.Handle;
         }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            Hwnd = handle.Handle;
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            NsObject = handle.Handle;
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            XWindow = (uint)handle.Handle;
-
-        _mutex.ReleaseMutex();
     }
 
     /// <inheritdoc />
     public void DisposeHandle()
     {
-        _mutex.WaitOne();
-        _isDisposed = true;
+        lock (this)
+        {
+            if (_isDisposed)
+                return;
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            Hwnd = IntPtr.Zero;
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            NsObject = IntPtr.Zero;
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            XWindow = 0;
+            _isDisposed = true;
 
-        _mutex.ReleaseMutex();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                Hwnd = IntPtr.Zero;
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                NsObject = IntPtr.Zero;
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                XWindow = 0;
+        }
     }
 
     /// <inheritdoc />

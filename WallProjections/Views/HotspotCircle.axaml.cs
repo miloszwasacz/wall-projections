@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Subjects;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.Shapes;
@@ -68,11 +67,6 @@ public partial class HotspotCircle : Ellipse, IDisposable
     #endregion
 
     #region Backing fields
-
-    /// <summary>
-    /// A mutex to prevent multiple threads from pulsing the hotspot at the same time
-    /// </summary>
-    private readonly Mutex _pulseMutex = new();
 
     /// <summary>
     /// The subject that holds the value of <see cref="IsActivating" />
@@ -143,15 +137,15 @@ public partial class HotspotCircle : Ellipse, IDisposable
         {
             var oldValue = _isActivated.Value;
             _isActivated.OnNext(value);
-            _pulseMutex.WaitOne();
-            RaisePropertyChanged(IsActivatedProperty, oldValue, value);
+            lock (_pulse)
+            {
+                RaisePropertyChanged(IsActivatedProperty, oldValue, value);
 
-            if (value)
-                StartPulsing();
-            else
-                Pulse = false;
-
-            _pulseMutex.ReleaseMutex();
+                if (value)
+                    StartPulsing();
+                else
+                    Pulse = false;
+            }
         }
     }
 
@@ -182,26 +176,24 @@ public partial class HotspotCircle : Ellipse, IDisposable
     {
         while (true)
         {
-            _pulseMutex.WaitOne();
-            Pulse = false;
-            if (!IsActivated)
+            lock (_pulse)
             {
-                _pulseMutex.ReleaseMutex();
-                return;
+                Pulse = false;
+
+                if (!IsActivated)
+                    return;
             }
 
-            _pulseMutex.ReleaseMutex();
             await Task.Delay(PulseTime);
 
-            _pulseMutex.WaitOne();
-            if (!IsActivated)
+            lock (_pulse)
             {
-                _pulseMutex.ReleaseMutex();
-                return;
+                if (!IsActivated)
+                    return;
+
+                Pulse = true;
             }
 
-            Pulse = true;
-            _pulseMutex.ReleaseMutex();
             await Task.Delay(PulseTime);
         }
     }

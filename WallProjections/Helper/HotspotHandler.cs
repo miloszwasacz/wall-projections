@@ -281,7 +281,7 @@ public sealed class HotspotHandler : IHotspotHandler
         {
             lock (_cts)
             {
-                // If the task was cancelled while waiting for the mutex, return
+                // If the task was cancelled while waiting for the lock, return
                 if (_cts.IsCancellationRequested)
                     return;
 

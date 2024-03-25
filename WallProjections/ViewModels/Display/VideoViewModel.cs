@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 using LibVLCSharp.Shared;
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
@@ -20,16 +19,17 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <summary>
     /// Whether or not this <see cref="VideoViewModel" /> has been disposed
     /// </summary>
+    /// <remarks>
+    /// Remember to use <i>lock (this)</i> when accessing this field
+    /// </remarks>
     private bool _isDisposed;
-
-    /// <summary>
-    /// Mutex for <see cref="_isLoaded"/> and <see cref="_isDisposed" />
-    /// </summary>
-    private readonly Mutex _stateMutex;
 
     /// <summary>
     /// Whether the video player has loaded
     /// </summary>
+    /// <remarks>
+    /// Remember to use <i>lock (this)</i> when accessing this field
+    /// </remarks>
     private bool _isLoaded;
 
     /// <summary>
@@ -56,7 +56,6 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     {
         _libVlc = libVlc;
         _mediaPlayer = mediaPlayer;
-        _stateMutex = new Mutex();
         _playQueue = new ConcurrentQueue<string>();
         _mediaPlayer.EndReached += PlayNextVideoEvent;
 
@@ -112,12 +111,13 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <inheritdoc />
     public void MarkLoaded()
     {
-        _stateMutex.WaitOne();
-        if (HasVideos)
-            PlayNextVideo();
+        lock (this)
+        {
+            if (HasVideos)
+                PlayNextVideo();
 
-        _isLoaded = true;
-        _stateMutex.ReleaseMutex();
+            _isLoaded = true;
+        }
     }
 
     /// <inheritdoc />
@@ -126,29 +126,27 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         foreach (var path in paths)
             _playQueue.Enqueue(path);
 
-        _stateMutex.WaitOne();
-        var success = false;
-        if (_isLoaded && HasVideos)
-            success = PlayNextVideo();
+        lock (this)
+        {
+            var success = false;
+            if (_isLoaded && HasVideos)
+                success = PlayNextVideo();
 
-        IsVisible = success;
-        _stateMutex.ReleaseMutex();
-
-        return success;
+            IsVisible = success;
+            return success;
+        }
     }
 
     /// <inheritdoc />
     public void StopVideo()
     {
-        _stateMutex.WaitOne();
-        if (_isDisposed)
+        lock (this)
         {
-            _stateMutex.ReleaseMutex();
-            return;
-        }
+            if (_isDisposed)
+                return;
 
-        ForceStopVideo();
-        _stateMutex.ReleaseMutex();
+            ForceStopVideo();
+        }
     }
 
     /// <summary>
@@ -164,22 +162,21 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <inheritdoc />
     public bool PlayNextVideo()
     {
-        // End of queue reached
-        _stateMutex.WaitOne();
-        if (_isDisposed || MediaPlayer is null || !_playQueue.TryDequeue(out var nextVideo))
+        lock (this)
         {
-            IsVisible = false;
-            _stateMutex.ReleaseMutex();
-            return false;
+            if (_isDisposed || MediaPlayer is null || !_playQueue.TryDequeue(out var nextVideo))
+            {
+                // End of queue reached
+                IsVisible = false;
+                return false;
+            }
+
+            var media = new Media(_libVlc, nextVideo);
+            var success = MediaPlayer.Play(media);
+            IsVisible = success;
+            media.Dispose();
+            return success;
         }
-
-        _stateMutex.ReleaseMutex();
-
-        var media = new Media(_libVlc, nextVideo);
-        var success = MediaPlayer.Play(media);
-        IsVisible = success;
-        media.Dispose();
-        return success;
     }
 
     /// <summary>
@@ -198,16 +195,14 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 
     public void Dispose()
     {
-        _stateMutex.WaitOne();
-        if (_isDisposed)
+        lock (this)
         {
-            _stateMutex.ReleaseMutex();
-            return;
-        }
+            if (_isDisposed)
+                return;
 
-        ForceStopVideo();
-        _isDisposed = true;
-        _stateMutex.ReleaseMutex();
+            ForceStopVideo();
+            _isDisposed = true;
+        }
 
         var player = MediaPlayer;
         MediaPlayer = null;

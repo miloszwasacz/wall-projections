@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using ReactiveUI;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -14,11 +13,6 @@ public class PositionEditorViewModel : AbsPositionEditorViewModel
 {
     /// <inheritdoc />
     public override event EventHandler? HotspotPositionChanged;
-
-    /// <summary>
-    /// A mutex ensuring sequential access to the position and radius of the hotspot.
-    /// </summary>
-    private readonly Mutex _mutex = new();
 
     /// <summary>
     /// The backing field for <see cref="IsInEditMode" />.
@@ -111,10 +105,11 @@ public class PositionEditorViewModel : AbsPositionEditorViewModel
     {
         if (!IsInEditMode || _selectedHotspot is null) return;
 
-        _mutex.WaitOne();
-        X = x;
-        Y = y;
-        _mutex.ReleaseMutex();
+        lock (this)
+        {
+            X = x;
+            Y = y;
+        }
     }
 
     /// <inheritdoc />
@@ -122,9 +117,10 @@ public class PositionEditorViewModel : AbsPositionEditorViewModel
     {
         if (!IsInEditMode || _selectedHotspot is null) return;
 
-        _mutex.WaitOne();
-        R += delta;
-        _mutex.ReleaseMutex();
+        lock (this)
+        {
+            R += delta;
+        }
     }
 
     /// <inheritdoc />
@@ -132,9 +128,10 @@ public class PositionEditorViewModel : AbsPositionEditorViewModel
     {
         if (!IsInEditMode || _selectedHotspot is null) return;
 
-        _mutex.WaitOne();
-        _selectedHotspot.Position = new Coord(X, Y, R);
-        _mutex.ReleaseMutex();
+        lock (this)
+        {
+            _selectedHotspot.Position = new Coord(X, Y, R);
+        }
 
         IsInEditMode = false;
         HotspotPositionChanged?.Invoke(this, EventArgs.Empty);

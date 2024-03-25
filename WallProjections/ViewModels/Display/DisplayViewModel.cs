@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
@@ -25,11 +24,6 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     internal const string NotFound = "Hmm...\n" +
                                      "Looks like this hotspot has missing content.\n" +
                                      "Please report this to the museum staff.";
-
-    /// <summary>
-    /// A mutex to ensure sequential access to the <see cref="ContentViewModel" />
-    /// </summary>
-    private readonly Mutex _mutex = new();
 
     /// <summary>
     /// The <see cref="INavigator" /> used for opening the Editor and closing the Display.
@@ -62,6 +56,9 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     private Layout _contentViewModel;
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Remember to use <i>lock (this)</i> when accessing this property
+    /// </remarks>
     public Layout ContentViewModel
     {
         get => _contentViewModel;
@@ -105,9 +102,12 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     /// <inheritdoc />
     public void OnHotspotActivated(object? sender, IHotspotHandler.HotspotArgs e)
     {
-        if (ContentViewModel.HotspotId == e.Id) return;
+        lock (this)
+        {
+            if (ContentViewModel.HotspotId == e.Id) return;
 
-        ShowHotspot(e.Id);
+            ShowHotspot(e.Id);
+        }
     }
 
     /// <summary>
@@ -116,8 +116,6 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     /// <param name="hotspotId">The ID of a hotspot to show</param>
     private async void ShowHotspot(int hotspotId) => await Task.Run(() =>
     {
-        _mutex.WaitOne();
-
         try
         {
             var media = _contentProvider.GetMedia(hotspotId);
@@ -137,8 +135,6 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
             Console.Error.WriteLine(e);
             ContentViewModel = _layoutProvider.GetErrorLayout(GenericError);
         }
-
-        _mutex.ReleaseMutex();
     });
 
     /// <inheritdoc />
@@ -159,10 +155,11 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     public void Dispose()
     {
         _hotspotHandler.HotspotActivated -= OnHotspotActivated;
-        _mutex.WaitOne();
-        if (ContentViewModel is IDisposable disposable)
-            disposable.Dispose();
-        ContentViewModel = CreateWelcomeLayout(_layoutProvider);
-        _mutex.ReleaseMutex();
+        lock (this)
+        {
+            if (ContentViewModel is IDisposable disposable)
+                disposable.Dispose();
+            ContentViewModel = CreateWelcomeLayout(_layoutProvider);
+        }
     }
 }

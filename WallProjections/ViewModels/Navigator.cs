@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -23,11 +22,6 @@ namespace WallProjections.ViewModels;
 /// <inheritdoc cref="INavigator" />
 public sealed class Navigator : ViewModelBase, INavigator
 {
-    /// <summary>
-    /// A mutex to ensure sequential access to <see cref="_appLifetime" />.<see cref="AppLifetime.MainWindow" />
-    /// </summary>
-    private readonly Mutex _windowMutex = new();
-
     /// <summary>
     /// The application lifetime.
     /// </summary>
@@ -113,24 +107,34 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     private void OpenDisplay()
     {
-        _windowMutex.WaitOne();
-        var config = _config;
-        if (config is null)
+        lock (this)
         {
-            _windowMutex.ReleaseMutex();
-            OpenEditor();
-            return;
+            OpenDisplayInternal();
         }
+    }
 
-        _pythonHandler.RunHotspotDetection(config);
-        var displayWindow = new DisplayWindow
+    /// <summary>
+    /// Same as <see cref="OpenDisplay" /> but without the lock.
+    /// </summary>
+    private void OpenDisplayInternal()
+    {
+        lock (this)
         {
-            DataContext = _vmProvider.GetDisplayViewModel(config)
-        };
-        Navigate(displayWindow);
-        _secondaryScreen.viewModel.ShowHotspotDisplay(config);
+            var config = _config;
+            if (config is null)
+            {
+                OpenEditorInternal();
+                return;
+            }
 
-        _windowMutex.ReleaseMutex();
+            _pythonHandler.RunHotspotDetection(config);
+            var displayWindow = new DisplayWindow
+            {
+                DataContext = _vmProvider.GetDisplayViewModel(config)
+            };
+            Navigate(displayWindow);
+            _secondaryScreen.viewModel.ShowHotspotDisplay(config);
+        }
     }
 
     /// <summary>
@@ -138,7 +142,17 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     public void OpenEditor()
     {
-        _windowMutex.WaitOne();
+        lock (this)
+        {
+            OpenEditorInternal();
+        }
+    }
+
+    /// <summary>
+    /// Same as <see cref="OpenEditor" /> but without the lock.
+    /// </summary>
+    private void OpenEditorInternal()
+    {
         var config = _config;
         var fileHandler = _fileHandlerFactory();
 
@@ -155,8 +169,6 @@ public sealed class Navigator : ViewModelBase, INavigator
         };
         Navigate(editorWindow);
         _secondaryScreen.viewModel.ShowPositionEditor(vm);
-
-        _windowMutex.ReleaseMutex();
     }
 
     /// <summary>
@@ -166,54 +178,65 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     public void CloseEditor()
     {
-        var fileHandler = _fileHandlerFactory();
-        try
+        lock (this)
         {
-            _config = fileHandler.LoadConfig();
-            OpenDisplay();
-        }
-        catch (Exception e)
-        {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
-            _config = null;
-            //TODO Show error message
-            Shutdown();
+            var fileHandler = _fileHandlerFactory();
+            try
+            {
+                _config = fileHandler.LoadConfig();
+                OpenDisplayInternal();
+            }
+            catch (Exception e)
+            {
+                //TODO Log to file
+                Console.Error.WriteLine(e);
+                _config = null;
+                //TODO Show error message
+                Shutdown();
+            }
         }
     }
 
     /// <inheritdoc />
     public void ShowCalibrationMarkers()
     {
-        _secondaryScreen.viewModel.ShowArUcoGrid();
+        lock (this)
+        {
+            _secondaryScreen.viewModel.ShowArUcoGrid();
+        }
     }
 
     /// <inheritdoc />
     public void HideCalibrationMarkers()
     {
-        IEditorViewModel? vm = null;
-        Dispatcher.UIThread.Invoke(() =>
+        lock (this)
         {
-            if (_mainWindow?.DataContext is IEditorViewModel editorViewModel)
-                vm = editorViewModel;
-        });
+            IEditorViewModel? vm = null;
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                if (_mainWindow?.DataContext is IEditorViewModel editorViewModel)
+                    vm = editorViewModel;
+            });
 
-        // TODO Test this physically
-        if (vm is not null)
-            _secondaryScreen.viewModel.ShowPositionEditor(vm);
+            if (vm is not null)
+                _secondaryScreen.viewModel.ShowPositionEditor(vm);
+        }
     }
 
     /// <inheritdoc />
     public ImmutableDictionary<int, Point>? GetArUcoPositions()
     {
-        var arUcoGridView = _secondaryScreen.window.FindDescendantOfType<ArUcoGridView>();
-        ImmutableDictionary<int, Point>? positions = null;
-        Dispatcher.UIThread.Invoke(() =>
+        lock (this)
         {
-            // This has to be run on the UI thread
-            positions = arUcoGridView?.GetArUcoPositions();
-        });
-        return positions;
+            var arUcoGridView = _secondaryScreen.window.FindDescendantOfType<ArUcoGridView>();
+            ImmutableDictionary<int, Point>? positions = null;
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                // This has to be run on the UI thread
+                positions = arUcoGridView?.GetArUcoPositions();
+            });
+            return positions;
+        }
     }
 
     /// <summary>

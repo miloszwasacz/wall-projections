@@ -40,9 +40,10 @@ public class HotspotHandlerInternalTest
 #pragma warning restore CS0618
 
             Task task;
+            // Lock the cancellation token source so that the task waits before starting the activation
             lock (cts)
             {
-                // Lock the internal mutex and run the task
+                // Run the task
                 task = runTask();
 
                 // Wait so that the task starts

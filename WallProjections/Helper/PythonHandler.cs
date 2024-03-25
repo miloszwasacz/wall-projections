@@ -57,11 +57,6 @@ public sealed class PythonHandler : IPythonHandler
     private readonly IPythonProxy _pythonProxy;
 
     /// <summary>
-    /// A mutex to ensure sequential access to <see cref="_currentTask" />
-    /// </summary>
-    private readonly Mutex _taskMutex = new();
-
-    /// <summary>
     /// The currently running Python task
     /// </summary>
     private CancellationTokenSource? _currentTask;
@@ -77,24 +72,21 @@ public sealed class PythonHandler : IPythonHandler
     /// <inheritdoc />
     public void CancelCurrentTask()
     {
-        _taskMutex.WaitOne();
-        if (_currentTask is null)
+        lock (this)
         {
-            _taskMutex.ReleaseMutex();
-            return;
-        }
+            if (_currentTask is null)
+                return;
 
-        try
-        {
-            RunPythonAction(python => python.StopCurrentAction());
-        }
-        finally
-        {
-            _currentTask?.Cancel();
-            _currentTask?.Dispose();
-            _currentTask = null;
-
-            _taskMutex.ReleaseMutex();
+            try
+            {
+                RunPythonAction(python => python.StopCurrentAction());
+            }
+            finally
+            {
+                _currentTask?.Cancel();
+                _currentTask?.Dispose();
+                _currentTask = null;
+            }
         }
     }
 
@@ -107,9 +99,12 @@ public sealed class PythonHandler : IPythonHandler
     private Task RunNewPythonAction(Action<IPythonProxy> action)
     {
         CancelCurrentTask();
-        _taskMutex.WaitOne();
-        var task = _currentTask = new CancellationTokenSource();
-        _taskMutex.ReleaseMutex();
+        CancellationTokenSource task;
+        lock (this)
+        {
+            task = _currentTask = new CancellationTokenSource();
+        }
+
         return Task.Run(() =>
         {
             try
@@ -135,9 +130,12 @@ public sealed class PythonHandler : IPythonHandler
     private Task<TR?> RunNewPythonAction<TR>(Func<IPythonProxy, TR?> action)
     {
         CancelCurrentTask();
-        _taskMutex.WaitOne();
-        var task = _currentTask = new CancellationTokenSource();
-        _taskMutex.ReleaseMutex();
+        CancellationTokenSource task;
+        lock (this)
+        {
+            task = _currentTask = new CancellationTokenSource();
+        }
+
         return Task.Run(() =>
         {
             try
