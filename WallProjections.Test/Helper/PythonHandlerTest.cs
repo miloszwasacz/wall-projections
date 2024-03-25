@@ -163,6 +163,19 @@ public class PythonHandlerTest
     [TestCaseSource(nameof(Ids))]
     public void OnHotspotUnpressedTest(int id)
     {
+        var id2 = id + 1;
+        var (handler, _) = CreateInstance();
+        HotspotSelectedArgs? eventFiredArgs = null;
+        handler.HotspotReleased += (_, a) => eventFiredArgs = a;
+
+        handler.OnHotspotUnpressed(id);
+        Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
+        Assert.That(eventFiredArgs!.Id, Is.EqualTo(id));
+        eventFiredArgs = null;
+
+        handler.OnHotspotUnpressed(id2);
+        Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
+        Assert.That(eventFiredArgs!.Id, Is.EqualTo(id2));
     }
 
     /// <summary>

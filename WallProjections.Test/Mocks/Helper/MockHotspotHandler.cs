@@ -10,6 +10,11 @@ public class MockHotspotHandler : IHotspotHandler
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotForcefullyDeactivated;
 
     /// <summary>
+    /// Whether <see cref="Dispose" /> has been called.
+    /// </summary>
+    public bool IsDisposed { get; private set; }
+
+    /// <summary>
     /// Returns if there are any subscribers to <see cref="HotspotActivating" />
     /// </summary>
     public bool HasActivatingSubscribers =>
@@ -67,5 +72,11 @@ public class MockHotspotHandler : IHotspotHandler
     public void ForcefullyDeactivateHotspot(int id)
     {
         HotspotForcefullyDeactivated?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
+    }
+
+    public void Dispose()
+    {
+        IsDisposed = true;
+        GC.SuppressFinalize(this);
     }
 }

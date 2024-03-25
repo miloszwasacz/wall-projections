@@ -23,7 +23,7 @@ public interface IDisplayViewModel : IDisposable
     /// The concrete <see cref="Layout" /> currently being displayed,
     /// based on the selected <see cref="Hotspot" />'s content.
     /// </summary>
-    public Layout? ContentViewModel { get; }
+    public Layout ContentViewModel { get; }
 
     /// <summary>
     /// Opens the <see cref="EditorWindow">Editor</see>.

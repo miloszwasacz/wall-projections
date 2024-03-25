@@ -5,7 +5,7 @@ namespace WallProjections.Helper.Interfaces;
 /// <summary>
 /// A handler for activating and deactivating hotspots
 /// </summary>
-public interface IHotspotHandler
+public interface IHotspotHandler : IDisposable
 {
     /// <summary>
     /// The total time required to activate a hotspot.
