@@ -6,6 +6,7 @@ using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using System.Diagnostics;
 using Python.Runtime;
+
 #else
 using System.Diagnostics.CodeAnalysis;
 using WallProjections.Models.Interfaces;
@@ -58,11 +59,8 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
-    {
-        //TODO Change to the actual entrypoint
-        return RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));
-    }
+    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions) =>
+        RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));
 
     /// <summary>
     /// Runs the given action after acquiring the Python GIL importing the given module

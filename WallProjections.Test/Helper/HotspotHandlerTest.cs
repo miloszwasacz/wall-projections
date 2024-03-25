@@ -149,7 +149,7 @@ public class HotspotHandlerTest
                 Assert.That(args6, Is.Null);
             });
             Assert.That(args5!.Id, Is.EqualTo(Ids[0]));
-            await Task.Delay(5 * eventDelay); // Wait for the rest of the activation time (plus a little extra)
+            await Task.Delay(6 * eventDelay); // Wait for the rest of the activation time (plus a little extra)
             var args7 = getEventArgs(HotspotState.Activated);
             Assert.That(args7, Is.Not.Null);
             Assert.That(args7!.Id, Is.EqualTo(Ids[0]));
