@@ -14,11 +14,23 @@ on:
         description: 'Whether to generate a code coverage report'
         type: boolean
         default: false
+    secrets:
+      CODECOV_TOKEN:
+        description: 'Token for uploading coverage reports to Codecov'
+        required: false
 
 jobs:
   build:
     runs-on: ${{ inputs.os }}
     steps:
+      - name: Fail on missing secrets
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ inputs.coverage && env.CODECOV_TOKEN == '' }}
+        run: |
+          echo "CODECOV_TOKEN is required for uploading coverage reports to Codecov."
+          exit 1
+
       - uses: actions/checkout@v4
 
       - name: Setup .NET

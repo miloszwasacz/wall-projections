@@ -11,3 +11,5 @@ jobs:
     with:
       os: 'ubuntu-latest'
       coverage: true
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
