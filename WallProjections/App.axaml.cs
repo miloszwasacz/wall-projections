@@ -1,14 +1,20 @@
-using System;
+using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using WallProjections.Helper;
+using WallProjections.Models;
 using WallProjections.ViewModels;
-using WallProjections.Views;
+using WallProjections.ViewModels.Display.Layouts;
+using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections;
 
 public class App : Application
 {
+    // ReSharper disable once NotAccessedField.Local
+    private INavigator? _navigator;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -16,24 +22,31 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.MainWindow = new DisplayWindow
-            {
-                DataContext = ViewModelProvider.Instance.GetDisplayViewModel()
-            };
-
-            desktop.Exit += OnExit;
-        }
-
+        InitializeNavigator(ApplicationLifetime);
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    /// <summary>
+    /// Initializes the application-wide navigator.
+    /// </summary>
+    /// <param name="lifetime">The application lifetime.</param>
+    [ExcludeFromCodeCoverage(Justification = "Headless lifetime is not a IClassicDesktopStyleApplicationLifetime")]
+    private void InitializeNavigator(IApplicationLifetime? lifetime)
     {
-        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
-
-        if (desktop.MainWindow?.DataContext is IDisposable vm)
-            vm.Dispose();
+        if (lifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            _navigator = new Navigator(
+                desktop,
+                PythonHandler.Instance,
+                (nav, pythonHandler) => new ViewModelProvider(
+                    nav,
+                    pythonHandler,
+                    new ProcessProxy(),
+                    config => new ContentProvider(config),
+                    () => new LayoutProvider()
+                ),
+                () => new FileHandler()
+            );
+        }
     }
 }

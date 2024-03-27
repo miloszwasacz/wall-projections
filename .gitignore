@@ -1,3 +1,5 @@
+/WallProjections/Assets/ArUcos/
+
 # Created by https://www.toptal.com/developers/gitignore/api/csharp,visualstudio,visualstudiocode,rider,intellij+all,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=csharp,visualstudio,visualstudiocode,rider,intellij+all,python
 
@@ -907,3 +909,10 @@ pyrightconfig.json
 
 .DS_STORE
 .avalonia-build-tasks
+
+# Jekyll Ignore
+_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
+vendor

@@ -1,7 +1,8 @@
-﻿using System.IO.Compression;
+﻿using System.Collections.Immutable;
+using System.IO.Compression;
+using System.Reflection;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
-using WallProjections.Test.Mocks.Models;
 using static WallProjections.Test.TestExtensions;
 
 namespace WallProjections.Test.Models;
@@ -19,28 +20,31 @@ public class ContentProviderTest
         Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_invalid.zip");
 
     private string _configPath = null!;
-    private readonly IConfig _mockConfig = new Config(Enumerable.Range(0, 5).Select(id => new Hotspot(id)));
 
-    private string MediaPath => Path.Combine(_configPath, ValidConfigPath, "Media");
-    private string InvalidMediaPath => Path.Combine(_configPath, InvalidConfigPath, "Media");
+    private IConfig _mockValidConfig = null!;
+    private IConfig _mockInvalidConfig = null!;
 
-    private string GetFullPath(int id, string file) => Path.Combine(MediaPath, id.ToString(), file);
+    private string MediaPath => Path.Combine(_configPath, ValidConfigPath);
+    private string InvalidMediaPath => Path.Combine(_configPath, InvalidConfigPath);
 
-    private string GetDescription(int id, string descFile) => File.ReadAllText(GetFullPath(id, descFile));
+    private string GetFullPath(string file) => Path.Combine(MediaPath, file);
 
-    private static IEnumerable<TestCaseData<(int, string, string[], string[])>> TestCases()
+    private string GetDescription(string descFile) => File.ReadAllText(GetFullPath(descFile));
+
+    private static IEnumerable<TestCaseData<(int, string, string, string[], string[])>> TestCases()
     {
         yield return MakeTestData(
-            (0, "0.txt", Array.Empty<string>(), Array.Empty<string>()),
+            (0, "Hotspot 0", "text_0.txt", Array.Empty<string>(), Array.Empty<string>()),
             "TextOnly"
         );
         yield return MakeTestData(
-            (1, "1.txt", new[] { "1.png" }, new[] { "1.mp4" }),
+            (1, "Hotspot 1", "text_1.txt", new[] { "image_1_0.png" }, new[] { "video_1_0.mp4" }),
             "FilenamesAreIDs"
         );
         yield return MakeTestData(
-            (2, "test2.txt", new[] { "1_2.jpg", "random.jpeg" }, new[] { "2.mkv", "2_1.mov" }),
-            "RandomFilenames"
+            (2, "Hotspot 2", "text_2.txt", new[] { "image_2_0.jpg", "image_2_1.jpeg" },
+                new[] { "video_2_0.mkv", "video_2_1.mov" }),
+            "Multiple Files"
         );
     }
 
@@ -56,6 +60,59 @@ public class ContentProviderTest
         var invalid = Path.Combine(_configPath, InvalidConfigPath);
         Directory.CreateDirectory(invalid);
         ZipFile.ExtractToDirectory(TestInvalidZipPath, invalid);
+
+        _mockValidConfig = new Config(new double[3, 3], new List<Hotspot>
+        {
+            NewTestHotspot(
+                0,
+                new Coord(0, 0, 0),
+                "Hotspot 0",
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty,
+                MediaPath
+            ),
+            NewTestHotspot(
+                1,
+                new Coord(0, 0, 0),
+                "Hotspot 1",
+                "text_1.txt",
+                new List<string> { "image_1_0.png" }.ToImmutableList(),
+                new List<string> { "video_1_0.mp4" }.ToImmutableList(),
+                MediaPath
+            ),
+            NewTestHotspot(
+                2,
+                new Coord(0, 0, 0),
+                "Hotspot 2",
+                "text_2.txt",
+                new List<string> { "image_2_0.jpg", "image_2_1.jpeg" }.ToImmutableList(),
+                new List<string> { "video_2_0.mkv", "video_2_1.mov" }.ToImmutableList(),
+                MediaPath
+            )
+        });
+
+        _mockInvalidConfig = new Config(new double[3, 3], new List<Hotspot>
+        {
+            NewTestHotspot(
+                0,
+                new Coord(0, 0, 0),
+                "Hotspot 0",
+                "text_0.txt",
+                ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty,
+                InvalidMediaPath
+            ),
+            NewTestHotspot(
+                1,
+                new Coord(0, 0, 0),
+                "Hotspot 1",
+                "text_1.txt",
+                new List<string> { "image_1_0.png" }.ToImmutableList(),
+                ImmutableList<string>.Empty,
+                InvalidMediaPath
+            )
+        });
     }
 
     [OneTimeTearDown]
@@ -67,24 +124,22 @@ public class ContentProviderTest
 
     [Test]
     [TestCaseSource(nameof(TestCases))]
-    public void GetMediaTest((int, string, string[], string[]) testCase)
+    public void GetMediaTest((int, string, string, string[], string[]) testCase)
     {
-        var (id, descPath, imagePaths, videoPaths) = testCase;
-        var cache = new MockContentCache(_mockConfig, MediaPath);
-        var provider = new ContentProvider(cache, _mockConfig);
+        var (id, title, descPath, imagePaths, videoPaths) = testCase;
+        var provider = new ContentProvider(_mockValidConfig);
 
         var media = provider.GetMedia(id);
-        var expectedDescription = GetDescription(id, descPath);
+        var expectedDescription = GetDescription(descPath);
         Assert.Multiple(() =>
         {
+            Assert.That(media.Title, Is.EqualTo(title));
             Assert.That(media.Description, Is.EqualTo(expectedDescription));
             Assert.That(
-                imagePaths.Select(path => GetFullPath(id, path)),
-                media.ImagePath is not null ? Has.Member(GetFullPath(id, media.ImagePath)) : Is.Empty
+                imagePaths.Select(GetFullPath).ToImmutableList(), Is.EqualTo(media.ImagePaths)
             );
             Assert.That(
-                videoPaths.Select(path => GetFullPath(id, path)),
-                media.VideoPath is not null ? Has.Member(GetFullPath(id, media.VideoPath)) : Is.Empty
+                videoPaths.Select(GetFullPath).ToImmutableList(), Is.EqualTo(media.VideoPaths)
             );
         });
     }
@@ -92,8 +147,7 @@ public class ContentProviderTest
     [Test]
     public void GetMediaNoHotspotTest()
     {
-        var cache = new MockContentCache(_mockConfig, MediaPath);
-        var provider = new ContentProvider(cache, _mockConfig);
+        var provider = new ContentProvider(_mockInvalidConfig);
 
         Assert.Throws<IConfig.HotspotNotFoundException>(() => provider.GetMedia(-1));
     }
@@ -101,9 +155,36 @@ public class ContentProviderTest
     [Test]
     public void GetMediaNoDescriptionTest()
     {
-        var cache = new MockContentCache(_mockConfig, InvalidMediaPath);
-        var provider = new ContentProvider(cache, _mockConfig);
+        var provider = new ContentProvider(_mockInvalidConfig);
 
         Assert.Throws<FileNotFoundException>(() => provider.GetMedia(1));
+    }
+
+    /// <summary>
+    /// Returns <see cref="Hotspot"/> with filepath updated to test path.
+    /// </summary>
+    /// <seealso cref="Hotspot(int, Coord, string, string, ImmutableList{string}, ImmutableList{string})"/>
+    private static Hotspot NewTestHotspot(
+        int id,
+        Coord position,
+        string title,
+        string descriptionPath,
+        ImmutableList<string> imagePaths,
+        ImmutableList<string> videoPaths,
+        string filePath)
+    {
+        var hotspot = new Hotspot(id, position, title, descriptionPath, imagePaths, videoPaths);
+
+        Assert.That(hotspot, Is.Not.Null);
+
+        // Use reflection to update file path of hotspots.
+        const string fieldName = "_filePath";
+        var hotspotFilePathField = typeof(Hotspot).GetField(
+            fieldName,
+            BindingFlags.Instance | BindingFlags.NonPublic
+        ) ?? throw new MissingFieldException(nameof(Hotspot), fieldName);
+        hotspotFilePathField.SetValue(hotspot, filePath);
+
+        return hotspot;
     }
 }

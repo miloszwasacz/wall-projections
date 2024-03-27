@@ -1,32 +1,79 @@
 ﻿using System;
 using LibVLCSharp.Shared;
-using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
+using WallProjections.Models.Interfaces;
+using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces;
+using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Display.Layouts;
+using WallProjections.ViewModels.Interfaces.Editor;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
+using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.ViewModels;
 
+/// <inheritdoc cref="IViewModelProvider" />
 public sealed class ViewModelProvider : IViewModelProvider, IDisposable
 {
-    /// <summary>
-    /// The backing field for the <see cref="ViewModelProvider" /> property
-    /// </summary>
-    private static ViewModelProvider? _viewModelProvider;
-
     /// <summary>
     /// The backing field for the <see cref="LibVlc" /> property
     /// </summary>
     /// <remarks>Reset when <see cref="Dispose" /> is called so that a new instance can be created if needed</remarks>
     private LibVLC? _libVlc;
 
-    private ViewModelProvider()
-    {
-    }
+    /// <summary>
+    /// The app-wide <see cref="INavigator" /> used for navigation between views
+    /// </summary>
+    private readonly INavigator _navigator;
 
     /// <summary>
-    /// A global instance of <see cref="ViewModelProvider" />
+    /// The app-wide <see cref="IPythonHandler" /> used for Python interop
     /// </summary>
-    public static ViewModelProvider Instance => _viewModelProvider ??= new ViewModelProvider();
+    private readonly IPythonHandler _pythonHandler;
+
+    /// <summary>
+    /// The app-wide <see cref="IProcessProxy" /> used for starting up external processes
+    /// </summary>
+    private readonly IProcessProxy _processProxy;
+
+    /// <summary>
+    /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
+    /// </summary>
+    private readonly Func<IConfig, IContentProvider> _contentProviderFactory;
+
+    /// <summary>
+    /// A factory for creating <see cref="ILayoutProvider" />s
+    /// </summary>
+    private readonly Func<ILayoutProvider> _layoutProviderFactory;
+
+    /// <summary>
+    /// Creates a new <see cref="ViewModelProvider" /> with the given <see cref="INavigator" />
+    /// </summary>
+    /// <param name="navigator">The app-wide <see cref="INavigator" /> used for navigation between views</param>
+    /// <param name="pythonHandler">The app-wide <see cref="IPythonHandler" /> used for Python interop</param>
+    /// <param name="processProxy">
+    /// The app-wide <see cref="IProcessProxy" /> used for starting up external processes
+    /// </param>
+    /// <param name="contentProviderFactory">
+    /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
+    /// </param>
+    /// <param name="layoutProviderFactory">A factory for creating <see cref="ILayoutProvider" />s</param>
+    public ViewModelProvider(
+        INavigator navigator,
+        IPythonHandler pythonHandler,
+        IProcessProxy processProxy,
+        Func<IConfig, IContentProvider> contentProviderFactory,
+        Func<ILayoutProvider> layoutProviderFactory
+    )
+    {
+        _navigator = navigator;
+        _pythonHandler = pythonHandler;
+        _processProxy = processProxy;
+        _contentProviderFactory = contentProviderFactory;
+        _layoutProviderFactory = layoutProviderFactory;
+    }
 
     /// <summary>
     /// A global instance of <see cref="LibVLC" /> to use for <see cref="LibVLCSharp" /> library
@@ -34,12 +81,20 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <remarks>Only instantiated if needed</remarks>
     private LibVLC LibVlc => _libVlc ??= new LibVLC();
 
+    #region Display
+
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> instance
     /// </summary>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
-    public IDisplayViewModel GetDisplayViewModel() =>
-        new DisplayViewModel(this, PythonEventHandler.Instance, ContentCache.Instance);
+    public IDisplayViewModel GetDisplayViewModel(IConfig config) => new DisplayViewModel(
+        _navigator,
+        this,
+        _contentProviderFactory(config),
+        _layoutProviderFactory(),
+        _pythonHandler
+    );
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance
@@ -52,6 +107,120 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <returns>A new <see cref="VideoViewModel" /> instance</returns>
     public IVideoViewModel GetVideoViewModel() => new VideoViewModel(LibVlc, new VLCMediaPlayer(LibVlc));
+
+    #endregion
+
+    #region Editor
+
+    /// <summary>
+    /// Creates a new <see cref="EditorViewModel" /> instance based on the given <see cref="IConfig" />
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
+    public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler) =>
+        new EditorViewModel(config, _navigator, fileHandler, _pythonHandler, this);
+
+    /// <summary>
+    /// Creates a new empty <see cref="EditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
+    public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler) =>
+        new EditorViewModel(_navigator, fileHandler, _pythonHandler, this);
+
+    /// <summary>
+    /// Creates a new <see cref="EditorHotspotViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="EditorHotspotViewModel" /> instance</returns>
+    public IEditorHotspotViewModel GetEditorHotspotViewModel(int id) =>
+        new EditorHotspotViewModel(id, this);
+
+    /// <summary>
+    /// Creates a new <see cref="EditorHotspotViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="EditorHotspotViewModel" /> instance</returns>
+    public IEditorHotspotViewModel GetEditorHotspotViewModel(Hotspot hotspot) =>
+        new EditorHotspotViewModel(hotspot, this);
+
+    /// <summary>
+    /// Creates a new <see cref="PositionEditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="PositionEditorViewModel" /> instance</returns>
+    public AbsPositionEditorViewModel GetPositionEditorViewModel() => new PositionEditorViewModel();
+
+    /// <summary>
+    /// Creates a new <see cref="DescriptionEditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="DescriptionEditorViewModel" /> instance</returns>
+    public IDescriptionEditorViewModel GetDescriptionEditorViewModel() => new DescriptionEditorViewModel(this);
+
+    /// <summary>
+    /// Creates a new <see cref="MediaEditorViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="MediaEditorViewModel" /> instance</returns>
+    public IMediaEditorViewModel GetMediaEditorViewModel(MediaEditorType type) => new MediaEditorViewModel(type switch
+    {
+        MediaEditorType.Images => "Images",
+        MediaEditorType.Videos => "Videos",
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
+    });
+
+    /// <inheritdoc />
+    /// <seealso cref="ImageThumbnailViewModel" />
+    /// <seealso cref="VideoThumbnailViewModel" />
+    public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath) => type switch
+    {
+        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, _processProxy),
+        MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, _processProxy),
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
+    };
+
+    /// <summary>
+    /// Creates a new <see cref="ImportViewModel" /> instance
+    /// </summary>
+    /// <inheritdoc />
+    /// <returns>A new <see cref="ImportViewModel" /> instance</returns>
+    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new ImportViewModel(descVm);
+
+    #endregion
+
+    #region Secondary screens
+
+    /// <summary>
+    /// Creates a new <see cref="SecondaryWindowViewModel" /> instance
+    /// with <i>TH</i> being <see cref="HotspotDisplayViewModel" />
+    /// </summary>
+    /// <returns>A new <see cref="SecondaryWindowViewModel" /> instance</returns>
+    public ISecondaryWindowViewModel GetSecondaryWindowViewModel() => new SecondaryWindowViewModel(this);
+
+    /// <summary>
+    /// Creates a new <see cref="HotspotDisplayViewModel" /> instance
+    /// </summary>
+    /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
+    /// <returns>A new <see cref="HotspotDisplayViewModel" /> instance</returns>
+    public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
+        new HotspotDisplayViewModel(config, _pythonHandler, this);
+
+    /// <summary>
+    /// Creates a new <see cref="HotspotProjectionViewModel" /> instance
+    /// </summary>
+    /// <param name="hotspot">The hotspot to be projected</param>
+    /// <returns>A new <see cref="HotspotProjectionViewModel" /> instance</returns>
+    public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
+        new HotspotProjectionViewModel(hotspot);
+
+    /// <summary>
+    /// Creates a new <see cref="ArUcoGridViewModel" /> instance
+    /// </summary>
+    /// <returns>A new <see cref="ArUcoGridViewModel" /> instance</returns>
+    public AbsArUcoGridViewModel GetArUcoGridViewModel() => new ArUcoGridViewModel();
+
+    #endregion
 
     /// <summary>
     /// Disposes of the <see cref="LibVlc" /> instance on resets the backing field to <i>null</i>,

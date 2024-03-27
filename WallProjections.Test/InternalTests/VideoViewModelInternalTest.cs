@@ -1,7 +1,8 @@
 ﻿using System.Reflection;
 using LibVLCSharp.Shared;
+using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Models;
-using WallProjections.ViewModels;
+using WallProjections.ViewModels.Display;
 
 namespace WallProjections.Test.InternalTests;
 
@@ -30,14 +31,14 @@ public class VideoViewModelInternalTest
     {
         var mediaPlayer = new MockMediaPlayer();
         var videoViewModel = new VideoViewModel(_libVlc, mediaPlayer);
-        var newMediaPlayer = new MockMediaPlayer();
+        videoViewModel.MarkLoaded();
 
-        var setter = videoViewModel.GetType().GetProperty("MediaPlayer")?.GetSetMethod(true) ?? throw PropertyException;
+        var newMediaPlayer = new MockMediaPlayer();
         Assert.Throws<InvalidOperationException>(() =>
         {
             try
             {
-                setter.Invoke(videoViewModel, new object[] { newMediaPlayer });
+                SetMediaPlayer(videoViewModel, newMediaPlayer);
             }
             catch (TargetInvocationException e)
             {
@@ -46,5 +47,25 @@ public class VideoViewModelInternalTest
                 throw;
             }
         });
+    }
+
+    [Test]
+    public void DisposeNoMediaPlayerTest()
+    {
+        var videoViewModel = new VideoViewModel(_libVlc, new MockMediaPlayer());
+        videoViewModel.MarkLoaded();
+        SetMediaPlayer(videoViewModel, null);
+
+        videoViewModel.Dispose();
+        Assert.That(videoViewModel.MediaPlayer, Is.Null);
+    }
+
+    /// <summary>
+    /// Uses reflection to use the private setter of <see cref="VideoViewModel.MediaPlayer"/>
+    /// </summary>
+    private static void SetMediaPlayer(VideoViewModel videoViewModel, IMediaPlayer? mediaPlayer)
+    {
+        var setter = videoViewModel.GetType().GetProperty("MediaPlayer")?.GetSetMethod(true) ?? throw PropertyException;
+        setter.Invoke(videoViewModel, new object?[] { mediaPlayer });
     }
 }

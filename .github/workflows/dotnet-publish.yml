@@ -1,0 +1,63 @@
+name: .NET Publish
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: 'Target runtime'
+        type: string
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: .github/requirements.txt
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget
+
+      - name: Install OpenCV
+        run: pip install opencv-python-headless
+
+      - name: Install Zip
+        run: sudo apt-get install zip
+
+      - name: Restore dependencies
+        run: dotnet restore -r ${{ inputs.target }}
+
+      - name: Publish
+        run: >
+          dotnet publish WallProjections --no-restore -c Release -r ${{ inputs.target }} \
+              --sc -o $HOME/build/WallProjections --verbosity normal
+
+      - name: Zip
+        run: >
+          pushd $HOME/build &&
+          zip -r $OLDPWD/WallProjections-${{ inputs.target }}.zip WallProjections &&
+          popd
+
+      - name: Archive production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.target }}
+          path: WallProjections-${{ inputs.target }}.zip
+          retention-days: 1

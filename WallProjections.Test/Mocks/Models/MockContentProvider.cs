@@ -25,10 +25,9 @@ public class MockContentProvider : IContentProvider
     /// Creates a new <see cref="MockContentProvider" /> that will search through the given list of media
     /// when <see cref="GetMedia" /> is called
     /// </summary>
-    /// <param name="result"></param>
-    public MockContentProvider(List<Hotspot.Media> result)
+    public MockContentProvider(IEnumerable<Hotspot.Media> result)
     {
-        _media = result;
+        _media = new List<Hotspot.Media>(result);
     }
 
     /// <summary>
@@ -57,7 +56,7 @@ public class MockContentProvider : IContentProvider
             throw _exception;
 
         FileNumber = hotspotId;
-        return _media.Find(media => media.Hotspot.Id == hotspotId) ??
+        return _media.Find(media => media.Id == hotspotId) ??
                throw new IConfig.HotspotNotFoundException(hotspotId);
     }
 }

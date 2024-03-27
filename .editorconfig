@@ -14,6 +14,10 @@ ij_smart_tabs = false
 ij_visual_guides = 80
 ij_wrap_on_typing = false
 
+[/WallProjections.Test/Assets/ImportViewModelTestCases/*.txt]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
 [*.css]
 ij_css_align_closing_brace_with_properties = false
 ij_css_blank_lines_around_nested_selector = 1

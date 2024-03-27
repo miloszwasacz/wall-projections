@@ -14,6 +14,9 @@ public class MockDesktopLifetime : ClassicDesktopStyleApplicationLifetime, IClas
     /// </summary>
     private readonly List<int> _shutdowns = new();
 
+    /// <inheritdoc />
+    public new event EventHandler<ControlledApplicationLifetimeExitEventArgs>? Exit;
+
     /// <summary>
     /// The exit codes passed to <see cref="Shutdown" />
     /// </summary>
@@ -26,5 +29,7 @@ public class MockDesktopLifetime : ClassicDesktopStyleApplicationLifetime, IClas
     public new void Shutdown(int exitCode = 0)
     {
         _shutdowns.Add(exitCode);
+        Exit?.Invoke(this, new ControlledApplicationLifetimeExitEventArgs(exitCode));
+        MainWindow?.Close();
     }
 }
