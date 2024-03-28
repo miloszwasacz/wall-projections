@@ -8,7 +8,7 @@ using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
 using static WallProjections.Test.TestSetup;
 using static WallProjections.Test.TestExtensions;
-using HotspotSelectedArgs = WallProjections.Helper.Interfaces.IPythonHandler.HotspotSelectedArgs;
+using HotspotSelectedArgs = WallProjections.Helper.Interfaces.IHotspotHandler.HotspotArgs;
 
 namespace WallProjections.Test.Helper;
 
@@ -147,7 +147,7 @@ public class PythonHandlerTest
         var id2 = id + 1;
         var (handler, _) = CreateInstance();
         HotspotSelectedArgs? eventFiredArgs = null;
-        handler.HotspotSelected += (_, a) => eventFiredArgs = a;
+        handler.HotspotPressed += (_, a) => eventFiredArgs = a;
 
         handler.OnHotspotPressed(id);
         Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
@@ -163,6 +163,19 @@ public class PythonHandlerTest
     [TestCaseSource(nameof(Ids))]
     public void OnHotspotUnpressedTest(int id)
     {
+        var id2 = id + 1;
+        var (handler, _) = CreateInstance();
+        HotspotSelectedArgs? eventFiredArgs = null;
+        handler.HotspotReleased += (_, a) => eventFiredArgs = a;
+
+        handler.OnHotspotUnpressed(id);
+        Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
+        Assert.That(eventFiredArgs!.Id, Is.EqualTo(id));
+        eventFiredArgs = null;
+
+        handler.OnHotspotUnpressed(id2);
+        Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
+        Assert.That(eventFiredArgs!.Id, Is.EqualTo(id2));
     }
 
     /// <summary>

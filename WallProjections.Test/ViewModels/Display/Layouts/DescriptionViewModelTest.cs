@@ -11,12 +11,29 @@ public class DescriptionViewModelTest
     [Test]
     public void ConstructorTest()
     {
+        const int hotspotId = 0;
+        const string title = "Title";
+        const string description = "Description";
+
+        var descriptionViewModel = new DescriptionViewModel(hotspotId, title, description);
+        Assert.Multiple(() =>
+        {
+            Assert.That(descriptionViewModel.HotspotId, Is.EqualTo(hotspotId));
+            Assert.That(descriptionViewModel.Title, Is.EqualTo(title));
+            Assert.That(descriptionViewModel.Description, Is.EqualTo(description));
+        });
+    }
+
+    [Test]
+    public void ConstructorNoHotspotTest()
+    {
         const string title = "Title";
         const string description = "Description";
 
         var descriptionViewModel = new DescriptionViewModel(title, description);
         Assert.Multiple(() =>
         {
+            Assert.That(descriptionViewModel.HotspotId, Is.Null);
             Assert.That(descriptionViewModel.Title, Is.EqualTo(title));
             Assert.That(descriptionViewModel.Description, Is.EqualTo(description));
         });
@@ -57,6 +74,7 @@ public class DescriptionViewModelTest
                 testCase,
                 (descriptionViewModel, inputMedia) => Assert.Multiple(() =>
                 {
+                    Assert.That(descriptionViewModel.HotspotId, Is.EqualTo(inputMedia.Id));
                     Assert.That(descriptionViewModel.Title, Is.EqualTo(inputMedia.Title));
                     Assert.That(descriptionViewModel.Description, Is.EqualTo(inputMedia.Description));
                 })

@@ -33,15 +33,17 @@ public class ImageWithDescriptionViewModel : Layout
     /// and paths to the images that <see cref="ImageViewModel" /> will show.
     /// </summary>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> to get the <see cref="IImageViewModel" />.</param>
+    /// <param name="hotspotId">The id of the hotspot.</param>
     /// <param name="title">The title of the hotspot.</param>
     /// <param name="description">The description of the hotspot.</param>
     /// <param name="imagePath">The path to the image to show.</param>
     public ImageWithDescriptionViewModel(
         IViewModelProvider vmProvider,
+        int hotspotId,
         string title,
         string description,
         string imagePath
-    )
+    ) : base(hotspotId)
     {
         Title = title;
         Description = description;
@@ -66,6 +68,12 @@ public class ImageWithDescriptionViewModel : Layout
 
         /// <inheritdoc />
         protected override Layout ConstructLayout(IViewModelProvider vmProvider, Hotspot.Media hotspot) =>
-            new ImageWithDescriptionViewModel(vmProvider, hotspot.Title, hotspot.Description, hotspot.ImagePaths[0]);
+            new ImageWithDescriptionViewModel(
+                vmProvider,
+                hotspot.Id,
+                hotspot.Title,
+                hotspot.Description,
+                hotspot.ImagePaths[0]
+            );
     }
 }

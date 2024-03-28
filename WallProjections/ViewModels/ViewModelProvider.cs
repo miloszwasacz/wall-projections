@@ -34,9 +34,20 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     private readonly IPythonHandler _pythonHandler;
 
     /// <summary>
+    /// The backing field for the <see cref="HotspotHandler" /> property
+    /// </summary>
+    /// <remarks>Reset when <see cref="Dispose" /> is called so that a new instance can be created if needed</remarks>
+    private IHotspotHandler? _hotspotHandler;
+
+    /// <summary>
     /// The app-wide <see cref="IProcessProxy" /> used for starting up external processes
     /// </summary>
     private readonly IProcessProxy _processProxy;
+
+    /// <summary>
+    /// A factory for creating a <see cref="IHotspotHandler" /> linked to the given <see cref="_pythonHandler" />
+    /// </summary>
+    private readonly Func<IPythonHandler, IHotspotHandler> _hotspotHandlerFactory;
 
     /// <summary>
     /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
@@ -56,6 +67,9 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="processProxy">
     /// The app-wide <see cref="IProcessProxy" /> used for starting up external processes
     /// </param>
+    /// <param name="hotspotHandlerFactory">
+    /// A factory for creating a <see cref="IHotspotHandler" /> based on <paramref name="pythonHandler" />
+    /// </param>
     /// <param name="contentProviderFactory">
     /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
     /// </param>
@@ -64,6 +78,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         INavigator navigator,
         IPythonHandler pythonHandler,
         IProcessProxy processProxy,
+        Func<IPythonHandler, IHotspotHandler> hotspotHandlerFactory,
         Func<IConfig, IContentProvider> contentProviderFactory,
         Func<ILayoutProvider> layoutProviderFactory
     )
@@ -71,6 +86,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         _navigator = navigator;
         _pythonHandler = pythonHandler;
         _processProxy = processProxy;
+        _hotspotHandlerFactory = hotspotHandlerFactory;
         _contentProviderFactory = contentProviderFactory;
         _layoutProviderFactory = layoutProviderFactory;
     }
@@ -80,6 +96,12 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <remarks>Only instantiated if needed</remarks>
     private LibVLC LibVlc => _libVlc ??= new LibVLC();
+
+    /// <summary>
+    /// The app-wide <see cref="IHotspotHandler" /> used for handling hotspot events
+    /// </summary>
+    /// <remarks>Only instantiated if needed</remarks>
+    private IHotspotHandler HotspotHandler => _hotspotHandler ??= _hotspotHandlerFactory(_pythonHandler);
 
     #region Display
 
@@ -93,7 +115,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         this,
         _contentProviderFactory(config),
         _layoutProviderFactory(),
-        _pythonHandler
+        HotspotHandler
     );
 
     /// <summary>
@@ -204,7 +226,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="HotspotDisplayViewModel" /> instance</returns>
     public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
-        new HotspotDisplayViewModel(config, _pythonHandler, this);
+        new HotspotDisplayViewModel(config, HotspotHandler, this);
 
     /// <summary>
     /// Creates a new <see cref="HotspotProjectionViewModel" /> instance
@@ -228,6 +250,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     public void Dispose()
     {
+        _hotspotHandler?.Dispose();
+        _hotspotHandler = null;
         _libVlc?.Dispose();
         _libVlc = null;
     }

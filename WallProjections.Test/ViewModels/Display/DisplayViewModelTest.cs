@@ -106,7 +106,7 @@ public class DisplayViewModelTest
     /// expected description, expected image files, and expected video files.
     /// </summary>
     /// <returns></returns>
-    private static IEnumerable<TestCaseData<ImmutableList<Hotspot.Media>>> OnHotspotSelectedTestCases()
+    private static IEnumerable<TestCaseData<ImmutableList<Hotspot.Media>>> OnHotspotActivatedTestCases()
     {
         yield return MakeTestData(
             FilesAll,
@@ -130,7 +130,7 @@ public class DisplayViewModelTest
         );
     }
 
-    private static IEnumerable<TestCaseData<(Exception, string)>> OnHotspotSelectedExceptionTestCases()
+    private static IEnumerable<TestCaseData<(Exception, string)>> OnHotspotActivatedExceptionTestCases()
     {
         yield return MakeTestData(
             (new IConfig.HotspotNotFoundException(HotspotId) as Exception, DisplayViewModel.NotFound),
@@ -151,42 +151,82 @@ public class DisplayViewModelTest
     public void CreationTest(ImmutableList<Hotspot.Media> hotspots)
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(hotspots);
+        var hotspotHandler = new MockHotspotHandler();
 
         using var displayViewModel = new DisplayViewModel(
             navigator,
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            pythonHandler
+            hotspotHandler
         );
 
         AssertJustInitialized(displayViewModel);
     }
 
     [Test]
-    [TestCaseSource(nameof(OnHotspotSelectedTestCases))]
-    public void OnHotspotSelectedTest(ImmutableList<Hotspot.Media> hotspots)
+    [TestCaseSource(nameof(OnHotspotActivatedTestCases))]
+    [Timeout(10000)]
+    public async Task OnHotspotActivatingTest(ImmutableList<Hotspot.Media> hotspots)
     {
         var hotspot = hotspots[0];
-        var hotspot2 = new Hotspot.Media(2, "Test2", "Test2", ImmutableList<string>.Empty, ImmutableList<string>.Empty);
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonHandler();
-        var contentProvider = new MockContentProvider(hotspots.Add(hotspot2));
+        var contentProvider = new MockContentProvider(hotspots);
+        var hotspotHandler = new MockHotspotHandler();
 
         using var displayViewModel = new DisplayViewModel(
             navigator,
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            pythonHandler
+            hotspotHandler
         );
 
-        var args = new IPythonHandler.HotspotSelectedArgs(hotspot.Id);
+        hotspotHandler.StartHotspotActivation(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.Not.InstanceOf<MockGenericLayout>());
+
+        hotspotHandler.DeactivateHotspot(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.Not.InstanceOf<MockGenericLayout>());
+
+        hotspotHandler.StartHotspotActivation(hotspot.Id);
+        await Task.Delay(500);
+        hotspotHandler.ActivateHotspot(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
+
+        // No new content should be created if the hotspot is already active
+        var oldContent = displayViewModel.ContentViewModel;
+        hotspotHandler.ActivateHotspot(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.SameAs(oldContent));
+    }
+
+    [Test]
+    [TestCaseSource(nameof(OnHotspotActivatedTestCases))]
+    [Timeout(10000)]
+    public async Task OnHotspotActivatedTest(ImmutableList<Hotspot.Media> hotspots)
+    {
+        var hotspot = hotspots[0];
+        var hotspot2 = new Hotspot.Media(2, "Test2", "Test2", ImmutableList<string>.Empty, ImmutableList<string>.Empty);
+        var navigator = new MockNavigator();
+        var contentProvider = new MockContentProvider(hotspots.Add(hotspot2));
+        var hotspotHandler = new MockHotspotHandler();
+
+        using var displayViewModel = new DisplayViewModel(
+            navigator,
+            ViewModelProvider,
+            contentProvider,
+            LayoutProvider,
+            hotspotHandler
+        );
+
+        var args = new IHotspotHandler.HotspotArgs(hotspot.Id);
         Assert.DoesNotThrowAsync(async () =>
         {
-            displayViewModel.OnHotspotSelected(null, args);
+            displayViewModel.OnHotspotActivated(null, args);
             await Task.Delay(200);
         });
         Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
@@ -197,10 +237,10 @@ public class DisplayViewModelTest
             Assert.That(content.IsDisposed, Is.False);
         });
 
-        var args2 = new IPythonHandler.HotspotSelectedArgs(hotspot2.Id);
+        var args2 = new IHotspotHandler.HotspotArgs(hotspot2.Id);
         Assert.DoesNotThrowAsync(async () =>
         {
-            displayViewModel.OnHotspotSelected(null, args2);
+            displayViewModel.OnHotspotActivated(null, args2);
             await Task.Delay(200);
         });
         Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
@@ -211,29 +251,41 @@ public class DisplayViewModelTest
             Assert.That(content2.IsDisposed, Is.False);
             Assert.That(content.IsDisposed, Is.True);
         });
+
+        hotspotHandler.ActivateHotspot(hotspot.Id);
+        await Task.Delay(200);
+        Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
+        var content3 = (MockGenericLayout)displayViewModel.ContentViewModel;
+        Assert.Multiple(() =>
+        {
+            Assert.That(content3.Media, Is.EqualTo(hotspot));
+            Assert.That(content3.IsDisposed, Is.False);
+            Assert.That(content2.IsDisposed, Is.True);
+        });
     }
 
     [Test]
-    public void OnHotspotSelectedNoConfigTest()
+    [Timeout(2000)]
+    public void OnHotspotActivatedNonexistentHotspotTest()
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(ImmutableList<Hotspot.Media>.Empty);
+        var hotspotHandler = new MockHotspotHandler();
 
         using var displayViewModel = new DisplayViewModel(
             navigator,
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            pythonHandler
+            hotspotHandler
         );
 
-        var args = new IPythonHandler.HotspotSelectedArgs(HotspotId);
+        var args = new IHotspotHandler.HotspotArgs(HotspotId);
         AssertJustInitialized(displayViewModel);
 
         Assert.DoesNotThrowAsync(async () =>
         {
-            displayViewModel.OnHotspotSelected(null, args);
+            displayViewModel.OnHotspotActivated(null, args);
             await Task.Delay(200);
         });
         Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockSimpleDescriptionLayout>());
@@ -246,26 +298,27 @@ public class DisplayViewModelTest
     }
 
     [Test]
-    [TestCaseSource(nameof(OnHotspotSelectedExceptionTestCases))]
-    public async Task OnHotspotSelectedExceptionTest((Exception, string) testCase)
+    [TestCaseSource(nameof(OnHotspotActivatedExceptionTestCases))]
+    [Timeout(5000)]
+    public async Task OnHotspotActivatedExceptionTest((Exception, string) testCase)
     {
         var (exception, expectedDescription) = testCase;
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(exception);
+        var hotspotHandler = new MockHotspotHandler();
 
         using var displayViewModel = new DisplayViewModel(
             navigator,
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            pythonHandler
+            hotspotHandler
         );
 
-        var args = new IPythonHandler.HotspotSelectedArgs(HotspotId);
+        var args = new IHotspotHandler.HotspotArgs(HotspotId);
         AssertJustInitialized(displayViewModel);
 
-        Assert.DoesNotThrow(() => displayViewModel.OnHotspotSelected(null, args));
+        Assert.DoesNotThrow(() => displayViewModel.OnHotspotActivated(null, args));
         await Task.Delay(200);
 
         Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockSimpleDescriptionLayout>());
@@ -281,8 +334,8 @@ public class DisplayViewModelTest
     public void OpenEditorTest()
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(FilesAll);
+        var hotspotHandler = new MockHotspotHandler();
         Assert.That(navigator.IsEditorOpen, Is.False);
 
         using var displayViewModel = new DisplayViewModel(
@@ -290,7 +343,7 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            pythonHandler
+            hotspotHandler
         );
         displayViewModel.OpenEditor();
 
@@ -301,8 +354,8 @@ public class DisplayViewModelTest
     public void CloseDisplayTest()
     {
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(FilesAll);
+        var hotspotHandler = new MockHotspotHandler();
         Assert.That(navigator.HasBeenShutDown, Is.False);
 
         using var displayViewModel = new DisplayViewModel(
@@ -310,7 +363,7 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            pythonHandler
+            hotspotHandler
         );
         displayViewModel.CloseDisplay();
 
@@ -323,17 +376,17 @@ public class DisplayViewModelTest
         var hotspots = FilesAll;
         var hotspot = hotspots[0];
         var navigator = new MockNavigator();
-        var pythonHandler = new MockPythonHandler();
         var contentProvider = new MockContentProvider(FilesAll);
+        var hotspotHandler = new MockHotspotHandler();
 
         var displayViewModel = new DisplayViewModel(
             navigator,
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            pythonHandler
+            hotspotHandler
         );
-        displayViewModel.OnHotspotSelected(null, new IPythonHandler.HotspotSelectedArgs(hotspot.Id));
+        displayViewModel.OnHotspotActivated(null, new IHotspotHandler.HotspotArgs(hotspot.Id));
         await Task.Delay(200);
 
         Assert.That(displayViewModel.ContentViewModel, Is.InstanceOf<MockGenericLayout>());
@@ -344,7 +397,7 @@ public class DisplayViewModelTest
         AssertJustInitialized(displayViewModel);
         Assert.Multiple(() =>
         {
-            Assert.That(pythonHandler.HasSubscribers, Is.False);
+            Assert.That(hotspotHandler.HasActivatedSubscribers, Is.False);
             Assert.That(content.IsDisposed, Is.True);
         });
     }
