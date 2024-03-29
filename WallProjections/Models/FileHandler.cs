@@ -167,7 +167,7 @@ public class FileHandler : IFileHandler
 
         using var configFile = File.OpenRead(configLocation);
         return JsonSerializer.Deserialize<Config>(configFile) ??
-               throw new JsonException("Config format invalid");
+               throw new ConfigInvalidException();
     }
 }
 

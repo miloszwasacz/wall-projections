@@ -58,10 +58,25 @@ public class FileHandlerTest
     [OneTimeTearDown]
     public void FileHandlerTearDown()
     {
+        Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+        Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+
         Directory.Move(
             CurrentConfigTempStore,
             IFileHandler.CurrentConfigFolderPath
         );
+    }
+
+    /// <summary>
+    /// Ensures the imported config is deleted before any tests.
+    /// </summary>
+    [SetUp]
+    public void DeleteImportedConfig()
+    {
+        if (!Directory.Exists(IFileHandler.CurrentConfigFolderPath)) return;
+
+        Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+        Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
     }
 
     /// <summary>
@@ -100,9 +115,6 @@ public class FileHandlerTest
         var oldFilePath = Path.Combine(IFileHandler.CurrentConfigFolderPath, Path.GetRandomFileName());
 
         #region Create folder and file for the test
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
 
         Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
         File.Create(oldFilePath).Close();
@@ -314,18 +326,6 @@ public class FileHandlerTest
     [NonParallelizable]
     public void SaveConfigBasicTest()
     {
-        #region Ensure Config Folder Reset
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-        {
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-        }
-
-        #endregion
-
         var fileHandler = new FileHandler();
         var config = new Config(TestMatrix, ImmutableList<Hotspot>.Empty);
 
@@ -346,16 +346,6 @@ public class FileHandlerTest
     [NonParallelizable]
     public void SaveConfigBasicNoFolderTest()
     {
-        #region Ensure Config Folder Deleted
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-        {
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-        }
-
-        #endregion
-
         var fileHandler = new FileHandler();
         var config = new Config(TestMatrix, ImmutableList<Hotspot>.Empty);
 
@@ -376,18 +366,6 @@ public class FileHandlerTest
     [NonParallelizable]
     public void SaveConfigDescriptionTest()
     {
-        #region Ensure Config Folder Reset
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-        {
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-        }
-
-        #endregion
-
         var fileHandler = new FileHandler();
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
         var config = new Config(TestMatrix, new List<Hotspot>
@@ -431,18 +409,6 @@ public class FileHandlerTest
     [NonParallelizable]
     public void SaveConfigDescriptionPlusImageTest()
     {
-        #region Ensure Config Folder Reset
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-        {
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-        }
-
-        #endregion
-
         var fileHandler = new FileHandler();
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
         var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
@@ -499,18 +465,6 @@ public class FileHandlerTest
     [NonParallelizable]
     public void SaveConfigTwoImagesTest()
     {
-        #region Ensure Config Folder Reset
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-        {
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-        }
-
-        #endregion
-
         var fileHandler = new FileHandler();
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
         var imageFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image.png");
@@ -571,18 +525,6 @@ public class FileHandlerTest
     [NonParallelizable]
     public void SaveConfigDescriptionPlusVideoTest()
     {
-        #region Ensure Config Folder Reset
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-        {
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-        }
-
-        #endregion
-
         var fileHandler = new FileHandler();
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
         var videoFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_video.mp4");
@@ -639,18 +581,6 @@ public class FileHandlerTest
     [NonParallelizable]
     public void SaveConfigTwoHotspotsTest()
     {
-        #region Ensure Config Folder Reset
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-        {
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-        }
-
-        #endregion
-
         var fileHandler = new FileHandler();
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
         var textFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_2.txt");
@@ -727,18 +657,6 @@ public class FileHandlerTest
     [NonParallelizable]
     public void SaveConfigImportedFilesTest()
     {
-        #region Ensure Config Folder Reset
-
-        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
-        {
-            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
-        }
-
-        #endregion
-
         var fileHandler = new FileHandler();
         var textFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
         var textFilePath2 = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_2.txt");

@@ -11,7 +11,7 @@ public class ConfigException : Exception
 }
 
 /// <summary>
-/// <see cref="ConfigException"/> for if the config package could not be found for importing.
+/// Thrown if the config package could not be found for importing.
 /// </summary>
 public class ConfigPackageNotFoundException : ConfigException
 {
@@ -28,6 +28,17 @@ public class ConfigPackageNotFoundException : ConfigException
     }
 }
 
+/// <summary>
+/// Thrown if the config that is imported is invalid
+/// </summary>
+public class ConfigInvalidException : ConfigException
+{
+    public override string Message => "Current config is invalid/corrupt";
+}
+
+/// <summary>
+/// Thrown if there is not a config imported to the application path when required.
+/// </summary>
 public class ConfigNotImportedException : ConfigException
 {
     public override string Message => "No config is currently loaded into the program";
