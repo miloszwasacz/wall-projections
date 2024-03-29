@@ -46,10 +46,13 @@ public class FileHandlerTest
     [OneTimeSetUp]
     public void FileHandlerSetUp()
     {
-        Directory.Move(
-            IFileHandler.CurrentConfigFolderPath,
-            CurrentConfigTempStore
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
+        {
+            Directory.Move(
+                IFileHandler.CurrentConfigFolderPath,
+                CurrentConfigTempStore
             );
+        }
     }
 
     /// <summary>
@@ -58,13 +61,20 @@ public class FileHandlerTest
     [OneTimeTearDown]
     public void FileHandlerTearDown()
     {
-        Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
+        {
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+        }
+
         Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
 
-        Directory.Move(
-            CurrentConfigTempStore,
-            IFileHandler.CurrentConfigFolderPath
-        );
+        if (Directory.Exists(CurrentConfigTempStore))
+        {
+            Directory.Move(
+                CurrentConfigTempStore,
+                IFileHandler.CurrentConfigFolderPath
+            );
+        }
     }
 
     /// <summary>
