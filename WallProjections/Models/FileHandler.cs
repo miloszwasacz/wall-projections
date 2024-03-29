@@ -13,6 +13,7 @@ namespace WallProjections.Models;
 public class FileHandler : IFileHandler
 {
     /// <inheritdoc />
+    /// <exception cref="ExternalFileReadException">Could not read </exception>
     /// <exception cref="ConfigException">Format of config file is invalid</exception>
     /// TODO Handle errors from trying to load from not-found/invalid zip file
     public IConfig ImportConfig(string zipPath)
@@ -37,6 +38,10 @@ public class FileHandler : IFileHandler
         catch (IOException e)
         {
             throw new ConfigIOException();
+        }
+        catch (InvalidDataException e)
+        {
+            throw new ConfigPackageFormatException(Path.GetFileName(zipPath));
         }
         catch (UnauthorizedAccessException e)
         {

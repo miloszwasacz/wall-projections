@@ -11,18 +11,18 @@ public class ConfigException : Exception
 }
 
 /// <summary>
-/// Thrown if the config package could not be found for importing.
+/// Thrown if the config package has invalid format.
 /// </summary>
-public class ConfigPackageNotFoundException : ConfigException
+public class ConfigPackageFormatException : ConfigException
 {
     /// <summary>
-    /// Name of the config package which could not be found.
+    /// Name of the config package which has invalid format.
     /// </summary>
     private string _fileName { get; }
 
-    public override string Message => $"Could not find .wall package with name {_fileName}";
+    public override string Message => $".wall package {_fileName} not valid";
 
-    public ConfigPackageNotFoundException(string fileName)
+    public ConfigPackageFormatException(string fileName)
     {
         _fileName = fileName;
     }
@@ -62,7 +62,7 @@ public class ExternalFileReadException : ConfigException
     /// </summary>
     private string _fileName { get; }
 
-    public override string Message => $"Could not read {_fileName}";
+    public override string Message => $"Could not find/access {_fileName}";
 
     public ExternalFileReadException(string fileName)
     {
