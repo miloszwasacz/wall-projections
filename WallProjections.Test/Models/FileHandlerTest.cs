@@ -154,7 +154,7 @@ public class FileHandlerTest
     {
         var fileHandler = new FileHandler();
         var path = Path.GetRandomFileName() + ".zip";
-        Assert.Throws<FileNotFoundException>(() => fileHandler.ImportConfig(path));
+        Assert.Throws<ExternalFileReadException>(() => fileHandler.ImportConfig(path));
     }
 
     /// <summary>

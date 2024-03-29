@@ -44,7 +44,28 @@ public class ConfigNotImportedException : ConfigException
     public override string Message => "No config is currently loaded into the program";
 }
 
+/// <summary>
+/// Thrown if there is an issue reading/writing to the required locations in the imported config.
+/// </summary>
 public class ConfigIOException : ConfigException
 {
-    public override string Message => "Could not open loaded config";
+    public override string Message => "Unable to access loaded config files";
+}
+
+/// <summary>
+/// Thrown if an external file could not be read.
+/// </summary>
+public class ExternalFileReadException : ConfigException
+{
+    /// <summary>
+    /// Name of file which could not be read.
+    /// </summary>
+    private string _fileName { get; }
+
+    public override string Message => $"Could not read {_fileName}";
+
+    public ExternalFileReadException(string fileName)
+    {
+        _fileName = fileName;
+    }
 }

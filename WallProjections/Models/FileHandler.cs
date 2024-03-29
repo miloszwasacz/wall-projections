@@ -17,16 +17,32 @@ public class FileHandler : IFileHandler
     /// TODO Handle errors from trying to load from not-found/invalid zip file
     public IConfig ImportConfig(string zipPath)
     {
-        // Clean up existing directory if in use
-        if (Directory.Exists(CurrentConfigFolderPath))
-            Directory.Delete(CurrentConfigFolderPath, true);
+        try
+        {
+            // Check if zip file exists for import
+            if (!File.Exists(zipPath))
+                throw new ExternalFileReadException(Path.GetFileName(zipPath));
 
-        Directory.CreateDirectory(CurrentConfigFolderPath);
+            // Clean up existing directory if in use
+            if (Directory.Exists(CurrentConfigFolderPath))
+                Directory.Delete(CurrentConfigFolderPath, true);
 
-        ZipFile.ExtractToDirectory(zipPath, CurrentConfigFolderPath);
+            Directory.CreateDirectory(CurrentConfigFolderPath);
 
-        var config = LoadConfig();
-        return config;
+            ZipFile.ExtractToDirectory(zipPath, CurrentConfigFolderPath);
+
+            var config = LoadConfig();
+            return config;
+        }
+        catch (IOException e)
+        {
+            throw new ConfigIOException();
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            throw new ConfigIOException();
+        }
+
     }
 
     /// <inheritdoc/>
