@@ -158,16 +158,32 @@ public class FileHandler : IFileHandler
     /// Loads a config from the .json file imported/created in the program folder.
     /// </summary>
     /// <returns>Loaded Config</returns>
-    /// <exception cref="JsonException">Format of config file is invalid</exception>
-    /// <exception cref="FileNotFoundException">If config file cannot be found in zip file</exception>
-    /// TODO More effective error handling of invalid/missing config files
+    /// <exception cref="ConfigNotImportedException">If <see cref="LoadConfig"/> called when no config imported.</exception>
+    /// <exception cref="ConfigInvalidException">config.json missing or has invalid syntax.</exception>
     public IConfig LoadConfig()
     {
         var configLocation = Path.Combine(CurrentConfigFolderPath, ConfigFileName);
 
-        using var configFile = File.OpenRead(configLocation);
-        return JsonSerializer.Deserialize<Config>(configFile) ??
-               throw new ConfigInvalidException();
+        if (!Directory.Exists(CurrentConfigFolderPath))
+            throw new ConfigNotImportedException();
+
+        if (!File.Exists(configLocation))
+            throw new ConfigInvalidException();
+
+        try
+        {
+            using var configFile = File.OpenRead(configLocation);
+            return JsonSerializer.Deserialize<Config>(configFile) ??
+                   throw new ConfigInvalidException();
+        }
+        catch (IOException e)
+        {
+            throw new ConfigIOException();
+        }
+        catch (JsonException e)
+        {
+            throw new ConfigInvalidException();
+        }
     }
 }
 

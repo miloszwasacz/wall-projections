@@ -43,3 +43,8 @@ public class ConfigNotImportedException : ConfigException
 {
     public override string Message => "No config is currently loaded into the program";
 }
+
+public class ConfigIOException : ConfigException
+{
+    public override string Message => "Could not open loaded config";
+}

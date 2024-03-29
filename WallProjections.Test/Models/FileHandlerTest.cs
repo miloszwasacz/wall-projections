@@ -165,7 +165,7 @@ public class FileHandlerTest
     public void ImportConfigNoConfigTest()
     {
         var fileHandler = new FileHandler();
-        Assert.Throws<FileNotFoundException>(() => fileHandler.ImportConfig(TestZipNoConfig));
+        Assert.Throws<ConfigInvalidException>(() => fileHandler.ImportConfig(TestZipNoConfig));
     }
 
     /// <summary>
