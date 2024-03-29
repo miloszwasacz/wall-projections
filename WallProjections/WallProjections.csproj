@@ -24,7 +24,9 @@
 
     <Target Name="GenerateArUcos" BeforeTargets="PrepareForBuild">
         <Exec Command="python Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
-        <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Linux'))"/>
+        <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="$([MSBuild]::IsOSPlatform('OSX')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'x86_64'"/>
+        <Exec Command="arch --arm64 python3 Scripts/Internal/aruco_generator.py" Condition="$([MSBuild]::IsOSPlatform('OSX')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'ARM64'"/>
         <ItemGroup>
             <AvaloniaResource Include="Assets\**"/>
         </ItemGroup>
