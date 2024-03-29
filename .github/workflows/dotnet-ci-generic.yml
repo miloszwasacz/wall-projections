@@ -59,7 +59,7 @@ jobs:
 
       - name: Install LibVLCSharp dependencies
         if: ${{ startsWith(inputs.os, 'ubuntu') }}
-        run: sudo apt install -y libvlc-dev vlc
+        run: sudo apt-get update -y && sudo apt-get install -y libvlc-dev vlc
 
       - name: Restore dependencies
         run: dotnet restore
