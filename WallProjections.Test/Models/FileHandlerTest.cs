@@ -754,6 +754,8 @@ public class FileHandlerTest
     {
         Assert.That(config1.Hotspots, Has.Count.EqualTo(config2.Hotspots.Count));
 
+        CollectionAssert.AreEqual(config1.HomographyMatrix, config2.HomographyMatrix);
+
         for (var i = 0; i < config1.Hotspots.Count; i++)
         {
             Assert.Multiple(() =>
