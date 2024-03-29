@@ -101,7 +101,7 @@ public class Hotspot
                           throw new ArgumentNullException(nameof(descriptionPath), "DescriptionPath cannot be null");
         ImagePaths = imagePaths ?? throw new ArgumentNullException(nameof(imagePaths), "ImagePaths cannot be null");
         VideoPaths = videoPaths ?? throw new ArgumentNullException(nameof(videoPaths), "VideoPaths cannot be null");
-        _filePath = IFileHandler.ConfigFolderPath;
+        _filePath = IFileHandler.CurrentConfigFolderPath;
     }
     // ReSharper restore NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
 

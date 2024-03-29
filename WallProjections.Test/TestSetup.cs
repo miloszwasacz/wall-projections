@@ -30,7 +30,6 @@ public class TestSetup
     public void GlobalTearDown()
     {
         // Dispose of the global singletons after all tests have run
-        IFileHandler.DeleteConfigFolder();
         _pythonHandler?.Dispose();
     }
 }

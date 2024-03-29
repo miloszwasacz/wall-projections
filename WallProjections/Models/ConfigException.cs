@@ -27,3 +27,8 @@ public class ConfigPackageNotFoundException : ConfigException
         _fileName = fileName;
     }
 }
+
+public class ConfigNotImportedException : ConfigException
+{
+    public override string Message => "No config is currently loaded into the program";
+}

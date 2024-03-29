@@ -37,6 +37,33 @@ public class FileHandlerTest
     private static string TestZipInvalidConfig =>
         Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_invalid_config.zip");
 
+    private static string CurrentConfigTempStore =>
+        Path.Combine(IFileHandler.ConfigFolderPath, "TestTemp");
+
+    /// <summary>
+    /// Ensures that the current config is not lost during tests.
+    /// </summary>
+    [OneTimeSetUp]
+    public void FileHandlerSetUp()
+    {
+        Directory.Move(
+            IFileHandler.CurrentConfigFolderPath,
+            CurrentConfigTempStore
+            );
+    }
+
+    /// <summary>
+    /// Ensures that the current config is moved back to the original position once the tests are finished.
+    /// </summary>
+    [OneTimeTearDown]
+    public void FileHandlerTearDown()
+    {
+        Directory.Move(
+            CurrentConfigTempStore,
+            IFileHandler.CurrentConfigFolderPath
+        );
+    }
+
     /// <summary>
     /// Test that loaded config matches expected config information
     /// </summary>
@@ -70,14 +97,14 @@ public class FileHandlerTest
     public void ImportConfigExistingDirectoryTest()
     {
         var fileHandler = new FileHandler();
-        var oldFilePath = Path.Combine(IFileHandler.ConfigFolderPath, Path.GetRandomFileName());
+        var oldFilePath = Path.Combine(IFileHandler.CurrentConfigFolderPath, Path.GetRandomFileName());
 
         #region Create folder and file for the test
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
 
-        Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
+        Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
         File.Create(oldFilePath).Close();
         Assert.That(File.Exists(oldFilePath), Is.True, "Could not create file in config folder for the test");
 
@@ -85,7 +112,7 @@ public class FileHandlerTest
 
         fileHandler.ImportConfig(TestZip);
 
-        var textFilePath = Path.Combine(IFileHandler.ConfigFolderPath, TestTxtFile);
+        var textFilePath = Path.Combine(IFileHandler.CurrentConfigFolderPath, TestTxtFile);
         Assert.Multiple(() =>
         {
             Assert.That(File.Exists(textFilePath), Is.True);
@@ -178,15 +205,15 @@ public class FileHandlerTest
         File.Delete(tempFilePath);
         Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
-            Directory.Delete(IFileHandler.ConfigFolderPath);
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath);
 
-        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.False,
+        Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.False,
             "Could not delete config folder for test.");
 
         var fileHandler = new FileHandler();
 
-        Assert.That(() => fileHandler.ExportConfig(tempFilePath), Throws.InstanceOf<DirectoryNotFoundException>());
+        Assert.That(() => fileHandler.ExportConfig(tempFilePath), Throws.InstanceOf<ConfigNotImportedException>());
 
         File.Delete(tempFilePath);
         Assert.That(File.Exists(tempFilePath), Is.False, "Could not delete temp file from test.");
@@ -202,7 +229,7 @@ public class FileHandlerTest
         IFileHandler fileHandler = new FileHandler();
         fileHandler.ImportConfig(TestZip);
 
-        var txtFilePath = Path.Combine(IFileHandler.ConfigFolderPath, TestTxtFile);
+        var txtFilePath = Path.Combine(IFileHandler.CurrentConfigFolderPath, TestTxtFile);
         Assert.Multiple(() =>
         {
             Assert.That(File.Exists(txtFilePath), Is.True);
@@ -223,11 +250,11 @@ public class FileHandlerTest
         var fileHandler = new FileHandler();
         fileHandler.ImportConfig(TestZip);
 
-        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True);
+        Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.True);
 
         Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
 
-        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.False);
+        Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.False);
     }
 
     // ReSharper disable once InconsistentNaming
@@ -241,19 +268,19 @@ public class FileHandlerTest
     public void DeleteConfigFolderIOExceptionWindowsTest()
     {
         var fileHandler = new FileHandler();
-        var tempFilePath = Path.Combine(IFileHandler.ConfigFolderPath, Path.GetRandomFileName());
+        var tempFilePath = Path.Combine(IFileHandler.CurrentConfigFolderPath, Path.GetRandomFileName());
 
         fileHandler.ImportConfig(TestZip);
 
         var file = File.Create(tempFilePath);
 
         Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
-        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True);
+        Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.True);
 
         file.Close();
 
         Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
-        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.False);
+        Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.False);
     }
 
     // ReSharper disable once InconsistentNaming
@@ -269,15 +296,15 @@ public class FileHandlerTest
         var fileHandler = new FileHandler();
         fileHandler.ImportConfig(TestZip);
 
-        Process.Start("chmod", "000 " + IFileHandler.ConfigFolderPath).WaitForExit();
+        Process.Start("chmod", "000 " + IFileHandler.CurrentConfigFolderPath).WaitForExit();
 
         Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
-        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.True);
+        Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.True);
 
-        Process.Start("chmod", "777 " + IFileHandler.ConfigFolderPath).WaitForExit();
+        Process.Start("chmod", "777 " + IFileHandler.CurrentConfigFolderPath).WaitForExit();
 
         Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
-        Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath), Is.False);
+        Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.False);
     }
 
     /// <summary>
@@ -289,12 +316,12 @@ public class FileHandlerTest
     {
         #region Ensure Config Folder Reset
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
         {
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
         }
 
         #endregion
@@ -304,7 +331,7 @@ public class FileHandlerTest
 
         fileHandler.SaveConfig(config);
 
-        Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+        Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
 
         var newConfig = fileHandler.LoadConfig();
 
@@ -321,10 +348,10 @@ public class FileHandlerTest
     {
         #region Ensure Config Folder Deleted
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
         {
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
         }
 
         #endregion
@@ -334,7 +361,7 @@ public class FileHandlerTest
 
         fileHandler.SaveConfig(config);
 
-        Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
+        Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
 
         var newConfig = fileHandler.LoadConfig();
 
@@ -351,12 +378,12 @@ public class FileHandlerTest
     {
         #region Ensure Config Folder Reset
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
         {
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
         }
 
         #endregion
@@ -373,11 +400,11 @@ public class FileHandlerTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt")));
         });
 
-        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt"));
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
@@ -406,12 +433,12 @@ public class FileHandlerTest
     {
         #region Ensure Config Folder Reset
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
         {
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
         }
 
         #endregion
@@ -434,18 +461,18 @@ public class FileHandlerTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt")));
 
             // File copied into the config folder.
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png")));
 
             // Original file not deleted.
             Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets",
                 "test_image.png")));
         });
 
-        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt"));
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
@@ -474,12 +501,12 @@ public class FileHandlerTest
     {
         #region Ensure Config Folder Reset
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
         {
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
         }
 
         #endregion
@@ -503,12 +530,12 @@ public class FileHandlerTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt")));
 
             // File copied into the config folder.
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_1.jpg")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_1.jpg")));
 
             // Original file not deleted.
             Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets",
@@ -517,7 +544,7 @@ public class FileHandlerTest
                 File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_image_2.jpg")));
         });
 
-        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt"));
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
@@ -546,12 +573,12 @@ public class FileHandlerTest
     {
         #region Ensure Config Folder Reset
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
         {
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
         }
 
         #endregion
@@ -574,18 +601,18 @@ public class FileHandlerTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt")));
 
             // File copied into the config folder.
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "video_0_0.mp4")));
 
             // Original file not deleted.
             Assert.That(File.Exists(Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets",
                 "test_video.mp4")));
         });
 
-        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt"));
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
@@ -614,12 +641,12 @@ public class FileHandlerTest
     {
         #region Ensure Config Folder Reset
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
         {
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
         }
 
         #endregion
@@ -650,12 +677,12 @@ public class FileHandlerTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt")));
 
             // File copied into the config folder.
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "video_0_0.mp4")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png")));
 
             // Original files not deleted.
             Assert.That(File.Exists(textFilePath));
@@ -664,10 +691,10 @@ public class FileHandlerTest
             Assert.That(File.Exists(videoFilePath));
         });
 
-        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"));
+        var savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt"));
         Assert.That(savedTextFileContents, Is.EqualTo("This is a test file.\r\n"));
 
-        savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.ConfigFolderPath, "text_1.txt"));
+        savedTextFileContents = File.ReadAllText(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_1.txt"));
         Assert.That(savedTextFileContents, Is.EqualTo("This is a second test file.\r\n"));
 
         // Config is transformed by saving to have relative paths.
@@ -702,12 +729,12 @@ public class FileHandlerTest
     {
         #region Ensure Config Folder Reset
 
-        if (Directory.Exists(IFileHandler.ConfigFolderPath))
+        if (Directory.Exists(IFileHandler.CurrentConfigFolderPath))
         {
-            Directory.Delete(IFileHandler.ConfigFolderPath, true);
-            Assert.That(!Directory.Exists(IFileHandler.ConfigFolderPath));
-            Directory.CreateDirectory(IFileHandler.ConfigFolderPath);
-            Assert.That(Directory.Exists(IFileHandler.ConfigFolderPath));
+            Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
+            Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+            Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
+            Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath));
         }
 
         #endregion
@@ -741,31 +768,31 @@ public class FileHandlerTest
             new(0,
                 new Coord(0, 0, 0),
                 HotspotTitle(0),
-                Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt"),
+                Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt"),
                 ImmutableList<string>.Empty,
                 ImmutableList<string>.Empty),
             new(1,
                 new Coord(0, 0, 0),
                 HotspotTitle(1),
-                Path.Combine(IFileHandler.ConfigFolderPath, "text_1.txt"),
-                new List<string> { Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png") }.ToImmutableList(),
-                new List<string> { Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4") }.ToImmutableList())
+                Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_1.txt"),
+                new List<string> { Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png") }.ToImmutableList(),
+                new List<string> { Path.Combine(IFileHandler.CurrentConfigFolderPath, "video_0_0.mp4") }.ToImmutableList())
         });
 
         fileHandler.SaveConfig(config);
 
         Assert.Multiple(() =>
         {
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "config.json")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "text_0.txt")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt")));
 
             // File copied into the config folder.
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "video_1_0.mp4")));
-            Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_1_0.png")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "video_1_0.mp4")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_1_0.png")));
 
             // Original files removed from the config folder.
-            Assert.That(!File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "video_0_0.mp4")));
-            Assert.That(!File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, "image_0_0.png")));
+            Assert.That(!File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "video_0_0.mp4")));
+            Assert.That(!File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png")));
         });
 
         config = new Config(TestMatrix, new List<Hotspot>
@@ -832,6 +859,6 @@ public class FileHandlerTest
     /// </summary>
     private static void AssertConfigImported()
     {
-        Assert.That(File.Exists(Path.Combine(IFileHandler.ConfigFolderPath, IFileHandler.ConfigFileName)), Is.True);
+        Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, IFileHandler.ConfigFileName)), Is.True);
     }
 }

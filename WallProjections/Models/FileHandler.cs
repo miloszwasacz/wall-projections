@@ -13,18 +13,18 @@ namespace WallProjections.Models;
 public class FileHandler : IFileHandler
 {
     /// <inheritdoc />
-    /// <exception cref="JsonException">Format of config file is invalid</exception>
+    /// <exception cref="ConfigException">Format of config file is invalid</exception>
     /// TODO Handle errors from trying to load from not-found/invalid zip file
     public IConfig ImportConfig(string zipPath)
     {
         // Clean up existing directory if in use
-        if (Directory.Exists(ConfigFolderPath))
-            Directory.Delete(ConfigFolderPath, true);
+        if (Directory.Exists(CurrentConfigFolderPath))
+            Directory.Delete(CurrentConfigFolderPath, true);
 
-        Directory.CreateDirectory(ConfigFolderPath);
+        Directory.CreateDirectory(CurrentConfigFolderPath);
 
-        ZipFile.ExtractToDirectory(zipPath, ConfigFolderPath);
-        Console.WriteLine($"File extracted to {ConfigFolderPath}");
+        ZipFile.ExtractToDirectory(zipPath, CurrentConfigFolderPath);
+
         var config = LoadConfig();
         return config;
     }
@@ -32,10 +32,10 @@ public class FileHandler : IFileHandler
     /// <inheritdoc/>
     public bool ExportConfig(string exportPath)
     {
-        if (!Directory.Exists(ConfigFolderPath))
-            throw new DirectoryNotFoundException("No imported/created config to export.");
+        if (!Directory.Exists(CurrentConfigFolderPath))
+            throw new ConfigNotImportedException();
 
-        ZipFile.CreateFromDirectory(ConfigFolderPath, exportPath);
+        ZipFile.CreateFromDirectory(CurrentConfigFolderPath, exportPath);
         return true;
     }
 
@@ -48,8 +48,8 @@ public class FileHandler : IFileHandler
     public bool SaveConfig(IConfig config)
     {
         // Check if directory already exists. If not, create it.
-        if (!Directory.Exists(ConfigFolderPath))
-            Directory.CreateDirectory(ConfigFolderPath);
+        if (!Directory.Exists(CurrentConfigFolderPath))
+            Directory.CreateDirectory(CurrentConfigFolderPath);
 
         var hotspots = config.Hotspots.Select(hotspot =>
         {
@@ -60,15 +60,15 @@ public class FileHandler : IFileHandler
             {
                 File.Copy(
                     hotspot.DescriptionPath,
-                    Path.Combine(ConfigFolderPath, newDescriptionPath),
+                    Path.Combine(CurrentConfigFolderPath, newDescriptionPath),
                     true
                 );
             }
             else
             {
                 File.Move(
-                    Path.Combine(ConfigFolderPath, hotspot.DescriptionPath),
-                    Path.Combine(ConfigFolderPath, newDescriptionPath),
+                    Path.Combine(CurrentConfigFolderPath, hotspot.DescriptionPath),
+                    Path.Combine(CurrentConfigFolderPath, newDescriptionPath),
                     true
                 );
             }
@@ -122,7 +122,7 @@ public class FileHandler : IFileHandler
         });
 #endif
 
-        using var configFile = new StreamWriter(Path.Combine(ConfigFolderPath, ConfigFileName));
+        using var configFile = new StreamWriter(Path.Combine(CurrentConfigFolderPath, ConfigFileName));
         configFile.Write(configString);
 
         return true;
@@ -149,7 +149,7 @@ public class FileHandler : IFileHandler
             var extension = Path.GetExtension(path);
             var newFileName = $"{type}_{id}_{i}{extension}";
 
-            fileUpdateFunc(path, Path.Combine(ConfigFolderPath, newFileName), true);
+            fileUpdateFunc(path, Path.Combine(CurrentConfigFolderPath, newFileName), true);
 
             return newFileName;
         });
@@ -163,7 +163,7 @@ public class FileHandler : IFileHandler
     /// TODO More effective error handling of invalid/missing config files
     public IConfig LoadConfig()
     {
-        var configLocation = Path.Combine(ConfigFolderPath, ConfigFileName);
+        var configLocation = Path.Combine(CurrentConfigFolderPath, ConfigFileName);
 
         using var configFile = File.OpenRead(configLocation);
         return JsonSerializer.Deserialize<Config>(configFile) ??
@@ -177,14 +177,14 @@ public class FileHandler : IFileHandler
 internal static class PathExtensions
 {
     /// <summary>
-    /// Checks if the file is in the <see cref="IFileHandler.ConfigFolderPath">config folder</see>.
+    /// Checks if the file is in the <see cref="IFileHandler.CurrentConfigFolderPath">config folder</see>.
     /// </summary>
     /// <param name="path">Path to the file.</param>
     /// <seealso cref="IsNotInConfig" />
-    public static bool IsInConfig(this string path) => path.StartsWith(ConfigFolderPath) && File.Exists(path);
+    public static bool IsInConfig(this string path) => path.StartsWith(CurrentConfigFolderPath) && File.Exists(path);
 
     /// <summary>
-    /// Checks if the file is not in the <see cref="IFileHandler.ConfigFolderPath">config folder</see>.
+    /// Checks if the file is not in the <see cref="IFileHandler.CurrentConfigFolderPath">config folder</see>.
     /// </summary>
     /// <param name="path">Path to the file.</param>
     /// <seealso cref="IsInConfig" />
