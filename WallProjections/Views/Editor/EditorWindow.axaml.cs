@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -15,6 +16,10 @@ namespace WallProjections.Views.Editor;
 
 public partial class EditorWindow : Window
 {
+    private const string ImportSuccessMessage = "Configuration imported successfully";
+    private const string ExportSuccessMessage = "Configuration exported successfully";
+    private const string CalibrationSuccessMessage = "Camera calibration successful";
+
     private const string ExplorerErrorMessage = "Could not open the File Explorer";
     private const string ImportErrorMessage = "An error occured while importing the configuration file";
     private const string ExportErrorMessage = "An error occured while exporting configuration to a file";
@@ -32,14 +37,28 @@ public partial class EditorWindow : Window
     private static readonly Uri CalibrationIconPath = new("avares://WallProjections/Assets/webcam-icon.ico");
 
     /// <summary>
-    /// Whether any dialog is currently shown.
+    /// The backing field for the <see cref="IsInPositionEditMode" /> property.
     /// </summary>
-    private bool _isDialogShown;
+    private bool _isInPositionEditMode;
 
     /// <summary>
-    /// Whether calibration is currently running.
+    /// A <see cref="DirectProperty{TOwner,TValue}">DirectProperty</see> that defines the <see cref="IsInPositionEditMode" /> property.
     /// </summary>
-    private bool _isCalibrationRunning;
+    protected static readonly DirectProperty<EditorWindow, bool> IsInPositionEditModeProperty =
+        AvaloniaProperty.RegisterDirect<EditorWindow, bool>(
+            nameof(IsInPositionEditMode),
+            o => o.IsInPositionEditMode,
+            (o, v) => o.IsInPositionEditMode = v
+        );
+
+    /// <summary>
+    /// Whether the PositionEditor is in edit mode.
+    /// </summary>
+    public bool IsInPositionEditMode
+    {
+        get => _isInPositionEditMode;
+        set => SetAndRaise(IsInPositionEditModeProperty, ref _isInPositionEditMode, value);
+    }
 
     public EditorWindow()
     {
@@ -68,41 +87,41 @@ public partial class EditorWindow : Window
     /// <param name="e">The event arguments (unused).</param>
     private async void DescriptionEditor_OnImportDescription(object? sender, RoutedEventArgs e)
     {
-        // Prevent multiple dialogs from being shown at once
-        if (_isDialogShown) return;
-
         if (DataContext is not IEditorViewModel vm) return;
-        var importer = vm.DescriptionEditor.Importer;
 
-        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        await vm.WithActionLock(async () =>
         {
-            Title = "Select a file to import...",
-            AllowMultiple = false,
-            FileTypeFilter = new[] { FilePickerFileTypes.TextPlain },
-            SuggestedStartLocation = startFolder
+            var importer = vm.DescriptionEditor.Importer;
+
+            var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Select a file to import...",
+                AllowMultiple = false,
+                FileTypeFilter = new[] { FilePickerFileTypes.TextPlain },
+                SuggestedStartLocation = startFolder
+            });
+
+            // No file was selected
+            if (files.Count == 0) return;
+
+            var file = files[0].Path.LocalPath;
+            var safety = importer.IsImportSafe();
+            if (safety is ImportWarningLevel.None)
+            {
+                //TODO Use the result of ImportFromFile to show an error message
+                importer.ImportFromFile(file);
+                return;
+            }
+
+            //TODO Refactor to use the generic dialog
+            // Import is not safe
+            var dialog = new ImportWarningDialog(file, safety)
+            {
+                DataContext = importer
+            };
+            await dialog.ShowDialog(this);
         });
-
-        // No file was selected
-        if (files.Count == 0) return;
-
-        var file = files[0].Path.LocalPath;
-        var safety = importer.IsImportSafe();
-        if (safety is ImportWarningLevel.None)
-        {
-            //TODO Use the result of ImportFromFile to show an error message
-            importer.ImportFromFile(file);
-            return;
-        }
-
-        // Import is not safe
-        var dialog = new ImportWarningDialog(file, safety)
-        {
-            DataContext = importer
-        };
-        _isDialogShown = true;
-        await dialog.ShowDialog(this);
-        _isDialogShown = false;
     }
 
     /// <summary>
@@ -112,9 +131,9 @@ public partial class EditorWindow : Window
     /// <param name="e">The event arguments (unused).</param>
     private async void HotspotList_OnDeleteHotspot(object? sender, HotspotList.DeleteArgs e)
     {
-        if (_isDialogShown) return;
-
         if (DataContext is not IEditorViewModel vm) return;
+
+        if (!vm.TryAcquireActionLock()) return;
 
         var dialog = new ConfirmationDialog(
             "Delete Hotspot",
@@ -122,11 +141,14 @@ public partial class EditorWindow : Window
             "Are you sure you want to delete this hotspot? All associated data will be lost.",
             "Delete"
         );
-        dialog.Confirm += (_, _) => vm.DeleteHotspot(e.Hotspot);
+        dialog.Confirm += (_, _) =>
+        {
+            vm.DeleteHotspot(e.Hotspot);
+            vm.ReleaseActionLock();
+        };
+        dialog.Cancel += (_, _) => vm.ReleaseActionLock();
 
-        _isDialogShown = true;
         await dialog.ShowDialog(this);
-        _isDialogShown = false;
     }
 
     /// <summary>
@@ -134,48 +156,39 @@ public partial class EditorWindow : Window
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private void ImageEditor_OnAddMedia(object? sender, RoutedEventArgs e)
-    {
-        FetchMediaFiles(
-            new[] { FilePickerFileTypes.ImageAll },
-            WellKnownFolder.Pictures,
-            (vm, files) => vm.SelectedHotspot?.AddMedia(MediaEditorType.Images, files)
-        );
-    }
+    private void ImageEditor_OnAddMedia(object? sender, RoutedEventArgs e) => FetchMediaFiles(
+        new[] { FilePickerFileTypes.ImageAll },
+        WellKnownFolder.Pictures,
+        (vm, files) => vm.SelectedHotspot?.AddMedia(MediaEditorType.Images, files)
+    );
 
     /// <summary>
     /// Opens a file picker to import videos.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private void VideoEditor_OnAddMedia(object? sender, RoutedEventArgs e)
-    {
-        FetchMediaFiles(
-            new[] { IContentProvider.FilePickerVideoType },
-            WellKnownFolder.Videos,
-            (vm, files) => vm.AddMedia(MediaEditorType.Videos, files)
-        );
-    }
+    private void VideoEditor_OnAddMedia(object? sender, RoutedEventArgs e) => FetchMediaFiles(
+        new[] { IContentProvider.FilePickerVideoType },
+        WellKnownFolder.Videos,
+        (vm, files) => vm.AddMedia(MediaEditorType.Videos, files)
+    );
+
 
     /// <summary>
     /// Removes media from the <see cref="IEditorHotspotViewModel.Images" /> collection.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments holding the media to remove.</param>
-    private void ImagesEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e)
-    {
+    private void ImagesEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e) =>
         RemoveMedia(MediaEditorType.Images, e);
-    }
 
     /// <summary>
     /// Removes media from the <see cref="IEditorHotspotViewModel.Videos" /> collection.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments holding the media to remove.</param>
-    private void VideoEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e)
-    {
+    private void VideoEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e) =>
         RemoveMedia(MediaEditorType.Videos, e);
-    }
 
     /// <summary>
     /// Opens a file picker to imports a new configuration from a file.
@@ -185,6 +198,8 @@ public partial class EditorWindow : Window
     private async void ConfigImport_OnClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not IEditorViewModel vm) return;
+
+        if (!vm.TryAcquireActionLock()) return;
 
         var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -203,9 +218,20 @@ public partial class EditorWindow : Window
             SuggestedStartLocation = startFolder
         });
 
-        if (files.Count == 0) return;
+        if (files.Count == 0)
+        {
+            vm.ReleaseActionLock();
+            return;
+        }
 
         var file = files[0].Path.LocalPath;
+
+        // If the import is safe, don't show a warning dialog
+        if (vm.IsImportSafe)
+        {
+            await Import(file);
+            return;
+        }
 
         var dialog = new ConfirmationDialog(
             "Import Configuration",
@@ -213,17 +239,18 @@ public partial class EditorWindow : Window
             "Are you sure you want to import a new configuration? All currently saved data will be lost.",
             "Import"
         );
-        dialog.Confirm += (_, _) =>
-        {
-            if (vm.ImportConfig(file)) return;
+        dialog.Confirm += async (_, _) => await Import(file);
+        dialog.Cancel += (_, _) => vm.ReleaseActionLock();
 
-            // An error occurred while importing
-            ShowToast(ImportErrorMessage);
-        };
-
-        _isDialogShown = true;
         await dialog.ShowDialog(this);
-        _isDialogShown = false;
+        return;
+
+        async Task Import(string configFile)
+        {
+            var success = await vm.ImportConfig(configFile);
+            ShowToast(success ? ImportSuccessMessage : ImportErrorMessage);
+            vm.ReleaseActionLock();
+        }
     }
 
     /// <summary>
@@ -235,21 +262,22 @@ public partial class EditorWindow : Window
     {
         if (DataContext is not IEditorViewModel vm) return;
 
-        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        await vm.WithActionLock(async () =>
         {
-            Title = "Choose export location...",
-            AllowMultiple = false,
-            SuggestedStartLocation = startFolder
+            var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
+            var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = "Choose export location...",
+                AllowMultiple = false,
+                SuggestedStartLocation = startFolder
+            });
+
+            if (folders.Count == 0) return;
+
+            var folder = folders[0].Path.LocalPath;
+            var success = await vm.ExportConfig(folder);
+            ShowToast(success ? ExportSuccessMessage : ExportErrorMessage);
         });
-
-        if (folders.Count == 0) return;
-
-        var folder = folders[0].Path.LocalPath;
-        if (vm.ExportConfig(folder)) return; //TODO Show a success message
-
-        // An error occurred while exporting
-        ShowToast(ExportErrorMessage);
     }
 
     /// <summary>
@@ -260,35 +288,30 @@ public partial class EditorWindow : Window
     private async void Calibrate_OnClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not IEditorViewModel vm) return;
-        if (_isCalibrationRunning || _isDialogShown) return;
 
-        _isCalibrationRunning = true;
+        if (!vm.TryAcquireActionLock()) return;
+
         vm.ShowCalibrationMarkers();
 
         var dialog = new ConfirmationDialog(
             "Camera calibration",
             CalibrationIconPath,
-            "Ensure that the window with calibration patterns is on the right screen and is in fullscreen mode.",
+            "Ensure that the window with calibration patterns is on the correct screen and is in fullscreen mode.",
             "Continue"
         );
         dialog.Confirm += async (_, _) =>
         {
             var success = await vm.CalibrateCamera();
-            _isCalibrationRunning = false;
-            if (success) return; //TODO Show a success message
-
-            // An error occurred while calibrating
-            ShowToast(CalibrationErrorMessage);
+            ShowToast(success ? CalibrationSuccessMessage : CalibrationErrorMessage);
+            vm.ReleaseActionLock();
         };
         dialog.Cancel += (_, _) =>
         {
             vm.HideCalibrationMarkers();
-            _isCalibrationRunning = false;
+            vm.ReleaseActionLock();
         };
 
-        _isDialogShown = true;
         await dialog.ShowDialog(this);
-        _isDialogShown = false;
     }
 
     /// <summary>
@@ -296,14 +319,17 @@ public partial class EditorWindow : Window
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private void Save_OnClick(object? sender, RoutedEventArgs e)
+    private async void Save_OnClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not IEditorViewModel vm) return;
 
-        if (vm.SaveConfig()) return;
+        await vm.WithActionLock(async () =>
+        {
+            if (await vm.SaveConfig()) return;
 
-        // An error occurred while saving
-        ShowToast(SaveErrorMessage);
+            // An error occurred while saving
+            ShowToast(SaveErrorMessage);
+        });
     }
 
     /// <summary>
@@ -316,17 +342,17 @@ public partial class EditorWindow : Window
     {
         if (DataContext is not IEditorViewModel vm) return;
 
+        if (!vm.TryAcquireActionLock()) return;
+
         if (vm.IsSaved)
         {
             vm.CloseEditor();
+            vm.ReleaseActionLock();
             return;
         }
 
         var dialog = CreateDiscardChangesDialog(vm);
-
-        _isDialogShown = true;
         await dialog.ShowDialog(this);
-        _isDialogShown = false;
     }
 
     private void EditPosition_OnClick(object? sender, RoutedEventArgs e)
@@ -342,7 +368,10 @@ public partial class EditorWindow : Window
     /// <summary>
     /// Handles key presses:
     /// <ul>
-    ///     <li><b>Escape</b>: Exit <see cref="AbAbsPositionEditorViewModelsInEditMode">edit mode</see> for <see cref="IEditorViewModel.PositionEditor" /></li>
+    ///     <li>
+    ///         <b>Escape</b>: Exit <see cref="AbsPositionEditorViewModel.IsInEditMode">edit mode</see>
+    ///                        for <see cref="IEditorViewModel.PositionEditor" />
+    ///     </li>
     /// </ul>
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
@@ -377,17 +406,17 @@ public partial class EditorWindow : Window
         // Prevent the window from closing
         e.Cancel = true;
 
+        if (!vm.TryAcquireActionLock()) return;
+
         if (vm.IsSaved)
         {
             vm.CloseEditor();
+            vm.ReleaseActionLock();
             return;
         }
 
         var dialog = CreateDiscardChangesDialog(vm);
-
-        _isDialogShown = true;
         await dialog.ShowDialog(this);
-        _isDialogShown = false;
     }
 
     //ReSharper restore UnusedParameter.Local
@@ -403,7 +432,12 @@ public partial class EditorWindow : Window
             "Are you sure you want to discard your changes? All unsaved data will be lost.",
             "Discard"
         );
-        dialog.Confirm += (_, _) => vm.CloseEditor();
+        dialog.Confirm += (_, _) =>
+        {
+            vm.CloseEditor();
+            vm.ReleaseActionLock();
+        };
+        dialog.Cancel += (_, _) => vm.ReleaseActionLock();
         return dialog;
     }
 
@@ -425,16 +459,19 @@ public partial class EditorWindow : Window
     {
         if (DataContext is not IEditorViewModel vm) return;
 
-        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(startLocation);
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        await vm.WithActionLock(async () =>
         {
-            Title = "Select media files to import...",
-            AllowMultiple = true,
-            FileTypeFilter = filter,
-            SuggestedStartLocation = startFolder
-        });
+            var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(startLocation);
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Select media files to import...",
+                AllowMultiple = true,
+                FileTypeFilter = filter,
+                SuggestedStartLocation = startFolder
+            });
 
-        action(vm, files);
+            action(vm, files);
+        });
     }
 
     /// <summary>
@@ -444,9 +481,9 @@ public partial class EditorWindow : Window
     /// <param name="args">The event arguments holding the media to remove.</param>
     private async void RemoveMedia(MediaEditorType type, MediaEditor.RemoveMediaArgs args)
     {
-        if (_isDialogShown) return;
-
         if (DataContext is not IEditorViewModel vm) return;
+
+        if (!vm.TryAcquireActionLock()) return;
 
         var media = args.Media;
         var dialog = new ConfirmationDialog(
@@ -455,11 +492,14 @@ public partial class EditorWindow : Window
             $"Are you sure you want to remove {media.Length} {type.NumberBasedLabel(media.Length)}? This action cannot be undone.",
             "Remove"
         );
-        dialog.Confirm += (_, _) => vm.RemoveMedia(type, media);
+        dialog.Confirm += (_, _) =>
+        {
+            vm.RemoveMedia(type, media);
+            vm.ReleaseActionLock();
+        };
+        dialog.Cancel += (_, _) => vm.ReleaseActionLock();
 
-        _isDialogShown = true;
         await dialog.ShowDialog(this);
-        _isDialogShown = false;
     }
 
     private void ShowToast(string message, Toast.ShowDuration duration = Toast.ShowDuration.Short)

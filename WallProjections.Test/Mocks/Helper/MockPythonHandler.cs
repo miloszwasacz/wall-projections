@@ -18,16 +18,22 @@ public class MockPythonHandler : IPythonHandler
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotPressed;
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotReleased;
 
-    public Task RunHotspotDetection(IConfig config)
+    /// <summary>
+    /// The delay (in milliseconds) simulating the time it takes to call a Python script
+    /// </summary>
+    public int Delay { get; set; }
+
+    public async Task RunHotspotDetection(IConfig config)
     {
         CurrentScript = PythonScript.HotspotDetection;
-        return Task.CompletedTask;
+        await Task.Delay(Delay);
     }
 
-    public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
+    public async Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
     {
         CurrentScript = PythonScript.Calibration;
-        return Task.FromResult(arucoPositions.Count > 0 ? MockPythonProxy.CalibrationResult : null);
+        await Task.Delay(Delay);
+        return arucoPositions.Count > 0 ? MockPythonProxy.CalibrationResult : null;
     }
 
     public void CancelCurrentTask()

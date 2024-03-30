@@ -11,11 +11,10 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="EditorWindow"
         WindowState="Maximized"
+        IsEnabled="{Binding !AreActionsDisabled}"
+        IsInPositionEditMode="{Binding PositionEditor.IsInEditMode}"
         KeyDown="Editor_OnKeyDown"
-        Closing="Editor_OnClosing"
-        Name="Editor"
-        Tag="{Binding PositionEditor.IsInEditMode}">
-    <!-- This `Tag` is used by the button for toggling position edit mode because it has a different DataContext -->
+        Closing="Editor_OnClosing">
 
     <Window.Styles>
         <!--TODO Change to a reasonable style -->
@@ -46,8 +45,7 @@
                         Export Config
                     </Button>
 
-                    <Button IsEnabled="{Binding }"
-                            Click="Calibrate_OnClick">
+                    <Button Click="Calibrate_OnClick">
                         Calibrate camera
                     </Button>
 
@@ -97,7 +95,7 @@
                                       ImportDescription="DescriptionEditor_OnImportDescription">
 
                 <views:IconButton ToolTip.Tip="Edit position"
-                                  Classes.edit-mode-toggled="{Binding #Editor.Tag}"
+                                  Classes.edit-mode-toggled="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
                                   IconData="{StaticResource my_location_regular}"
                                   Click="EditPosition_OnClick" />
 

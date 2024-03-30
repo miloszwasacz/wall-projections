@@ -50,6 +50,7 @@
                              Text="{Binding Title}" />
 
                     <views:IconButton Grid.Column="2" Grid.Row="0"
+                                      MinHeight="48"
                                       ToolTip.Tip="Import from file"
                                       Command="{Binding ImportButton_OnClick, RelativeSource={RelativeSource TemplatedParent}}"
                                       CommandParameter="{Binding RelativeSource={RelativeSource Self}}"

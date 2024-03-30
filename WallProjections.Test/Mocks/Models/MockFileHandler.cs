@@ -39,6 +39,11 @@ public sealed class MockFileHandler : IFileHandler
     public IConfig Config { get; set; }
 
     /// <summary>
+    /// The delay (in milliseconds) simulating the time it takes to perform file operations
+    /// </summary>
+    public int Delay { get; set; }
+
+    /// <summary>
     /// A list of all the zip files that have been loaded using <see cref="ImportConfig" />
     /// </summary>
     public IReadOnlyList<string> LoadedZips => _loadedZips;
@@ -109,6 +114,7 @@ public sealed class MockFileHandler : IFileHandler
         if (_exception is not null)
             throw _exception;
 
+        Task.Delay(Delay).Wait();
         Config = config;
         return _modificationOutputs;
     }
@@ -129,6 +135,7 @@ public sealed class MockFileHandler : IFileHandler
         if (_exception is not null)
             throw _exception;
 
+        Task.Delay(Delay).Wait();
         _loadedZips.Add(filePath);
         return _modificationOutputs ? Config : null;
     }
@@ -149,6 +156,7 @@ public sealed class MockFileHandler : IFileHandler
         if (_exception is not null)
             throw _exception;
 
+        Task.Delay(Delay).Wait();
         _exportedZips.Add(exportPath);
         return _modificationOutputs;
     }
@@ -162,6 +170,7 @@ public sealed class MockFileHandler : IFileHandler
         if (_exception is not null)
             throw _exception;
 
+        Task.Delay(Delay).Wait();
         return Config;
     }
 
