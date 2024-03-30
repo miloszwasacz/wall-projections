@@ -64,7 +64,33 @@ public class ExternalFileReadException : ConfigException
 
     public override string Message => $"Could not find/access {_fileName}";
 
+    /// <summary>
+    /// Constructor for <see cref="ExternalFileReadException"/>
+    /// </summary>
+    /// <param name="fileName">Name of file which could not be read.</param>
     public ExternalFileReadException(string fileName)
+    {
+        _fileName = fileName;
+    }
+}
+
+/// <summary>
+/// Thrown if a file of the same name already exists in the config.
+/// </summary>
+public class ConfigDuplicateFileException : ConfigException
+{
+    /// <summary>
+    /// Name of duplicate imported media file.
+    /// </summary>
+    private string _fileName { get; }
+
+    public override string Message => $"Duplicate media files with name {_fileName} in config";
+
+    /// <summary>
+    /// Constructor for <see cref="ConfigDuplicateFileException"/>
+    /// </summary>
+    /// <param name="fileName">The duplicate imported file name.</param>
+    public ConfigDuplicateFileException(string fileName)
     {
         _fileName = fileName;
     }

@@ -9,6 +9,7 @@ public interface IFileHandler
     public const string ConfigFolderName = "WallProjections";
     public const string CurrentConfigFolder = "Current";
     public const string TempConfigFolder = "Temp";
+    public const string BackupConfigFolder = "Backup";
 
     /// <summary>
     /// Path to the config folder for the program.
@@ -27,6 +28,11 @@ public interface IFileHandler
     /// Path to the folder for storing the temporary config for during saving.
     /// </summary>
     public static string TempConfigFolderPath => Path.Combine(ConfigFolderPath, TempConfigFolder );
+
+    /// <summary>
+    /// Path to the folder for storing the current config while the new config is being saved.
+    /// </summary>
+    public static string BackupConfigFolderPath => Path.Combine(ConfigFolderPath, BackupConfigFolder);
 
     /// <summary>
     /// Import a zip file of the config file and the media files

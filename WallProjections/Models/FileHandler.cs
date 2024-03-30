@@ -4,7 +4,10 @@ using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security;
 using System.Text.Json;
+using System.Threading;
+using Avalonia.Markup.Xaml.Templates;
 using WallProjections.Models.Interfaces;
 using static WallProjections.Models.Interfaces.IFileHandler;
 
@@ -68,112 +71,17 @@ public class FileHandler : IFileHandler
     /// </exception>
     public bool SaveConfig(IConfig config)
     {
-        // Check if directory already exists. If not, create it.
-        if (!Directory.Exists(CurrentConfigFolderPath))
-            Directory.CreateDirectory(CurrentConfigFolderPath);
+        using var configBuilder = new ConfigBuilder(config.HomographyMatrix);
 
-        var hotspots = config.Hotspots.Select(hotspot =>
+        config.Hotspots.ForEach(hotspot =>
         {
-            var newDescriptionPath = $"text_{hotspot.Id}.txt";
-
-            // Copy in non-imported description path.
-            if (!hotspot.DescriptionPath.IsInConfig())
-            {
-                File.Copy(
-                    hotspot.DescriptionPath,
-                    Path.Combine(CurrentConfigFolderPath, newDescriptionPath),
-                    true
-                );
-            }
-            else
-            {
-                File.Move(
-                    Path.Combine(CurrentConfigFolderPath, hotspot.DescriptionPath),
-                    Path.Combine(CurrentConfigFolderPath, newDescriptionPath),
-                    true
-                );
-            }
-
-            var newImagePaths = UpdateFiles( // Move already imported image files.
-                PathExtensions.IsInConfig,
-                File.Move,
-                hotspot.ImagePaths,
-                "image",
-                hotspot.Id
-            ).Concat(UpdateFiles( // Import non-imported image files.
-                PathExtensions.IsNotInConfig,
-                File.Copy,
-                hotspot.ImagePaths,
-                "image",
-                hotspot.Id
-            )).ToImmutableList();
-
-            var newVideoPaths = UpdateFiles( // Move already imported video files.
-                PathExtensions.IsInConfig,
-                File.Move,
-                hotspot.VideoPaths,
-                "video",
-                hotspot.Id
-            ).Concat(UpdateFiles( // Import non-imported video files.
-                PathExtensions.IsNotInConfig,
-                File.Copy,
-                hotspot.VideoPaths,
-                "video",
-                hotspot.Id
-            )).ToImmutableList();
-
-            return new Hotspot(
-                hotspot.Id,
-                hotspot.Position,
-                hotspot.Title,
-                newDescriptionPath,
-                newImagePaths,
-                newVideoPaths
-            );
+            configBuilder.AddHotspot(hotspot);
         });
 
-        var newConfig = new Config(config.HomographyMatrix, hotspots);
-
-#if RELEASE
-        var configString = JsonSerializer.Serialize(newConfig);
-#else
-        var configString = JsonSerializer.Serialize(newConfig, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
-#endif
-
-        using var configFile = new StreamWriter(Path.Combine(CurrentConfigFolderPath, ConfigFileName));
-        configFile.Write(configString);
+        configBuilder.Commit();
 
         return true;
     }
-
-    /// <summary>
-    /// Moves and updates paths for files that match filter.
-    /// </summary>
-    /// <param name="filter">Decides if file will be processed.</param>
-    /// <param name="fileUpdateFunc">The function run to update the location of the file.</param>
-    /// <param name="filePaths">All the old paths to be processed to new paths.</param>
-    /// <param name="type">The type of file (image, video) to be updated.</param>
-    /// <param name="id">The id of the hotspot for the new file name.</param>
-    private static IEnumerable<string> UpdateFiles(
-        Func<string, bool> filter,
-        Action<string, string, bool> fileUpdateFunc,
-        IEnumerable<string> filePaths,
-        string type,
-        int id
-    ) => filePaths
-        .Where(filter)
-        .Select((path, i) =>
-        {
-            var extension = Path.GetExtension(path);
-            var newFileName = $"{type}_{id}_{i}{extension}";
-
-            fileUpdateFunc(path, Path.Combine(CurrentConfigFolderPath, newFileName), true);
-
-            return newFileName;
-        });
 
     /// <summary>
     /// Loads a config from the .json file imported/created in the program folder.
@@ -204,6 +112,188 @@ public class FileHandler : IFileHandler
         catch (JsonException e)
         {
             throw new ConfigInvalidException();
+        }
+    }
+
+    /// <summary>
+    /// Builds and saves a new config.
+    /// </summary>
+    private class ConfigBuilder : IDisposable
+    {
+        /// <summary>
+        /// Homography matrix for config
+        /// </summary>
+        private double[,] _homographyMatrix;
+
+        /// <summary>
+        /// List of hotspots to be stored in the new config.
+        /// </summary>
+        private List<Hotspot> _hotspots;
+
+        /// <summary>
+        /// Stores whether the new config has been committed to storage.
+        /// </summary>
+        private bool _commited;
+
+        public ConfigBuilder(double [,] homographyMatrix)
+        {
+            // Reset/Create temporary config folder
+            if (Directory.Exists(TempConfigFolderPath))
+                Directory.Delete(TempConfigFolderPath);
+
+            Directory.CreateDirectory(TempConfigFolderPath);
+
+            _homographyMatrix = homographyMatrix;
+            _hotspots = new List<Hotspot>();
+        }
+
+        /// <summary>
+        /// Adds a hotspot to the new config.
+        /// </summary>
+        /// <param name="hotspot">Hotspot to resolve/add to new config.</param>
+        /// <exception cref="ConfigDuplicateFileException">If a file with the same resolved name is already imported.</exception>
+        /// <exception cref="ExternalFileReadException">If one of the files to resolve cannot be read.</exception>
+        public void AddHotspot(Hotspot hotspot)
+        {
+             _hotspots.Add(new Hotspot(
+                hotspot.Id,
+                hotspot.Position,
+                hotspot.Title,
+                ResolveFile(hotspot.DescriptionPath, "text", hotspot.Id),
+                new List<string>(ResolveFiles(hotspot.ImagePaths, "image", hotspot.Id)).ToImmutableList(),
+                new List<string>(ResolveFiles(hotspot.VideoPaths, "video", hotspot.Id)).ToImmutableList()
+                ));
+        }
+
+        /// <summary>
+        /// Commits the new config and overwrites the old config.
+        /// </summary>
+        /// <exception cref="ConfigIOException">If a permissions/IO error occurs during a file operation</exception>
+        public void Commit()
+        {
+            try
+            {
+                // Backup current config until save is complete
+                if (Directory.Exists(BackupConfigFolderPath))
+                    Directory.Delete(BackupConfigFolderPath, true);
+
+                if (Directory.Exists(CurrentConfigFolderPath))
+                    Directory.Move(CurrentConfigFolderPath, BackupConfigFolderPath);
+
+                var newConfig = new Config(_homographyMatrix, _hotspots);
+
+#if RELEASE
+                var configString = JsonSerializer.Serialize(newConfig);
+#else
+                var configString = JsonSerializer.Serialize(newConfig, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+#endif
+
+                using var configFile = new StreamWriter(Path.Combine(TempConfigFolderPath, ConfigFileName));
+                configFile.Write(configString);
+
+                if (Directory.Exists(CurrentConfigFolderPath))
+                    Directory.Delete(CurrentConfigFolderPath);
+
+                Directory.Move(TempConfigFolderPath, CurrentConfigFolderPath);
+                _commited = true;
+
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or SecurityException)
+            {
+                // throw new ConfigIOException();
+                throw;
+            }
+            finally
+            {
+                // If not committed and a backup exists, move backup to become current.
+                if (!_commited && Directory.Exists(BackupConfigFolderPath))
+                {
+                    if (Directory.Exists(CurrentConfigFolderPath))
+                        Directory.Delete(CurrentConfigFolderPath, true);
+
+                    Directory.Move(BackupConfigFolderPath, CurrentConfigFolder);
+                }
+
+                // Once backup used, delete the backup to remove leftover files.
+                if (Directory.Exists(BackupConfigFolderPath))
+                    Directory.Delete(BackupConfigFolderPath, true);
+            }
+        }
+
+        /// <summary>
+        /// Resolves file from current config if path is relative and copies file to temporary config.
+        /// </summary>
+        /// <param name="file">File to resolve</param>
+        /// <param name="type">Type of file to resolve</param>
+        /// <param name="id">Id of current hotspot</param>
+        /// <param name="i">Current number of item (optional)</param>
+        /// <returns>Paths of resolved files.</returns>
+        /// <exception cref="ConfigDuplicateFileException">If a file with the same resolved name is already imported.</exception>
+        /// <exception cref="ExternalFileReadException">If the file to resolve cannot be read.</exception>
+        private static string ResolveFile(string file, string type, int id, int? i = null)
+        {
+            var currentFileName = Path.GetFileName(file);
+
+            if (currentFileName is null or "")
+                throw new ExternalFileReadException(file);
+
+            var extension = Path.GetExtension(file);
+
+            if (extension is null or "")
+                throw new ExternalFileReadException(currentFileName);
+
+            var newFileName = i is null ? $"{type}_{id}{extension}" : $"{type}_{id}_{i}{extension}";
+
+            var resolvedFilePath =
+                file.IsNotInConfig() ? file : Path.Combine(CurrentConfigFolderPath, file);
+
+            var newFilePath = Path.Combine(TempConfigFolderPath, newFileName);
+
+            if (File.Exists(newFilePath))
+                throw new ConfigDuplicateFileException(newFileName);
+
+            if (!File.Exists(resolvedFilePath))
+                throw new ExternalFileReadException(Path.GetFileName(resolvedFilePath));
+
+            try
+            {
+                File.Copy(resolvedFilePath, newFilePath);
+            }
+            catch (IOException e)
+            {
+                throw new ConfigIOException();
+            }
+
+            return newFileName;
+        }
+
+        /// <summary>
+        /// Resolves files from current config if path is relative or else an external source and copies files to
+        /// temporary config.
+        /// </summary>
+        /// <param name="files">Files to resolve</param>
+        /// <param name="type">Type of the files to resolve</param>
+        /// <param name="id">Id of current hotspot</param>
+        /// <returns>Paths of resolved files.</returns>
+        /// <exception cref="ConfigDuplicateFileException">If a file with the same resolved name is already imported.</exception>
+        /// <exception cref="ExternalFileReadException">If one of the files to resolve cannot be read.</exception>
+        private static IEnumerable<string> ResolveFiles(IEnumerable<string> files, string type, int id) =>
+            files.Select((path, i) => ResolveFile(path, type, id, i));
+
+        /// <summary>
+        /// Delete temporary config folder
+        /// </summary>
+        public void Dispose()
+        {
+            if (Directory.Exists(TempConfigFolderPath))
+                Directory.Delete(TempConfigFolderPath, true);
+
+            if (Directory.Exists(BackupConfigFolderPath))
+                Directory.Delete(BackupConfigFolderPath, true);
+
         }
     }
 }
