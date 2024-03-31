@@ -37,6 +37,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Initializes the Python runtime
     /// </summary>
+    /// <remarks>Reference for VirtualEnv code: https://gist.github.com/AMArostegui/9b2ecf9d87042f2c119e417b4e38524b</remarks>
     public PythonProxy()
     {
         // Only use VirtualEnv if directory for VirtualEnv exists.
@@ -78,7 +79,7 @@ public sealed class PythonProxy : IPythonProxy
             Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
         }
 
-        Debug.WriteLine("Initializing Python...    ");
+        Debug.Write("Initializing Python...    ");
         PythonEngine.Initialize();
         _threadsPtr = PythonEngine.BeginAllowThreads();
         Debug.WriteLine("Done");
