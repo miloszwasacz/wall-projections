@@ -113,6 +113,11 @@
                                 RemoveMedia="VideoEditor_OnRemoveMedia"
                                 OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
 
+            <views:Toast Name="LoadingToast"
+                         Grid.Column="0" Grid.Row="0"
+                         Grid.ColumnSpan="5" Grid.RowSpan="3"
+                         IsLoading="True" />
+
             <views:Toast Name="Toast"
                          Grid.Column="0" Grid.Row="0"
                          Grid.ColumnSpan="5" Grid.RowSpan="3" />

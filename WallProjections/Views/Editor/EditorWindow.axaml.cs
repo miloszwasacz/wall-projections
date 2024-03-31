@@ -16,6 +16,11 @@ namespace WallProjections.Views.Editor;
 
 public partial class EditorWindow : Window
 {
+    private const string ImportInProgressMessage = "Importing configuration...";
+    private const string ExportInProgressMessage = "Exporting configuration...";
+    private const string CalibrationInProgressMessage = "Calibrating camera...";
+    private const string SaveInProgressMessage = "Saving configuration...";
+
     private const string ImportSuccessMessage = "Configuration imported successfully";
     private const string ExportSuccessMessage = "Configuration exported successfully";
     private const string CalibrationSuccessMessage = "Camera calibration successful";
@@ -115,6 +120,7 @@ public partial class EditorWindow : Window
             }
 
             //TODO Refactor to use the generic dialog
+            //TODO Show a loading toast
             // Import is not safe
             var dialog = new ImportWarningDialog(file, safety)
             {
@@ -247,7 +253,7 @@ public partial class EditorWindow : Window
 
         async Task Import(string configFile)
         {
-            var success = await vm.ImportConfig(configFile);
+            var success = await WithLoadingToast(ImportInProgressMessage, () => vm.ImportConfig(configFile));
             ShowToast(success ? ImportSuccessMessage : ImportErrorMessage);
             vm.ReleaseActionLock();
         }
@@ -275,7 +281,7 @@ public partial class EditorWindow : Window
             if (folders.Count == 0) return;
 
             var folder = folders[0].Path.LocalPath;
-            var success = await vm.ExportConfig(folder);
+            var success = await WithLoadingToast(ExportInProgressMessage, () => vm.ExportConfig(folder));
             ShowToast(success ? ExportSuccessMessage : ExportErrorMessage);
         });
     }
@@ -301,7 +307,7 @@ public partial class EditorWindow : Window
         );
         dialog.Confirm += async (_, _) =>
         {
-            var success = await vm.CalibrateCamera();
+            var success = await WithLoadingToast(CalibrationInProgressMessage, vm.CalibrateCamera);
             ShowToast(success ? CalibrationSuccessMessage : CalibrationErrorMessage);
             vm.ReleaseActionLock();
         };
@@ -325,7 +331,8 @@ public partial class EditorWindow : Window
 
         await vm.WithActionLock(async () =>
         {
-            if (await vm.SaveConfig()) return;
+            var success = await WithLoadingToast(SaveInProgressMessage, vm.SaveConfig);
+            if (success) return;
 
             // An error occurred while saving
             ShowToast(SaveErrorMessage);
@@ -502,9 +509,31 @@ public partial class EditorWindow : Window
         await dialog.ShowDialog(this);
     }
 
+    /// <summary>
+    /// Shows a toast with the specified message.
+    /// </summary>
+    /// <param name="message">The text to show in the toast.</param>
+    /// <param name="duration">The duration for which the toast should be shown.</param>
     private void ShowToast(string message, Toast.ShowDuration duration = Toast.ShowDuration.Short)
     {
         Toast.Text = message;
         Toast.Show(duration);
+    }
+
+    /// <summary>
+    /// Shows a loading toast with the specified message while performing an action.
+    /// </summary>
+    /// <param name="message">The message to show in the loading toast.</param>
+    /// <param name="action">The action to perform.</param>
+    /// <typeparam name="T">The return type of the action.</typeparam>
+    /// <returns>The result of the action.</returns>
+    private async Task<T> WithLoadingToast<T>(string message, Func<Task<T>> action)
+    {
+        LoadingToast.Text = message;
+        await Task.Delay(10);
+        LoadingToast.Show();
+        var result = await action();
+        LoadingToast.Hide();
+        return result;
     }
 }
