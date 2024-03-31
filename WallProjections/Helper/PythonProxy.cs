@@ -5,6 +5,7 @@ using WallProjections.Helper.Interfaces;
 #if !DEBUGSKIPPYTHON
 using WallProjections.Models.Interfaces;
 using System.Diagnostics;
+using System.IO;
 using Python.Runtime;
 
 #else
@@ -18,6 +19,11 @@ namespace WallProjections.Helper;
 /// <inheritdoc />
 public sealed class PythonProxy : IPythonProxy
 {
+    /// <summary>
+    /// Path to VirtualEnv if it exists.
+    /// </summary>
+    private static string _virtualEnvPath => Path.Combine(IFileHandler.ConfigFolderPath, "VirtualEnv");
+
     /// <summary>
     /// A handle to Python threads
     /// </summary>
@@ -33,8 +39,46 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     public PythonProxy()
     {
-        Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
-        Debug.Write("Initializing Python...    ");
+        // Only use VirtualEnv if directory for VirtualEnv exists.
+        if (Directory.Exists(_virtualEnvPath))
+        {
+            Debug.WriteLine("Getting Python information from VirtualEnv...");
+
+            string pathVeScripts;
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                pathVeScripts = _virtualEnvPath + @"\Scripts";
+            else
+                pathVeScripts = _virtualEnvPath + @"/bin";
+            Environment.SetEnvironmentVariable("PATH", pathVeScripts, EnvironmentVariableTarget.Process);
+
+            var pythonPath = string.Empty;
+
+            // Process gets the location of the Python DLL and the full path for the VirtualEnv.
+            var proc = new Process();
+            proc.StartInfo.FileName = pathVeScripts + Path.DirectorySeparatorChar + "python";
+            proc.StartInfo.Arguments = $"-c \"import sys; import find_libpython; print(find_libpython.find_libpython() + ',' +'{Path.PathSeparator}'.join(sys.path))\"";
+            proc.StartInfo.RedirectStandardOutput = true;
+            if (!proc.Start())
+                throw new Exception("Couldn't initialize Python in virtual environment");
+            proc.WaitForExit();
+
+            var pythonOutput = proc.StandardOutput.ReadToEnd().Split(',');
+
+            pythonPath = pythonOutput[1].Replace(Environment.NewLine, "");
+            if (string.IsNullOrEmpty(pythonPath))
+                throw new Exception("Couldn't initialize Python.NET");
+
+            Runtime.PythonDLL = pythonOutput[0];
+
+            Environment.SetEnvironmentVariable("PYTHONPATH", pythonPath, EnvironmentVariableTarget.Process);
+            PythonEngine.PythonPath = pythonPath;
+        }
+        else
+        {
+            Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
+        }
+
+        Debug.WriteLine("Initializing Python...    ");
         PythonEngine.Initialize();
         _threadsPtr = PythonEngine.BeginAllowThreads();
         Debug.WriteLine("Done");

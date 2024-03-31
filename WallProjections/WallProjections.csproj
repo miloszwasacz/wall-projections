@@ -8,6 +8,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <Configurations>Debug;Release;DebugSkipPython</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <AppDataDir>$([System.Environment]::GetFolderPath(SpecialFolder.ApplicationData))</AppDataDir>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'DebugSkipPython' ">
@@ -21,10 +22,12 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
-
+    
     <Target Name="GenerateArUcos" BeforeTargets="PrepareForBuild">
-        <Exec Command="python Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
-        <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="python Scripts\Internal\aruco_generator.py" Condition="!Exists('$(AppDataDir)\WallProjections\VirtualEnv') AND $([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="$(AppDataDir)/WallProjections/VirtualEnv/bin/python Scripts/Internal/aruco_generator.py" Condition="Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="$(AppDataDir)\WallProjections\VirtualEnv\Scripts\python Scripts\Internal\aruco_generator.py" Condition="Exists('$(AppDataDir)\WallProjections\VirtualEnv') AND $([MSBuild]::IsOsPlatform('Windows'))"/>
         <ItemGroup>
             <AvaloniaResource Include="Assets\**"/>
         </ItemGroup>
