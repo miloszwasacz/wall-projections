@@ -131,6 +131,18 @@ public partial class EditorWindow : Window
     }
 
     /// <summary>
+    /// Adds a new hotspot.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void HotspotList_OnAddHotspot(object? sender, EventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        vm.AddHotspot();
+    }
+
+    /// <summary>
     /// Shows a <see cref="ConfirmationDialog">dialog</see> to confirm the deletion of a hotspot.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
