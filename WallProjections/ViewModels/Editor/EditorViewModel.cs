@@ -163,7 +163,6 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             if (value)
                 _configExists = true;
             this.RaiseAndSetIfChanged(ref _isSaved, value);
-            this.RaisePropertyChanged(nameof(IEditorViewModel.CloseButtonText));
             this.RaisePropertyChanged(nameof(IsImportSafe));
             this.RaisePropertyChanged(nameof(CanExport));
         }

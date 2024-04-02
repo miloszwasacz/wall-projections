@@ -14,7 +14,6 @@ using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 // ReSharper disable AccessToStaticMemberViaDerivedType
-using Is = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions.Is;
 using Has = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions.Has;
 
 namespace WallProjections.Test.ViewModels.Editor
@@ -98,7 +97,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(editorViewModel.DescriptionEditor.Description, Is.Empty);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.IsImportSafe, Is.True);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
@@ -126,7 +125,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(descriptionEditor.Hotspot, Is.SameAs(editorViewModel.Hotspots[0]));
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(editorViewModel.Hotspots[0].Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(editorViewModel.Hotspots[0].Videos));
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.IsImportSafe, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.True);
             });
@@ -159,7 +158,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(editorViewModel.SelectedHotspot, Is.Null);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -186,7 +185,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 );
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(selected.Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(selected.Videos));
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.CanExport, Is.True);
             });
         }
@@ -214,7 +213,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 );
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(selected.Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(selected.Videos));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
@@ -230,7 +229,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 );
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(selected.Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(selected.Videos));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -255,7 +254,7 @@ namespace WallProjections.Test.ViewModels.Editor
             {
                 Assert.That(editorViewModel.Hotspots, Has.EquivalentHotspots(expectedViewModels));
                 Assert.That(editorViewModel.SelectedHotspot, Is.SameAs(newHotspot));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
@@ -285,7 +284,7 @@ namespace WallProjections.Test.ViewModels.Editor
             {
                 Assert.That(editorViewModel.Hotspots, Has.EquivalentHotspots(expectedViewModels));
                 Assert.That(editorViewModel.SelectedHotspot, Is.SameAs(editorViewModel.Hotspots[0]));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -333,7 +332,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(added, Is.True);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -353,7 +352,7 @@ namespace WallProjections.Test.ViewModels.Editor
 
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.CanExport, Is.True);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
@@ -421,7 +420,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(removed, Is.True);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
                 Assert.That(mediaEditor.SelectedMedia, Has.Count.Zero);
             });
@@ -442,7 +441,7 @@ namespace WallProjections.Test.ViewModels.Editor
 
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.CanExport, Is.True);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
@@ -583,7 +582,7 @@ namespace WallProjections.Test.ViewModels.Editor
             editorViewModel.AddHotspot();
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
@@ -596,7 +595,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(saved, Is.EqualTo(savingSuccessful));
-                Assert.That(editorViewModel, savingSuccessful ? Is.Saved : Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, savingSuccessful ? Is.True : Is.False);
                 Assert.That(editorViewModel.CanExport, Is.EqualTo(savingSuccessful));
                 //TODO Improve Config comparison
                 Assert.That(
@@ -618,14 +617,14 @@ namespace WallProjections.Test.ViewModels.Editor
 
             editorViewModel.AddHotspot();
             editorViewModel.DeleteHotspot(editorViewModel.Hotspots[^1]);
-            Assert.That(editorViewModel, Is.Unsaved);
+            Assert.That(editorViewModel.IsSaved, Is.False);
 
             var saved = await editorViewModel.SaveConfig();
 
             Assert.Multiple(() =>
             {
                 Assert.That(saved, Is.False);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -646,7 +645,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(saved, Is.True);
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
             });
         }
 
@@ -670,7 +669,7 @@ namespace WallProjections.Test.ViewModels.Editor
             editorViewModel.DeleteHotspot(editorViewModel.Hotspots[^1]);
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
@@ -683,7 +682,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(imported, Is.EqualTo(expectedSuccess));
-                Assert.That(editorViewModel, expectedSuccess ? Is.Saved : Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, expectedSuccess ? Is.True : Is.False);
                 Assert.That(editorViewModel.CanExport, Is.EqualTo(expectedSuccess));
                 Assert.That(fileHandler.LoadedZips, Is.EquivalentTo(new[] { filePath }));
                 Assert.That(
@@ -706,14 +705,14 @@ namespace WallProjections.Test.ViewModels.Editor
             IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
-            Assert.That(editorViewModel, Is.Unsaved);
+            Assert.That(editorViewModel.IsSaved, Is.False);
 
             var imported = await editorViewModel.ImportConfig("test.zip");
 
             Assert.Multiple(() =>
             {
                 Assert.That(imported, Is.False);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
                 Assert.That(editorViewModel.Hotspots, Has.Exactly(1).Items);
             });
@@ -731,14 +730,14 @@ namespace WallProjections.Test.ViewModels.Editor
             IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
-            Assert.That(editorViewModel, Is.Unsaved);
+            Assert.That(editorViewModel.IsSaved, Is.False);
 
             var imported = await editorViewModel.ImportConfig("test.zip");
 
             Assert.Multiple(() =>
             {
                 Assert.That(imported, Is.True);
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.CanExport, Is.True);
                 Assert.That(editorViewModel.Hotspots, Is.Empty);
             });
@@ -759,7 +758,7 @@ namespace WallProjections.Test.ViewModels.Editor
             IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
 
             editorViewModel.AddHotspot();
-            Assert.That(editorViewModel, Is.Unsaved);
+            Assert.That(editorViewModel.IsSaved, Is.False);
 
             var task = editorViewModel.ExportConfig(exportPath);
             Assert.That(editorViewModel.IsExporting, Is.True);
@@ -770,7 +769,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(exported, Is.EqualTo(expectedSuccess));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
                 Assert.That(
                     fileHandler.ExportedZips,
@@ -790,7 +789,7 @@ namespace WallProjections.Test.ViewModels.Editor
             editorViewModel.AddHotspot();
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
@@ -799,7 +798,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(exported, Is.False);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -919,76 +918,6 @@ namespace WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
     /// </summary>
     internal static class NUnitExtensions
     {
-        #region IsSaved
-
-        /// <summary>
-        /// Returns whether the given <see cref="IEditorViewModel" /> is
-        /// <see cref="IEditorViewModel.IsSaved">saved</see>, and has
-        /// the correct <see cref="IEditorViewModel.CloseButtonText" />,
-        /// based on the value of <see cref="IEditorViewModel.IsSaved" />.
-        /// </summary>
-        /// <seealso cref="CorrectSavedCloseButtonText" />.
-        /// <seealso cref="CorrectUnsavedCloseButtonText" />.
-        public sealed class IsSavedConstraint : Constraint
-        {
-            // ReSharper disable once MemberCanBePrivate.Global
-            /// <summary>
-            /// The correct text for the close button when the editor is saved.
-            /// </summary>
-            public const string CorrectSavedCloseButtonText = "Close";
-
-            // ReSharper disable once MemberCanBePrivate.Global
-            /// <summary>
-            /// The correct text for the close button when the editor is unsaved.
-            /// </summary>
-            public const string CorrectUnsavedCloseButtonText = "Discard";
-
-            /// <summary>
-            /// Whether <see cref="IEditorViewModel.IsSaved" /> should be <i>true</i>.
-            /// </summary>
-            private readonly bool _expectedIsSaved;
-
-            public IsSavedConstraint(bool expectedIsSaved = true)
-            {
-                _expectedIsSaved = expectedIsSaved;
-                Description = _expectedIsSaved
-                    ? $"saved and close button has correct text (\"{CorrectSavedCloseButtonText}\")"
-                    : $"unsaved and close button has correct text (\"{CorrectUnsavedCloseButtonText}\")";
-            }
-
-            public override ConstraintResult ApplyTo<TActual>(TActual actual)
-            {
-                if (actual is not IEditorViewModel editorViewModel)
-                    return new ConstraintResult(this, actual, ConstraintStatus.Error);
-
-                var expectedCloseButtonText = _expectedIsSaved
-                    ? CorrectSavedCloseButtonText
-                    : CorrectUnsavedCloseButtonText;
-
-                var actualIsSaved = $"{nameof(editorViewModel.IsSaved)}: {editorViewModel.IsSaved}";
-                var actualCloseButtonText =
-                    $"{nameof(editorViewModel.CloseButtonText)}: `{editorViewModel.CloseButtonText}`";
-
-                var matches =
-                    editorViewModel.IsSaved == _expectedIsSaved &&
-                    editorViewModel.CloseButtonText == expectedCloseButtonText;
-
-                return new ConstraintResult(this, (actualIsSaved, actualCloseButtonText), matches);
-            }
-        }
-
-        /// <summary>
-        /// Appends a <see cref="IsSavedConstraint" /> to the given <see cref="ConstraintExpression" />.
-        /// </summary>
-        public static IsSavedConstraint IsSaved(this ConstraintExpression expression)
-        {
-            var constraint = new IsSavedConstraint();
-            expression.Append(constraint);
-            return constraint;
-        }
-
-        #endregion
-
         #region HasEquivalentHotspots
 
         /// <summary>
@@ -996,7 +925,7 @@ namespace WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
         /// </summary>
         public static CollectionItemsEqualConstraint HasEquivalentHotspots(
             IEnumerable<IEditorHotspotViewModel> expectedCollection
-        ) => NUnit.Framework.Is.EquivalentTo(expectedCollection)
+        ) => Is.EquivalentTo(expectedCollection)
             .Using<IEditorHotspotViewModel>((actual, expected) =>
             {
                 var thumbnailComparer = new ThumbnailComparer();
@@ -1045,36 +974,6 @@ namespace WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
         }
 
         #endregion
-    }
-
-
-    /// <inheritdoc />
-    internal abstract class Is : NUnit.Framework.Is
-    {
-        /// <summary>
-        /// Returns whether the given <see cref="IEditorViewModel" /> is
-        /// <see cref="IEditorViewModel.IsSaved">saved</see>, and has
-        /// the correct <see cref="IEditorViewModel.CloseButtonText" />,
-        /// based on the value of <see cref="IEditorViewModel.IsSaved" />.
-        /// </summary>
-        /// <seealso cref="NUnitExtensions.IsSavedConstraint.CorrectSavedCloseButtonText" />.
-        /// <seealso cref="Unsaved" />.
-        public static NUnitExtensions.IsSavedConstraint Saved => new();
-
-        /// <summary>
-        /// Returns whether the given <see cref="IEditorViewModel" /> is
-        /// <see cref="IEditorViewModel.IsSaved">unsaved</see>, and has
-        /// the correct <see cref="IEditorViewModel.CloseButtonText" />,
-        /// based on the value of <see cref="IEditorViewModel.IsSaved" />.
-        /// </summary>
-        /// <remarks>
-        /// This is not the same as using <see cref="Is" />.<see cref="Is.Not" />.<see cref="Is.Saved" />,
-        /// as it also checks the <see cref="IEditorViewModel.CloseButtonText" />
-        /// (generally <i>Is.Not.Saved</i> should not be used).
-        /// </remarks>
-        /// <seealso cref="NUnitExtensions.IsSavedConstraint.CorrectUnsavedCloseButtonText" />.
-        /// <seealso cref="Saved" />.
-        public static NUnitExtensions.IsSavedConstraint Unsaved => new(false);
     }
 
     /// <inheritdoc />

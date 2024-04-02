@@ -54,14 +54,7 @@ public interface IEditorViewModel
     /// Whether the current state of the viewmodel has been saved.
     /// </summary>
     /// <seealso cref="CanExport" />
-    /// <seealso cref="CloseButtonText" />
     public bool IsSaved { get; }
-
-    /// <summary>
-    /// The text of the button that closes the editor.
-    /// </summary>
-    /// <returns>"Close" if <see cref="IsSaved" /> is <i>true</i>; "Discard" otherwise.</returns>
-    public string CloseButtonText => IsSaved ? "Close" : "Discard";
 
     /// <summary>
     /// Whether there is no loaded config, so it is safe to import a new one.

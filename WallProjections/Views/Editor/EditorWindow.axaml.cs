@@ -341,14 +341,7 @@ public partial class EditorWindow : Window
     {
         if (DataContext is not IEditorViewModel vm) return;
 
-        await vm.WithActionLock(async () =>
-        {
-            var success = await WithLoadingToast(SaveInProgressMessage, vm.SaveConfig);
-            if (success) return;
-
-            // An error occurred while saving
-            ShowToast(SaveErrorMessage);
-        });
+        await vm.WithActionLock(() => Save(vm));
     }
 
     /// <summary>
@@ -361,17 +354,7 @@ public partial class EditorWindow : Window
     {
         if (DataContext is not IEditorViewModel vm) return;
 
-        if (!vm.TryAcquireActionLock()) return;
-
-        if (vm.IsSaved)
-        {
-            vm.CloseEditor();
-            vm.ReleaseActionLock();
-            return;
-        }
-
-        var dialog = CreateDiscardChangesDialog(vm);
-        await dialog.ShowDialog(this);
+        await CloseEditor(vm);
     }
 
     private void EditPosition_OnClick(object? sender, RoutedEventArgs e)
@@ -425,6 +408,33 @@ public partial class EditorWindow : Window
         // Prevent the window from closing
         e.Cancel = true;
 
+        await CloseEditor(vm);
+    }
+
+    //ReSharper restore UnusedParameter.Local
+
+    /// <summary>
+    /// Saves the Editor's state while showing a loading toast. Shows an error toast if the save fails.
+    /// </summary>
+    /// <param name="vm">The Editor's viewmodel</param>
+    /// <seealso cref="IEditorViewModel.SaveConfig" />
+    private async Task Save(IEditorViewModel vm)
+    {
+        var success = await WithLoadingToast(SaveInProgressMessage, vm.SaveConfig);
+        if (success) return;
+
+        // An error occurred while saving
+        ShowToast(SaveErrorMessage);
+    }
+
+    /// <summary>
+    /// Closes the Editor if the viewmodel's state is saved, otherwise shows a warning dialog.
+    /// </summary>
+    /// <param name="vm">The Editor's viewmodel</param>
+    /// <seealso cref="IEditorViewModel.IsSaved" />
+    /// <seealso cref="IEditorViewModel.CloseEditor" />
+    private async Task CloseEditor(IEditorViewModel vm)
+    {
         if (!vm.TryAcquireActionLock()) return;
 
         if (vm.IsSaved)
@@ -434,24 +444,31 @@ public partial class EditorWindow : Window
             return;
         }
 
-        var dialog = CreateDiscardChangesDialog(vm);
+        var dialog = CreateUnsavedChangesDialog(vm);
         await dialog.ShowDialog(this);
     }
-
-    //ReSharper restore UnusedParameter.Local
 
     /// <summary>
     /// Creates a new <see cref="ConfirmationDialog" /> to discard changes.
     /// </summary>
-    private static ConfirmationDialog CreateDiscardChangesDialog(IEditorViewModel vm)
+    /// <remarks>
+    /// The dialog calls <see cref="IEditorViewModel.ReleaseActionLock" /> on confirm, refuse and cancel.
+    /// </remarks>
+    private ConfirmationDialog CreateUnsavedChangesDialog(IEditorViewModel vm)
     {
         var dialog = new ConfirmationDialog(
-            "Discard Changes",
+            "Unsaved Changes",
             WarningIconPath,
-            "Are you sure you want to discard your changes? All unsaved data will be lost.",
+            "It appears that you have unsaved changes. Do you want save them before closing?",
+            "Save",
             "Discard"
         );
-        dialog.Confirm += (_, _) =>
+        dialog.Confirm += async (_, _) =>
+        {
+            await Save(vm);
+            vm.ReleaseActionLock();
+        };
+        dialog.Refuse += (_, _) =>
         {
             vm.CloseEditor();
             vm.ReleaseActionLock();

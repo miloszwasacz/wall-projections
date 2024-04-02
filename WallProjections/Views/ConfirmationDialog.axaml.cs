@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
@@ -24,6 +25,12 @@ public partial class ConfirmationDialog : Window
         RoutedEvent.Register<ConfirmationDialog, RoutedEventArgs>(nameof(Confirm), RoutingStrategies.Bubble);
 
     /// <summary>
+    /// A routed event that is raised when the user refuses the action.
+    /// </summary>
+    private static readonly RoutedEvent<RoutedEventArgs> RefuseEvent =
+        RoutedEvent.Register<ConfirmationDialog, RoutedEventArgs>(nameof(Refuse), RoutingStrategies.Bubble);
+
+    /// <summary>
     /// A routed event that is raised when the user cancels the action.
     /// </summary>
     private static readonly RoutedEvent<RoutedEventArgs> CancelEvent =
@@ -37,6 +44,15 @@ public partial class ConfirmationDialog : Window
     {
         add => AddHandler(ConfirmEvent, value);
         remove => RemoveHandler(ConfirmEvent, value);
+    }
+
+    /// <summary>
+    /// An event that is raised when the user refuses the action.
+    /// </summary>
+    public event EventHandler<RoutedEventArgs> Refuse
+    {
+        add => AddHandler(RefuseEvent, value);
+        remove => RemoveHandler(RefuseEvent, value);
     }
 
     /// <summary>
@@ -56,17 +72,27 @@ public partial class ConfirmationDialog : Window
     /// <param name="iconPath">A <see cref="Uri" /> to the icon of the dialog.</param>
     /// <param name="message">The message displayed by the dialog.</param>
     /// <param name="confirmButtonText">The text for the confirm button.</param>
+    /// <param name="refuseButtonText">The text for the refuse button. If null or empty, the button is hidden.</param>
     /// <param name="cancelButtonText">The text for the cancel button.</param>
     public ConfirmationDialog(
         string title,
         Uri iconPath,
         string message,
         string confirmButtonText,
+        string? refuseButtonText = null,
         string cancelButtonText = "Cancel"
     )
     {
         InitializeComponent();
-        DataContext = new ConfirmationDialogViewModel(title, iconPath, message, confirmButtonText, cancelButtonText);
+        this.AttachDevTools();
+        DataContext = new ConfirmationDialogViewModel(
+            title,
+            iconPath,
+            message,
+            confirmButtonText,
+            refuseButtonText,
+            cancelButtonText
+        );
     }
 
     // ReSharper disable UnusedParameter.Local
@@ -78,10 +104,32 @@ public partial class ConfirmationDialog : Window
     /// <param name="e">The event arguments (unused).</param>
     private void Confirm_OnClick(object? sender, RoutedEventArgs? e)
     {
-        if (_handled) return;
+        lock (this)
+        {
+            if (_handled) return;
 
-        _handled = true;
+            _handled = true;
+        }
+
         RaiseEvent(new RoutedEventArgs(ConfirmEvent, this));
+        Close();
+    }
+
+    /// <summary>
+    /// A callback for when the user refuses the action. Closes the dialog.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void Refuse_OnClick(object? sender, RoutedEventArgs e)
+    {
+        lock (this)
+        {
+            if (_handled) return;
+
+            _handled = true;
+        }
+
+        RaiseEvent(new RoutedEventArgs(RefuseEvent, this));
         Close();
     }
 
@@ -92,9 +140,13 @@ public partial class ConfirmationDialog : Window
     /// <param name="e">The event arguments (unused).</param>
     private void Cancel_OnClick(object? sender, RoutedEventArgs? e)
     {
-        if (_handled) return;
+        lock (this)
+        {
+            if (_handled) return;
 
-        _handled = true;
+            _handled = true;
+        }
+
         RaiseEvent(new RoutedEventArgs(CancelEvent, this));
         Close();
     }
@@ -107,8 +159,14 @@ public partial class ConfirmationDialog : Window
     /// <param name="e">The event arguments (unused).</param>
     private void Dialog_OnClosed(object? sender, EventArgs e)
     {
-        if (!_handled)
-            RaiseEvent(new RoutedEventArgs(CancelEvent, this));
+        lock (this)
+        {
+            if (_handled) return;
+
+            _handled = true;
+        }
+
+        RaiseEvent(new RoutedEventArgs(CancelEvent, this));
     }
 
     // ReSharper restore UnusedParameter.Local
@@ -116,7 +174,7 @@ public partial class ConfirmationDialog : Window
     // ReSharper disable once UnusedMember.Global
     /// <summary>
     /// This constructor should not be called. It is only here to suppress an Avalonia warning.
-    /// Use <see cref="ConfirmationDialog(string, Uri, string, string, string)" /> instead.
+    /// Use <see cref="ConfirmationDialog(string, Uri, string, string, string?, string)" /> instead.
     /// </summary>
     /// <exception cref="InvalidOperationException">Always thrown.</exception>
     [ExcludeFromCodeCoverage]
@@ -137,13 +195,16 @@ internal class ConfirmationDialogViewModel
     public WindowIcon Icon { get; }
     public string Message { get; }
     public string ConfirmButtonText { get; }
+    public string RefuseButtonText { get; }
     public string CancelButtonText { get; }
+    public bool HasRefuseButton { get; }
 
     public ConfirmationDialogViewModel(
         string title,
         Uri iconPath,
         string message,
         string confirmButtonText,
+        string? refuseButtonText,
         string cancelButtonText
     )
     {
@@ -151,6 +212,8 @@ internal class ConfirmationDialogViewModel
         Icon = new WindowIcon(new Bitmap(AssetLoader.Open(iconPath)));
         Message = message;
         ConfirmButtonText = confirmButtonText;
+        RefuseButtonText = refuseButtonText ?? "";
         CancelButtonText = cancelButtonText;
+        HasRefuseButton = !string.IsNullOrEmpty(RefuseButtonText);
     }
 }

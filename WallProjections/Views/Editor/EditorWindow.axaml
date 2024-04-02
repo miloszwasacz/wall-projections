@@ -60,8 +60,9 @@
                         Save
                     </Button>
 
-                    <Button Content="{Binding CloseButtonText}"
-                            Click="Close_OnClick" />
+                    <Button Click="Close_OnClick">
+                        Return
+                    </Button>
 
                 </StackPanel>
 
