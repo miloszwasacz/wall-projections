@@ -8,7 +8,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.Editor.EditorWindow"
         x:DataType="vm:IEditorViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/app-icon.ico"
         Title="EditorWindow"
         WindowState="Maximized"
         IsEnabled="{Binding !AreActionsDisabled}"
@@ -61,7 +61,7 @@
                     </Button>
 
                     <Button Click="Close_OnClick">
-                        Return
+                        Close Editor
                     </Button>
 
                 </StackPanel>

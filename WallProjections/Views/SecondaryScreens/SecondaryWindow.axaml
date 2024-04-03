@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.SecondaryScreens.SecondaryWindow"
         x:DataType="vm:ISecondaryWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/app-icon.ico"
         Title="HotspotWindow"
         Content="{Binding Content}"
         KeyDown="OnKeyDown"

@@ -160,8 +160,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         get => _isSaved;
         private set
         {
-            if (value)
-                _configExists = true;
+            _configExists = true;
             this.RaiseAndSetIfChanged(ref _isSaved, value);
             this.RaisePropertyChanged(nameof(IsImportSafe));
             this.RaisePropertyChanged(nameof(CanExport));

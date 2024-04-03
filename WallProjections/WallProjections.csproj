@@ -8,6 +8,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <Configurations>Debug;Release;DebugSkipPython</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'DebugSkipPython' ">
