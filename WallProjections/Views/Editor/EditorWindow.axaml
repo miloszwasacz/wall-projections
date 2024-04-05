@@ -17,9 +17,8 @@
         Closing="Editor_OnClosing">
 
     <Window.Styles>
-        <!--TODO Change to a reasonable style -->
-        <Style Selector=".edit-mode-toggled /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Firebrick" />
+        <Style Selector="FlyoutPresenter.attached-bottom">
+            <Setter Property="Margin" Value="0 5 0 0" />
         </Style>
     </Window.Styles>
 
@@ -84,10 +83,27 @@
                                       DataContext="{Binding DescriptionEditor}"
                                       ImportDescription="DescriptionEditor_OnImportDescription">
 
-                <views:IconButton ToolTip.Tip="Edit position"
-                                  Classes.edit-mode-toggled="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
-                                  IconData="{StaticResource my_location_regular}"
-                                  Click="EditPosition_OnClick" />
+                <views:IconToggleButton Name="PositionEditorToggle"
+                                        ToolTip.Tip="Edit position"
+                                        IsChecked="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
+                                        IconData="{StaticResource my_location_regular}"
+                                        Click="EditPosition_OnClick">
+
+                    <FlyoutBase.AttachedFlyout>
+                        <Flyout FlyoutPresenterClasses="attached-bottom"
+                                ShowMode="Transient"
+                                Placement="BottomEdgeAlignedRight"
+                                OverlayInputPassThroughElement="{Binding $parent[Window]}">
+
+                            <TextBlock MaxWidth="170"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Text="Use your mouse to move the hotspot around on the second screen" />
+
+                        </Flyout>
+                    </FlyoutBase.AttachedFlyout>
+
+                </views:IconToggleButton>
 
             </editor:DescriptionEditor>
 

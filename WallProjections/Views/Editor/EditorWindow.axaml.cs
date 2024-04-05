@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -62,7 +63,16 @@ public partial class EditorWindow : Window
     public bool IsInPositionEditMode
     {
         get => _isInPositionEditMode;
-        set => SetAndRaise(IsInPositionEditModeProperty, ref _isInPositionEditMode, value);
+        set
+        {
+            SetAndRaise(IsInPositionEditModeProperty, ref _isInPositionEditMode, value);
+
+            if (PositionEditorToggle is null) return;
+            if (value)
+                FlyoutBase.ShowAttachedFlyout(PositionEditorToggle);
+            else
+                FlyoutBase.GetAttachedFlyout(PositionEditorToggle)?.Hide();
+        }
     }
 
     public EditorWindow()
@@ -357,12 +367,14 @@ public partial class EditorWindow : Window
         await CloseEditor(vm);
     }
 
+    /// <summary>
+    /// Toggles the <see cref="AbsPositionEditorViewModel.IsInEditMode">edit mode</see> for the PositionEditor.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
     private void EditPosition_OnClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not IEditorViewModel vm) return;
-
-        //TODO Show some indication that the PositionEditor is in edit mode
-        //TODO Add focus management to Navigator so that focus is automatically set to the PositionEditor
 
         vm.PositionEditor.IsInEditMode = !vm.PositionEditor.IsInEditMode;
     }
