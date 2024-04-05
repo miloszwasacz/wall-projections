@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="using:WallProjections.Views.Converters"
              xmlns:vm="using:WallProjections.ViewModels.Interfaces.Display"
              xmlns:views="using:WallProjections.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -9,10 +10,31 @@
              x:DataType="vm:IVideoViewModel"
              Background="Transparent">
 
+    <UserControl.Resources>
+        <converters:WidthConverter x:Key="WidthConverter" />
+        <converters:HeightConverter x:Key="HeightConverter" />
+    </UserControl.Resources>
+
     <views:NativeVideoView Name="VideoViewer"
                            IsVisible="{Binding IsVisible}"
                            MediaPlayer="{Binding MediaPlayer}"
-                           Loaded="OnPlayerLoaded"
-                           SizeChanged="OnVideoViewResize" />
+                           Loaded="OnPlayerLoaded">
+
+        <views:NativeVideoView.MaxWidth>
+            <MultiBinding Converter="{StaticResource WidthConverter}">
+                <Binding Path="$parent[Control].Bounds.Width"  />
+                <Binding Path="$parent[Control].Bounds.Height" />
+                <Binding Path="MediaPlayer.VideoSize" FallbackValue="" />
+            </MultiBinding>
+        </views:NativeVideoView.MaxWidth>
+        <views:NativeVideoView.MaxHeight>
+            <MultiBinding Converter="{StaticResource HeightConverter}">
+                <Binding Path="$parent[Control].Bounds.Width" />
+                <Binding Path="$parent[Control].Bounds.Height" />
+                <Binding Path="MediaPlayer.VideoSize" FallbackValue="" />
+            </MultiBinding>
+        </views:NativeVideoView.MaxHeight>
+
+    </views:NativeVideoView>
 
 </UserControl>

@@ -28,6 +28,10 @@ public sealed class MockMediaPlayer : IMediaPlayer
 
     public event EventHandler<EventArgs>? EndReached;
 
+    /// <inheritdoc />
+    /// <remarks>Has to be set manually</remarks>
+    public (uint Width, uint Height)? VideoSize { get; set; }
+
     public int Volume { get; set; }
 
     public bool IsPlaying { get; private set; }

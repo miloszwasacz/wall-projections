@@ -13,6 +13,11 @@ public interface IMediaPlayer : IDisposable
     /// <inheritdoc cref="MediaPlayer.EndReached"/>
     public event EventHandler<EventArgs> EndReached;
 
+    /// <summary>
+    /// The Width and Height of the video currently being played.
+    /// </summary>
+    public (uint Width, uint Height)? VideoSize { get; }
+
     /// <inheritdoc cref="MediaPlayer.Volume" />
     public int Volume { get; set; }
 
