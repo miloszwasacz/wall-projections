@@ -11,7 +11,7 @@ from .Helper.EventHandler import EventHandler
 # noinspection PyPackages
 from .Helper.Hotspot import Hotspot
 # noinspection PyPackages
-from .Helper.VideoCaptureThread import VideoCaptureThread
+from .Helper.VideoCapture import VideoCapture
 # noinspection PyPackages
 from .Interop.json_dict_converters import json_to_3dict
 # noinspection PyPackages
@@ -76,7 +76,8 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
 
     detection_running = True
 
-    photo = VideoCaptureThread.take_photo()  # TODO: there has got to be a better way of getting camera width and height
+    logging.info("Starting hotspot detection...")
+    photo = VideoCapture.take_photo()  # TODO: there has got to be a better way of getting camera width and height
     h, w, d = photo.shape
     logging.info(f"Camera width: {w}, height: {h}")
     calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
@@ -91,18 +92,13 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
                                            min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
 
     # initialise video capture
-    video_capture_thread = VideoCaptureThread()
-    video_capture_thread.start()
+    video_capture = VideoCapture()
+    video_capture.start()
 
-    logging.info("Initialisation done.")
+    logging.info("Hotspot detection started.")
 
     while detection_running:
-        # cycle until video capture is open
-        if video_capture_thread.get_current_frame() is None:
-            cv2.waitKey(500)
-            continue
-
-        video_capture_img_bgr = video_capture_thread.get_current_frame()
+        video_capture_img_bgr = video_capture.get_current_frame()
         video_capture_img_rgb = cv2.cvtColor(video_capture_img_bgr, cv2.COLOR_BGR2RGB)
 
         # run model
@@ -119,14 +115,11 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
                 hotspot.update(fingertip_coords_proj)
 
     # clean up
-    logging.info("Cleaning up...")
-    if video_capture_thread.is_alive():
-        video_capture_thread.stop()
-        video_capture_thread.join()
+    video_capture.stop()
     cv2.destroyAllWindows()  # there shouldn't be any windows but just in case
     hands_model.close()
-    logging.info("Hotspot detection stopped.")
     detection_mutex.release()
+    logging.info("Hotspot detection stopped.")
 
 
 def stop_hotspot_detection():
