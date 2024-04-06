@@ -8,7 +8,7 @@ public class MockSimpleDescriptionLayout : Layout
 
     public string Description { get; }
 
-    public MockSimpleDescriptionLayout(string title, string description)
+    public MockSimpleDescriptionLayout(string title, string description) : base(null)
     {
         Title = title;
         Description = description;

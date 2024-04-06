@@ -12,6 +12,14 @@ namespace WallProjections.Views.Display;
 
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
+#if DEBUGSKIPPYTHON
+    // ReSharper disable once InconsistentNaming
+    /// <summary>
+    /// Whether the application is running in a CI environment.
+    /// </summary>
+    public bool IsCI { get; init; }
+#endif
+
     public DisplayWindow()
     {
         InitializeComponent();
@@ -22,7 +30,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     /// <summary>
     /// Handles key presses:
     /// <ul>
-    ///     <li><b>F11</b>: Toggles fullscreen</li>
+    ///     <li><b>F</b>: Toggles fullscreen</li>
     ///     <li><b>Escape</b>: Closes the display</li>
     ///     <li><b>E</b>: Opens the editor</li>
     /// </ul>
@@ -31,8 +39,11 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     /// <param name="e">The event arguments containing the key that was pressed.</param>
     internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        // Ignore handled events and ones with key modifiers
+        if (e.Handled || e.KeyModifiers != KeyModifiers.None) return;
+
         // Toggle fullscreen
-        if (e.Key == Key.F11)
+        if (e.Key == Key.F)
         {
             WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
             return;
@@ -60,7 +71,8 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             default:
             {
 #if DEBUGSKIPPYTHON
-                MockPythonInput(e.Key);
+                if (!IsCI)
+                    MockPythonInput(e.Key);
 #endif
                 base.OnKeyDown(e);
                 break;
@@ -113,10 +125,26 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             Key.D9 => new Optional<int>(9),
             _ => new Optional<int>()
         };
+        if (keyVal.HasValue)
+            PythonHandler.Instance.OnHotspotPressed(keyVal.Value);
 
-        if (!keyVal.HasValue) return;
 
-        PythonHandler.Instance.OnHotspotPressed(keyVal.Value);
+        var keyValUnpressed = key switch
+        {
+            Key.NumPad0 => new Optional<int>(0),
+            Key.NumPad1 => new Optional<int>(1),
+            Key.NumPad2 => new Optional<int>(2),
+            Key.NumPad3 => new Optional<int>(3),
+            Key.NumPad4 => new Optional<int>(4),
+            Key.NumPad5 => new Optional<int>(5),
+            Key.NumPad6 => new Optional<int>(6),
+            Key.NumPad7 => new Optional<int>(7),
+            Key.NumPad8 => new Optional<int>(8),
+            Key.NumPad9 => new Optional<int>(9),
+            _ => new Optional<int>()
+        };
+        if (keyValUnpressed.HasValue)
+            PythonHandler.Instance.OnHotspotUnpressed(keyValUnpressed.Value);
     }
 #endif
 }

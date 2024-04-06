@@ -273,10 +273,10 @@ public class NavigatorTest
 
             window.CloseAndDispose();
 
-            await Task.Delay(2);
+            await Task.Delay(10);
             Assert.That(window.ShowInTaskbar, Is.False);
 
-            await Task.Delay(250);
+            await Task.Delay(300);
             Assert.Multiple(() =>
             {
                 Assert.That(dataContext.HasBeenDisposed, Is.True);

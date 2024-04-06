@@ -1,14 +1,13 @@
 ﻿using System;
 using LibVLCSharp.Shared;
-using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Display;
-using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
+using WallProjections.ViewModels.Interfaces.Display.Layouts;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.ViewModels.SecondaryScreens;
@@ -35,14 +34,61 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     private readonly IPythonHandler _pythonHandler;
 
     /// <summary>
+    /// The backing field for the <see cref="HotspotHandler" /> property
+    /// </summary>
+    /// <remarks>Reset when <see cref="Dispose" /> is called so that a new instance can be created if needed</remarks>
+    private IHotspotHandler? _hotspotHandler;
+
+    /// <summary>
+    /// The app-wide <see cref="IProcessProxy" /> used for starting up external processes
+    /// </summary>
+    private readonly IProcessProxy _processProxy;
+
+    /// <summary>
+    /// A factory for creating a <see cref="IHotspotHandler" /> linked to the given <see cref="_pythonHandler" />
+    /// </summary>
+    private readonly Func<IPythonHandler, IHotspotHandler> _hotspotHandlerFactory;
+
+    /// <summary>
+    /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
+    /// </summary>
+    private readonly Func<IConfig, IContentProvider> _contentProviderFactory;
+
+    /// <summary>
+    /// A factory for creating <see cref="ILayoutProvider" />s
+    /// </summary>
+    private readonly Func<ILayoutProvider> _layoutProviderFactory;
+
+    /// <summary>
     /// Creates a new <see cref="ViewModelProvider" /> with the given <see cref="INavigator" />
     /// </summary>
     /// <param name="navigator">The app-wide <see cref="INavigator" /> used for navigation between views</param>
     /// <param name="pythonHandler">The app-wide <see cref="IPythonHandler" /> used for Python interop</param>
-    public ViewModelProvider(INavigator navigator, IPythonHandler pythonHandler)
+    /// <param name="processProxy">
+    /// The app-wide <see cref="IProcessProxy" /> used for starting up external processes
+    /// </param>
+    /// <param name="hotspotHandlerFactory">
+    /// A factory for creating a <see cref="IHotspotHandler" /> based on <paramref name="pythonHandler" />
+    /// </param>
+    /// <param name="contentProviderFactory">
+    /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
+    /// </param>
+    /// <param name="layoutProviderFactory">A factory for creating <see cref="ILayoutProvider" />s</param>
+    public ViewModelProvider(
+        INavigator navigator,
+        IPythonHandler pythonHandler,
+        IProcessProxy processProxy,
+        Func<IPythonHandler, IHotspotHandler> hotspotHandlerFactory,
+        Func<IConfig, IContentProvider> contentProviderFactory,
+        Func<ILayoutProvider> layoutProviderFactory
+    )
     {
         _navigator = navigator;
         _pythonHandler = pythonHandler;
+        _processProxy = processProxy;
+        _hotspotHandlerFactory = hotspotHandlerFactory;
+        _contentProviderFactory = contentProviderFactory;
+        _layoutProviderFactory = layoutProviderFactory;
     }
 
     /// <summary>
@@ -51,16 +97,26 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <remarks>Only instantiated if needed</remarks>
     private LibVLC LibVlc => _libVlc ??= new LibVLC();
 
+    /// <summary>
+    /// The app-wide <see cref="IHotspotHandler" /> used for handling hotspot events
+    /// </summary>
+    /// <remarks>Only instantiated if needed</remarks>
+    private IHotspotHandler HotspotHandler => _hotspotHandler ??= _hotspotHandlerFactory(_pythonHandler);
+
     #region Display
 
-    //TODO Refactor this to use DI
     /// <summary>
     /// Creates a new <see cref="DisplayViewModel" /> instance
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="DisplayViewModel" /> instance</returns>
-    public IDisplayViewModel GetDisplayViewModel(IConfig config) =>
-        new DisplayViewModel(_navigator, this, new ContentProvider(config), new LayoutProvider(), _pythonHandler);
+    public IDisplayViewModel GetDisplayViewModel(IConfig config) => new DisplayViewModel(
+        _navigator,
+        this,
+        _contentProviderFactory(config),
+        _layoutProviderFactory(),
+        HotspotHandler
+    );
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance
@@ -141,8 +197,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <seealso cref="VideoThumbnailViewModel" />
     public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath) => type switch
     {
-        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, new ProcessProxy()),
-        MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, new ProcessProxy()),
+        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, _processProxy),
+        MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, _processProxy),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
     };
 
@@ -170,7 +226,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="HotspotDisplayViewModel" /> instance</returns>
     public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
-        new HotspotDisplayViewModel(config, _pythonHandler, this);
+        new HotspotDisplayViewModel(config, HotspotHandler, this);
 
     /// <summary>
     /// Creates a new <see cref="HotspotProjectionViewModel" /> instance
@@ -194,6 +250,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     public void Dispose()
     {
+        _hotspotHandler?.Dispose();
+        _hotspotHandler = null;
         _libVlc?.Dispose();
         _libVlc = null;
     }

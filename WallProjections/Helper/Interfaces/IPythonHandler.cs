@@ -11,7 +11,12 @@ public interface IPythonHandler : IDisposable
     /// <summary>
     /// An event that is fired when a hotspot is pressed
     /// </summary>
-    public event EventHandler<HotspotSelectedArgs>? HotspotSelected;
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotPressed;
+
+    /// <summary>
+    /// An event that is fired when a hotspot is released
+    /// </summary>
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotReleased;
 
     /// <summary>
     /// Starts an asynchronous Python task that listens for hotspot presses
@@ -40,17 +45,4 @@ public interface IPythonHandler : IDisposable
     /// </summary>
     /// <param name="id">The ID of the released hotspot</param>
     public void OnHotspotUnpressed(int id);
-
-    /// <summary>
-    /// Arguments for the <see cref="HotspotSelected" /> event
-    /// </summary>
-    public class HotspotSelectedArgs : EventArgs
-    {
-        public int Id { get; }
-
-        public HotspotSelectedArgs(int id)
-        {
-            Id = id;
-        }
-    }
 }

@@ -10,11 +10,27 @@ on:
         description: 'Operating system to run the tests on'
         type: string
         required: true
+      coverage:
+        description: 'Whether to generate a code coverage report'
+        type: boolean
+        default: false
+    secrets:
+      CODECOV_TOKEN:
+        description: 'Token for uploading coverage reports to Codecov'
+        required: false
 
 jobs:
   build:
     runs-on: ${{ inputs.os }}
     steps:
+      - name: Fail on missing secrets
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ inputs.coverage && env.CODECOV_TOKEN == '' }}
+        run: |
+          echo "CODECOV_TOKEN is required for uploading coverage reports to Codecov."
+          exit 1
+
       - uses: actions/checkout@v4
 
       - name: Setup .NET
@@ -43,7 +59,7 @@ jobs:
 
       - name: Install LibVLCSharp dependencies
         if: ${{ startsWith(inputs.os, 'ubuntu') }}
-        run: sudo apt install -y libvlc-dev vlc
+        run: sudo apt-get update -y && sudo apt-get install -y libvlc-dev vlc
 
       - name: Restore dependencies
         run: dotnet restore
@@ -52,4 +68,19 @@ jobs:
         run: dotnet build --no-restore -c DebugSkipPython
 
       - name: Test
+        if: ${{ !inputs.coverage }}
         run: dotnet test --no-build -c DebugSkipPython --verbosity normal
+
+      - name: Test & generate Code Coverage report
+        if: ${{ inputs.coverage }}
+        run: >
+          dotnet test --no-build -c DebugSkipPython --verbosity normal \
+              --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory TestResults
+
+      - name: Upload coverage reports to Codecov
+        if: ${{ inputs.coverage }}
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./TestResults
+          verbose: true

@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.ViewModels;
+using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
 
 namespace WallProjections;
@@ -37,7 +38,14 @@ public class App : Application
             _navigator = new Navigator(
                 desktop,
                 PythonHandler.Instance,
-                (nav, pythonHandler) => new ViewModelProvider(nav, pythonHandler),
+                (nav, pythonHandler) => new ViewModelProvider(
+                    nav,
+                    pythonHandler,
+                    new ProcessProxy(),
+                    pyHandler => new HotspotHandler(pyHandler),
+                    config => new ContentProvider(config),
+                    () => new LayoutProvider()
+                ),
                 () => new FileHandler()
             );
         }

@@ -32,15 +32,17 @@ public class VideoWithDescriptionViewModel : Layout, IDisposable
     /// and paths to the videos that <see cref="VideoViewModel" /> will play.
     /// </summary>
     /// <param name="vmProvider">The <see cref="IViewModelProvider" /> to get the <see cref="IVideoViewModel" />.</param>
+    /// <param name="hotspotId">The id of the hotspot.</param>
     /// <param name="title">The title of the hotspot.</param>
     /// <param name="description">The description of the hotspot.</param>
     /// <param name="videoPaths">The paths to the videos to play.</param>
     public VideoWithDescriptionViewModel(
         IViewModelProvider vmProvider,
+        int hotspotId,
         string title,
         string description,
         IEnumerable<string> videoPaths
-    )
+    ) : base(hotspotId)
     {
         VideoViewModel = vmProvider.GetVideoViewModel();
         Title = title;
@@ -71,6 +73,12 @@ public class VideoWithDescriptionViewModel : Layout, IDisposable
 
         /// <inheritdoc />
         protected override Layout ConstructLayout(IViewModelProvider vmProvider, Hotspot.Media hotspot) =>
-            new VideoWithDescriptionViewModel(vmProvider, hotspot.Title, hotspot.Description, hotspot.VideoPaths);
+            new VideoWithDescriptionViewModel(
+                vmProvider,
+                hotspot.Id,
+                hotspot.Title,
+                hotspot.Description,
+                hotspot.VideoPaths
+            );
     }
 }

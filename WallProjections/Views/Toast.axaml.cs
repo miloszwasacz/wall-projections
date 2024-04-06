@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -17,11 +16,6 @@ public class Toast : TemplatedControl
     /// The number of times the toast has been opened (used for keeping track of when to hide the toast).
     /// </summary>
     private int _openedCount;
-
-    /// <summary>
-    /// A mutex to ensure consistent access to <see cref="_openedCount" />.
-    /// </summary>
-    private readonly Mutex _mutex = new();
 
     /// <summary>
     /// Defines the <see cref="Text" /> property.
@@ -55,18 +49,20 @@ public class Toast : TemplatedControl
     /// <param name="duration">The duration for which the toast should be shown.</param>
     public async void Show(ShowDuration duration)
     {
-        _mutex.WaitOne();
-        _openedCount++;
-        IsVisible = true;
-        _mutex.ReleaseMutex();
+        lock (this)
+        {
+            _openedCount++;
+            IsVisible = true;
+        }
 
         await Task.Delay((int)duration);
 
-        _mutex.WaitOne();
-        _openedCount--;
-        if (_openedCount == 0)
-            IsVisible = false;
-        _mutex.ReleaseMutex();
+        lock (this)
+        {
+            _openedCount--;
+            if (_openedCount == 0)
+                IsVisible = false;
+        }
     }
 
     /// <summary>

@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Threading;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.Helper;
@@ -19,11 +18,6 @@ namespace WallProjections.Helper;
 public class ObservableHotspotCollection<T> : ObservableCollection<T>
     where T : IEditorHotspotViewModel, INotifyPropertyChanged
 {
-    /// <summary>
-    /// A mutex to enforce that only one item can be updated at a time.
-    /// </summary>
-    private readonly Mutex _mutex = new();
-
     /// <summary>
     /// Whether the collection is currently updating because of a property change in an item.
     /// </summary>
@@ -106,32 +100,22 @@ public class ObservableHotspotCollection<T> : ObservableCollection<T>
     /// <seealso cref="IsItemUpdating" />
     private void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        StartUpdate();
-        if (sender is T item)
+        lock (this)
         {
-            var index = IndexOf(item);
-            if (index != -1)
-            {
-                Move(index, index);
-                FinishUpdate();
-                return;
-            }
-        }
-
-        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        FinishUpdate();
-        return;
-
-        void StartUpdate()
-        {
-            _mutex.WaitOne();
             IsItemUpdating = true;
-        }
+            if (sender is T item)
+            {
+                var index = IndexOf(item);
+                if (index != -1)
+                {
+                    Move(index, index);
+                    IsItemUpdating = false;
+                    return;
+                }
+            }
 
-        void FinishUpdate()
-        {
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             IsItemUpdating = false;
-            _mutex.ReleaseMutex();
         }
     }
 }

@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Test.Mocks.ViewModels;
@@ -17,10 +18,11 @@ public class DisplayWindowTest
     public void ViewModelTest()
     {
         var vm = new MockDisplayViewModel();
-        vm.OnHotspotSelected(null, new IPythonHandler.HotspotSelectedArgs(1));
+        vm.OnHotspotActivated(null, new IHotspotHandler.HotspotArgs(1));
         var displayWindow = new DisplayWindow
         {
-            DataContext = vm
+            DataContext = vm,
+            IsCI = true
         };
         displayWindow.Show();
         var content = displayWindow.FindDescendantOfType<TransitioningContentControl>();
@@ -40,16 +42,17 @@ public class DisplayWindowTest
         var vm = new MockDisplayViewModel();
         var displayWindow = new DisplayWindow
         {
-            DataContext = vm
+            DataContext = vm,
+            IsCI = true
         };
         displayWindow.Show();
 
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
 
-        displayWindow.KeyPress(Key.F11, RawInputModifiers.None);
+        displayWindow.KeyPress(Key.F, RawInputModifiers.None);
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.Normal));
 
-        displayWindow.KeyPress(Key.F11, RawInputModifiers.None);
+        displayWindow.KeyPress(Key.F, RawInputModifiers.None);
         Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
     }
 
@@ -60,7 +63,8 @@ public class DisplayWindowTest
         var vm = new MockDisplayViewModel(navigator: navigator);
         var displayWindow = new DisplayWindow
         {
-            DataContext = vm
+            DataContext = vm,
+            IsCI = true
         };
         displayWindow.Show();
 
@@ -75,7 +79,8 @@ public class DisplayWindowTest
         var vm = new MockDisplayViewModel(navigator: navigator);
         var displayWindow = new DisplayWindow
         {
-            DataContext = vm
+            DataContext = vm,
+            IsCI = true
         };
         displayWindow.Show();
 
@@ -85,32 +90,77 @@ public class DisplayWindowTest
     }
 
     [AvaloniaTheory]
-    public void KeyPressTest(Key key)
+    [Timeout(1500)]
+    public async Task KeyPressTest(Key key)
     {
-        Assume.That(key is not Key.F11);
+        Assume.That(key is not Key.F);
         Assume.That(key is not Key.Escape);
         Assume.That(key is not Key.E);
-        Assume.That(key is > Key.D9 or < Key.D0);
 
         var navigator = new MockNavigator();
         var vm = new MockDisplayViewModel(navigator: navigator);
         var displayWindow = new DisplayWindow
         {
-            DataContext = vm
+            DataContext = vm,
+            IsCI = true
         };
         displayWindow.Show();
 
+        await Task.Delay(200);
         displayWindow.KeyPress(key, RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
         Assert.Multiple(() =>
         {
             Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
-            Assert.That(navigator.HasBeenShutDown, Is.False);
-            Assert.That(navigator.IsEditorOpen, Is.False);
+            Assert.That(navigator.HasBeenShutDown, Is.False, "The window should not have been closed");
+            Assert.That(navigator.IsEditorOpen, Is.False, "The editor should not have been opened");
         });
     }
 
+    [TestFixture]
+    public class KeyPressWithModifiersTest
+    {
+        [DatapointSource] public static readonly Key[] Keys = { Key.F, Key.Escape, Key.E, Key.A, Key.F11, Key.NumPad0 };
+
+        [AvaloniaTheory]
+        [Timeout(1500)]
+        public async Task KeyPressTest(Key key, KeyModifiers modifiers)
+        {
+            Assume.That(modifiers is not KeyModifiers.None || key is not (Key.F or Key.Escape or Key.E));
+
+            var navigator = new MockNavigator();
+            var vm = new MockDisplayViewModel(navigator: navigator);
+            var displayWindow = new DisplayWindow
+            {
+                DataContext = vm,
+                IsCI = true
+            };
+            displayWindow.Show();
+
+            await Task.Delay(200);
+            var rawInputModifiers = modifiers switch
+            {
+                KeyModifiers.Alt => RawInputModifiers.Alt,
+                KeyModifiers.Control => RawInputModifiers.Control,
+                KeyModifiers.Shift => RawInputModifiers.Shift,
+                KeyModifiers.Meta => RawInputModifiers.Meta,
+                _ => RawInputModifiers.None
+            };
+            displayWindow.KeyPress(key, rawInputModifiers);
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.FullScreen));
+                Assert.That(navigator.HasBeenShutDown, Is.False, "The window should not have been closed");
+                Assert.That(navigator.IsEditorOpen, Is.False, "The editor should not have been opened");
+            });
+        }
+    }
+
     [AvaloniaTest]
-    [TestCase(Key.F11)]
+    [TestCase(Key.F)]
     [TestCase(Key.Escape)]
     [TestCase(Key.E)]
     public void KeyPressInvalidViewModelTest(Key key)
@@ -118,7 +168,8 @@ public class DisplayWindowTest
         var navigator = new MockNavigator();
         var displayWindow = new DisplayWindow
         {
-            DataContext = navigator
+            DataContext = navigator,
+            IsCI = true
         };
         displayWindow.Show();
 
@@ -127,7 +178,7 @@ public class DisplayWindowTest
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (key)
         {
-            case Key.F11:
+            case Key.F:
                 // Toggling fullscreen should still work
                 Assert.That(displayWindow.WindowState, Is.EqualTo(WindowState.Normal));
                 break;
@@ -150,7 +201,8 @@ public class DisplayWindowTest
         var vm = new MockDisplayViewModel(navigator: navigator);
         var displayWindow = new DisplayWindow
         {
-            DataContext = vm
+            DataContext = vm,
+            IsCI = true
         };
         displayWindow.Show();
 
@@ -173,7 +225,8 @@ public class DisplayWindowTest
         var vm = new MockDisplayViewModel(navigator: navigator);
         var displayWindow = new DisplayWindow
         {
-            DataContext = vm
+            DataContext = vm,
+            IsCI = true
         };
         displayWindow.Show();
 
@@ -188,7 +241,8 @@ public class DisplayWindowTest
         var navigator = new MockNavigator();
         var displayWindow = new DisplayWindow
         {
-            DataContext = navigator
+            DataContext = navigator,
+            IsCI = true
         };
         displayWindow.Show();
 

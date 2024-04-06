@@ -39,19 +39,8 @@ public class MockHotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposab
     public override bool IsVisible { get; protected set; }
 
     /// <summary>
-    /// Mock version of the ActivateHotspot function in <see cref="HotspotDisplayViewModel"/> which just
-    /// sets the first hotspot in the list to true, takes in the param <paramref name="id"></paramref>
-    /// to uphold the interface but does not use this parameter 
-    /// </summary>
-    /// <param name="id">The id of the hotspot to be activated</param>
-    public override void ActivateHotspot(int id)
-    {
-        Projections.First().IsActive = true;
-    }
-
-    /// <summary>
     /// Mock version of the DeactivateHotspot function in <see cref="HotspotDisplayViewModel"/> which just
-    /// sets the first hotspot in the list to false
+    /// sets <see cref="IHotspotProjectionViewModel.IsActive" /> of the first hotspot in the list to false
     /// </summary>
     public override void DeactivateHotspots()
     {
