@@ -3,21 +3,21 @@ import threading
 import numpy as np
 import cv2
 
-VIDEO_CAPTURE_TARGET: int | str = 0
+DEFAULT_TARGET: int | str = 0
 """Camera ID, video filename, image sequence filename or video stream URL to capture video from.
 
-Set to 0 to use default camera.
+Set to 0 to auto-detect.
 
 See https://docs.opencv.org/3.4/d8/dfe/classcv_1_1VideoCapture.html#a949d90b766ba42a6a93fe23a67785951 for details."""
 
-VIDEO_CAPTURE_BACKEND: int = cv2.CAP_ANY
+DEFAULT_BACKEND: int = cv2.CAP_ANY
 """The API backend to use for capturing video. 
 
 Use ``cv2.CAP_ANY`` to auto-detect. 
 
 See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html for more options."""
 
-VIDEO_CAPTURE_PROPERTIES: dict[int, int] = {cv2.CAP_PROP_FPS: 30}
+DEFAULT_PROPERTIES: dict[int, int] = {cv2.CAP_PROP_FPS: 30}
 """Extra properties to use for OpenCV video capture.
 
 Tweaking these properties could be found useful in case of any issues with capturing video.
@@ -27,23 +27,34 @@ https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
 
 
 class VideoCaptureThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, target=None, backend=None, properties=None):
+        """
+        Initialise the class. Use VideoCaptureThread.start() to start capturing video. Pass `None` for any parameter to
+        choose a default value.
+
+        :param target Camera ID, video filename, image sequence filename or video stream URL to capture video from.
+        :param backend The API backend to use for capturing video.
+        :param properties Extra properties to use for OpenCV video capture.
+        """
         super().__init__()
+        self.target = target or DEFAULT_TARGET
+        self.backend = backend or DEFAULT_BACKEND
+        self.properties = properties or DEFAULT_PROPERTIES
         self._current_frame = None
-        self.stopping = False
+        """The current frame in BGR."""
+        self._stopping = False
 
     def run(self):
         logging.info("Initialising video capture...")
         video_capture = cv2.VideoCapture()
-        success = video_capture.open(VIDEO_CAPTURE_TARGET, VIDEO_CAPTURE_BACKEND)
+        success = video_capture.open(self.target, self.backend)
         if not success:
-            raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid.")
-        for prop_id, prop_value in VIDEO_CAPTURE_PROPERTIES.items():
+            raise RuntimeError("Error opening video capture - perhaps the video capture target or backend is invalid, "
+                               "or the camera is already in use.")
+        for prop_id, prop_value in self.properties.items():
             supported = video_capture.set(prop_id, prop_value)
             if not supported:
-                logging.warning(
-                    f"Property id {prop_id} is not supported by video capture backend {VIDEO_CAPTURE_BACKEND}."
-                )
+                logging.warning(f"Property id {prop_id} is not supported by video capture backend {self.backend}.")
 
         while video_capture.isOpened():
             success, video_capture_img = video_capture.read()
@@ -51,16 +62,14 @@ class VideoCaptureThread(threading.Thread):
                 logging.warning("Unsuccessful video read; ignoring frame.")
                 continue
 
-            video_capture_img = cv2.cvtColor(video_capture_img, cv2.COLOR_BGR2RGB)  # convert to RGB
+            # normalise and downscale resolution
             new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
-            video_capture_img = cv2.resize(
-                video_capture_img,
-                new_dim,
-                interpolation=cv2.INTER_NEAREST
-            )  # normalise size
+            video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)
+
             self._current_frame = video_capture_img
 
-            if self.stopping:
+            if self._stopping:
+                logging.info("Stopping video capture.")
                 break
 
         video_capture.release()
@@ -75,16 +84,21 @@ class VideoCaptureThread(threading.Thread):
 
         Call `Thread.join` after this to block until the thread has stopped.
         """
-        logging.info("Stopping video capture...")
-        self.stopping = True
+        self._stopping = True
 
     @staticmethod
     def take_photo() -> np.ndarray:
         """
         Returns a photo from a detectable camera
         """
+        video_capture_thread = VideoCaptureThread()
+        video_capture_thread.start()
 
-        cap = cv2.VideoCapture(0)
-        ret, image = cap.read()
+        image = None
+        while image is None:
+            cv2.waitKey(500)
+            image = video_capture_thread.get_current_frame()
 
+        video_capture_thread.stop()
+        video_capture_thread.join()
         return image
