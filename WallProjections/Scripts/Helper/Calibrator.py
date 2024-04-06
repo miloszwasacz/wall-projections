@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 from cv2 import aruco
 # noinspection PyPackages
-from .VideoCaptureThread import VideoCaptureThread
+from .VideoCapture import VideoCapture
 
 DICT = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)
 """The CV2 ArUco dictionary, which we detect for. Must match the one used in Internal/aruco_generator.
@@ -21,7 +21,7 @@ class Calibrator:
         """
         Takes a photo, detects ArUcos and returns a transformation matrix between provided and detected coordinates.
         """
-        photo = VideoCaptureThread.take_photo()
+        photo = VideoCapture.take_photo()
         if photo is None:
             raise Exception("No photo taken, check if Camera is connected")
         camera_id_to_coord = Calibrator._detect_ArUcos(photo)
