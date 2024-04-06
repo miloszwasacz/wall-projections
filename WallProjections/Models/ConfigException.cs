@@ -95,3 +95,28 @@ public class ConfigDuplicateFileException : ConfigException
         _fileName = fileName;
     }
 }
+
+/// <summary>
+/// Thrown if a config is being imported and a new one is being built at the same time.
+/// </summary>
+public class ConfigBuilderInvalidException : ConfigException
+{
+    public override string Message { get; }
+
+    /// <summary>
+    /// Default message for Exception
+    /// </summary>
+    public ConfigBuilderInvalidException()
+    {
+        Message = "Cannot import and build new config at the same time";
+    }
+
+    /// <summary>
+    /// Custom message for exception
+    /// </summary>
+    /// <param name="message">Custom message</param>
+    public ConfigBuilderInvalidException(string message)
+    {
+        Message = message;
+    }
+}

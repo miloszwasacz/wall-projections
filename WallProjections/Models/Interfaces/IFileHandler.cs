@@ -75,12 +75,11 @@ public interface IFileHandler
         }
         catch (DirectoryNotFoundException)
         {
-            Console.WriteLine($"{CurrentConfigFolderPath} already deleted");
+            throw new ConfigNotImportedException();
         }
-        catch (Exception e)
+        catch (IOException)
         {
-            //TODO Write to log file instead
-            Console.Error.WriteLine(e);
+            throw new ConfigIOException();
         }
     }
 }

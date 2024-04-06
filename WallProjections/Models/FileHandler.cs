@@ -6,8 +6,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security;
 using System.Text.Json;
-using System.Threading;
-using Avalonia.Markup.Xaml.Templates;
 using WallProjections.Models.Interfaces;
 using static WallProjections.Models.Interfaces.IFileHandler;
 
@@ -21,36 +19,13 @@ public class FileHandler : IFileHandler
     /// TODO Handle errors from trying to load from not-found/invalid zip file
     public IConfig ImportConfig(string zipPath)
     {
-        try
-        {
-            // Check if zip file exists for import
-            if (!File.Exists(zipPath))
-                throw new ExternalFileReadException(Path.GetFileName(zipPath));
+        using var configBuilder = new ConfigBuilder();
 
-            // Clean up existing directory if in use
-            if (Directory.Exists(CurrentConfigFolderPath))
-                Directory.Delete(CurrentConfigFolderPath, true);
+        configBuilder.ImportConfig(zipPath);
 
-            Directory.CreateDirectory(CurrentConfigFolderPath);
+        configBuilder.Commit();
 
-            ZipFile.ExtractToDirectory(zipPath, CurrentConfigFolderPath);
-
-            var config = LoadConfig();
-            return config;
-        }
-        catch (IOException e)
-        {
-            throw new ConfigIOException();
-        }
-        catch (InvalidDataException e)
-        {
-            throw new ConfigPackageFormatException(Path.GetFileName(zipPath));
-        }
-        catch (UnauthorizedAccessException e)
-        {
-            throw new ConfigIOException();
-        }
-
+        return LoadConfig();
     }
 
     /// <inheritdoc/>
@@ -71,12 +46,13 @@ public class FileHandler : IFileHandler
     /// </exception>
     public bool SaveConfig(IConfig config)
     {
-        using var configBuilder = new ConfigBuilder(config.HomographyMatrix);
+        using var configBuilder = new ConfigBuilder();
 
-        config.Hotspots.ForEach(hotspot =>
-        {
-            configBuilder.AddHotspot(hotspot);
-        });
+        configBuilder.AddHomographyMatrix(config.HomographyMatrix);
+
+        config.Hotspots.ForEach(hotspot => { configBuilder.AddHotspot(hotspot); });
+
+        configBuilder.GenerateConfigFile();
 
         configBuilder.Commit();
 
@@ -105,11 +81,12 @@ public class FileHandler : IFileHandler
             return JsonSerializer.Deserialize<Config>(configFile) ??
                    throw new ConfigInvalidException();
         }
-        catch (IOException e)
+        catch (IOException)
         {
             throw new ConfigIOException();
         }
-        catch (JsonException e)
+        // When JSON config is not in a valid format.
+        catch (Exception e) when (e is JsonException or ArgumentNullException)
         {
             throw new ConfigInvalidException();
         }
@@ -131,11 +108,26 @@ public class FileHandler : IFileHandler
         private List<Hotspot> _hotspots;
 
         /// <summary>
+        /// Store if a new config will be generated
+        /// </summary>
+        private bool _newConfig;
+
+        /// <summary>
+        /// Store if config file has been generated
+        /// </summary>
+        private bool _generatedConfig;
+
+        /// <summary>
+        /// Store if an imported config will be used
+        /// </summary>
+        private bool _importedConfig;
+
+        /// <summary>
         /// Stores whether the new config has been committed to storage.
         /// </summary>
-        private bool _commited;
+        private bool _committed;
 
-        public ConfigBuilder(double [,] homographyMatrix)
+        public ConfigBuilder()
         {
             // Reset/Create temporary config folder
             if (Directory.Exists(TempConfigFolderPath))
@@ -143,8 +135,66 @@ public class FileHandler : IFileHandler
 
             Directory.CreateDirectory(TempConfigFolderPath);
 
-            _homographyMatrix = homographyMatrix;
             _hotspots = new List<Hotspot>();
+
+            _committed = false;
+            _importedConfig = false;
+            _newConfig = false;
+            _generatedConfig = false;
+        }
+
+        /// <summary>
+        /// Import
+        /// </summary>
+        /// <param name="zipPath"></param>
+        /// <exception cref="ConfigBuilderInvalidException">If a new config has already started being built</exception>
+        /// <exception cref="ExternalFileReadException">If the package does not exist</exception>
+        /// <exception cref="ConfigIOException">If there is an issue accessing package/config folder</exception>
+        /// <exception cref="ConfigPackageFormatException">If config package is not a valid package</exception>
+        public void ImportConfig(string zipPath)
+        {
+            if (_newConfig)
+                throw new ConfigBuilderInvalidException();
+            _importedConfig = true;
+
+            try
+            {
+                // Check if zip file exists for import
+                if (!File.Exists(zipPath))
+                    throw new ExternalFileReadException(Path.GetFileName(zipPath));
+
+                ZipFile.ExtractToDirectory(zipPath, TempConfigFolderPath);
+
+            }
+            catch (IOException e)
+            {
+                throw new ConfigIOException();
+            }
+            catch (InvalidDataException e)
+            {
+                throw new ConfigPackageFormatException(Path.GetFileName(zipPath));
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                throw new ConfigIOException();
+            }
+        }
+
+        /// <summary>
+        /// Add the homography matrix to be stored inside the config
+        /// </summary>
+        /// <param name="homographyMatrix">The homography matrix to be stored in the config</param>
+        public void AddHomographyMatrix(double[,] homographyMatrix)
+        {
+            if (_importedConfig)
+                throw new ConfigBuilderInvalidException();
+
+            if (_homographyMatrix is not null)
+                throw new ConfigBuilderInvalidException("Homography matrix already added");
+
+            _newConfig = true;
+
+            _homographyMatrix = homographyMatrix;
         }
 
         /// <summary>
@@ -155,33 +205,43 @@ public class FileHandler : IFileHandler
         /// <exception cref="ExternalFileReadException">If one of the files to resolve cannot be read.</exception>
         public void AddHotspot(Hotspot hotspot)
         {
-             _hotspots.Add(new Hotspot(
+            if (_importedConfig)
+                throw new ConfigBuilderInvalidException();
+
+            if (_generatedConfig)
+                throw new ConfigBuilderInvalidException("Config file already generated");
+
+            _newConfig = true;
+
+            _hotspots.Add(new Hotspot(
                 hotspot.Id,
                 hotspot.Position,
                 hotspot.Title,
                 ResolveFile(hotspot.DescriptionPath, "text", hotspot.Id),
                 new List<string>(ResolveFiles(hotspot.ImagePaths, "image", hotspot.Id)).ToImmutableList(),
                 new List<string>(ResolveFiles(hotspot.VideoPaths, "video", hotspot.Id)).ToImmutableList()
-                ));
+            ));
         }
 
         /// <summary>
-        /// Commits the new config and overwrites the old config.
+        /// Generates the JSON file from the current set of hotspots added with <see cref="AddHotspot"/>
         /// </summary>
-        /// <exception cref="ConfigIOException">If a permissions/IO error occurs during a file operation</exception>
-        public void Commit()
+        public void GenerateConfigFile()
         {
+            if (_importedConfig)
+                throw new ConfigBuilderInvalidException("Cannot generate config file for imported config");
+
+            if (_homographyMatrix is null)
+                throw new ConfigBuilderInvalidException("Must have homography matrix");
+
+            if (_generatedConfig)
+                throw new ConfigBuilderInvalidException("Config file already generated for config");
+            _generatedConfig = true;
+
+            var newConfig = new Config(_homographyMatrix, _hotspots);
+
             try
             {
-                // Backup current config until save is complete
-                if (Directory.Exists(BackupConfigFolderPath))
-                    Directory.Delete(BackupConfigFolderPath, true);
-
-                if (Directory.Exists(CurrentConfigFolderPath))
-                    Directory.Move(CurrentConfigFolderPath, BackupConfigFolderPath);
-
-                var newConfig = new Config(_homographyMatrix, _hotspots);
-
 #if RELEASE
                 var configString = JsonSerializer.Serialize(newConfig);
 #else
@@ -193,33 +253,52 @@ public class FileHandler : IFileHandler
 
                 using var configFile = new StreamWriter(Path.Combine(TempConfigFolderPath, ConfigFileName));
                 configFile.Write(configString);
-
-                if (Directory.Exists(CurrentConfigFolderPath))
-                    Directory.Delete(CurrentConfigFolderPath);
-
-                Directory.Move(TempConfigFolderPath, CurrentConfigFolderPath);
-                _commited = true;
-
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or SecurityException)
             {
-                // throw new ConfigIOException();
-                throw;
+                throw new ConfigIOException();
+            }
+        }
+
+        /// <summary>
+        /// Commits the new config and overwrites the old config.
+        /// </summary>
+        /// <exception cref="ConfigIOException">If a permissions/IO error occurs during the commit</exception>
+        public void Commit()
+        {
+            if (!_newConfig && !_importedConfig)
+                throw new ConfigBuilderInvalidException("Must have imported or built new config");
+
+            if (_newConfig && !_generatedConfig)
+                throw new ConfigBuilderInvalidException("Must generate config file for new config before commit");
+
+            try
+            {
+                // Backup current config until save is complete
+                if (Directory.Exists(BackupConfigFolderPath))
+                    Directory.Delete(BackupConfigFolderPath, true);
+
+                if (Directory.Exists(CurrentConfigFolderPath))
+                    Directory.Move(CurrentConfigFolderPath, BackupConfigFolderPath);
+
+                Directory.Move(TempConfigFolderPath, CurrentConfigFolderPath);
+                _committed = true;
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or SecurityException)
+            {
+                Console.WriteLine(e);
+                throw new ConfigIOException();
             }
             finally
             {
                 // If not committed and a backup exists, move backup to become current.
-                if (!_commited && Directory.Exists(BackupConfigFolderPath))
+                if (!_committed && Directory.Exists(BackupConfigFolderPath))
                 {
                     if (Directory.Exists(CurrentConfigFolderPath))
                         Directory.Delete(CurrentConfigFolderPath, true);
 
-                    Directory.Move(BackupConfigFolderPath, CurrentConfigFolder);
+                    Directory.Move(BackupConfigFolderPath, CurrentConfigFolderPath);
                 }
-
-                // Once backup used, delete the backup to remove leftover files.
-                if (Directory.Exists(BackupConfigFolderPath))
-                    Directory.Delete(BackupConfigFolderPath, true);
             }
         }
 
@@ -284,7 +363,7 @@ public class FileHandler : IFileHandler
             files.Select((path, i) => ResolveFile(path, type, id, i));
 
         /// <summary>
-        /// Delete temporary config folder
+        /// Delete temporary config folder and backup
         /// </summary>
         public void Dispose()
         {
@@ -293,7 +372,6 @@ public class FileHandler : IFileHandler
 
             if (Directory.Exists(BackupConfigFolderPath))
                 Directory.Delete(BackupConfigFolderPath, true);
-
         }
     }
 }

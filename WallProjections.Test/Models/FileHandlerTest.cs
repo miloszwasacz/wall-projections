@@ -37,6 +37,21 @@ public class FileHandlerTest
     private static string TestZipInvalidConfig =>
         Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_invalid_config.zip");
 
+    /// <summary>
+    /// Location of a text file to check exception for non zip file
+    /// </summary>
+    private static string TestNonZipConfig =>
+        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+
+    /// <summary>
+    /// Location of a zip file containing a file with only whitespace in the name
+    /// </summary>
+    private static string TestZipWithSingleTestFileConfig =>
+        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_zip_with_test_file.zip");
+
+    /// <summary>
+    /// Location to store current non test config while tests are running
+    /// </summary>
     private static string CurrentConfigTempStore =>
         Path.Combine(IFileHandler.ConfigFolderPath, "TestTemp");
 
@@ -110,8 +125,6 @@ public class FileHandlerTest
 
         Assert.That(config, Is.Not.Null);
         AssertConfigsEqual(config!, config2);
-
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -141,8 +154,6 @@ public class FileHandlerTest
             Assert.That(File.ReadAllText(textFilePath), Is.EqualTo(TestTxtFileContents));
             Assert.That(File.Exists(oldFilePath), Is.False);
         });
-
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -176,7 +187,7 @@ public class FileHandlerTest
     public void ImportConfigInvalidConfigTest()
     {
         var fileHandler = new FileHandler();
-        Assert.Throws<ArgumentNullException>(() => fileHandler.ImportConfig(TestZipInvalidConfig));
+        Assert.Throws<ConfigInvalidException>(() => fileHandler.ImportConfig(TestZipInvalidConfig));
     }
 
     /// <summary>
@@ -258,8 +269,6 @@ public class FileHandlerTest
             Assert.That(File.ReadAllText(txtFilePath), Is.EqualTo(TestTxtFileContents));
         });
         //TODO Test more media files
-
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -296,7 +305,7 @@ public class FileHandlerTest
 
         var file = File.Create(tempFilePath);
 
-        Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
+        Assert.That(IFileHandler.DeleteConfigFolder, Throws.InstanceOf<ConfigIOException>());
         Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.True);
 
         file.Close();
@@ -320,7 +329,7 @@ public class FileHandlerTest
 
         Process.Start("chmod", "000 " + IFileHandler.CurrentConfigFolderPath).WaitForExit();
 
-        Assert.That(IFileHandler.DeleteConfigFolder, Throws.Nothing);
+        Assert.That(IFileHandler.DeleteConfigFolder, Throws.InstanceOf<ConfigIOException>());
         Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.True);
 
         Process.Start("chmod", "777 " + IFileHandler.CurrentConfigFolderPath).WaitForExit();
@@ -346,7 +355,6 @@ public class FileHandlerTest
         var newConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(config, newConfig);
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -366,7 +374,6 @@ public class FileHandlerTest
         var newConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(config, newConfig);
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -409,7 +416,6 @@ public class FileHandlerTest
         var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -465,7 +471,6 @@ public class FileHandlerTest
         var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -525,7 +530,6 @@ public class FileHandlerTest
         var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -581,7 +585,6 @@ public class FileHandlerTest
         var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -657,7 +660,6 @@ public class FileHandlerTest
         var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(newConfig, loadedConfig);
-        IFileHandler.DeleteConfigFolder();
     }
 
     /// <summary>
@@ -742,7 +744,34 @@ public class FileHandlerTest
         var loadedConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(config, loadedConfig);
-        IFileHandler.DeleteConfigFolder();
+    }
+
+    /// <summary>
+    /// Test that a <see cref="ConfigPackageFormatException"/> is thrown if a file to import is not a zip.
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void ImportNonZipFileTest()
+    {
+        var fileHandler = new FileHandler();
+        // Non zip file
+        Assert.Throws<ConfigPackageFormatException>(() => fileHandler.ImportConfig(TestNonZipConfig));
+    }
+
+    /// <summary>
+    /// Test that a <see cref="ExternalFileReadException"/> is thrown if a file to import cannot be found.
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void ImportNonExistentFileTest()
+    {
+        var fileHandler = new FileHandler();
+        var tempFile = "";
+
+        while (File.Exists(tempFile))
+            tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+
+        Assert.Throws<ExternalFileReadException>(() => fileHandler.ImportConfig(tempFile));
     }
 
     /// <summary>
