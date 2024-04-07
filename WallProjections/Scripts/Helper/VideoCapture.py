@@ -1,7 +1,8 @@
 import logging
 import threading
-import numpy as np
+
 import cv2
+import numpy as np
 
 DEFAULT_TARGET: int | str = 0
 """Camera ID, video filename, image sequence filename or video stream URL to capture video from.
@@ -56,9 +57,9 @@ class VideoCapture:
         self._video_capture_thread = threading.Thread(target=self._thread)
         self._video_capture_thread.start()
 
-        # wait until camera is opened
+        # wait until camera is opened (1 min timeout)
         i = 0
-        while self._current_frame is None and i < 100:
+        while self._current_frame is None and i < 600:
             cv2.waitKey(100)
             i += 1
 
@@ -67,7 +68,7 @@ class VideoCapture:
             self._video_capture_thread.join()
             self._video_capture_thread = None
             self._current_frame = None
-            raise RuntimeError("Error starting video capture: Camera failed to open.")
+            raise RuntimeError("Error starting video capture: Camera failed to open (timed out).")
 
         cv2.waitKey(1000)  # wait for a bit more as it returns garbage at first
 
