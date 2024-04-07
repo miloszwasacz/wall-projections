@@ -11,6 +11,10 @@ using static WallProjections.Models.Interfaces.IFileHandler;
 
 namespace WallProjections.Models;
 
+/// <summary>
+/// Class for all file handling functions for program (includes Config handling methods)
+/// </summary>
+/// TODO: Add logging for any errors found during file handling
 public class FileHandler : IFileHandler
 {
     /// <inheritdoc />
