@@ -132,11 +132,8 @@ class VideoCapture:
     def take_photo(target: int | str | None = None, backend: int | None = None,
                    properties: dict[int, int] | None = None) -> np.ndarray:
         """Returns a photo from a detectable camera."""
-
-        logging.info("Taking photo...")
         vid_cap = VideoCapture(target, backend, properties)
         vid_cap.start()
         image = vid_cap.get_current_frame()
         vid_cap.stop()
-        logging.info("Photo taken.")
         return image

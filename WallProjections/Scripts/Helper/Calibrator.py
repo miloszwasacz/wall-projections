@@ -1,7 +1,9 @@
 import logging
-import numpy as np
+
 import cv2
+import numpy as np
 from cv2 import aruco
+
 # noinspection PyPackages
 from .VideoCapture import VideoCapture
 
@@ -11,6 +13,8 @@ Defined here https://docs.opencv.org/3.4/d9/d6a/group__aruco.html#gac84398a9ed9d
 
 DISPLAY_RESULTS = False
 """Displays labeled ArUco detection on a CV2 window, useful for debugging"""
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class Calibrator:
@@ -22,8 +26,6 @@ class Calibrator:
         Takes a photo, detects ArUcos and returns a transformation matrix between provided and detected coordinates.
         """
         photo = VideoCapture.take_photo()
-        if photo is None:
-            raise Exception("No photo taken, check if Camera is connected")
         camera_id_to_coord = Calibrator._detect_ArUcos(photo)
         return Calibrator._get_transformation_matrix(camera_id_to_coord, projector_id_to_coord)
 
@@ -57,18 +59,15 @@ class Calibrator:
         """
         from_array = []
         to_array = []
-        logging.info("From Coords " + str(from_coords))
-        logging.info("To Coords " + str(to_coords))
         for iD in from_coords:
             if iD in to_coords:  # if iD in both dictionaries
-                logging.info(
-                    "Matching coords found: " + str(iD) + " " + str(from_coords[iD]) + " " + str(to_coords[iD]))
                 from_array.append(from_coords[iD])
                 to_array.append(to_coords[iD])
 
+        logging.info(f"Found {len(from_array)} markers.")
+
         if len(from_array) < 4:
-            logging.info(str(len(from_array)) + " matching coords found, at least 4 are required for calibration.")
-            raise Exception("Not enough ArUcos detected at least 4 required for calibration.")
+            raise RuntimeError("Not enough markers detected - at least 4 required for calibration.")
 
         from_np_array = np.array(from_array, dtype=np.float32)
         to_np_array = np.array(to_array, dtype=np.float32)
