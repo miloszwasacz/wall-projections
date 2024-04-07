@@ -76,13 +76,6 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     detection_running = True
 
     logging.info("Starting hotspot detection...")
-    photo = VideoCapture.take_photo()  # TODO: there has got to be a better way of getting camera width and height
-    h, w, d = photo.shape
-    logging.info(f"Camera width: {w}, height: {h}")
-    calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
-
-    calibrator = Calibrator(calibration_matrix, (w, h))
-    hotspots = generate_hotspots(event_handler, hotspot_coords_str)
 
     # initialise ML hand-tracking model
     logging.info("Initialising hand-tracking model...")
@@ -93,6 +86,13 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     # initialise video capture
     video_capture = VideoCapture()
     video_capture.start()
+
+    # initialise calibrator
+    h, w, d = video_capture.get_current_frame().shape
+    logging.info(f"Camera width: {w}, height: {h}")
+    calibration_matrix = npnet.asNumpyArray(calibration_matrix_net_array)
+    calibrator = Calibrator(calibration_matrix, (w, h))
+    hotspots = generate_hotspots(event_handler, hotspot_coords_str)
 
     logging.info("Hotspot detection started.")
 
