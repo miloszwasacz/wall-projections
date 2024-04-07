@@ -16,7 +16,6 @@ public class FileHandler : IFileHandler
     /// <inheritdoc />
     /// <exception cref="ExternalFileReadException">Could not read </exception>
     /// <exception cref="ConfigException">Format of config file is invalid</exception>
-    /// TODO Handle errors from trying to load from not-found/invalid zip file
     public IConfig ImportConfig(string zipPath)
     {
         using var configBuilder = new ConfigBuilder();
@@ -46,14 +45,13 @@ public class FileHandler : IFileHandler
     /// </exception>
     public bool SaveConfig(IConfig config)
     {
-        using var configBuilder = new ConfigBuilder();
+        var configBuilder = new ConfigBuilder();
 
         configBuilder.AddHomographyMatrix(config.HomographyMatrix);
 
         config.Hotspots.ForEach(hotspot => { configBuilder.AddHotspot(hotspot); });
 
         configBuilder.GenerateConfigFile();
-
         configBuilder.Commit();
 
         return true;
@@ -100,32 +98,33 @@ public class FileHandler : IFileHandler
         /// <summary>
         /// Homography matrix for config
         /// </summary>
-        private double[,] _homographyMatrix;
+        private double[,]? _homographyMatrix;
 
         /// <summary>
         /// List of hotspots to be stored in the new config.
         /// </summary>
-        private List<Hotspot> _hotspots;
+        private readonly List<Hotspot> _hotspots;
 
         /// <summary>
-        /// Store if a new config will be generated
+        /// Store if a config has been imported from a package.
         /// </summary>
-        private bool _newConfig;
+        private bool _configImported;
 
         /// <summary>
-        /// Store if config file has been generated
+        /// Store if config file has been generated for new config
         /// </summary>
-        private bool _generatedConfig;
+        private bool _configFileGenerated;
 
         /// <summary>
-        /// Store if an imported config will be used
+        /// Stores whether the config has been committed to storage.
         /// </summary>
-        private bool _importedConfig;
+        private bool _configCommitted;
 
         /// <summary>
-        /// Stores whether the new config has been committed to storage.
+        /// Calculated property for if a new config is being made.
         /// </summary>
-        private bool _committed;
+        /// <returns>If new config is being made.</returns>
+        private bool IsNewConfig() => _hotspots.Count != 0 || _homographyMatrix is not null;
 
         public ConfigBuilder()
         {
@@ -136,26 +135,22 @@ public class FileHandler : IFileHandler
             Directory.CreateDirectory(TempConfigFolderPath);
 
             _hotspots = new List<Hotspot>();
-
-            _committed = false;
-            _importedConfig = false;
-            _newConfig = false;
-            _generatedConfig = false;
         }
 
         /// <summary>
-        /// Import
+        /// Import a config from a package file.
         /// </summary>
-        /// <param name="zipPath"></param>
-        /// <exception cref="ConfigBuilderInvalidException">If a new config has already started being built</exception>
-        /// <exception cref="ExternalFileReadException">If the package does not exist</exception>
-        /// <exception cref="ConfigIOException">If there is an issue accessing package/config folder</exception>
-        /// <exception cref="ConfigPackageFormatException">If config package is not a valid package</exception>
+        /// <param name="zipPath">Path to the config package file.</param>
+        /// <exception cref="InvalidOperationException">If a new config has already started being created.</exception>
+        /// <exception cref="ExternalFileReadException">If the package does not exist.</exception>
+        /// <exception cref="ConfigIOException">If there is an issue accessing package/config folder.</exception>
+        /// <exception cref="ConfigPackageFormatException">If config package is not a valid package.</exception>
         public void ImportConfig(string zipPath)
         {
-            if (_newConfig)
-                throw new ConfigBuilderInvalidException();
-            _importedConfig = true;
+            // Can only import if a new config isn't being created
+            if (IsNewConfig())
+                throw new InvalidOperationException("Cannot import when a new config is being created");
+            _configImported = true;
 
             try
             {
@@ -164,17 +159,16 @@ public class FileHandler : IFileHandler
                     throw new ExternalFileReadException(Path.GetFileName(zipPath));
 
                 ZipFile.ExtractToDirectory(zipPath, TempConfigFolderPath);
-
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 throw new ConfigIOException();
             }
-            catch (InvalidDataException e)
+            catch (InvalidDataException)
             {
                 throw new ConfigPackageFormatException(Path.GetFileName(zipPath));
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 throw new ConfigIOException();
             }
@@ -184,15 +178,22 @@ public class FileHandler : IFileHandler
         /// Add the homography matrix to be stored inside the config
         /// </summary>
         /// <param name="homographyMatrix">The homography matrix to be stored in the config</param>
+        /// <exception cref="InvalidOperationException">
+        ///     If config has already been imported, or if a config file has already been generated for new config.
+        /// </exception>
         public void AddHomographyMatrix(double[,] homographyMatrix)
         {
-            if (_importedConfig)
-                throw new ConfigBuilderInvalidException();
+            // Cannot create new config if config has been imported
+            if (_configImported)
+                throw new InvalidOperationException("Config already imported");
 
+            // Cannot update information if a config file has already been generated
+            if (_configFileGenerated)
+                throw new InvalidOperationException("Config file already generated");
+
+            // Cannot set homography matrix multiple times
             if (_homographyMatrix is not null)
-                throw new ConfigBuilderInvalidException("Homography matrix already added");
-
-            _newConfig = true;
+                throw new InvalidOperationException("Homography matrix already added");
 
             _homographyMatrix = homographyMatrix;
         }
@@ -201,17 +202,20 @@ public class FileHandler : IFileHandler
         /// Adds a hotspot to the new config.
         /// </summary>
         /// <param name="hotspot">Hotspot to resolve/add to new config.</param>
+        /// <exception cref="InvalidOperationException">
+        ///     If config has already been imported, or if a config file has already been generated for new config.
+        /// </exception>
         /// <exception cref="ConfigDuplicateFileException">If a file with the same resolved name is already imported.</exception>
         /// <exception cref="ExternalFileReadException">If one of the files to resolve cannot be read.</exception>
         public void AddHotspot(Hotspot hotspot)
         {
-            if (_importedConfig)
-                throw new ConfigBuilderInvalidException();
+            // Cannot create new config if config has been imported
+            if (_configImported)
+                throw new InvalidOperationException("Config already imported");
 
-            if (_generatedConfig)
-                throw new ConfigBuilderInvalidException("Config file already generated");
-
-            _newConfig = true;
+            // Cannot update information if a config file has already been generated
+            if (_configFileGenerated)
+                throw new InvalidOperationException("Config file already generated");
 
             _hotspots.Add(new Hotspot(
                 hotspot.Id,
@@ -226,17 +230,22 @@ public class FileHandler : IFileHandler
         /// <summary>
         /// Generates the JSON file from the current set of hotspots added with <see cref="AddHotspot"/>
         /// </summary>
+        /// <exception cref="InvalidOperationException">
+        ///     If no homography matrix has been added, a config has
+        ///     already been imported, or a config file has already been generated.
+        /// </exception>
         public void GenerateConfigFile()
         {
-            if (_importedConfig)
-                throw new ConfigBuilderInvalidException("Cannot generate config file for imported config");
+            // Cannot create new config if config has been imported
+            if (_configImported)
+                throw new InvalidOperationException("Config already imported");
 
             if (_homographyMatrix is null)
-                throw new ConfigBuilderInvalidException("Must have homography matrix");
+                throw new InvalidOperationException("Must have homography matrix");
 
-            if (_generatedConfig)
-                throw new ConfigBuilderInvalidException("Config file already generated for config");
-            _generatedConfig = true;
+            if (_configFileGenerated)
+                throw new InvalidOperationException("Config file already generated for config");
+            _configFileGenerated = true;
 
             var newConfig = new Config(_homographyMatrix, _hotspots);
 
@@ -263,14 +272,12 @@ public class FileHandler : IFileHandler
         /// <summary>
         /// Commits the new config and overwrites the old config.
         /// </summary>
+        /// <exception cref="InvalidOperationException">If config has not yet been imported or created</exception>
         /// <exception cref="ConfigIOException">If a permissions/IO error occurs during the commit</exception>
         public void Commit()
         {
-            if (!_newConfig && !_importedConfig)
-                throw new ConfigBuilderInvalidException("Must have imported or built new config");
-
-            if (_newConfig && !_generatedConfig)
-                throw new ConfigBuilderInvalidException("Must generate config file for new config before commit");
+            if (!(IsNewConfig() || _configImported))
+                throw new InvalidOperationException("Must create or import config before committing");
 
             try
             {
@@ -282,17 +289,16 @@ public class FileHandler : IFileHandler
                     Directory.Move(CurrentConfigFolderPath, BackupConfigFolderPath);
 
                 Directory.Move(TempConfigFolderPath, CurrentConfigFolderPath);
-                _committed = true;
+                _configCommitted = true;
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or SecurityException)
             {
-                Console.WriteLine(e);
                 throw new ConfigIOException();
             }
             finally
             {
                 // If not committed and a backup exists, move backup to become current.
-                if (!_committed && Directory.Exists(BackupConfigFolderPath))
+                if (!_configCommitted && Directory.Exists(BackupConfigFolderPath))
                 {
                     if (Directory.Exists(CurrentConfigFolderPath))
                         Directory.Delete(CurrentConfigFolderPath, true);
@@ -341,7 +347,7 @@ public class FileHandler : IFileHandler
             {
                 File.Copy(resolvedFilePath, newFilePath);
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 throw new ConfigIOException();
             }
@@ -386,6 +392,7 @@ internal static class PathExtensions
     /// </summary>
     /// <param name="path">Path to the file.</param>
     /// <seealso cref="IsNotInConfig" />
+    // ReSharper disable once MemberCanBePrivate.Global
     public static bool IsInConfig(this string path) => path.StartsWith(CurrentConfigFolderPath) && File.Exists(path);
 
     /// <summary>
