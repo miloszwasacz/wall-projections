@@ -5,18 +5,17 @@ import cv2
 import mediapipe as mp
 
 # noinspection PyPackages
-from .Interop import numpy_dotnet_converters as npnet
-# noinspection PyPackages
 from .Helper.EventHandler import EventHandler
 # noinspection PyPackages
 from .Helper.Hotspot import Hotspot
 # noinspection PyPackages
 from .Helper.VideoCapture import VideoCapture
 # noinspection PyPackages
+from .Interop import numpy_dotnet_converters as npnet
+# noinspection PyPackages
 from .Interop.json_dict_converters import json_to_3dict
 # noinspection PyPackages
 from .calibration import Calibrator
-
 
 MAX_NUM_HANDS: int = 4
 """The maximum number of hands to detect."""
@@ -119,10 +118,12 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
     cv2.destroyAllWindows()  # there shouldn't be any windows but just in case
     hands_model.close()
     detection_mutex.release()
-    logging.info("Hotspot detection stopped.")
 
 
 def stop_hotspot_detection():
-    logging.info("Stopping hotspot detection...")
     global detection_running
+    logging.info("Stopping hotspot detection...")
     detection_running = False
+    detection_mutex.acquire()  # wait until hotspot detection has stopped
+    detection_mutex.release()
+    logging.info("Hotspot detection stopped.")
