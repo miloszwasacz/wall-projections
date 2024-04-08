@@ -554,7 +554,7 @@ public class FileHandlerTest
 
         file.Close();
 
-        Directory.Delete(IFileHandler.TempConfigFolderPath);
+        Directory.Delete(IFileHandler.TempConfigFolderPath, true);
     }
 
     /// <summary>
