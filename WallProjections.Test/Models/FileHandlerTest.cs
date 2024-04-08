@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
@@ -493,11 +494,16 @@ public class FileHandlerTest
 
     /// <summary>
     /// Test that <see cref="FileHandler.SaveConfig"/> still saves correctly if a
-    /// file is open inside the <see cref="IFileHandler.TempConfigFolderPath"/>
+    /// file is open inside the <see cref="IFileHandler.TempConfigFolderPath"/>.
     /// </summary>
+    /// <remarks>
+    ///     This test only passes on Linux and MacOS,
+    ///     since they keep a reference to a deleted file.
+    /// </remarks>
     [NonParallelizable]
+    [Platform("Linux,MacOsX")]
     [Test]
-    public void SaveConfigWithNonWritableTempFileTest()
+    public void SaveConfigWithNonWritableTempFileUnixTest()
     {
         // Creates an existing temporary config folder with a file to ensure they are deleted correctly.
         Directory.CreateDirectory(IFileHandler.TempConfigFolderPath);
@@ -516,6 +522,39 @@ public class FileHandlerTest
 
         Assert.That(Directory.Exists(IFileHandler.TempConfigFolderPath), Is.False);
         AssertConfigsEqual(config, newConfig);
+    }
+
+    /// <summary>
+    /// Test that <see cref="FileHandler.SaveConfig"/> throws a <see cref="ConfigIOException"/> if a
+    /// file is open inside the <see cref="IFileHandler.TempConfigFolderPath"/> on Windows.
+    /// </summary>
+    /// <remarks>
+    ///     This test only passes on Windows, as Windows will block deletion of a parent folder
+    ///     of a file.
+    /// </remarks>
+    [NonParallelizable]
+    [Platform("Win")]
+    [Test]
+    public void SaveConfigWithNonWritableTempFileWindowsTest()
+    {
+        // Creates an existing temporary config folder with a file.
+        Directory.CreateDirectory(IFileHandler.TempConfigFolderPath);
+
+        // Keep new file open so that temp folder is not writable.
+        using var file = File.Create(IFileHandler.TempConfigFilePath);
+
+        var fileHandler = new FileHandler();
+        var config = new Config(TestMatrix, ImmutableList<Hotspot>.Empty);
+
+        Assert.That(File.Exists(IFileHandler.TempConfigFilePath));
+
+        Assert.Throws<ConfigIOException>(() => fileHandler.SaveConfig(config));
+
+        Assert.That(Directory.Exists(IFileHandler.TempConfigFolderPath), Is.True);
+
+        file.Close();
+
+        Directory.Delete(IFileHandler.TempConfigFolderPath);
     }
 
     /// <summary>
