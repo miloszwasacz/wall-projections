@@ -49,7 +49,26 @@ public class ConfigNotImportedException : ConfigException
 /// </summary>
 public class ConfigIOException : ConfigException
 {
-    public override string Message => "Unable to access loaded config files";
+    private readonly string? _filePath;
+
+    public override string Message =>
+        _filePath is null ? "Unable to access loaded config files" : $"Unable to access {_filePath}";
+
+    /// <summary>
+    /// Constructor if specific path where issue occurred not relevant.
+    /// </summary>
+    public ConfigIOException()
+    {
+    }
+
+    /// <summary>
+    /// Constructor to tell user path where issue occurred.
+    /// </summary>
+    /// <param name="filePath"></param>
+    public ConfigIOException(string filePath)
+    {
+        _filePath = filePath;
+    }
 }
 
 /// <summary>

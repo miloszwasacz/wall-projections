@@ -20,40 +20,38 @@ public class FileHandlerTest
     private static string HotspotTitle(int id) => $"Hotspot {id}";
     private static readonly double[,] TestMatrix = MockPythonProxy.CalibrationResult;
 
+    private static string TestAssets => Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+
     /// <summary>
     /// Location of the zip file for testing
     /// </summary>
-    private static string TestZip => Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.zip");
+    private static string TestZip => Path.Combine(TestAssets, "test.zip");
 
     /// <summary>
     /// Location of the zip file with no config file for testing
     /// </summary>
-    private static string TestZipNoConfig =>
-        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_no_config.zip");
+    private static string TestZipNoConfig => Path.Combine(TestAssets, "test_no_config.zip");
 
     /// <summary>
     /// Location of the zip file with an invalid config file for testing
     /// </summary>
-    private static string TestZipInvalidConfig =>
-        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_invalid_config.zip");
+    private static string TestZipInvalidConfigFile => Path.Combine(TestAssets, "test_invalid_config.zip");
 
     /// <summary>
     /// Location of a text file to check exception for non zip file
     /// </summary>
-    private static string TestNonZipConfig =>
-        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test.txt");
+    private static string TestNonZipConfig => Path.Combine(TestAssets, "test.txt");
 
     /// <summary>
     /// Location of a zip file containing a file with only whitespace in the name
     /// </summary>
-    private static string TestZipWithSingleTestFileConfig =>
-        Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "test_zip_with_test_file.zip");
+    private static string TestNonExistentConfig => Path.Combine(TestAssets, "does_not_exist.zip");
 
     /// <summary>
     /// Location to store current non test config while tests are running
     /// </summary>
     private static string CurrentConfigTempStore =>
-        Path.Combine(IFileHandler.ConfigFolderPath, "TestTemp");
+        Path.Combine(IFileHandler.AppDataFolderPath, "TestTemp");
 
     /// <summary>
     /// Ensures that the current config is not lost during tests.
@@ -102,6 +100,38 @@ public class FileHandlerTest
 
         Directory.Delete(IFileHandler.CurrentConfigFolderPath, true);
         Assert.That(!Directory.Exists(IFileHandler.CurrentConfigFolderPath));
+    }
+
+    /// <summary>
+    /// Test that the <see cref="FileHandler.LoadConfig"/> method throws a
+    /// <see cref="ConfigNotImportedException"/> if no config is imported
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void LoadNonImportedConfigTest()
+    {
+        // Check that there is no config imported
+        Assert.That(Directory.Exists(IFileHandler.CurrentConfigFolderPath), Is.False);
+
+        Assert.Throws<ConfigNotImportedException>(() => new FileHandler().LoadConfig());
+    }
+
+    /// <summary>
+    /// Test that the <see cref="FileHandler.LoadConfig"/> method throws a
+    /// <see cref="ConfigIOException"/> if the config file is already opened
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void LoadingOnBlockedFileTest()
+    {
+        Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
+
+        // Creates file and keeps it open/blocked
+        using var _ = File.Create(IFileHandler.CurrentConfigFilePath);
+
+        Assert.That(File.Exists(IFileHandler.CurrentConfigFilePath));
+
+        Assert.Throws<ConfigIOException>(() => new FileHandler().LoadConfig());
     }
 
     /// <summary>
@@ -169,7 +199,8 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws an exception when the zip file does not contain a config file
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws a
+    /// <see cref="ConfigInvalidException"/> when the zip file does not contain a config file
     /// </summary>
     [Test]
     [NonParallelizable]
@@ -180,14 +211,73 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws an exception when the config file has invalid format
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method throws a
+    /// <see cref="ConfigInvalidException"/> when the config file has invalid format
     /// </summary>
     [Test]
     [NonParallelizable]
     public void ImportConfigInvalidConfigTest()
     {
         var fileHandler = new FileHandler();
-        Assert.Throws<ConfigInvalidException>(() => fileHandler.ImportConfig(TestZipInvalidConfig));
+        Assert.Throws<ConfigInvalidException>(() => fileHandler.ImportConfig(TestZipInvalidConfigFile));
+    }
+
+    /// <summary>
+    /// Test that the <see cref="FileHandler.ImportConfig"/> method throws a
+    /// <see cref="ConfigPackageFormatException"/> if a file to import is not a zip.
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void ImportNonZipFileTest()
+    {
+        var fileHandler = new FileHandler();
+        // Non zip file
+        Assert.Throws<ConfigPackageFormatException>(() => fileHandler.ImportConfig(TestNonZipConfig));
+    }
+
+    /// <summary>
+    /// Test that the <see cref="FileHandler.ImportConfig"/> method throws a
+    /// <see cref="ExternalFileReadException"/> if a file to import cannot be found.
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void ImportNonExistentFileTest()
+    {
+        var fileHandler = new FileHandler();
+
+        // Non existent file
+        Assert.Throws<ExternalFileReadException>(() => fileHandler.ImportConfig(TestNonExistentConfig));
+    }
+
+    [NonParallelizable]
+    [Test]
+    public void ImportNonAccessibleFileTest()
+    {
+        var fileHandler = new FileHandler();
+
+        using var file = ZipFile.Open(TestZip, ZipArchiveMode.Update);
+
+        Assert.Throws<ExternalFileReadException>(() => fileHandler.ImportConfig(TestZip));
+    }
+
+    /// <summary>
+    /// Test that the <see cref="FileHandler.ImportConfig" /> method always deletes the
+    /// <see cref="IFileHandler.TempConfigFolderPath"/>
+    /// </summary>
+    [Test]
+    [NonParallelizable]
+    public void ImportConfigDisposeTest()
+    {
+        var fileHandler = new FileHandler();
+        var path = TestZip;
+        fileHandler.ImportConfig(path);
+
+        Assert.That(Directory.Exists(IFileHandler.TempConfigFolderPath), Is.False);
+
+        path = Path.GetRandomFileName() + ".zip";
+        Assert.Throws<ExternalFileReadException>(() => fileHandler.ImportConfig(path));
+
+        Assert.That(Directory.Exists(IFileHandler.TempConfigFolderPath), Is.False);
     }
 
     /// <summary>
@@ -374,6 +464,79 @@ public class FileHandlerTest
         var newConfig = fileHandler.LoadConfig();
 
         AssertConfigsEqual(config, newConfig);
+    }
+
+    /// <summary>
+    /// Test that config is correctly saved without previously existing config folder.
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void SaveConfigExistingTempFolderTest()
+    {
+        // Creates an existing temporary config folder with a file to ensure they are deleted correctly.
+        Directory.CreateDirectory(IFileHandler.TempConfigFolderPath);
+
+        // Immediately close file to ensure no IOException
+        File.Create(IFileHandler.TempConfigFilePath).Close();
+
+        var fileHandler = new FileHandler();
+        var config = new Config(TestMatrix, ImmutableList<Hotspot>.Empty);
+
+        fileHandler.SaveConfig(config);
+
+        Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "config.json")));
+
+        var newConfig = fileHandler.LoadConfig();
+
+        AssertConfigsEqual(config, newConfig);
+    }
+
+    /// <summary>
+    /// Test that <see cref="FileHandler.SaveConfig"/> still saves correctly if a
+    /// file is open inside the <see cref="IFileHandler.TempConfigFolderPath"/>
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void SaveConfigWithNonWritableTempFileTest()
+    {
+        // Creates an existing temporary config folder with a file to ensure they are deleted correctly.
+        Directory.CreateDirectory(IFileHandler.TempConfigFolderPath);
+
+        // Keep new file open so that temp folder is not writable.
+        File.Create(IFileHandler.TempConfigFilePath);
+
+        var fileHandler = new FileHandler();
+        var config = new Config(TestMatrix, ImmutableList<Hotspot>.Empty);
+
+        Assert.That(File.Exists(IFileHandler.TempConfigFilePath));
+
+        fileHandler.SaveConfig(config);
+
+        var newConfig = fileHandler.LoadConfig();
+
+        Assert.That(Directory.Exists(IFileHandler.TempConfigFolderPath), Is.False);
+        AssertConfigsEqual(config, newConfig);
+    }
+
+    /// <summary>
+    /// Test that <see cref="FileHandler.SaveConfig"/> throws a
+    /// <see cref="ConfigIOException"/> if a file has the same path as the temp folder
+    /// </summary>
+    [NonParallelizable]
+    [Test]
+    public void SaveConfigWithFileAtTempFolderTest()
+    {
+        File.Create(IFileHandler.TempConfigFolderPath).Close();
+
+        Assert.That(File.Exists(IFileHandler.TempConfigFolderPath));
+
+        var fileHandler = new FileHandler();
+        var config = new Config(TestMatrix, ImmutableList<Hotspot>.Empty);
+
+        Assert.Throws<ConfigIOException>(() => fileHandler.SaveConfig(config));
+
+        // Clean up file to get rid of errors
+        File.Delete(IFileHandler.TempConfigFolderPath);
     }
 
     /// <summary>
@@ -705,8 +868,10 @@ public class FileHandlerTest
                 new Coord(0, 0, 0),
                 HotspotTitle(1),
                 Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_1.txt"),
-                new List<string> { Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png") }.ToImmutableList(),
-                new List<string> { Path.Combine(IFileHandler.CurrentConfigFolderPath, "video_0_0.mp4") }.ToImmutableList())
+                new List<string>
+                    { Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png") }.ToImmutableList(),
+                new List<string>
+                    { Path.Combine(IFileHandler.CurrentConfigFolderPath, "video_0_0.mp4") }.ToImmutableList())
         });
 
         fileHandler.SaveConfig(config);
@@ -747,31 +912,87 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that a <see cref="ConfigPackageFormatException"/> is thrown if a file to import is not a zip.
+    /// Test that config with a single hotspot with non existent description throws
+    /// <see cref="ExternalFileReadException"/> and resets config back.
     /// </summary>
-    [NonParallelizable]
     [Test]
-    public void ImportNonZipFileTest()
+    [NonParallelizable]
+    public void SaveConfigNonExistentFileTest()
     {
         var fileHandler = new FileHandler();
-        // Non zip file
-        Assert.Throws<ConfigPackageFormatException>(() => fileHandler.ImportConfig(TestNonZipConfig));
+        var textFilePath = Path.Combine(TestAssets, "test.txt");
+        var config = new Config(TestMatrix, new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                "Hotspot 0",
+                textFilePath,
+                new List<string> { Path.Combine(TestAssets, "test_image.png") }.ToImmutableList(),
+                ImmutableList<string>.Empty)
+        });
+
+        fileHandler.SaveConfig(config);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(IFileHandler.CurrentConfigFilePath));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png")));
+        });
+
+        textFilePath = TestNonExistentConfig;
+
+        config = new Config(TestMatrix, new List<Hotspot>
+        {
+            new(0, new Coord(0, 0, 0), "Hotspot 0", textFilePath, ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        Assert.Throws<ExternalFileReadException>(() => fileHandler.SaveConfig(config));
+
+        // Image should still exist even though the second config does not have one
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(IFileHandler.CurrentConfigFilePath));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "text_0.txt")));
+            Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, "image_0_0.png")));
+        });
     }
 
     /// <summary>
-    /// Test that a <see cref="ExternalFileReadException"/> is thrown if a file to import cannot be found.
+    /// Test that the <see cref="FileHandler.SaveConfig"/> method clears the temp folder on exit.
     /// </summary>
     [NonParallelizable]
     [Test]
-    public void ImportNonExistentFileTest()
+    public void SaveConfigDisposeTest()
     {
         var fileHandler = new FileHandler();
-        var tempFile = "";
+        var textFilePath = Path.Combine(TestAssets, "test.txt");
+        var config = new Config(TestMatrix, new List<Hotspot>
+        {
+            new(0,
+                new Coord(0, 0, 0),
+                "Hotspot 0",
+                textFilePath,
+                new List<string> { Path.Combine(TestAssets, "test_image.png") }.ToImmutableList(),
+                ImmutableList<string>.Empty)
+        });
 
-        while (File.Exists(tempFile))
-            tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+        fileHandler.SaveConfig(config);
 
-        Assert.Throws<ExternalFileReadException>(() => fileHandler.ImportConfig(tempFile));
+        Assert.That(Directory.Exists(IFileHandler.TempConfigFolderPath), Is.False);
+
+        textFilePath = TestNonExistentConfig;
+
+        config = new Config(TestMatrix, new List<Hotspot>
+        {
+            new(0, new Coord(0, 0, 0), "Hotspot 0", textFilePath, ImmutableList<string>.Empty,
+                ImmutableList<string>.Empty)
+        });
+
+        Assert.Throws<ExternalFileReadException>(() => fileHandler.SaveConfig(config));
+
+        Assert.That(Directory.Exists(IFileHandler.TempConfigFolderPath), Is.False);
     }
 
     /// <summary>
@@ -818,6 +1039,6 @@ public class FileHandlerTest
     /// </summary>
     private static void AssertConfigImported()
     {
-        Assert.That(File.Exists(Path.Combine(IFileHandler.CurrentConfigFolderPath, IFileHandler.ConfigFileName)), Is.True);
+        Assert.That(File.Exists(IFileHandler.CurrentConfigFilePath), Is.True);
     }
 }

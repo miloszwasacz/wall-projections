@@ -18,8 +18,9 @@ namespace WallProjections.Models;
 public class FileHandler : IFileHandler
 {
     /// <inheritdoc />
-    /// <exception cref="ExternalFileReadException">Could not read </exception>
-    /// <exception cref="ConfigException">Format of config file is invalid</exception>
+    /// <exception cref="ExternalFileReadException">Could not access config package.</exception>
+    /// <exception cref="ConfigInvalidException">Format of config file is invalid.</exception>
+    /// <exception cref="ConfigPackageFormatException">If format of config package is invalid.</exception>
     public IConfig ImportConfig(string zipPath)
     {
         using var configBuilder = new ConfigBuilder();
@@ -43,13 +44,13 @@ public class FileHandler : IFileHandler
 
 
     /// <inheritdoc />
-    /// <exception>
-    /// Can throw the same exceptions as <see cref="Directory.CreateDirectory" />,
-    /// <see cref="File.Copy(string, string)" />, and <see cref="File.Move(string, string, bool)" />.
+    /// <exception cref="ExternalFileReadException">
+    ///     If one of the media files does not exist or is not readable.
     /// </exception>
+    /// <exception cref="ConfigIOException">If there is an issue accessing internal config files/folders.</exception>
     public bool SaveConfig(IConfig config)
     {
-        var configBuilder = new ConfigBuilder();
+        using var configBuilder = new ConfigBuilder();
 
         configBuilder.AddHomographyMatrix(config.HomographyMatrix);
 
@@ -69,7 +70,7 @@ public class FileHandler : IFileHandler
     /// <exception cref="ConfigInvalidException">config.json missing or has invalid syntax.</exception>
     public IConfig LoadConfig()
     {
-        var configLocation = Path.Combine(CurrentConfigFolderPath, ConfigFileName);
+        var configLocation = CurrentConfigFilePath;
 
         if (!Directory.Exists(CurrentConfigFolderPath))
             throw new ConfigNotImportedException();
@@ -130,15 +131,29 @@ public class FileHandler : IFileHandler
         /// <returns>If new config is being made.</returns>
         private bool IsNewConfig() => _hotspots.Count != 0 || _homographyMatrix is not null;
 
+        /// <summary>
+        /// Constructor for config builder. Creates the temporary folder for saving.
+        /// <exception cref="ConfigIOException">
+        ///     Thrown if the <see cref="IFileHandler.TempConfigFolderPath"/> could not be modified
+        ///     due to permission/access or blocking issues.
+        /// </exception>
+        /// </summary>
         public ConfigBuilder()
         {
-            // Reset/Create temporary config folder
-            if (Directory.Exists(TempConfigFolderPath))
-                Directory.Delete(TempConfigFolderPath);
+            try
+            {
+                // Reset/Create temporary config folder
+                if (Directory.Exists(TempConfigFolderPath))
+                    Directory.Delete(TempConfigFolderPath, true);
 
-            Directory.CreateDirectory(TempConfigFolderPath);
+                Directory.CreateDirectory(TempConfigFolderPath);
 
-            _hotspots = new List<Hotspot>();
+                _hotspots = new List<Hotspot>();
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                throw new ConfigIOException(TempConfigFolderPath);
+            }
         }
 
         /// <summary>
@@ -146,8 +161,7 @@ public class FileHandler : IFileHandler
         /// </summary>
         /// <param name="zipPath">Path to the config package file.</param>
         /// <exception cref="InvalidOperationException">If a new config has already started being created.</exception>
-        /// <exception cref="ExternalFileReadException">If the package does not exist.</exception>
-        /// <exception cref="ConfigIOException">If there is an issue accessing package/config folder.</exception>
+        /// <exception cref="ExternalFileReadException">If the package does not exist or is not accessible.</exception>
         /// <exception cref="ConfigPackageFormatException">If config package is not a valid package.</exception>
         public void ImportConfig(string zipPath)
         {
@@ -158,23 +172,19 @@ public class FileHandler : IFileHandler
 
             try
             {
-                // Check if zip file exists for import
-                if (!File.Exists(zipPath))
-                    throw new ExternalFileReadException(Path.GetFileName(zipPath));
-
                 ZipFile.ExtractToDirectory(zipPath, TempConfigFolderPath);
             }
-            catch (IOException)
+            catch (FileNotFoundException)
             {
-                throw new ConfigIOException();
+                throw new ExternalFileReadException(Path.GetFileName(zipPath));
+            }
+            catch (Exception e) when (e is UnauthorizedAccessException or IOException)
+            {
+                throw new ExternalFileReadException(zipPath);
             }
             catch (InvalidDataException)
             {
                 throw new ConfigPackageFormatException(Path.GetFileName(zipPath));
-            }
-            catch (UnauthorizedAccessException)
-            {
-                throw new ConfigIOException();
             }
         }
 
@@ -221,6 +231,10 @@ public class FileHandler : IFileHandler
             if (_configFileGenerated)
                 throw new InvalidOperationException("Config file already generated");
 
+            // Cannot add hotspot if hotspot with the same id already exists
+            if (_hotspots.Select(h => h.Id).Contains(hotspot.Id))
+                throw new ArgumentException("Cannot have two hotspots with the same id", nameof(hotspot));
+
             _hotspots.Add(new Hotspot(
                 hotspot.Id,
                 hotspot.Position,
@@ -264,12 +278,12 @@ public class FileHandler : IFileHandler
                 });
 #endif
 
-                using var configFile = new StreamWriter(Path.Combine(TempConfigFolderPath, ConfigFileName));
+                using var configFile = new StreamWriter(TempConfigFilePath);
                 configFile.Write(configString);
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or SecurityException)
             {
-                throw new ConfigIOException();
+                throw new ConfigIOException(TempConfigFilePath);
             }
         }
 
@@ -277,7 +291,7 @@ public class FileHandler : IFileHandler
         /// Commits the new config and overwrites the old config.
         /// </summary>
         /// <exception cref="InvalidOperationException">If config has not yet been imported or created</exception>
-        /// <exception cref="ConfigIOException">If a permissions/IO error occurs during the commit</exception>
+        /// <exception cref="ConfigIOException">If a permissions/blocking error occurs during the commit</exception>
         public void Commit()
         {
             if (!(IsNewConfig() || _configImported))
@@ -322,6 +336,7 @@ public class FileHandler : IFileHandler
         /// <returns>Paths of resolved files.</returns>
         /// <exception cref="ConfigDuplicateFileException">If a file with the same resolved name is already imported.</exception>
         /// <exception cref="ExternalFileReadException">If the file to resolve cannot be read.</exception>
+        /// <exception cref="ConfigIOException">If there is an issue accessing original file or saving new file.</exception>
         private static string ResolveFile(string file, string type, int id, int? i = null)
         {
             var currentFileName = Path.GetFileName(file);
@@ -337,7 +352,7 @@ public class FileHandler : IFileHandler
             var newFileName = i is null ? $"{type}_{id}{extension}" : $"{type}_{id}_{i}{extension}";
 
             var resolvedFilePath =
-                file.IsNotInConfig() ? file : Path.Combine(CurrentConfigFolderPath, file);
+                file.IsInConfig() ? Path.Combine(CurrentConfigFolderPath, file) : file;
 
             var newFilePath = Path.Combine(TempConfigFolderPath, newFileName);
 
@@ -367,8 +382,7 @@ public class FileHandler : IFileHandler
         /// <param name="type">Type of the files to resolve</param>
         /// <param name="id">Id of current hotspot</param>
         /// <returns>Paths of resolved files.</returns>
-        /// <exception cref="ConfigDuplicateFileException">If a file with the same resolved name is already imported.</exception>
-        /// <exception cref="ExternalFileReadException">If one of the files to resolve cannot be read.</exception>
+        /// <exceptions>See <see cref="ResolveFile"/></exceptions>
         private static IEnumerable<string> ResolveFiles(IEnumerable<string> files, string type, int id) =>
             files.Select((path, i) => ResolveFile(path, type, id, i));
 

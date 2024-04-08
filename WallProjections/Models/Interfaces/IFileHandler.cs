@@ -5,34 +5,45 @@ namespace WallProjections.Models.Interfaces;
 
 public interface IFileHandler
 {
-    public const string ConfigFileName = "config.json";
-    public const string ConfigFolderName = "WallProjections";
-    public const string CurrentConfigFolder = "Current";
-    public const string TempConfigFolder = "Temp";
-    public const string BackupConfigFolder = "Backup";
+    private const string ConfigFileName = "config.json";
+    private const string ConfigFolderName = "WallProjections";
+    private const string CurrentConfigFolder = "Current";
+    private const string TempConfigFolder = "Temp";
+    private const string BackupConfigFolder = "Backup";
 
     /// <summary>
     /// Path to the config folder for the program.
     /// </summary>
-    public static string ConfigFolderPath =>
+    public static string AppDataFolderPath =>
         Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create),
-            ConfigFolderName );
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData,
+                Environment.SpecialFolderOption.Create),
+            ConfigFolderName);
 
     /// <summary>
     /// Path to the folder containing the current config.json and the media files.
     /// </summary>
-    public static string CurrentConfigFolderPath => Path.Combine(ConfigFolderPath, CurrentConfigFolder );
+    public static string CurrentConfigFolderPath => Path.Combine(AppDataFolderPath, CurrentConfigFolder);
 
     /// <summary>
-    /// Path to the folder for storing the temporary config for during saving.
+    /// Path to the current config.json file.
     /// </summary>
-    public static string TempConfigFolderPath => Path.Combine(ConfigFolderPath, TempConfigFolder );
+    public static string CurrentConfigFilePath => Path.Combine(CurrentConfigFolderPath, ConfigFileName);
+
+    /// <summary>
+    /// Path to the folder used to store the temporary config during saving.
+    /// </summary>
+    public static string TempConfigFolderPath => Path.Combine(AppDataFolderPath, TempConfigFolder);
+
+    /// <summary>
+    /// Path to the config.json file during saving.
+    /// </summary>
+    public static string TempConfigFilePath => Path.Combine(TempConfigFolderPath, ConfigFileName);
 
     /// <summary>
     /// Path to the folder for storing the current config while the new config is being saved.
     /// </summary>
-    public static string BackupConfigFolderPath => Path.Combine(ConfigFolderPath, BackupConfigFolder);
+    public static string BackupConfigFolderPath => Path.Combine(AppDataFolderPath, BackupConfigFolder);
 
     /// <summary>
     /// Import a zip file of the config file and the media files
