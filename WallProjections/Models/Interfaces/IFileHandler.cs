@@ -50,7 +50,6 @@ public interface IFileHandler
     /// </summary>
     /// <param name="zipPath">Path to the zip file</param>
     /// <returns>A config at the specified path, if any exist</returns>
-    /// <exception cref="ConfigPackageNotFoundException">If zip file or config file could not be found</exception>
     public IConfig? ImportConfig(string zipPath);
 
     /// <summary>
@@ -58,7 +57,6 @@ public interface IFileHandler
     /// </summary>
     /// <param name="exportPath">Path to the zip file</param>
     /// <returns>True if file is exported</returns>
-    /// <exception cref="ConfigNotImportedException">If there is no imported config/media.</exception>
     public bool ExportConfig(string exportPath);
 
     /// <summary>
@@ -76,8 +74,10 @@ public interface IFileHandler
     public bool SaveConfig(IConfig config);
 
     /// <summary>
-    /// Removes all files and the folder<see cref="CurrentConfigFolderPath" />.
+    /// Removes all files and the folder <see cref="CurrentConfigFolderPath" />.
     /// </summary>
+    /// <exception cref="ConfigNotImportedException">If there is no imported config to delete.</exception>
+    /// <exception cref="ConfigIOException">If config folder is locked or inaccessible.</exception>
     public static void DeleteConfigFolder()
     {
         try
@@ -88,7 +88,7 @@ public interface IFileHandler
         {
             throw new ConfigNotImportedException();
         }
-        catch (IOException)
+        catch (Exception e) when (e is UnauthorizedAccessException or IOException)
         {
             throw new ConfigIOException();
         }

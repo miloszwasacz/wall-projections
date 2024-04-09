@@ -5,7 +5,7 @@ namespace WallProjections.Models;
 /// <summary>
 /// Base <see cref="Exception"/> for any expected issues with the config/file management.
 /// </summary>
-public class ConfigException : Exception
+public abstract class ConfigException : Exception
 {
     public override string Message => "Something went wrong managing the config";
 }
@@ -18,7 +18,7 @@ public class ConfigPackageFormatException : ConfigException
     /// <summary>
     /// Name of the config package which has invalid format.
     /// </summary>
-    private string _fileName { get; }
+    private readonly string _fileName;
 
     public override string Message => $".wall package {_fileName} not valid";
 
@@ -79,7 +79,7 @@ public class ExternalFileReadException : ConfigException
     /// <summary>
     /// Name of file which could not be read.
     /// </summary>
-    private string _fileName { get; }
+    private readonly string _fileName;
 
     public override string Message => $"Could not find/access {_fileName}";
 
@@ -101,7 +101,7 @@ public class ConfigDuplicateFileException : ConfigException
     /// <summary>
     /// Name of duplicate imported media file.
     /// </summary>
-    private string _fileName { get; }
+    private readonly string _fileName;
 
     public override string Message => $"Duplicate media files with name {_fileName} in config";
 
