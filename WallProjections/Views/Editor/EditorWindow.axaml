@@ -60,7 +60,7 @@
                     </Button>
 
                     <Button Click="Close_OnClick">
-                        Close Editor
+                        Return to Viewer
                     </Button>
 
                 </StackPanel>

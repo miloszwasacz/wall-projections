@@ -51,10 +51,18 @@
 
                     <views:IconButton Grid.Column="2" Grid.Row="0"
                                       MinHeight="48"
-                                      ToolTip.Tip="Import from file"
                                       Command="{Binding ImportButton_OnClick, RelativeSource={RelativeSource TemplatedParent}}"
                                       CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
-                                      IconData="{StaticResource document_import_regular}" />
+                                      IconData="{StaticResource document_import_regular}">
+
+                        <ToolTip.Tip>
+                            <TextBlock TextAlignment="Center">
+                                Import title and description<LineBreak />
+                                from a text file
+                            </TextBlock>
+                        </ToolTip.Tip>
+
+                    </views:IconButton>
 
                     <ItemsControl Grid.Column="4" Grid.Row="0"
                                   ItemsSource="{TemplateBinding MenuItems}">
