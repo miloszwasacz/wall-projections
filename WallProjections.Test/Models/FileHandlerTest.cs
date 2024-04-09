@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.Test.Mocks.Helper;
@@ -107,8 +106,8 @@ public class FileHandlerTest
     /// Test that the <see cref="FileHandler.LoadConfig"/> method throws a
     /// <see cref="ConfigNotImportedException"/> if no config is imported
     /// </summary>
-    [NonParallelizable]
     [Test]
+    [NonParallelizable]
     public void LoadNonImportedConfigTest()
     {
         // Check that there is no config imported
@@ -121,8 +120,8 @@ public class FileHandlerTest
     /// Test that the <see cref="FileHandler.LoadConfig"/> method throws a
     /// <see cref="ConfigIOException"/> if the config file is already opened
     /// </summary>
-    [NonParallelizable]
     [Test]
+    [NonParallelizable]
     public void LoadingOnBlockedFileTest()
     {
         Directory.CreateDirectory(IFileHandler.CurrentConfigFolderPath);
@@ -227,8 +226,8 @@ public class FileHandlerTest
     /// Test that the <see cref="FileHandler.ImportConfig"/> method throws a
     /// <see cref="ConfigPackageFormatException"/> if a file to import is not a zip.
     /// </summary>
-    [NonParallelizable]
     [Test]
+    [NonParallelizable]
     public void ImportNonZipFileTest()
     {
         var fileHandler = new FileHandler();
@@ -240,8 +239,8 @@ public class FileHandlerTest
     /// Test that the <see cref="FileHandler.ImportConfig"/> method throws a
     /// <see cref="ExternalFileReadException"/> if a file to import cannot be found.
     /// </summary>
-    [NonParallelizable]
     [Test]
+    [NonParallelizable]
     public void ImportNonExistentFileTest()
     {
         var fileHandler = new FileHandler();
@@ -250,8 +249,12 @@ public class FileHandlerTest
         Assert.Throws<ExternalFileReadException>(() => fileHandler.ImportConfig(TestNonExistentConfig));
     }
 
-    [NonParallelizable]
+    /// <summary>
+    /// Test that the <see cref="FileHandler.ImportConfig"/> throws a
+    /// <see cref="ExternalFileReadException"/> if the config package file is locked.
+    /// </summary>
     [Test]
+    [NonParallelizable]
     public void ImportNonAccessibleFileTest()
     {
         var fileHandler = new FileHandler();
@@ -468,10 +471,12 @@ public class FileHandlerTest
     }
 
     /// <summary>
-    /// Test that config is correctly saved without previously existing config folder.
+    /// Test that the <see cref="FileHandler.SaveConfig"/> removes a preexisting
+    /// <see cref="IFileHandler.TempConfigFolderPath">temp folder</see> and saves
+    /// correctly.
     /// </summary>
-    [NonParallelizable]
     [Test]
+    [NonParallelizable]
     public void SaveConfigExistingTempFolderTest()
     {
         // Creates an existing temporary config folder with a file to ensure they are deleted correctly.
@@ -500,9 +505,9 @@ public class FileHandlerTest
     ///     This test only passes on Linux and MacOS,
     ///     since they keep a reference to a deleted file.
     /// </remarks>
+    [Test]
     [NonParallelizable]
     [Platform("Linux,MacOsX")]
-    [Test]
     public void SaveConfigWithNonWritableTempFileUnixTest()
     {
         // Creates an existing temporary config folder with a file to ensure they are deleted correctly.
@@ -532,9 +537,9 @@ public class FileHandlerTest
     ///     This test only passes on Windows, as Windows will block deletion of a parent folder
     ///     of a file.
     /// </remarks>
+    [Test]
     [NonParallelizable]
     [Platform("Win")]
-    [Test]
     public void SaveConfigWithNonWritableTempFileWindowsTest()
     {
         // Creates an existing temporary config folder with a file.
@@ -561,8 +566,8 @@ public class FileHandlerTest
     /// Test that <see cref="FileHandler.SaveConfig"/> throws a
     /// <see cref="ConfigIOException"/> if a file has the same path as the temp folder
     /// </summary>
-    [NonParallelizable]
     [Test]
+    [NonParallelizable]
     public void SaveConfigWithFileAtTempFolderTest()
     {
         File.Create(IFileHandler.TempConfigFolderPath).Close();
@@ -1001,8 +1006,8 @@ public class FileHandlerTest
     /// <summary>
     /// Test that the <see cref="FileHandler.SaveConfig"/> method clears the temp folder on exit.
     /// </summary>
-    [NonParallelizable]
     [Test]
+    [NonParallelizable]
     public void SaveConfigDisposeTest()
     {
         var fileHandler = new FileHandler();
