@@ -101,7 +101,7 @@ public interface IFileHandler
         }
         catch (Exception e) when (e is UnauthorizedAccessException or IOException)
         {
-            throw new ConfigIOException(e);
+            throw new ConfigIOException(CurrentConfigFolderPath, e);
         }
     }
 }
