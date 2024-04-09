@@ -96,21 +96,6 @@ public interface IEditorViewModel
     public bool AreActionsDisabled { get; }
 
     /// <summary>
-    /// Tries to acquire the action lock, preventing other actions from being performed.
-    /// </summary>
-    /// <returns>Whether the lock was acquired.</returns>
-    /// <seealso cref="ReleaseActionLock" />
-    /// <seealso cref="AreActionsDisabled" />
-    public bool TryAcquireActionLock();
-
-    /// <summary>
-    /// Releases the action lock, allowing other actions to be performed.
-    /// </summary>
-    /// <seealso cref="TryAcquireActionLock" />
-    /// <seealso cref="AreActionsDisabled" />
-    public void ReleaseActionLock();
-
-    /// <summary>
     /// Performs the given <paramref name="action" /> while ignoring any attempts to perform other actions.
     /// </summary>
     /// <param name="action">The action to perform.</param>

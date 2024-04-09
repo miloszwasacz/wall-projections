@@ -207,34 +207,18 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     public bool AreActionsDisabled
     {
         get => _areActionsDisabled;
-        protected set => this.RaiseAndSetIfChanged(ref _areActionsDisabled, value);
+        private set => this.RaiseAndSetIfChanged(ref _areActionsDisabled, value);
     }
 
     /// <inheritdoc />
-    public bool TryAcquireActionLock()
+    public async Task<bool> WithActionLock(Func<Task> action)
     {
         lock (this)
         {
             if (AreActionsDisabled) return false;
 
             AreActionsDisabled = true;
-            return true;
         }
-    }
-
-    /// <inheritdoc />
-    public void ReleaseActionLock()
-    {
-        lock (this)
-        {
-            AreActionsDisabled = false;
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> WithActionLock(Func<Task> action)
-    {
-        if (!TryAcquireActionLock()) return false;
 
         try
         {
@@ -243,7 +227,10 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         }
         finally
         {
-            ReleaseActionLock();
+            lock (this)
+            {
+                AreActionsDisabled = false;
+            }
         }
     }
 

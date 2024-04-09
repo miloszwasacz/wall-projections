@@ -18,6 +18,7 @@ public interface IImportViewModel
     /// <returns>The level of warning to show.</returns>
     public ImportWarningLevel IsImportSafe();
 
+    //TODO Refactor to async
     /// <summary>
     /// Imports the hotspot's title and description from a file. The first line is the title,
     /// then a blank line, then the description.

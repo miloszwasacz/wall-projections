@@ -516,52 +516,12 @@ namespace WallProjections.Test.ViewModels.Editor
             }
 
             // Assert that the lock can be acquired again
-            var lock2 = editorViewModel.TryAcquireActionLock();
-            Assert.Multiple(() =>
+            var lock2 = await editorViewModel.WithActionLock(() =>
             {
-                Assert.That(lock2, Is.True);
                 Assert.That(editorViewModel.AreActionsDisabled, Is.True);
+                return Task.CompletedTask;
             });
-        }
-
-        [AvaloniaTest]
-        public void ManualActionLockTest()
-        {
-            var navigator = new MockNavigator();
-            var fileHandler = new MockFileHandler(true);
-            var pythonHandler = new MockPythonHandler();
-            var (config, _) = CreateConfig();
-            IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
-
-            // Acquire the lock
-            var lock1 = editorViewModel.TryAcquireActionLock();
-            Assert.Multiple(() =>
-            {
-                Assert.That(lock1, Is.True);
-                Assert.That(editorViewModel.AreActionsDisabled, Is.True);
-            });
-
-            // Try to acquire the lock again
-            var lock2 = editorViewModel.TryAcquireActionLock();
-            Assert.Multiple(() =>
-            {
-                Assert.That(lock2, Is.False);
-                Assert.That(editorViewModel.AreActionsDisabled, Is.True);
-            });
-
-            // Release the lock
-            editorViewModel.ReleaseActionLock();
-            Assert.That(editorViewModel.AreActionsDisabled, Is.False);
-
-            // Try to acquire the lock again
-            var lock3 = editorViewModel.TryAcquireActionLock();
-            Assert.Multiple(() =>
-            {
-                Assert.That(lock3, Is.True);
-                Assert.That(editorViewModel.AreActionsDisabled, Is.True);
-            });
-            editorViewModel.ReleaseActionLock();
+            Assert.That(lock2, Is.True);
         }
 
         [AvaloniaTest]

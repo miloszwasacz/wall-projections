@@ -24,28 +24,14 @@ public class MockEditorViewModel : IEditorViewModel
     public bool IsCalibrating { get; set; } = false;
     public bool AreActionsDisabled { get; private set; }
 
-    public bool TryAcquireActionLock()
+    public async Task<bool> WithActionLock(Func<Task> action)
     {
         lock (this)
         {
             if (AreActionsDisabled) return false;
 
             AreActionsDisabled = true;
-            return true;
         }
-    }
-
-    public void ReleaseActionLock()
-    {
-        lock (this)
-        {
-            AreActionsDisabled = false;
-        }
-    }
-
-    public async Task<bool> WithActionLock(Func<Task> action)
-    {
-        if (!TryAcquireActionLock()) return false;
 
         try
         {
@@ -54,7 +40,10 @@ public class MockEditorViewModel : IEditorViewModel
         }
         finally
         {
-            ReleaseActionLock();
+            lock (this)
+            {
+                AreActionsDisabled = false;
+            }
         }
     }
 
