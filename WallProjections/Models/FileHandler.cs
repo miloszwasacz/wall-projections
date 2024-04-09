@@ -180,10 +180,6 @@ public class FileHandler : IFileHandler
             {
                 ZipFile.ExtractToDirectory(zipPath, TempConfigFolderPath);
             }
-            catch (FileNotFoundException e)
-            {
-                throw new ExternalFileReadException(zipPath, e);
-            }
             catch (Exception e) when (e is UnauthorizedAccessException or IOException)
             {
                 throw new ExternalFileReadException(zipPath, e);
