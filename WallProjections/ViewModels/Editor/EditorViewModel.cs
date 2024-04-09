@@ -53,17 +53,24 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     private IEditorHotspotViewModel? _selectedHotspot;
 
     /// <summary>
-    /// Whether the config exists, i.e. is not empty
-    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IPythonHandler, IViewModelProvider)" />)</i>.
+    /// The backing field for <see cref="ConfigExists" />.
     /// </summary>
-    /// <seealso cref="IsImportSafe" />
-    /// <seealso cref="CanExport" />
     private bool _configExists;
 
     /// <summary>
     /// The backing field for <see cref="IsSaved" />.
     /// </summary>
     private bool _isSaved;
+
+    /// <summary>
+    /// A reactive backing field for <see cref="IsImportSafe" />.
+    /// </summary>
+    private readonly ObservableAsPropertyHelper<bool> _isImportSafe;
+
+    /// <summary>
+    /// A reactive backing field for <see cref="CanExport" />.
+    /// </summary>
+    private readonly ObservableAsPropertyHelper<bool> _canExport;
 
     #region Loading properties' backing fields
 
@@ -122,6 +129,8 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             this.RaiseAndSetIfChanged(ref _selectedHotspot, value);
             PositionEditor.SelectHotspot(value, Hotspots.Where(h => h != value).Select(h => h.Position));
             DescriptionEditor.Hotspot = value;
+            ImageEditor.IsEnabled = value is not null;
+            VideoEditor.IsEnabled = value is not null;
 
             ImageEditor.Media.CollectionChanged -= SetUnsaved;
             VideoEditor.Media.CollectionChanged -= SetUnsaved;
@@ -154,24 +163,34 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public IMediaEditorViewModel VideoEditor { get; }
 
+    /// <summary>
+    /// Whether the config exists, i.e. is not empty
+    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IPythonHandler, IViewModelProvider)" />)</i>.
+    /// </summary>
+    /// <seealso cref="IsImportSafe" />
+    /// <seealso cref="CanExport" />
+    private bool ConfigExists
+    {
+        get => _configExists;
+        set => this.RaiseAndSetIfChanged(ref _configExists, value);
+    }
+
     /// <inheritdoc />
     public bool IsSaved
     {
         get => _isSaved;
         private set
         {
-            _configExists = true;
+            ConfigExists = true;
             this.RaiseAndSetIfChanged(ref _isSaved, value);
-            this.RaisePropertyChanged(nameof(IsImportSafe));
-            this.RaisePropertyChanged(nameof(CanExport));
         }
     }
 
     /// <inheritdoc />
-    public bool IsImportSafe => !_configExists;
+    public bool IsImportSafe => _isImportSafe.Value;
 
     /// <inheritdoc />
-    public bool CanExport => IsSaved && _configExists;
+    public bool CanExport => _canExport.Value;
 
     #region Loading properties
 
@@ -402,7 +421,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         if (matrix is not null)
         {
             _homographyMatrix = matrix;
-            _configExists = true;
+            ConfigExists = true;
             IsSaved = false;
         }
 
@@ -452,8 +471,11 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
 
-        _configExists = false;
+        ConfigExists = false;
         _isSaved = true; // Setting the backing field directly to avoid changing _configExists, which is set in IsSaved setter
+
+        _isImportSafe = GetIsImportSafeProperty();
+        _canExport = GetCanExportProperty();
 
         InitEventHandlers();
     }
@@ -488,11 +510,28 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
         SelectedHotspot = Hotspots.FirstOrDefault();
 
-        _configExists = true;
+        ConfigExists = true;
         IsSaved = true;
+
+        _isImportSafe = GetIsImportSafeProperty();
+        _canExport = GetCanExportProperty();
 
         InitEventHandlers();
     }
+
+    /// <summary>
+    /// Creates a new observable property for <see cref="_isImportSafe" />.
+    /// </summary>
+    private ObservableAsPropertyHelper<bool> GetIsImportSafeProperty() => this
+        .WhenAnyValue(x => x.ConfigExists, exists => !exists)
+        .ToProperty(this, x => x.IsImportSafe);
+
+    /// <summary>
+    /// Creates a new observable property for <see cref="_canExport" />.
+    /// </summary>
+    private ObservableAsPropertyHelper<bool> GetCanExportProperty() => this
+        .WhenAnyValue(x => x.IsSaved, x => x.ConfigExists, (saved, exists) => saved && exists)
+        .ToProperty(this, x => x.CanExport);
 
     /// <summary>
     /// Initializes event handlers for the editor (to keep track of unsaved changes).

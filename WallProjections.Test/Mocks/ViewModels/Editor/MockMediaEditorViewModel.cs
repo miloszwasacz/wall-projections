@@ -8,6 +8,7 @@ public class MockMediaEditorViewModel : IMediaEditorViewModel
 {
     private ObservableCollection<IThumbnailViewModel> _media;
     public string Title { get; }
+    public bool IsEnabled { get; set; }
 
     public ObservableCollection<IThumbnailViewModel> Media
     {
