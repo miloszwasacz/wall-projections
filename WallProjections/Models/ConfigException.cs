@@ -8,6 +8,10 @@ namespace WallProjections.Models;
 public abstract class ConfigException : Exception
 {
     public override string Message => "Something went wrong managing the config";
+
+    protected ConfigException(Exception cause) : base(null, cause)
+    {
+    }
 }
 
 /// <summary>
@@ -22,7 +26,7 @@ public class ConfigPackageFormatException : ConfigException
 
     public override string Message => $".wall package {_fileName} not valid";
 
-    public ConfigPackageFormatException(string fileName)
+    public ConfigPackageFormatException(string fileName, Exception cause) : base(cause)
     {
         _fileName = fileName;
     }
@@ -34,6 +38,10 @@ public class ConfigPackageFormatException : ConfigException
 public class ConfigInvalidException : ConfigException
 {
     public override string Message => "Current config is invalid/corrupt";
+
+    public ConfigInvalidException(Exception cause) : base(cause)
+    {
+    }
 }
 
 /// <summary>
@@ -42,6 +50,10 @@ public class ConfigInvalidException : ConfigException
 public class ConfigNotImportedException : ConfigException
 {
     public override string Message => "No config is currently loaded into the program";
+
+    public ConfigNotImportedException(Exception cause) : base(cause)
+    {
+    }
 }
 
 /// <summary>
@@ -57,7 +69,7 @@ public class ConfigIOException : ConfigException
     /// <summary>
     /// Constructor if specific path where issue occurred not relevant.
     /// </summary>
-    public ConfigIOException()
+    public ConfigIOException(Exception cause) : base(cause)
     {
     }
 
@@ -65,7 +77,7 @@ public class ConfigIOException : ConfigException
     /// Constructor to tell user path where issue occurred.
     /// </summary>
     /// <param name="filePath"></param>
-    public ConfigIOException(string filePath)
+    public ConfigIOException(string filePath, Exception cause) : base(cause)
     {
         _filePath = filePath;
     }
@@ -87,30 +99,30 @@ public class ExternalFileReadException : ConfigException
     /// Constructor for <see cref="ExternalFileReadException"/>
     /// </summary>
     /// <param name="fileName">Name of file which could not be read.</param>
-    public ExternalFileReadException(string fileName)
+    public ExternalFileReadException(string fileName, Exception cause) : base(cause)
     {
         _fileName = fileName;
     }
 }
 
 /// <summary>
-/// Thrown if a file of the same name already exists in the config.
+/// Thrown if a file of the same name already exists.
 /// </summary>
 public class ConfigDuplicateFileException : ConfigException
 {
     /// <summary>
-    /// Name of duplicate imported media file.
+    /// Name of duplicate file.
     /// </summary>
-    private readonly string _fileName;
+    private readonly string _filePath;
 
-    public override string Message => $"Duplicate media files with name {_fileName} in config";
+    public override string Message => $"File already exists at {_filePath}";
 
     /// <summary>
     /// Constructor for <see cref="ConfigDuplicateFileException"/>
     /// </summary>
     /// <param name="fileName">The duplicate imported file name.</param>
-    public ConfigDuplicateFileException(string fileName)
+    public ConfigDuplicateFileException(string filePath, Exception cause) : base(cause)
     {
-        _fileName = fileName;
+        _filePath = filePath;
     }
 }

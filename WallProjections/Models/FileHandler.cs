@@ -18,9 +18,6 @@ namespace WallProjections.Models;
 public class FileHandler : IFileHandler
 {
     /// <inheritdoc />
-    /// <exception cref="ExternalFileReadException">Could not access config package.</exception>
-    /// <exception cref="ConfigInvalidException">Format of config file is invalid.</exception>
-    /// <exception cref="ConfigPackageFormatException">If format of config package is invalid.</exception>
     public IConfig ImportConfig(string zipPath)
     {
         using var configBuilder = new ConfigBuilder();
@@ -32,29 +29,39 @@ public class FileHandler : IFileHandler
         return LoadConfig();
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool ExportConfig(string exportPath)
     {
-        if (!Directory.Exists(CurrentConfigFolderPath))
-            throw new ConfigNotImportedException();
+        try
+        {
+            ZipFile.CreateFromDirectory(CurrentConfigFolderPath, exportPath);
+            return true;
+        }
+        catch (DirectoryNotFoundException e)
+        {
+            throw new ConfigNotImportedException(e);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            if (File.Exists(exportPath))
+                throw new ConfigDuplicateFileException(exportPath, e);
 
-        ZipFile.CreateFromDirectory(CurrentConfigFolderPath, exportPath);
-        return true;
+            throw new ConfigIOException(exportPath, e);
+        }
     }
 
 
     /// <inheritdoc />
-    /// <exception cref="ExternalFileReadException">
-    ///     If one of the media files does not exist or is not readable.
-    /// </exception>
-    /// <exception cref="ConfigIOException">If there is an issue accessing internal config files/folders.</exception>
     public bool SaveConfig(IConfig config)
     {
         using var configBuilder = new ConfigBuilder();
 
         configBuilder.AddHomographyMatrix(config.HomographyMatrix);
 
-        config.Hotspots.ForEach(hotspot => { configBuilder.AddHotspot(hotspot); });
+        foreach (var hotspot in config.Hotspots)
+        {
+            configBuilder.AddHotspot(hotspot);
+        }
 
         configBuilder.GenerateConfigFile();
         configBuilder.Commit();
@@ -62,36 +69,35 @@ public class FileHandler : IFileHandler
         return true;
     }
 
-    /// <summary>
-    /// Loads a config from the .json file imported/created in the program folder.
-    /// </summary>
-    /// <returns>Loaded Config</returns>
-    /// <exception cref="ConfigNotImportedException">If <see cref="LoadConfig"/> called when no config imported.</exception>
-    /// <exception cref="ConfigInvalidException">config.json missing or has invalid syntax.</exception>
+    /// <inheritdoc />
     public IConfig LoadConfig()
     {
         var configLocation = CurrentConfigFilePath;
-
-        if (!Directory.Exists(CurrentConfigFolderPath))
-            throw new ConfigNotImportedException();
-
-        if (!File.Exists(configLocation))
-            throw new ConfigInvalidException();
 
         try
         {
             using var configFile = File.OpenRead(configLocation);
             return JsonSerializer.Deserialize<Config>(configFile) ??
-                   throw new ConfigInvalidException();
+                   // Edge case if file contains "null"
+                   throw new ConfigInvalidException(new Exception());
+
         }
-        catch (IOException)
+        catch (DirectoryNotFoundException e)
         {
-            throw new ConfigIOException();
+            throw new ConfigNotImportedException(e);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new ConfigInvalidException(e);
+        }
+        catch (IOException e)
+        {
+            throw new ConfigIOException(e);
         }
         // When JSON config is not in a valid format.
         catch (Exception e) when (e is JsonException or ArgumentNullException)
         {
-            throw new ConfigInvalidException();
+            throw new ConfigInvalidException(e);
         }
     }
 
@@ -152,7 +158,7 @@ public class FileHandler : IFileHandler
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
-                throw new ConfigIOException(TempConfigFolderPath);
+                throw new ConfigIOException(TempConfigFolderPath, e);
             }
         }
 
@@ -174,17 +180,17 @@ public class FileHandler : IFileHandler
             {
                 ZipFile.ExtractToDirectory(zipPath, TempConfigFolderPath);
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException e)
             {
-                throw new ExternalFileReadException(Path.GetFileName(zipPath));
+                throw new ExternalFileReadException(zipPath, e);
             }
             catch (Exception e) when (e is UnauthorizedAccessException or IOException)
             {
-                throw new ExternalFileReadException(zipPath);
+                throw new ExternalFileReadException(zipPath, e);
             }
-            catch (InvalidDataException)
+            catch (InvalidDataException e)
             {
-                throw new ConfigPackageFormatException(Path.GetFileName(zipPath));
+                throw new ConfigPackageFormatException(Path.GetFileName(zipPath), e);
             }
         }
 
@@ -252,6 +258,7 @@ public class FileHandler : IFileHandler
         ///     If no homography matrix has been added, a config has
         ///     already been imported, or a config file has already been generated.
         /// </exception>
+        /// <exception cref="ConfigIOException">If there is an issue saving the generated config file to disk.</exception>
         public void GenerateConfigFile()
         {
             // Cannot create new config if config has been imported
@@ -283,7 +290,7 @@ public class FileHandler : IFileHandler
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or SecurityException)
             {
-                throw new ConfigIOException(TempConfigFilePath);
+                throw new ConfigIOException(TempConfigFilePath, e);
             }
         }
 
@@ -311,7 +318,7 @@ public class FileHandler : IFileHandler
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or SecurityException)
             {
-                throw new ConfigIOException();
+                throw new ConfigIOException(e);
             }
             finally
             {
@@ -322,6 +329,7 @@ public class FileHandler : IFileHandler
                         Directory.Delete(CurrentConfigFolderPath, true);
 
                     Directory.Move(BackupConfigFolderPath, CurrentConfigFolderPath);
+
                 }
             }
         }
@@ -339,36 +347,38 @@ public class FileHandler : IFileHandler
         /// <exception cref="ConfigIOException">If there is an issue accessing original file or saving new file.</exception>
         private static string ResolveFile(string file, string type, int id, int? i = null)
         {
-            var currentFileName = Path.GetFileName(file);
-
-            if (currentFileName is null or "")
-                throw new ExternalFileReadException(file);
-
             var extension = Path.GetExtension(file);
 
-            if (extension is null or "")
-                throw new ExternalFileReadException(currentFileName);
-
             var newFileName = i is null ? $"{type}_{id}{extension}" : $"{type}_{id}_{i}{extension}";
+            string resolvedFilePath;
+            string newFilePath;
 
-            var resolvedFilePath =
-                file.IsInConfig() ? Path.Combine(CurrentConfigFolderPath, file) : file;
+            try
+            {
+                resolvedFilePath =
+                    file.IsInConfig() ? Path.Combine(CurrentConfigFolderPath, file) : file;
 
-            var newFilePath = Path.Combine(TempConfigFolderPath, newFileName);
-
-            if (File.Exists(newFilePath))
-                throw new ConfigDuplicateFileException(newFileName);
-
-            if (!File.Exists(resolvedFilePath))
-                throw new ExternalFileReadException(Path.GetFileName(resolvedFilePath));
+                newFilePath = Path.Combine(TempConfigFolderPath, newFileName);
+            }
+            catch (ArgumentNullException e)
+            {
+                throw new ExternalFileReadException(file, e);
+            }
 
             try
             {
                 File.Copy(resolvedFilePath, newFilePath);
             }
-            catch (IOException)
+            catch (FileNotFoundException e)
             {
-                throw new ConfigIOException();
+                throw new ExternalFileReadException(file, e);
+            }
+            catch (IOException e)
+            {
+                if (File.Exists(newFilePath))
+                    throw new ConfigDuplicateFileException(newFileName, e);
+
+                throw new ConfigIOException(file, e);
             }
 
             return newFileName;
