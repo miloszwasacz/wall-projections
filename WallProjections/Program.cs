@@ -3,7 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 
 [assembly: InternalsVisibleTo("WallProjections.Test")]
 
@@ -22,9 +24,10 @@ internal class Program
     [ExcludeFromCodeCoverage]
     public static void Main(string[] args)
     {
-        var pythonProxy = new PythonProxy();
-        var pythonHandler = PythonHandler.Initialize(pythonProxy);
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        var pythonProxy = new PythonProxy(loggerFactory);
+        var pythonHandler = new PythonHandler(pythonProxy, loggerFactory);
+        BuildAvaloniaApp(pythonHandler, loggerFactory).StartWithClassicDesktopLifetime(args);
         pythonHandler.Dispose();
         pythonProxy.Dispose();
     }
@@ -33,9 +36,9 @@ internal class Program
     /// Avalonia configuration, don't remove; also used by visual designer.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    private static AppBuilder BuildAvaloniaApp()
+    private static AppBuilder BuildAvaloniaApp(IPythonHandler pythonHandler, ILoggerFactory loggerFactory)
     {
-        return AppBuilder.Configure<App>()
+        return AppBuilder.Configure(() => new App(pythonHandler, loggerFactory))
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()

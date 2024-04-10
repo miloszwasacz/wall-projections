@@ -1,12 +1,11 @@
 ﻿using System.Collections.Immutable;
-using System.Reflection;
 using Avalonia;
 using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
-using static WallProjections.Test.TestSetup;
 using static WallProjections.Test.TestExtensions;
 using HotspotSelectedArgs = WallProjections.Helper.Interfaces.IHotspotHandler.HotspotArgs;
 
@@ -41,51 +40,13 @@ public class PythonHandlerTest
     }
 
     [Test]
-    public void SingletonPatternTest()
-    {
-        var instance1 = PythonHandler.Instance;
-        var instance2 = PythonHandler.Instance;
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(instance2, Is.SameAs(instance1));
-            Assert.That(PythonRuntime.IsDisposed, Is.False);
-        });
-    }
-
-    [Test]
-    [NonParallelizable]
-    public void InitializeTest()
-    {
-        // Clear the global instance
-        var field = typeof(PythonHandler).GetField("_instance", BindingFlags.NonPublic | BindingFlags.Static)
-                    ?? throw new MissingFieldException("Could not find the `_instance` field");
-        field.SetValue(PythonHandler.Instance, null);
-
-        // Usage of uninitialized global instance
-        Assert.That(() => _ = PythonHandler.Instance, Throws.TypeOf<TypeInitializationException>());
-
-        // Initialization of the global instance
-        var initialized = PythonHandler.Initialize(PythonRuntime);
-        var singleton = PythonHandler.Instance;
-        Assert.Multiple(() =>
-        {
-            Assert.That(initialized, Is.SameAs(singleton));
-            Assert.That(initialized, Is.InstanceOf<IPythonHandler>());
-            Assert.That(PythonRuntime.IsDisposed, Is.False);
-        });
-
-        // Re-initialization of the global instance
-        Assert.That(() => PythonHandler.Initialize(PythonRuntime), Throws.InvalidOperationException);
-    }
-
-    [Test]
     [Timeout(2000)]
     public async Task RunHotspotDetectionTest()
     {
         var (handler, python) = CreateInstance();
         await handler.RunHotspotDetection(TestConfig);
         Assert.That(python.IsHotspotDetectionRunning, Is.True);
+        handler.Dispose();
     }
 
     [AvaloniaTest]
@@ -95,6 +56,7 @@ public class PythonHandlerTest
         var (handler, python) = CreateInstance();
         await handler.RunCalibration(ImmutableDictionary.Create<int, Point>());
         Assert.That(python.IsCameraCalibrated, Is.True);
+        handler.Dispose();
     }
 
     [Test]
@@ -111,6 +73,7 @@ public class PythonHandlerTest
         await Task.Delay(100);
         python.Exception = new Exception("Test exception");
         AssertThrowsTaskCanceledException(task);
+        handler.Dispose();
     }
 
     /// <summary>
@@ -128,6 +91,7 @@ public class PythonHandlerTest
         await handler.RunCalibration(ImmutableDictionary.Create<int, Point>());
         python.Exception = new Exception("Test exception");
         AssertThrowsTaskCanceledException(task);
+        handler.Dispose();
     }
 
     [Test]
@@ -138,6 +102,7 @@ public class PythonHandlerTest
         var (handler, python) = CreateInstance();
         python.Exception = new Exception("Test exception");
         Assert.ThrowsAsync<Exception>(() => asyncAction(handler));
+        handler.Dispose();
     }
 
     [Test]
@@ -157,6 +122,7 @@ public class PythonHandlerTest
         handler.OnHotspotPressed(id2);
         Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
         Assert.That(eventFiredArgs!.Id, Is.EqualTo(id2));
+        handler.Dispose();
     }
 
     [Test]
@@ -176,29 +142,17 @@ public class PythonHandlerTest
         handler.OnHotspotUnpressed(id2);
         Assert.That(eventFiredArgs, Is.InstanceOf<HotspotSelectedArgs>());
         Assert.That(eventFiredArgs!.Id, Is.EqualTo(id2));
+        handler.Dispose();
     }
 
     /// <summary>
-    /// Uses reflection to get the private constructor of <see cref="PythonHandler" />,
-    /// so that the global instance is not used
+    /// Creates a new instance of <see cref="PythonHandler" /> and a mock python proxy
     /// </summary>
-    /// <returns>
-    /// A new instance of <see cref="PythonHandler" /> and a <see cref="MockPythonProxy" /> injected into the constructor
-    /// </returns>
-    /// <exception cref="InvalidCastException">When the object cannot be instantiated as <see cref="PythonHandler" /></exception>
     private static (PythonHandler handler, MockPythonProxy python) CreateInstance()
     {
         var python = new MockPythonProxy();
-        var ctor = typeof(PythonHandler).GetConstructor(
-            BindingFlags.NonPublic | BindingFlags.Instance,
-            null,
-            new[] { typeof(IPythonProxy) },
-            null
-        );
-        var instance = ctor?.Invoke(new object[] { python }) as PythonHandler
-                       ?? throw new MissingMethodException("Could not construct PythonEventHandler");
-
-        return (instance, python);
+        var handler = new PythonHandler(python, new MockLoggerFactory());
+        return (handler, python);
     }
 
     /// <summary>

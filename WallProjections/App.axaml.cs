@@ -1,8 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display.Layouts;
@@ -12,8 +15,27 @@ namespace WallProjections;
 
 public class App : Application
 {
+    /// <summary>
+    /// The application-wide Python handler for interop
+    /// </summary>
+    private readonly IPythonHandler _pythonHandler;
+
+    /// <summary>
+    /// A factory for creating loggers
+    /// </summary>
+    private readonly ILoggerFactory _loggerFactory;
+
     // ReSharper disable once NotAccessedField.Local
+    /// <summary>
+    /// The application-wide navigator
+    /// </summary>
     private INavigator? _navigator;
+
+    public App(IPythonHandler pythonHandler, ILoggerFactory loggerFactory)
+    {
+        _pythonHandler = pythonHandler;
+        _loggerFactory = loggerFactory;
+    }
 
     public override void Initialize()
     {
@@ -30,6 +52,7 @@ public class App : Application
     /// Initializes the application-wide navigator.
     /// </summary>
     /// <param name="lifetime">The application lifetime.</param>
+    [MethodImpl(MethodImplOptions.NoOptimization)] // Prevents _navigator from being optimized away
     [ExcludeFromCodeCoverage(Justification = "Headless lifetime is not a IClassicDesktopStyleApplicationLifetime")]
     private void InitializeNavigator(IApplicationLifetime? lifetime)
     {
@@ -37,7 +60,7 @@ public class App : Application
         {
             _navigator = new Navigator(
                 desktop,
-                PythonHandler.Instance,
+                _pythonHandler,
                 (nav, pythonHandler) => new ViewModelProvider(
                     nav,
                     pythonHandler,
@@ -50,4 +73,13 @@ public class App : Application
             );
         }
     }
+
+#if DEBUGSKIPPYTHON
+    // ReSharper disable once ConvertToAutoPropertyWhenPossible
+    /// <summary>
+    /// A property to access the Python handler for mocking input
+    /// </summary>
+    [ExcludeFromCodeCoverage(Justification = "Used only in manual testing")]
+    public IPythonHandler PythonHandler => _pythonHandler;
+#endif
 }

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using Microsoft.Extensions.Logging;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
 #if !DEBUGSKIPPYTHON
 using WallProjections.Models.Interfaces;
-using System.Diagnostics;
 using Python.Runtime;
 
 #else
@@ -24,26 +23,36 @@ public sealed class PythonProxy : IPythonProxy
     private readonly IntPtr _threadsPtr;
 
     /// <summary>
-    /// The currently running Python module for hotspot detection
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
+    /// <summary>
+    /// The currently running Python module
     /// </summary>
     private readonly AtomicPythonModule _currentModule = new();
 
     /// <summary>
     /// Initializes the Python runtime
     /// </summary>
-    public PythonProxy()
+    public PythonProxy(ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<PythonProxy>();
         Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
-        Debug.Write("Initializing Python...    ");
+        _logger.LogInformation("Initializing Python...    ");
         PythonEngine.Initialize();
         _threadsPtr = PythonEngine.BeginAllowThreads();
-        Debug.WriteLine("Done");
+        _logger.LogInformation("Python initialized.");
     }
 
     /// <inheritdoc />
     public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
-        RunPythonAction(PythonModule.HotspotDetection, module => { module.StartDetection(eventListener, config); });
+        RunPythonAction(PythonModule.HotspotDetection, module =>
+        {
+            _logger.LogInformation("Starting hotspot detection...");
+            module.StartDetection(eventListener, config);
+        });
     }
 
     /// <inheritdoc />
@@ -54,6 +63,7 @@ public sealed class PythonProxy : IPythonProxy
 
         using (Py.GIL())
         {
+            _logger.LogInformation("Stopping hotspot detection...");
             module.StopDetection();
         }
     }
@@ -92,7 +102,6 @@ public sealed class PythonProxy : IPythonProxy
     {
         using (Py.GIL())
         {
-            //TODO Maybe Import a module once and reuse it?
             var module = moduleFactory();
             _currentModule.Set(module);
             return action(module);
@@ -152,11 +161,22 @@ public sealed class PythonProxy : IPythonProxy
 public sealed class PythonProxy : IPythonProxy
 {
     /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
+    // ReSharper disable once UnusedParameter.Local
+    public PythonProxy(ILoggerFactory loggerFactory)
+    {
+        _logger = loggerFactory.CreateLogger<PythonProxy>();
+    }
+
+    /// <summary>
     /// Prints a message to the console
     /// </summary>
     public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
-        Console.WriteLine("Starting hotspot detection");
+        _logger.LogInformation("Starting hotspot detection");
     }
 
     /// <summary>
@@ -164,7 +184,7 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     public void StopCurrentAction()
     {
-        Console.WriteLine("Stopping currently running action");
+        _logger.LogInformation("Stopping currently running action");
     }
 
     /// <summary>
@@ -172,7 +192,7 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     public double[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
-        Console.WriteLine("Calibrating camera");
+        _logger.LogInformation("Calibrating camera");
         return new double[,]
         {
             { 1, 0, 0 },
@@ -186,7 +206,7 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     public void Dispose()
     {
-        Console.WriteLine("Disposing PythonProxy");
+        _logger.LogInformation("Disposing PythonProxy");
     }
 }
 #endif
