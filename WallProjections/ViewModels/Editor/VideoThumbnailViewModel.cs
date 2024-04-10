@@ -17,7 +17,7 @@ public class VideoThumbnailViewModel : ViewModelBase, IThumbnailViewModel
     /// <summary>
     /// The <see cref="Uri" /> to the video placeholder image.
     /// </summary>
-    private static readonly Uri VideoThumbnailPath = new("avares://WallProjections/Assets/video_placeholder.png");
+    private static readonly Uri VideoThumbnailPath = new("avares://WallProjections/Assets/video-placeholder.png");
 
     /// <inheritdoc />
     public IProcessProxy ProcessProxy { get; }

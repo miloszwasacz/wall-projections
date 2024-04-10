@@ -15,24 +15,43 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="10" />
         <Setter Property="BoxShadow" Value="5 5 10 0 DarkGray" />
-        <Setter Property="Padding" Value="10" />
         <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="IsVisible" Value="False" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Spacing" Value="0" />
+        <Style Selector="^[IsLoading=True]">
+            <Setter Property="Spacing" Value="15" />
+        </Style>
+
         <Setter Property="Template">
             <ControlTemplate>
 
-                <Border
-                    HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                    VerticalAlignment="{Binding VerticalAlignment, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                    Background="{Binding Background, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                    BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                    BorderThickness="{Binding BorderThickness, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                    CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                    BoxShadow="{Binding BoxShadow, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                    Padding="{Binding Padding, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                <Border Background="{TemplateBinding Background}"
+                        HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                        VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        BoxShadow="{TemplateBinding BoxShadow}"
+                        Padding="{TemplateBinding Padding}">
 
-                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
+                    <Grid MinHeight="25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="{Binding Spacing, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <controls:LoadingRing Grid.Column="0" Grid.Row="0"
+                                              IsVisible="{TemplateBinding IsLoading}"
+                                              Width="25" Height="25"
+                                              BorderThickness="4" />
+
+                        <TextBlock Grid.Column="2" Grid.Row="0"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Text="{TemplateBinding Text}" />
+
+                    </Grid>
 
                 </Border>
 

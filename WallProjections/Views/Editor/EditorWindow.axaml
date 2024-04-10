@@ -8,19 +8,17 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.Editor.EditorWindow"
         x:DataType="vm:IEditorViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/app-icon.ico"
         Title="EditorWindow"
         WindowState="Maximized"
+        IsEnabled="{Binding !AreActionsDisabled}"
+        IsInPositionEditMode="{Binding PositionEditor.IsInEditMode}"
         KeyDown="Editor_OnKeyDown"
-        Closing="Editor_OnClosing"
-        Name="Editor"
-        Tag="{Binding PositionEditor.IsInEditMode}">
-    <!-- This `Tag` is used by the button for toggling position edit mode because it has a different DataContext -->
+        Closing="Editor_OnClosing">
 
     <Window.Styles>
-        <!--TODO Change to a reasonable style -->
-        <Style Selector=".edit-mode-toggled /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Firebrick" />
+        <Style Selector="FlyoutPresenter.attached-bottom">
+            <Setter Property="Margin" Value="0 5 0 0" />
         </Style>
     </Window.Styles>
 
@@ -46,8 +44,7 @@
                         Export Config
                     </Button>
 
-                    <Button IsEnabled="{Binding }"
-                            Click="Calibrate_OnClick">
+                    <Button Click="Calibrate_OnClick">
                         Calibrate camera
                     </Button>
 
@@ -62,8 +59,9 @@
                         Save
                     </Button>
 
-                    <Button Content="{Binding CloseButtonText}"
-                            Click="Close_OnClick" />
+                    <Button Click="Close_OnClick">
+                        Return to Viewer
+                    </Button>
 
                 </StackPanel>
 
@@ -75,31 +73,37 @@
               ColumnDefinitions="*, 15, 3*, 15, 2*" RowDefinitions="*, 15, *"
               Margin="15">
 
-            <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
-                  ColumnDefinitions="*" RowDefinitions="*, 15, Auto">
-
-                <editor:HotspotList Grid.Column="0" Grid.Row="0"
-                                    DataContext="{Binding}"
-                                    DeleteHotspot="HotspotList_OnDeleteHotspot" />
-
-                <Button Grid.Column="0" Grid.Row="2"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Command="{Binding AddHotspot}">
-                    Add Hotspot
-                </Button>
-
-            </Grid>
+            <editor:HotspotList Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
+                                DataContext="{Binding}"
+                                AddHotspot="HotspotList_OnAddHotspot"
+                                DeleteHotspot="HotspotList_OnDeleteHotspot" />
 
             <editor:DescriptionEditor Grid.Column="2" Grid.Row="0" Grid.RowSpan="3"
                                       Spacing="15"
                                       DataContext="{Binding DescriptionEditor}"
                                       ImportDescription="DescriptionEditor_OnImportDescription">
 
-                <views:IconButton ToolTip.Tip="Edit position"
-                                  Classes.edit-mode-toggled="{Binding #Editor.Tag}"
-                                  IconData="{StaticResource my_location_regular}"
-                                  Click="EditPosition_OnClick" />
+                <views:IconToggleButton Name="PositionEditorToggle"
+                                        ToolTip.Tip="Edit position"
+                                        IsChecked="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
+                                        IconData="{StaticResource my_location_regular}"
+                                        Click="EditPosition_OnClick">
+
+                    <FlyoutBase.AttachedFlyout>
+                        <Flyout FlyoutPresenterClasses="attached-bottom"
+                                ShowMode="Transient"
+                                Placement="BottomEdgeAlignedRight"
+                                OverlayInputPassThroughElement="{Binding $parent[Window]}">
+
+                            <TextBlock MaxWidth="170"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Text="Use your mouse to move the hotspot around on the second screen" />
+
+                        </Flyout>
+                    </FlyoutBase.AttachedFlyout>
+
+                </views:IconToggleButton>
 
             </editor:DescriptionEditor>
 
@@ -114,6 +118,11 @@
                                 AddMedia="VideoEditor_OnAddMedia"
                                 RemoveMedia="VideoEditor_OnRemoveMedia"
                                 OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
+
+            <views:Toast Name="LoadingToast"
+                         Grid.Column="0" Grid.Row="0"
+                         Grid.ColumnSpan="5" Grid.RowSpan="3"
+                         IsLoading="True" />
 
             <views:Toast Name="Toast"
                          Grid.Column="0" Grid.Row="0"

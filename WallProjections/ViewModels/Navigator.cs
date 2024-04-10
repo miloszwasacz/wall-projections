@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -211,15 +210,8 @@ public sealed class Navigator : ViewModelBase, INavigator
     {
         lock (this)
         {
-            IEditorViewModel? vm = null;
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                if (_mainWindow?.DataContext is IEditorViewModel editorViewModel)
-                    vm = editorViewModel;
-            });
-
-            if (vm is not null)
-                _secondaryScreen.viewModel.ShowPositionEditor(vm);
+            if (_mainWindow?.DataContext is IEditorViewModel editorViewModel)
+                _secondaryScreen.viewModel.ShowPositionEditor(editorViewModel);
         }
     }
 
@@ -229,13 +221,7 @@ public sealed class Navigator : ViewModelBase, INavigator
         lock (this)
         {
             var arUcoGridView = _secondaryScreen.window.FindDescendantOfType<ArUcoGridView>();
-            ImmutableDictionary<int, Point>? positions = null;
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                // This has to be run on the UI thread
-                positions = arUcoGridView?.GetArUcoPositions();
-            });
-            return positions;
+            return arUcoGridView?.GetArUcoPositions();
         }
     }
 
