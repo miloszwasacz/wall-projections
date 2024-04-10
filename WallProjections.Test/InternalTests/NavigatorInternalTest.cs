@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Avalonia.Threading;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
@@ -27,7 +28,13 @@ public class NavigatorInternalTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
-        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        using var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         lifetime.MainWindow = null;
         Assert.That(lifetime.MainWindow, Is.Null);
 

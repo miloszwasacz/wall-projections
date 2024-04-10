@@ -67,9 +67,11 @@ public class App : Application
                     new ProcessProxy(),
                     pyHandler => new HotspotHandler(pyHandler),
                     config => new ContentProvider(config),
-                    () => new LayoutProvider()
+                    () => new LayoutProvider(),
+                    _loggerFactory
                 ),
-                () => new FileHandler()
+                () => new FileHandler(),
+                _loggerFactory
             );
         }
     }

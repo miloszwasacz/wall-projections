@@ -1,5 +1,6 @@
 ﻿using System;
 using LibVLCSharp.Shared;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -17,6 +18,11 @@ namespace WallProjections.ViewModels;
 /// <inheritdoc cref="IViewModelProvider" />
 public sealed class ViewModelProvider : IViewModelProvider, IDisposable
 {
+    /// <summary>
+    /// A factory for creating loggers, passed to the viewmodels that need it
+    /// </summary>
+    private readonly ILoggerFactory _loggerFactory;
+
     /// <summary>
     /// The backing field for the <see cref="LibVlc" /> property
     /// </summary>
@@ -74,15 +80,18 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
     /// </param>
     /// <param name="layoutProviderFactory">A factory for creating <see cref="ILayoutProvider" />s</param>
+    /// <param name="loggerFactory">A factory for creating loggers</param>
     public ViewModelProvider(
         INavigator navigator,
         IPythonHandler pythonHandler,
         IProcessProxy processProxy,
         Func<IPythonHandler, IHotspotHandler> hotspotHandlerFactory,
         Func<IConfig, IContentProvider> contentProviderFactory,
-        Func<ILayoutProvider> layoutProviderFactory
+        Func<ILayoutProvider> layoutProviderFactory,
+        ILoggerFactory loggerFactory
     )
     {
+        _loggerFactory = loggerFactory;
         _navigator = navigator;
         _pythonHandler = pythonHandler;
         _processProxy = processProxy;

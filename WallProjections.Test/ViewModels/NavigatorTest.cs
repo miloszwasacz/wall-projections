@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Threading;
 using WallProjections.Models;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
@@ -30,7 +31,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
-        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        using var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
 
         await FlushUIThread(100);
         lifetime.AssertOpenedWindows<DisplayWindow, IDisplayViewModel, AbsHotspotDisplayViewModel>();
@@ -46,7 +53,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
-        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        using var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
 
         await FlushUIThread(100);
         lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>();
@@ -62,7 +75,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
-        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        using var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
 
@@ -83,7 +102,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
-        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        using var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         navigator.OpenEditor();
         await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
@@ -109,7 +134,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
-        var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
 
@@ -135,7 +166,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
-        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        using var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         await FlushUIThread(100);
         lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>();
 
@@ -157,7 +194,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
-        using var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        using var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         navigator.ShowCalibrationMarkers();
         await FlushUIThread();
         lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsArUcoGridViewModel>();
@@ -175,7 +218,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
-        var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
 
@@ -201,7 +250,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new FileNotFoundException());
 
-        var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<EditorWindow>());
 
@@ -229,7 +284,13 @@ public class NavigatorTest
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
-        var navigator = new Navigator(lifetime, pythonHandler, (_, _) => vmProvider, () => fileHandler);
+        var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () => fileHandler,
+            new MockLoggerFactory()
+        );
         await FlushUIThread(100);
         Assert.That(lifetime.MainWindow, Is.InstanceOf<DisplayWindow>());
 
