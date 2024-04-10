@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
@@ -10,9 +11,6 @@ using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using static WallProjections.Views.ConfirmationDialog;
-#if !RELEASE
-using Avalonia;
-#endif
 
 namespace WallProjections.Views.Editor;
 
@@ -100,7 +98,7 @@ public partial class EditorWindow : Window
     /// <summary>
     /// Opens a file picker to import a description from a file.
     /// Then, if the import is <see cref="IImportViewModel.IsImportSafe">safe</see>, the file is imported;
-    /// otherwise, a <see cref="ImportWarningDialog">dialog</see> is shown.
+    /// otherwise, a warning dialog is shown.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
