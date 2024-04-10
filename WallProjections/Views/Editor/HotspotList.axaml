@@ -13,44 +13,78 @@
             BorderThickness="2"
             CornerRadius="8">
 
-        <ListBox ItemsSource="{Binding Hotspots}"
-                 SelectedItem="{Binding SelectedHotspot}"
-                 SelectionMode="Single, AlwaysSelected"
-                 CornerRadius="7"
-                 ClipToBounds="True">
+        <Grid ColumnDefinitions="*" RowDefinitions="Auto, *">
 
-            <ListBox.ItemTemplate>
-                <DataTemplate x:DataType="vm:IEditorHotspotViewModel">
+            <Border Grid.Column="0" Grid.Row="0"
+                    BorderBrush="LightGray"
+                    BorderThickness="0 0 0 2"
+                    CornerRadius="8 8 0 0 "
+                    Padding="8">
 
-                    <Grid ColumnDefinitions="*, 10, Auto" RowDefinitions="Auto">
+                <Grid ColumnDefinitions="*, 10, Auto" RowDefinitions="Auto">
+                    <!--TODO Get rid of this - use proper styling on IconButton -->
+                    <Grid.Styles>
+                        <Style Selector="PathIcon:disabled">
+                            <Setter Property="Foreground" Value="Transparent" />
+                        </Style>
+                    </Grid.Styles>
 
-                        <StackPanel Grid.Column="0" Grid.Row="0">
+                    <TextBlock Grid.Column="0" Grid.Row="0"
+                               FontWeight="Bold"
+                               TextTrimming="CharacterEllipsis"
+                               Text="Hotspots" />
 
-                            <TextBlock IsVisible="{Binding !IsFallback}"
-                                       TextTrimming="CharacterEllipsis"
-                                       Text="{Binding Title}" />
+                    <views:IconButton Grid.Column="2" Grid.Row="0"
+                                      ToolTip.Tip="Add a new Hotspot"
+                                      Padding="2"
+                                      IconData="{StaticResource add_regular}"
+                                      Click="Add_OnClick" />
 
-                            <TextBlock IsVisible="{Binding IsFallback}"
-                                       FontFamily="static"
-                                       FontStyle="Oblique"
-                                       TextTrimming="CharacterEllipsis"
-                                       Text="{Binding FallbackTitle}" />
+                </Grid>
 
-                        </StackPanel>
+            </Border>
 
-                        <views:IconButton Grid.Column="2" Grid.Row="0"
-                                          ToolTip.Tip="Delete Hotspot"
-                                          Padding="2"
-                                          Tag="{Binding}"
-                                          IconData="{StaticResource delete_regular}"
-                                          Click="Delete_OnClick" />
+            <ListBox Grid.Column="0" Grid.Row="1"
+                ItemsSource="{Binding Hotspots}"
+                     SelectedItem="{Binding SelectedHotspot}"
+                     SelectionMode="Single, AlwaysSelected"
+                     CornerRadius="0 0 7 7"
+                     ClipToBounds="True">
 
-                    </Grid>
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:IEditorHotspotViewModel">
 
-                </DataTemplate>
-            </ListBox.ItemTemplate>
+                        <Grid ColumnDefinitions="*, 10, Auto" RowDefinitions="Auto">
 
-        </ListBox>
+                            <StackPanel Grid.Column="0" Grid.Row="0">
+
+                                <TextBlock IsVisible="{Binding !IsFallback}"
+                                           TextTrimming="CharacterEllipsis"
+                                           Text="{Binding Title}" />
+
+                                <TextBlock IsVisible="{Binding IsFallback}"
+                                           FontFamily="static"
+                                           FontStyle="Oblique"
+                                           TextTrimming="CharacterEllipsis"
+                                           Text="{Binding FallbackTitle}" />
+
+                            </StackPanel>
+
+                            <views:IconButton Grid.Column="2" Grid.Row="0"
+                                              ToolTip.Tip="Delete Hotspot"
+                                              Padding="2"
+                                              Tag="{Binding}"
+                                              IconData="{StaticResource delete_regular}"
+                                              Click="Delete_OnClick" />
+
+                        </Grid>
+
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+
+            </ListBox>
+
+        </Grid>
 
     </Border>
 

@@ -7,6 +7,9 @@ using System.Diagnostics.CodeAnalysis;
 using Avalonia.Data;
 using WallProjections.Helper;
 #endif
+#if !RELEASE
+using Avalonia;
+#endif
 
 namespace WallProjections.Views.Display;
 
@@ -23,6 +26,9 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     public DisplayWindow()
     {
         InitializeComponent();
+#if !RELEASE
+        this.AttachDevTools();
+#endif
     }
 
     // ReSharper disable UnusedParameter.Local

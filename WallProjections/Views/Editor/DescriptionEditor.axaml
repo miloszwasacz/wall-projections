@@ -21,7 +21,7 @@
             <ControlTemplate x:DataType="vm:IDescriptionEditorViewModel">
 
                 <!--TODO Style children properly -->
-                <Grid>
+                <Grid IsEnabled="{Binding IsEnabled}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition
@@ -46,14 +46,22 @@
                              BorderBrush="LightGray"
                              BorderThickness="2"
                              CornerRadius="8"
-                             IsEnabled="{Binding IsEnabled}"
                              Text="{Binding Title}" />
 
                     <views:IconButton Grid.Column="2" Grid.Row="0"
-                                      ToolTip.Tip="Import from file"
+                                      MinHeight="48"
                                       Command="{Binding ImportButton_OnClick, RelativeSource={RelativeSource TemplatedParent}}"
                                       CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
-                                      IconData="{StaticResource document_import_regular}" />
+                                      IconData="{StaticResource document_import_regular}">
+
+                        <ToolTip.Tip>
+                            <TextBlock TextAlignment="Center">
+                                Import title and description<LineBreak />
+                                from a text file
+                            </TextBlock>
+                        </ToolTip.Tip>
+
+                    </views:IconButton>
 
                     <ItemsControl Grid.Column="4" Grid.Row="0"
                                   ItemsSource="{TemplateBinding MenuItems}">
@@ -79,7 +87,6 @@
                              BorderBrush="LightGray"
                              BorderThickness="2"
                              CornerRadius="8"
-                             IsEnabled="{Binding IsEnabled}"
                              Text="{Binding Description}" />
 
                 </Grid>

@@ -15,9 +15,9 @@ public class MockPythonProxy : IPythonProxy
     /// </summary>
     public static readonly double[,] CalibrationResult =
     {
-        { 0.0f, 0.1f, 0.2f },
-        { 1.0f, 1.1f, 1.2f },
-        { 2.0f, 2.1f, 2.2f }
+        { 0.0d, 0.1d, 0.2d },
+        { 1.0d, 1.1d, 1.2d },
+        { 2.0d, 2.1d, 2.2d }
     };
 
     /// <summary>

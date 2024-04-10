@@ -8,10 +8,25 @@ namespace WallProjections.Views.Editor;
 public partial class HotspotList : UserControl
 {
     /// <summary>
+    /// A routed event that is raised when the user creates a new hotspot.
+    /// </summary>
+    private static readonly RoutedEvent NewHotspotEvent =
+        RoutedEvent.Register<HotspotList, RoutedEventArgs>(nameof(AddHotspot), RoutingStrategies.Bubble);
+
+    /// <summary>
     /// A routed event that is raised when the user deletes a hotspot.
     /// </summary>
     private static readonly RoutedEvent<DeleteArgs> DeleteHotspotEvent =
         RoutedEvent.Register<HotspotList, DeleteArgs>(nameof(DeleteHotspot), RoutingStrategies.Bubble);
+
+    /// <summary>
+    /// An event that is raised when the user creates a new hotspot.
+    /// </summary>
+    public event EventHandler AddHotspot
+    {
+        add => AddHandler(NewHotspotEvent, value);
+        remove => RemoveHandler(NewHotspotEvent, value);
+    }
 
     /// <summary>
     /// An event that is raised when the user deletes a hotspot.
@@ -28,6 +43,16 @@ public partial class HotspotList : UserControl
     }
 
     // ReSharper disable UnusedParameter.Local
+
+    /// <summary>
+    /// A callback for when the user adds a new hotspot.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void Add_OnClick(object? sender, RoutedEventArgs e)
+    {
+        RaiseEvent(new RoutedEventArgs(NewHotspotEvent, this));
+    }
 
     /// <summary>
     /// A callback for when the user deletes a hotspot.

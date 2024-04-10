@@ -10,6 +10,11 @@ namespace WallProjections.ViewModels.Editor;
 public class MediaEditorViewModel : ViewModelBase, IMediaEditorViewModel
 {
     /// <summary>
+    /// The backing field for <see cref="IsEnabled" />.
+    /// </summary>
+    private bool _isEnabled;
+
+    /// <summary>
     /// The backing field for <see cref="Media" />.
     /// </summary>
     private ObservableCollection<IThumbnailViewModel> _media = new();
@@ -21,6 +26,13 @@ public class MediaEditorViewModel : ViewModelBase, IMediaEditorViewModel
 
     /// <inheritdoc />
     public string Title { get; }
+
+    /// <inheritdoc />
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
+    }
 
     /// <inheritdoc />
     public ObservableCollection<IThumbnailViewModel> Media

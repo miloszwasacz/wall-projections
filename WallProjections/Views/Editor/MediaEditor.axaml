@@ -6,7 +6,8 @@
              xmlns:views="using:WallProjections.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.Editor.MediaEditor"
-             x:DataType="vm:IMediaEditorViewModel">
+             x:DataType="vm:IMediaEditorViewModel"
+             IsEnabled="{Binding IsEnabled}">
 
     <!--TODO Style this and children properly -->
     <Border BorderBrush="LightGray"

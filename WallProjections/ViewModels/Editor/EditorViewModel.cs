@@ -53,15 +53,53 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     private IEditorHotspotViewModel? _selectedHotspot;
 
     /// <summary>
+    /// The backing field for <see cref="ConfigExists" />.
+    /// </summary>
+    private bool _configExists;
+
+    /// <summary>
     /// The backing field for <see cref="IsSaved" />.
     /// </summary>
     private bool _isSaved;
 
     /// <summary>
-    /// Whether the config exists, i.e. is not empty
-    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IPythonHandler, IViewModelProvider)" />)</i>.
+    /// A reactive backing field for <see cref="IsImportSafe" />.
     /// </summary>
-    private bool _configExists;
+    private readonly ObservableAsPropertyHelper<bool> _isImportSafe;
+
+    /// <summary>
+    /// A reactive backing field for <see cref="CanExport" />.
+    /// </summary>
+    private readonly ObservableAsPropertyHelper<bool> _canExport;
+
+    #region Loading properties' backing fields
+
+    /// <summary>
+    /// The backing field for <see cref="IsSaving" />.
+    /// </summary>
+    private bool _isSaving;
+
+    /// <summary>
+    /// The backing field for <see cref="IsImporting" />.
+    /// </summary>
+    private bool _isImporting;
+
+    /// <summary>
+    /// The backing field for <see cref="IsExporting" />.
+    /// </summary>
+    private bool _isExporting;
+
+    /// <summary>
+    /// The backing field for <see cref="IsCalibrating" />.
+    /// </summary>
+    private bool _isCalibrating;
+
+    /// <summary>
+    /// The backing field for <see cref="AreActionsDisabled" />.
+    /// </summary>
+    private bool _areActionsDisabled;
+
+    #endregion
 
     /// <inheritdoc />
     public ObservableHotspotCollection<IEditorHotspotViewModel> Hotspots
@@ -91,6 +129,8 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             this.RaiseAndSetIfChanged(ref _selectedHotspot, value);
             PositionEditor.SelectHotspot(value, Hotspots.Where(h => h != value).Select(h => h.Position));
             DescriptionEditor.Hotspot = value;
+            ImageEditor.IsEnabled = value is not null;
+            VideoEditor.IsEnabled = value is not null;
 
             ImageEditor.Media.CollectionChanged -= SetUnsaved;
             VideoEditor.Media.CollectionChanged -= SetUnsaved;
@@ -123,22 +163,99 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public IMediaEditorViewModel VideoEditor { get; }
 
+    /// <summary>
+    /// Whether the config exists, i.e. is not empty
+    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IPythonHandler, IViewModelProvider)" />)</i>.
+    /// </summary>
+    /// <seealso cref="IsImportSafe" />
+    /// <seealso cref="CanExport" />
+    private bool ConfigExists
+    {
+        get => _configExists;
+        set => this.RaiseAndSetIfChanged(ref _configExists, value);
+    }
+
     /// <inheritdoc />
     public bool IsSaved
     {
         get => _isSaved;
         private set
         {
-            if (value)
-                _configExists = true;
+            ConfigExists = true;
             this.RaiseAndSetIfChanged(ref _isSaved, value);
-            this.RaisePropertyChanged(nameof(IEditorViewModel.CloseButtonText));
-            this.RaisePropertyChanged(nameof(CanExport));
         }
     }
 
     /// <inheritdoc />
-    public bool CanExport => IsSaved && _configExists;
+    public bool IsImportSafe => _isImportSafe.Value;
+
+    /// <inheritdoc />
+    public bool CanExport => _canExport.Value;
+
+    #region Loading properties
+
+    /// <inheritdoc />
+    public bool IsSaving
+    {
+        get => _isSaving;
+        private set => this.RaiseAndSetIfChanged(ref _isSaving, value);
+    }
+
+    /// <inheritdoc />
+    public bool IsImporting
+    {
+        get => _isImporting;
+        private set => this.RaiseAndSetIfChanged(ref _isImporting, value);
+    }
+
+    /// <inheritdoc />
+    public bool IsExporting
+    {
+        get => _isExporting;
+        private set => this.RaiseAndSetIfChanged(ref _isExporting, value);
+    }
+
+    /// <inheritdoc />
+    public bool IsCalibrating
+    {
+        get => _isCalibrating;
+        private set => this.RaiseAndSetIfChanged(ref _isCalibrating, value);
+    }
+
+    /// <inheritdoc />
+    public bool AreActionsDisabled
+    {
+        get => _areActionsDisabled;
+        private set => this.RaiseAndSetIfChanged(ref _areActionsDisabled, value);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> WithActionLock(Func<Task> action)
+    {
+        lock (this)
+        {
+            if (AreActionsDisabled) return false;
+
+            AreActionsDisabled = true;
+        }
+
+        try
+        {
+            await action();
+            return true;
+        }
+        finally
+        {
+            lock (this)
+            {
+                AreActionsDisabled = false;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Hotspot management
 
     /// <inheritdoc />
     public void AddHotspot()
@@ -167,6 +284,10 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         SelectedHotspot = Hotspots.FirstOrDefault();
     }
 
+    #endregion
+
+    #region Media management
+
     /// <inheritdoc />
     public void AddMedia(MediaEditorType type, IEnumerable<IStorageFile> files)
     {
@@ -192,16 +313,26 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         selectedMedia.Clear();
     }
 
+    #endregion
+
+    #region Config manipulation
+
     /// <inheritdoc />
-    public bool SaveConfig()
+    public async Task<bool> SaveConfig()
     {
         try
         {
-            var hotspots = Hotspots.Select(hotspot => hotspot.ToHotspot());
-            var config = new Config(_homographyMatrix, hotspots);
+            IsSaving = true;
 
-            // Set IsSaved to the result of SaveConfig and return the same value
-            return IsSaved = _fileHandler.SaveConfig(config);
+            var hotspots = Hotspots.Select(hotspot => hotspot.ToHotspot());
+            var result = await Task.Run(() =>
+            {
+                var config = new Config(_homographyMatrix, hotspots);
+                return _fileHandler.SaveConfig(config);
+            });
+
+            IsSaved = result;
+            return result;
         }
         catch (Exception e)
         {
@@ -209,14 +340,20 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             Console.Error.WriteLine(e);
             return false;
         }
+        finally
+        {
+            IsSaving = false;
+        }
     }
 
     /// <inheritdoc />
-    public bool ImportConfig(string filePath)
+    public async Task<bool> ImportConfig(string filePath)
     {
         try
         {
-            var config = _fileHandler.ImportConfig(filePath);
+            IsImporting = true;
+
+            var config = await Task.Run(() => _fileHandler.ImportConfig(filePath));
             if (config is null) return false;
 
             Hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>(
@@ -233,15 +370,21 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             Console.Error.WriteLine(e);
             return false;
         }
+        finally
+        {
+            IsImporting = false;
+        }
     }
 
     /// <inheritdoc />
-    public bool ExportConfig(string exportPath)
+    public async Task<bool> ExportConfig(string exportPath)
     {
         try
         {
+            IsExporting = true;
+
             var path = Path.Combine(exportPath, IEditorViewModel.ExportFileName);
-            return _fileHandler.ExportConfig(path);
+            return await Task.Run(() => _fileHandler.ExportConfig(path));
         }
         catch (Exception e)
         {
@@ -250,7 +393,15 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             //TODO Improve error reporting (especially for "file already exists")
             return false;
         }
+        finally
+        {
+            IsExporting = false;
+        }
     }
+
+    #endregion
+
+    #region Calibration
 
     /// <inheritdoc />
     public void ShowCalibrationMarkers() => _navigator.ShowCalibrationMarkers();
@@ -259,28 +410,36 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     public void HideCalibrationMarkers() => _navigator.HideCalibrationMarkers();
 
     /// <inheritdoc />
-    public Task<bool> CalibrateCamera() => Task.Run(async () =>
+    public async Task<bool> CalibrateCamera()
     {
+        IsCalibrating = true;
+
         var arUcoPositions = _navigator.GetArUcoPositions();
         if (arUcoPositions is null) return false;
 
-        var matrix = await _pythonHandler.RunCalibration(arUcoPositions);
+        var matrix = await Task.Run(() => _pythonHandler.RunCalibration(arUcoPositions));
         if (matrix is not null)
         {
             _homographyMatrix = matrix;
-            _configExists = true;
+            ConfigExists = true;
             IsSaved = false;
         }
 
         _navigator.HideCalibrationMarkers();
+
+        IsCalibrating = false;
         return matrix is not null;
-    });
+    }
+
+    #endregion
 
     /// <inheritdoc />
     public void CloseEditor()
     {
         _navigator.CloseEditor();
     }
+
+    #region Constructors and initialization
 
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" />, not linked to any existing <see cref="IConfig" />.
@@ -312,8 +471,11 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         ImageEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Images);
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
 
-        _configExists = false;
+        ConfigExists = false;
         _isSaved = true; // Setting the backing field directly to avoid changing _configExists, which is set in IsSaved setter
+
+        _isImportSafe = GetIsImportSafeProperty();
+        _canExport = GetCanExportProperty();
 
         InitEventHandlers();
     }
@@ -348,11 +510,28 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         VideoEditor = vmProvider.GetMediaEditorViewModel(MediaEditorType.Videos);
         SelectedHotspot = Hotspots.FirstOrDefault();
 
-        _configExists = true;
+        ConfigExists = true;
         IsSaved = true;
+
+        _isImportSafe = GetIsImportSafeProperty();
+        _canExport = GetCanExportProperty();
 
         InitEventHandlers();
     }
+
+    /// <summary>
+    /// Creates a new observable property for <see cref="_isImportSafe" />.
+    /// </summary>
+    private ObservableAsPropertyHelper<bool> GetIsImportSafeProperty() => this
+        .WhenAnyValue(x => x.ConfigExists, exists => !exists)
+        .ToProperty(this, x => x.IsImportSafe);
+
+    /// <summary>
+    /// Creates a new observable property for <see cref="_canExport" />.
+    /// </summary>
+    private ObservableAsPropertyHelper<bool> GetCanExportProperty() => this
+        .WhenAnyValue(x => x.IsSaved, x => x.ConfigExists, (saved, exists) => saved && exists)
+        .ToProperty(this, x => x.CanExport);
 
     /// <summary>
     /// Initializes event handlers for the editor (to keep track of unsaved changes).
@@ -373,4 +552,6 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     {
         IsSaved = false;
     }
+
+    #endregion
 }
