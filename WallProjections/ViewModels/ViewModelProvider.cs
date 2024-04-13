@@ -151,7 +151,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler) =>
-        new EditorViewModel(config, _navigator, fileHandler, _pythonHandler, this);
+        new EditorViewModel(config, _navigator, fileHandler, _pythonHandler, this, _loggerFactory);
 
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" /> instance
@@ -159,7 +159,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler) =>
-        new EditorViewModel(_navigator, fileHandler, _pythonHandler, this);
+        new EditorViewModel(_navigator, fileHandler, _pythonHandler, this, _loggerFactory);
 
     /// <summary>
     /// Creates a new <see cref="EditorHotspotViewModel" /> instance
@@ -208,7 +208,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <seealso cref="VideoThumbnailViewModel" />
     public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath) => type switch
     {
-        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, _processProxy),
+        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, _processProxy, _loggerFactory),
         MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, _processProxy),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
     };
@@ -218,7 +218,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <inheritdoc />
     /// <returns>A new <see cref="ImportViewModel" /> instance</returns>
-    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new ImportViewModel(descVm);
+    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) =>
+        new ImportViewModel(descVm, _loggerFactory);
 
     #endregion
 

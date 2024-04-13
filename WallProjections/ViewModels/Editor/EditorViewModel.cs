@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
@@ -19,6 +20,11 @@ namespace WallProjections.ViewModels.Editor;
 /// <inheritdoc cref="IEditorViewModel" />
 public class EditorViewModel : ViewModelBase, IEditorViewModel
 {
+    /// <summary>
+    /// A logger for this class.
+    /// </summary>
+    private readonly ILogger _logger;
+
     /// <summary>
     /// A <see cref="INavigator" /> used for closing the Editor.
     /// </summary>
@@ -165,7 +171,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
     /// <summary>
     /// Whether the config exists, i.e. is not empty
-    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IPythonHandler, IViewModelProvider)" />)</i>.
+    /// <i>(see <see cref="EditorViewModel(INavigator, IFileHandler, IPythonHandler, IViewModelProvider, ILoggerFactory)" />)</i>.
     /// </summary>
     /// <seealso cref="IsImportSafe" />
     /// <seealso cref="CanExport" />
@@ -273,6 +279,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         var newHotspot = _vmProvider.GetEditorHotspotViewModel(newId);
         Hotspots.Add(newHotspot);
         SelectedHotspot = newHotspot;
+        _logger.LogTrace("Added new hotspot with ID {Id}.", newId);
     }
 
     /// <inheritdoc />
@@ -282,6 +289,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
         Hotspots.Remove(hotspot);
         SelectedHotspot = Hotspots.FirstOrDefault();
+        _logger.LogTrace("Deleted hotspot with ID {Id}.", hotspot.Id);
     }
 
     #endregion
@@ -291,26 +299,52 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public void AddMedia(MediaEditorType type, IEnumerable<IStorageFile> files)
     {
-        if (SelectedHotspot is null) return;
-        IsSaved = false;
+        var hotspot = SelectedHotspot;
+        if (hotspot is null)
+        {
+            _logger.LogWarning("No hotspot selected to add media to.");
+            return;
+        }
 
-        SelectedHotspot?.AddMedia(type, files);
+        IsSaved = false;
+        hotspot.AddMedia(type, files);
+
+        var logTypeText = type switch
+        {
+            MediaEditorType.Images => "images",
+            MediaEditorType.Videos => "videos",
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+        _logger.LogTrace("Added {TypeText} to hotspot with ID {Id}.", logTypeText, hotspot.Id);
     }
 
     /// <inheritdoc />
     public void RemoveMedia(MediaEditorType type, IEnumerable<IThumbnailViewModel> media)
     {
-        if (SelectedHotspot is null) return;
-        IsSaved = false;
+        var hotspot = SelectedHotspot;
+        if (hotspot is null)
+        {
+            _logger.LogWarning("No hotspot selected to remove media from.");
+            return;
+        }
 
+        IsSaved = false;
         var selectedMedia = type switch
         {
             MediaEditorType.Images => ImageEditor.SelectedMedia,
             MediaEditorType.Videos => VideoEditor.SelectedMedia,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
-        SelectedHotspot?.RemoveMedia(type, media);
+        hotspot.RemoveMedia(type, media);
         selectedMedia.Clear();
+
+        var logTypeText = type switch
+        {
+            MediaEditorType.Images => "images",
+            MediaEditorType.Videos => "videos",
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+        _logger.LogTrace("Removed {TypeText} from hotspot with ID {Id}.", logTypeText, hotspot.Id);
     }
 
     #endregion
@@ -332,12 +366,16 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             });
 
             IsSaved = result;
+            if (result)
+                _logger.LogInformation("Config saved successfully.");
+            else
+                _logger.LogWarning("Failed to save config.");
+
             return result;
         }
         catch (Exception e)
         {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
+            _logger.LogError(e, "Failed to save config.");
             return false;
         }
         finally
@@ -354,7 +392,11 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
             IsImporting = true;
 
             var config = await Task.Run(() => _fileHandler.ImportConfig(filePath));
-            if (config is null) return false;
+            if (config is null)
+            {
+                _logger.LogWarning("Failed to import config from {Path}.", filePath);
+                return false;
+            }
 
             Hotspots = new ObservableHotspotCollection<IEditorHotspotViewModel>(
                 config.Hotspots.Select(hotspot => _vmProvider.GetEditorHotspotViewModel(hotspot))
@@ -366,8 +408,7 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
         }
         catch (Exception e)
         {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
+            _logger.LogError(e, "Failed to import config from {Path}.", filePath);
             return false;
         }
         finally
@@ -379,18 +420,22 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public async Task<bool> ExportConfig(string exportPath)
     {
+        var path = Path.Combine(exportPath, IEditorViewModel.ExportFileName);
         try
         {
             IsExporting = true;
 
-            var path = Path.Combine(exportPath, IEditorViewModel.ExportFileName);
-            return await Task.Run(() => _fileHandler.ExportConfig(path));
+            var result = await Task.Run(() => _fileHandler.ExportConfig(path));
+            if (result)
+                _logger.LogInformation("Config exported successfully at {Path}.", path);
+            else
+                _logger.LogWarning("Failed to export config at {Path}.", path);
+
+            return result;
         }
         catch (Exception e)
         {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
-            //TODO Improve error reporting (especially for "file already exists")
+            _logger.LogError(e, "Failed to export config at {Path}.", path);
             return false;
         }
         finally
@@ -412,23 +457,36 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public async Task<bool> CalibrateCamera()
     {
-        IsCalibrating = true;
-
-        var arUcoPositions = _navigator.GetArUcoPositions();
-        if (arUcoPositions is null) return false;
-
-        var matrix = await Task.Run(() => _pythonHandler.RunCalibration(arUcoPositions));
-        if (matrix is not null)
+        try
         {
-            _homographyMatrix = matrix;
-            ConfigExists = true;
-            IsSaved = false;
+            IsCalibrating = true;
+
+            var arUcoPositions = _navigator.GetArUcoPositions();
+            if (arUcoPositions is null)
+            {
+                _logger.LogWarning("Failed to calibrate camera: ArUco markers not found.");
+                return false;
+            }
+
+            var matrix = await Task.Run(() => _pythonHandler.RunCalibration(arUcoPositions));
+            if (matrix is not null)
+            {
+                _homographyMatrix = matrix;
+                ConfigExists = true;
+                IsSaved = false;
+                _logger.LogInformation("Camera calibrated successfully.");
+            }
+            else
+                _logger.LogWarning("Failed to calibrate camera: Python script returned null.");
+
+            _navigator.HideCalibrationMarkers();
+
+            return matrix is not null;
         }
-
-        _navigator.HideCalibrationMarkers();
-
-        IsCalibrating = false;
-        return matrix is not null;
+        finally
+        {
+            IsCalibrating = false;
+        }
     }
 
     #endregion
@@ -448,13 +506,16 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
     /// <param name="pythonHandler">A <see cref="IPythonHandler" /> used for calibrating the camera.</param>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
+    /// <param name="loggerFactory">A factory for creating loggers.</param>
     public EditorViewModel(
         INavigator navigator,
         IFileHandler fileHandler,
         IPythonHandler pythonHandler,
-        IViewModelProvider vmProvider
+        IViewModelProvider vmProvider,
+        ILoggerFactory loggerFactory
     )
     {
+        _logger = loggerFactory.CreateLogger<EditorViewModel>();
         _navigator = navigator;
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;
@@ -488,14 +549,17 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <param name="fileHandler">A <see cref="IFileHandler" /> used for saving, importing, and exporting configs.</param>
     /// <param name="pythonHandler">A <see cref="IPythonHandler" /> used for calibrating the camera.</param>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
+    /// <param name="loggerFactory">A factory for creating loggers.</param>
     public EditorViewModel(
         IConfig config,
         INavigator navigator,
         IFileHandler fileHandler,
         IPythonHandler pythonHandler,
-        IViewModelProvider vmProvider
+        IViewModelProvider vmProvider,
+        ILoggerFactory loggerFactory
     )
     {
+        _logger = loggerFactory.CreateLogger<EditorViewModel>();
         _navigator = navigator;
         _vmProvider = vmProvider;
         _fileHandler = fileHandler;

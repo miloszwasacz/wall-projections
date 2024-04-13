@@ -88,7 +88,6 @@ public sealed class PythonProxy : IPythonProxy
     {
         using (Py.GIL())
         {
-            //TODO Maybe Import a module once and reuse it?
             var module = moduleFactory();
             _currentModule.Set(module);
             action(module);

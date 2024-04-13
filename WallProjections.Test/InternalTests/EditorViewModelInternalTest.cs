@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using WallProjections.Models;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
@@ -18,8 +19,8 @@ public class EditorViewModelInternalTest
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
         var pythonHandler = new MockPythonHandler();
         var vmProvider = new MockViewModelProvider();
-
-        var editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, vmProvider);
+        var editorViewModel =
+            new EditorViewModel(navigator, fileHandler, pythonHandler, vmProvider, new MockLoggerFactory());
 
         editorViewModel.AddHotspot();
         editorViewModel.AddHotspot();
