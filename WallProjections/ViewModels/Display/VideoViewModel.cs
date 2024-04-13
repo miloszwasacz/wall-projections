@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using LibVLCSharp.Shared;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
@@ -11,6 +12,11 @@ namespace WallProjections.ViewModels.Display;
 /// <inheritdoc cref="IVideoViewModel" />
 public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 {
+    /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
     /// <summary>
     /// The <see cref="LibVLC" /> object used to play the videos
     /// </summary>
@@ -50,10 +56,12 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <summary>
     /// Creates a new <see cref="VideoViewModel" /> with the given <see cref="IMediaPlayer" />
     /// </summary>
-    /// <param name="libVlc"></param>
-    /// <param name="mediaPlayer"></param>
-    public VideoViewModel(LibVLC libVlc, IMediaPlayer mediaPlayer)
+    /// <param name="libVlc">The <see cref="LibVLC" /> object used by <see cref="LibVLCSharp" /></param>
+    /// <param name="mediaPlayer">The <see cref="IMediaPlayer" /> used to play the videos</param>
+    /// <param name="loggerFactory">A factory for creating loggers</param>
+    public VideoViewModel(LibVLC libVlc, IMediaPlayer mediaPlayer, ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<VideoViewModel>();
         _libVlc = libVlc;
         _mediaPlayer = mediaPlayer;
         _playQueue = new ConcurrentQueue<string>();
@@ -186,11 +194,15 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <param name="e">Arguments for the event</param>
     private void PlayNextVideoEvent(object? sender, EventArgs e)
     {
-        var success = PlayNextVideo();
-
-        //TODO Log to file
-        if (!success)
-            Console.WriteLine("Could not play next video");
+        switch (PlayNextVideo())
+        {
+            case false when _playQueue.IsEmpty:
+                _logger.LogInformation("End of video queue reached");
+                break;
+            case false:
+                _logger.LogError("Failed to play next video");
+                break;
+        }
     }
 
     public void Dispose()

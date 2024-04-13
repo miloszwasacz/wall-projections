@@ -124,20 +124,22 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         this,
         _contentProviderFactory(config),
         _layoutProviderFactory(),
-        HotspotHandler
+        HotspotHandler,
+        _loggerFactory
     );
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="ImageViewModel" /> instance</returns>
-    public IImageViewModel GetImageViewModel() => new ImageViewModel();
+    public IImageViewModel GetImageViewModel() => new ImageViewModel(_loggerFactory);
 
     /// <summary>
     /// Creates a new <see cref="VideoViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="VideoViewModel" /> instance</returns>
-    public IVideoViewModel GetVideoViewModel() => new VideoViewModel(LibVlc, new VLCMediaPlayer(LibVlc));
+    public IVideoViewModel GetVideoViewModel() =>
+        new VideoViewModel(LibVlc, new VLCMediaPlayer(LibVlc), _loggerFactory);
 
     #endregion
 

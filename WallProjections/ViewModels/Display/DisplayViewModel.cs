@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
@@ -24,6 +25,11 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     internal const string NotFound = "Hmm...\n" +
                                      "Looks like this hotspot has missing content.\n" +
                                      "Please report this to the museum staff.";
+
+    /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
 
     /// <summary>
     /// The <see cref="INavigator" /> used for opening the Editor and closing the Display.
@@ -75,14 +81,17 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     /// <param name="contentProvider">A <see cref="IContentProvider"/> for fetching data about hotspots.</param>
     /// <param name="layoutProvider">A <see cref="ILayoutProvider"/> for fetching appropriate child layouts.</param>
     /// <param name="hotspotHandler">A <see cref="IHotspotHandler" /> used to listen for hotspot events.</param>
+    /// <param name="loggerFactory">A factory for creating loggers</param>
     public DisplayViewModel(
         INavigator navigator,
         IViewModelProvider vmProvider,
         IContentProvider contentProvider,
         ILayoutProvider layoutProvider,
-        IHotspotHandler hotspotHandler
+        IHotspotHandler hotspotHandler,
+        ILoggerFactory loggerFactory
     )
     {
+        _logger = loggerFactory.CreateLogger<DisplayViewModel>();
         _navigator = navigator;
         _contentProvider = contentProvider;
         _vmProvider = vmProvider;
@@ -125,14 +134,12 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
         }
         catch (Exception e) when (e is IConfig.HotspotNotFoundException or FileNotFoundException)
         {
-            //TODO Write to Log instead of Console
-            Console.Error.WriteLine(e);
+            _logger.LogError(e, "Error while loading content for hotspot {HotspotId} (Not Found)", hotspotId);
             ContentViewModel = _layoutProvider.GetErrorLayout(NotFound);
         }
         catch (Exception e)
         {
-            //TODO Write to Log instead of Console
-            Console.Error.WriteLine(e);
+            _logger.LogError(e, "Error while loading content for hotspot {HotspotId}", hotspotId);
             ContentViewModel = _layoutProvider.GetErrorLayout(GenericError);
         }
     });

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
 using WallProjections.Models;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Display.Layouts;
@@ -27,7 +28,7 @@ public class LayoutProviderTest
             typeof(VideoWithDescriptionViewModel.Factory)
         };
 
-        var layoutProvider = new LayoutProvider();
+        var layoutProvider = new LayoutProvider(new MockLoggerFactory());
         var layoutFactories = GetLayoutFactories(layoutProvider);
         Assert.That(
             layoutFactories,
@@ -93,7 +94,7 @@ public class LayoutProviderTest
         const string title = "Title";
         const string description = "Description";
 
-        var layoutProvider = new LayoutProvider();
+        var layoutProvider = new LayoutProvider(new MockLoggerFactory());
         var layout = layoutProvider.GetSimpleDescriptionLayout(title, description);
         Assert.That(layout, Is.InstanceOf<DescriptionViewModel>());
         var descriptionLayout = (DescriptionViewModel)layout;

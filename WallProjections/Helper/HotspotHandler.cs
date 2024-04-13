@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.Helper;
@@ -21,6 +22,11 @@ public sealed class HotspotHandler : IHotspotHandler
 
     /// <inheritdoc />
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotForcefullyDeactivated;
+
+    /// <summary>
+    /// A logger for this class.
+    /// </summary>
+    private readonly ILogger _logger;
 
     /// <summary>
     /// A <see cref="IPythonHandler" /> which notifies when a hotspot is pressed or released.
@@ -55,8 +61,10 @@ public sealed class HotspotHandler : IHotspotHandler
     /// <param name="pythonHandler">
     /// A <see cref="IPythonHandler" /> which notifies when a hotspot is pressed or released
     /// </param>
-    public HotspotHandler(IPythonHandler pythonHandler)
+    /// <param name="loggerFactory">A factory for creating loggers</param>
+    public HotspotHandler(IPythonHandler pythonHandler, ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<HotspotHandler>();
         _pythonHandler = pythonHandler;
         _pythonHandler.HotspotPressed += OnHotspotPressed;
         _pythonHandler.HotspotReleased += OnHotspotReleased;
@@ -75,12 +83,15 @@ public sealed class HotspotHandler : IHotspotHandler
 
             // If there is a running task which is not done, or the currently activated hotspot has been pressed, return
             if (_currentlyActivated == e.Id || (runningTask is not null && !runningTask.Done))
+            {
+                _logger.LogTrace("Ignoring hotspot {HotspotId} press", e.Id);
                 return;
+            }
 
             // If the same task has been previously cancelled, resume that task; otherwise, create a new task
             _currentTask = _cancelledTasks.TryRemove(e.Id, out var cancelledTask)
-                ? new ActivationTask(cancelledTask, InvokeActivating, InvokeActivatedAndUpdateCurrent)
-                : new ActivationTask(e.Id, InvokeActivating, InvokeActivatedAndUpdateCurrent);
+                ? new ActivationTask(cancelledTask, InvokeActivating, InvokeActivatedAndUpdateCurrent, _logger)
+                : new ActivationTask(e.Id, InvokeActivating, InvokeActivatedAndUpdateCurrent, _logger);
 
             // If there was a running task, it must have already finished, so remove it
             if (runningTask is not null)
@@ -224,15 +235,18 @@ public sealed class HotspotHandler : IHotspotHandler
         /// <param name="id">The ID of the hotspot to activate.</param>
         /// <param name="activatingCallback">The callback to invoke when the hotspot starts activating.</param>
         /// <param name="activatedCallback">The callback to invoke when the hotspot is fully activated.</param>
+        /// <param name="logger">A logger for debugging purposes.</param>
         /// <seealso cref="Run" />
         public ActivationTask(
             int id,
             Action<int> activatingCallback,
-            Action<int> activatedCallback
+            Action<int> activatedCallback,
+            ILogger logger
         )
         {
             Id = id;
             Run(activatingCallback, activatedCallback);
+            logger.LogTrace("Started activation task for hotspot {HotspotId}", id);
         }
 
         /// <summary>
@@ -241,11 +255,13 @@ public sealed class HotspotHandler : IHotspotHandler
         /// <param name="cancelledTask">Task to resume.</param>
         /// <param name="activatingCallback">The callback to invoke when the hotspot starts activating.</param>
         /// <param name="activatedCallback">The callback to invoke when the hotspot is fully activated.</param>
+        /// <param name="logger">A logger for debugging purposes.</param>
         /// <exception cref="ArgumentException">Thrown when the provided task has not been cancelled.</exception>
         public ActivationTask(
             ActivationTask cancelledTask,
             Action<int> activatingCallback,
-            Action<int> activatedCallback
+            Action<int> activatedCallback,
+            ILogger logger
         )
         {
             // Cannot resume a task that has not been cancelled
@@ -264,6 +280,11 @@ public sealed class HotspotHandler : IHotspotHandler
 
             // Run the task with the new progress
             Run(activatingCallback, activatedCallback, progress);
+            logger.LogTrace(
+                "Resumed activation task for hotspot {HotspotId} (progress: {Progress} ms)",
+                Id,
+                progress.Milliseconds
+            );
         }
 
         /// <summary>

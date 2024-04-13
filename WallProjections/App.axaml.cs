@@ -64,10 +64,10 @@ public class App : Application
                 (nav, pythonHandler) => new ViewModelProvider(
                     nav,
                     pythonHandler,
-                    new ProcessProxy(),
-                    pyHandler => new HotspotHandler(pyHandler),
+                    new ProcessProxy(_loggerFactory),
+                    pyHandler => new HotspotHandler(pyHandler, _loggerFactory),
                     config => new ContentProvider(config),
-                    () => new LayoutProvider(),
+                    () => new LayoutProvider(_loggerFactory),
                     _loggerFactory
                 ),
                 () => new FileHandler(),

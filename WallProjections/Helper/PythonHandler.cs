@@ -188,12 +188,14 @@ public sealed class PythonHandler : IPythonHandler
     /// <inheritdoc />
     public void OnHotspotPressed(int id)
     {
+        _logger.LogTrace("Hotspot {HotspotId} pressed", id);
         HotspotPressed?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 
     /// <inheritdoc />
     public void OnHotspotUnpressed(int id)
     {
+        _logger.LogTrace("Hotspot {HotspotId} released", id);
         HotspotReleased?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 

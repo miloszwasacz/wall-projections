@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
@@ -21,11 +22,16 @@ public class LayoutProvider : ILayoutProvider
     /// </summary>
     private readonly IEnumerable<LayoutFactory> _layoutFactories;
 
+    // ReSharper disable once UnusedParameter.Local
     /// <summary>
     /// Finds all <see cref="LayoutFactory">Layout Factories</see> that can make layouts automatically.
     /// </summary>
-    public LayoutProvider()
+    /// <param name="loggerFactory">A factory for creating loggers.</param>
+    public LayoutProvider(ILoggerFactory loggerFactory)
     {
+#if RELEASE
+        var logger = loggerFactory.CreateLogger<LayoutProvider>();
+#endif
         // From: https://stackoverflow.com/questions/67079586/get-all-classes-that-implement-an-interface-and-call-a-function-in-net-core
         _layoutFactories = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(s => s.GetTypes())
@@ -40,12 +46,14 @@ public class LayoutProvider : ILayoutProvider
             {
                 try
                 {
-                    return Activator.CreateInstance(p) as LayoutFactory;
+                    return Activator.CreateInstance(p) as LayoutFactory
+                           ?? throw new InvalidCastException();
                 }
                 catch (Exception e)
                 {
-                    // TODO Log to file
-                    Console.Error.WriteLine($"Error creating LayoutFactory of type {p.Name}: {e.Message}");
+                    logger.LogWarning(
+                        e, "LayoutFactory of type {LayoutFactoryType} is not correctly implemented", p.Name
+                    );
                     return null;
                 }
             })

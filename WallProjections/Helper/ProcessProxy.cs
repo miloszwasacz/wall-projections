@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.Helper;
@@ -8,6 +9,17 @@ namespace WallProjections.Helper;
 /// <inheritdoc />
 public class ProcessProxy : IProcessProxy
 {
+    /// <summary>
+    /// A logger for this class.
+    /// </summary>
+    private readonly ILogger _logger;
+
+    [ExcludeFromCodeCoverage]
+    public ProcessProxy(ILoggerFactory loggerFactory)
+    {
+        _logger = loggerFactory.CreateLogger<ProcessProxy>();
+    }
+
     // ReSharper disable once ConvertIfStatementToReturnStatement
     /// <inheritdoc />
     [ExcludeFromCodeCoverage(Justification = "Is platform specific (especially Linux) and should be tested manually")]
@@ -28,5 +40,9 @@ public class ProcessProxy : IProcessProxy
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage(Justification = "Unit tests should not start external processes")]
-    public void Start(string fileName, string arguments) => Process.Start(fileName, arguments);
+    public void Start(string fileName, string arguments)
+    {
+        _logger.LogInformation("Starting process: {FileName} {Arguments}", fileName, arguments);
+        Process.Start(fileName, arguments);
+    }
 }

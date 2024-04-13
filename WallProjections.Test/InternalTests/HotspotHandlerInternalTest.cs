@@ -1,4 +1,5 @@
 ﻿using WallProjections.Helper;
+using WallProjections.Test.Mocks;
 
 namespace WallProjections.Test.InternalTests;
 
@@ -11,9 +12,10 @@ public class HotspotHandlerInternalTest
         [Test]
         public void ConstructorFromNotCancelledTaskTest()
         {
-            var task = new HotspotHandler.ActivationTask(0, EmptyCallback, EmptyCallback);
+            var logger = new MockLoggerFactory().CreateLogger(nameof(HotspotHandlerInternalTest));
+            var task = new HotspotHandler.ActivationTask(0, EmptyCallback, EmptyCallback, logger);
             Assert.That(
-                () => new HotspotHandler.ActivationTask(task, EmptyCallback, EmptyCallback),
+                () => new HotspotHandler.ActivationTask(task, EmptyCallback, EmptyCallback, logger),
                 Throws.ArgumentException
             );
         }
