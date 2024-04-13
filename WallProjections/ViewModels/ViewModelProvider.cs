@@ -229,7 +229,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// with <i>TH</i> being <see cref="HotspotDisplayViewModel" />
     /// </summary>
     /// <returns>A new <see cref="SecondaryWindowViewModel" /> instance</returns>
-    public ISecondaryWindowViewModel GetSecondaryWindowViewModel() => new SecondaryWindowViewModel(this);
+    public ISecondaryWindowViewModel GetSecondaryWindowViewModel() =>
+        new SecondaryWindowViewModel(this, _loggerFactory);
 
     /// <summary>
     /// Creates a new <see cref="HotspotDisplayViewModel" /> instance
@@ -237,7 +238,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="HotspotDisplayViewModel" /> instance</returns>
     public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
-        new HotspotDisplayViewModel(config, HotspotHandler, this);
+        new HotspotDisplayViewModel(config, HotspotHandler, this, _loggerFactory);
 
     /// <summary>
     /// Creates a new <see cref="HotspotProjectionViewModel" /> instance

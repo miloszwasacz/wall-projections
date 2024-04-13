@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
@@ -10,6 +11,11 @@ namespace WallProjections.ViewModels.SecondaryScreens;
 /// <inheritdoc cref="ISecondaryWindowViewModel" />
 public class SecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewModel, IDisposable
 {
+    /// <summary>
+    /// A logger for this class.
+    /// </summary>
+    private readonly ILogger _logger;
+
     /// <summary>
     /// A <see cref="IViewModelProvider" /> used for creating child viewmodels.
     /// </summary>
@@ -37,8 +43,10 @@ public class SecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewModel
     /// Creates a new instance of <see cref="SecondaryWindowViewModel" />.
     /// </summary>
     /// <param name="vmProvider">A <see cref="IViewModelProvider" /> used for creating child viewmodels.</param>
-    public SecondaryWindowViewModel(IViewModelProvider vmProvider)
+    /// <param name="loggerFactory">A factory for creating loggers.</param>
+    public SecondaryWindowViewModel(IViewModelProvider vmProvider, ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<SecondaryWindowViewModel>();
         _vmProvider = vmProvider;
     }
 
@@ -46,18 +54,21 @@ public class SecondaryWindowViewModel : ViewModelBase, ISecondaryWindowViewModel
     public void ShowHotspotDisplay(IConfig config)
     {
         Content = _vmProvider.GetHotspotDisplayViewModel(config);
+        _logger.LogTrace("Showing Hotspot Display");
     }
 
     /// <inheritdoc />
     public void ShowPositionEditor(IEditorViewModel editorViewModel)
     {
         Content = editorViewModel.PositionEditor;
+        _logger.LogTrace("Showing Position Editor");
     }
 
     /// <inheritdoc />
     public void ShowArUcoGrid()
     {
         Content = _vmProvider.GetArUcoGridViewModel();
+        _logger.LogTrace("Showing ArUco Grid");
     }
 
     public void Dispose()

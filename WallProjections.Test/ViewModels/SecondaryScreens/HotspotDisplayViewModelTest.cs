@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
@@ -44,7 +45,7 @@ public class HotspotDisplayViewModelTest
     {
         var config = CreateConfig();
         var hotspotHandler = new MockHotspotHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(config, hotspotHandler, VMProvider);
+        var hotspotViewModel = new HotspotDisplayViewModel(config, hotspotHandler, VMProvider, new MockLoggerFactory());
         Assert.Multiple(() =>
         {
             Assert.That(
@@ -64,7 +65,7 @@ public class HotspotDisplayViewModelTest
     {
         var config = CreateConfig();
         var hotspotHandler = new MockHotspotHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(config, hotspotHandler, VMProvider);
+        var hotspotViewModel = new HotspotDisplayViewModel(config, hotspotHandler, VMProvider, new MockLoggerFactory());
 
         // Set activating
         hotspotHandler.StartHotspotActivation(0);
@@ -104,7 +105,7 @@ public class HotspotDisplayViewModelTest
     {
         var config = CreateConfig();
         var hotspotHandler = new MockHotspotHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(config, hotspotHandler, VMProvider);
+        var hotspotViewModel = new HotspotDisplayViewModel(config, hotspotHandler, VMProvider, new MockLoggerFactory());
 
         // Set activating
         hotspotHandler.StartHotspotActivation(3);
@@ -138,7 +139,7 @@ public class HotspotDisplayViewModelTest
     public void DisplayHotspotsTest()
     {
         var hotspotHandler = new MockHotspotHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), hotspotHandler, VMProvider);
+        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), hotspotHandler, VMProvider, new MockLoggerFactory());
         Assert.That(hotspotViewModel.IsVisible, Is.False);
         hotspotViewModel.DisplayHotspots();
         Assert.That(hotspotViewModel.IsVisible, Is.True);
@@ -148,7 +149,7 @@ public class HotspotDisplayViewModelTest
     public void DisposeTest()
     {
         var hotspotHandler = new MockHotspotHandler();
-        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), hotspotHandler, VMProvider);
+        var hotspotViewModel = new HotspotDisplayViewModel(CreateConfig(), hotspotHandler, VMProvider, new MockLoggerFactory());
         AssertActiveHotspot(hotspotViewModel, null);
 
         hotspotViewModel.Dispose();
