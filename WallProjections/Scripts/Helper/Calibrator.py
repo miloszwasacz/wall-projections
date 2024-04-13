@@ -14,7 +14,7 @@ Defined here https://docs.opencv.org/3.4/d9/d6a/group__aruco.html#gac84398a9ed9d
 DISPLAY_RESULTS = False
 """Displays labeled ArUco detection on a CV2 window, useful for debugging"""
 
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("logger")
 
 
 class Calibrator:
@@ -64,7 +64,7 @@ class Calibrator:
                 from_array.append(from_coords[iD])
                 to_array.append(to_coords[iD])
 
-        logging.info(f"Found {len(from_array)} markers.")
+        logger.info(f"Found {len(from_array)} markers.")
 
         if len(from_array) < 4:
             raise RuntimeError("Not enough markers detected - at least 4 required for calibration.")
