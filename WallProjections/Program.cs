@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.ReactiveUI;
@@ -24,12 +26,27 @@ internal class Program
     [ExcludeFromCodeCoverage]
     public static void Main(string[] args)
     {
-        using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        var pythonProxy = new PythonProxy(loggerFactory);
-        var pythonHandler = new PythonHandler(pythonProxy, loggerFactory);
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            var logPath = Path.Combine(
+                FileLoggerProvider.DefaultLogFolderPath,
+                $"WallProjections_{DateTime.Now:yyyy-MM-dd}.log"
+            );
+
+            if (args.Contains("--trace"))
+                builder.AddFilter(level => level >= LogLevel.Trace);
+
+            builder.AddSimpleConsole(options => options.TimestampFormat = "HH:mm:ss ");
+            builder.AddProvider(new FileLoggerProvider(logPath));
+        });
+        var logger = loggerFactory.CreateLogger("Program");
+        logger.LogInformation("Starting application");
+
+        using var pythonProxy = new PythonProxy(loggerFactory);
+        using var pythonHandler = new PythonHandler(pythonProxy, loggerFactory);
         BuildAvaloniaApp(pythonHandler, loggerFactory).StartWithClassicDesktopLifetime(args);
-        pythonHandler.Dispose();
-        pythonProxy.Dispose();
+
+        logger.LogInformation("Closing application");
     }
 
     /// <summary>

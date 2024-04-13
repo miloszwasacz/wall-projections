@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Avalonia;
@@ -84,4 +85,16 @@ public class App : Application
     [ExcludeFromCodeCoverage(Justification = "Used only in manual testing")]
     public IPythonHandler PythonHandler => _pythonHandler;
 #endif
+
+    // ReSharper disable once UnusedMember.Global
+    /// <summary>
+    /// This constructor should not be called. It is only here to suppress an Avalonia warning.
+    /// Use <see cref="App(IPythonHandler, ILoggerFactory)" /> instead.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Always thrown.</exception>
+    [ExcludeFromCodeCoverage]
+    [Obsolete("This constructor should not be called. See the documentation for more information.", true)]
+    public App() => throw new InvalidOperationException(
+        "This constructor should not be called. See the documentation for more information."
+    );
 }
