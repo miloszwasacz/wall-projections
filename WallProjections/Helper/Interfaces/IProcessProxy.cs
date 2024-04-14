@@ -13,8 +13,9 @@ public interface IProcessProxy
     /// <summary>
     /// Gets the full path and the DLL for the Python virtual environment.
     /// </summary>
-    /// <returns>(Python DLL, path) of virtual environment stored in </returns>
-    public (string, string) LoadPythonVirtualEnv();
+    /// <param name="virtualEnvPath">Path where the virtual environment is located.</param>
+    /// <returns>(Python DLL, path) of virtual environment stored at <see cref="virtualEnvPath"/> </returns>
+    public (string, string) LoadPythonVirtualEnv(string virtualEnvPath);
 
     /// <inheritdoc cref="Process.Start(string, string)" />
     public void Start(string fileName, string arguments);

@@ -11,19 +11,12 @@ namespace WallProjections.Helper;
 /// <inheritdoc />
 public class ProcessProxy : IProcessProxy
 {
-    private const string _pythonError = "Could not load Python virtual environment. Please check installation guide on website.";
-
     /// <summary>
-    /// Folder to store virtual environment.
+    /// Error message if Python virtual environment cannot be loaded.
     /// </summary>
-    private const string VirtualEnvFolder = "VirtualEnv";
+    private const string PythonErrorMessage = "Could not load Python virtual environment. Please check installation guide on website.";
 
-    /// <summary>
-    /// Full path to the Python virtual environment if it exists.
-    /// </summary>
-    private static string VirtualEnvPath => Path.Combine(IFileHandler.AppDataFolderPath, VirtualEnvFolder);
-
-    private static string _venvLocatorScript => $"import sys;" +
+    private static string VenvLocatorScript => $"import sys;" +
                                                 $"import find_libpython;" +
                                                 $"print(" +
                                                 $"  find_libpython.find_libpython(), " +
@@ -50,42 +43,38 @@ public class ProcessProxy : IProcessProxy
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage( Justification = "Unit tests should not start external processes")]
-    public (string, string) LoadPythonVirtualEnv()
+    public (string, string) LoadPythonVirtualEnv(string virtualEnvPath)
     {
         Debug.WriteLine("Getting Python information from VirtualEnv...");
 
-        string virtualEnvScriptsPath;
-        if (OperatingSystem.IsWindows())
-            virtualEnvScriptsPath = VirtualEnvPath + @"\Scripts";
-        else
-            virtualEnvScriptsPath = VirtualEnvPath + @"/bin";
-
-        Console.WriteLine(virtualEnvScriptsPath);
-
-        // Environment.SetEnvironmentVariable("PATH", pathVeScripts, EnvironmentVariableTarget.Process);
+        var virtualEnvScriptsPath = virtualEnvPath + (
+            OperatingSystem.IsWindows()
+                ? @"\Scripts"
+                : "/bin"
+        );
 
         // Process calls Python script to find location of
         var proc = new Process();
         proc.StartInfo.FileName = Path.Combine(virtualEnvScriptsPath, "python");
-        proc.StartInfo.Arguments = $"-c \"{_venvLocatorScript}\"";
+        proc.StartInfo.Arguments = $"-c \"{VenvLocatorScript}\"";
         proc.StartInfo.RedirectStandardOutput = true;
 
         if (!proc.Start())
-            throw new Exception("Couldn't initialize Python in virtual environment");
+            throw new Exception(PythonErrorMessage);
 
         proc.WaitForExit();
 
         var rawOutput = proc.StandardOutput.ReadToEnd();
 
         if (string.IsNullOrEmpty(rawOutput))
-            throw new Exception(_pythonError);
+            throw new Exception(PythonErrorMessage);
 
         var pythonOutput = rawOutput
             .Replace(Environment.NewLine, "")
             .Split(',');
 
         if (pythonOutput.Length != 2)
-            throw new Exception(_pythonError);
+            throw new Exception(PythonErrorMessage);
 
         return (pythonOutput[0], pythonOutput[1]);
     }

@@ -20,9 +20,14 @@ namespace WallProjections.Helper;
 public sealed class PythonProxy : IPythonProxy
 {
     /// <summary>
+    /// Folder to store virtual environment.
+    /// </summary>
+    private const string VirtualEnvFolder = "VirtualEnv";
+    
+    /// <summary>
     /// Path to VirtualEnv if it exists.
     /// </summary>
-    private static string _virtualEnvPath => Path.Combine(IFileHandler.AppDataFolderPath, "VirtualEnv");
+    private static string VirtualEnvPath => Path.Combine(IFileHandler.AppDataFolderPath, "VirtualEnv");
 
     /// <summary>
     /// A handle to Python threads
@@ -35,26 +40,20 @@ public sealed class PythonProxy : IPythonProxy
     private readonly AtomicPythonModule _currentModule = new();
 
     /// <summary>
-    /// <see cref="IProcessProxy"/> for checking the Python virtual environment.
-    /// </summary>
-    private readonly IProcessProxy _processProxy;
-
-    /// <summary>
     /// Initializes the Python runtime
     /// </summary>
     /// <remarks>Reference for VirtualEnv code: https://gist.github.com/AMArostegui/9b2ecf9d87042f2c119e417b4e38524b</remarks>
     public PythonProxy(IProcessProxy processProxy)
     {
-        _processProxy = processProxy;
-
         // Only use VirtualEnv if directory for VirtualEnv exists.
-        if (Directory.Exists(_virtualEnvPath))
+        if (Directory.Exists(VirtualEnvPath))
         {
             Debug.WriteLine("Virtual environment detected. Loading Python from Virtual environment.");
 
-            var (pythonDLL, pythonPath) = _processProxy.LoadPythonVirtualEnv();
+            // TODO: Show error message to user before shutting down program if virtual environment cannot be loaded.
+            var (pythonDll, pythonPath) = processProxy.LoadPythonVirtualEnv(VirtualEnvPath);
 
-            Runtime.PythonDLL = pythonDLL;
+            Runtime.PythonDLL = pythonDll;
             PythonEngine.PythonPath = pythonPath;
         }
         else
