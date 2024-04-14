@@ -22,7 +22,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Path to VirtualEnv if it exists.
     /// </summary>
-    private static string _virtualEnvPath => Path.Combine(IFileHandler.ConfigFolderPath, "VirtualEnv");
+    private static string _virtualEnvPath => Path.Combine(IFileHandler.AppDataFolderPath, "VirtualEnv");
 
     /// <summary>
     /// A handle to Python threads
@@ -35,43 +35,26 @@ public sealed class PythonProxy : IPythonProxy
     private readonly AtomicPythonModule _currentModule = new();
 
     /// <summary>
+    /// <see cref="IProcessProxy"/> for checking the Python virtual environment.
+    /// </summary>
+    private readonly IProcessProxy _processProxy;
+
+    /// <summary>
     /// Initializes the Python runtime
     /// </summary>
     /// <remarks>Reference for VirtualEnv code: https://gist.github.com/AMArostegui/9b2ecf9d87042f2c119e417b4e38524b</remarks>
-    public PythonProxy()
+    public PythonProxy(IProcessProxy processProxy)
     {
+        _processProxy = processProxy;
+
         // Only use VirtualEnv if directory for VirtualEnv exists.
         if (Directory.Exists(_virtualEnvPath))
         {
-            Debug.WriteLine("Getting Python information from VirtualEnv...");
+            Debug.WriteLine("Virtual environment detected. Loading Python from Virtual environment.");
 
-            string pathVeScripts;
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                pathVeScripts = _virtualEnvPath + @"\Scripts";
-            else
-                pathVeScripts = _virtualEnvPath + @"/bin";
-            Environment.SetEnvironmentVariable("PATH", pathVeScripts, EnvironmentVariableTarget.Process);
+            var (pythonDLL, pythonPath) = _processProxy.LoadPythonVirtualEnv();
 
-            var pythonPath = string.Empty;
-
-            // Process gets the location of the Python DLL and the full path for the VirtualEnv.
-            var proc = new Process();
-            proc.StartInfo.FileName = pathVeScripts + Path.DirectorySeparatorChar + "python";
-            proc.StartInfo.Arguments = $"-c \"import sys; import find_libpython; print(find_libpython.find_libpython() + ',' +'{Path.PathSeparator}'.join(sys.path))\"";
-            proc.StartInfo.RedirectStandardOutput = true;
-            if (!proc.Start())
-                throw new Exception("Couldn't initialize Python in virtual environment");
-            proc.WaitForExit();
-
-            var pythonOutput = proc.StandardOutput.ReadToEnd().Split(',');
-
-            pythonPath = pythonOutput[1].Replace(Environment.NewLine, "");
-            if (string.IsNullOrEmpty(pythonPath))
-                throw new Exception("Couldn't initialize Python.NET");
-
-            Runtime.PythonDLL = pythonOutput[0];
-
-            Environment.SetEnvironmentVariable("PYTHONPATH", pythonPath, EnvironmentVariableTarget.Process);
+            Runtime.PythonDLL = pythonDLL;
             PythonEngine.PythonPath = pythonPath;
         }
         else
@@ -196,6 +179,15 @@ public sealed class PythonProxy : IPythonProxy
 [ExcludeFromCodeCoverage(Justification = "Mock Python proxy for manual testing")]
 public sealed class PythonProxy : IPythonProxy
 {
+    /// <summary>
+    /// Constructor to keep definitions consistent with the Python version.
+    /// </summary>
+    /// <param name="processProxy">Not used.</param>
+    public PythonProxy(IProcessProxy processProxy)
+    {
+
+    }
+
     /// <summary>
     /// Prints a message to the console
     /// </summary>

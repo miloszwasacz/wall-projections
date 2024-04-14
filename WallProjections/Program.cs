@@ -22,7 +22,7 @@ internal class Program
     [ExcludeFromCodeCoverage]
     public static void Main(string[] args)
     {
-        var pythonProxy = new PythonProxy();
+        var pythonProxy = new PythonProxy(new ProcessProxy());
         var pythonHandler = PythonHandler.Initialize(pythonProxy);
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         pythonHandler.Dispose();
