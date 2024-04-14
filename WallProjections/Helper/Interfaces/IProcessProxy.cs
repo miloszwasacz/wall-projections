@@ -15,6 +15,7 @@ public interface IProcessProxy
     /// </summary>
     /// <param name="virtualEnvPath">Path where the virtual environment is located.</param>
     /// <returns>(Python DLL, path) of virtual environment stored at <see cref="virtualEnvPath"/> </returns>
+    /// <exception>If the virtual environment cannot be loaded for PythonNET</exception>
     public (string, string) LoadPythonVirtualEnv(string virtualEnvPath);
 
     /// <inheritdoc cref="Process.Start(string, string)" />
