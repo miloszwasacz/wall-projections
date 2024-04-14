@@ -16,12 +16,12 @@ public class ProcessProxy : IProcessProxy
     /// </summary>
     private const string PythonErrorMessage = "Could not load Python virtual environment. Please check installation guide on website.";
 
-    private static string VenvLocatorScript => $"import sys;" +
-                                                $"import find_libpython;" +
-                                                $"print(" +
-                                                $"  find_libpython.find_libpython(), " +
-                                                $"  '{Path.PathSeparator}'.join(sys.path), " +
-                                                $"  sep = ',' )";
+    private static readonly string VenvLocatorScript = $"import sys;" +
+                                                       $"import find_libpython;" +
+                                                       $"print(" +
+                                                       $"  find_libpython.find_libpython(), " +
+                                                       $"  '{Path.PathSeparator}'.join(sys.path), " +
+                                                       $"  sep = ',' )";
 
     // ReSharper disable once ConvertIfStatementToReturnStatement
     /// <inheritdoc />

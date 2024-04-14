@@ -27,7 +27,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Path to VirtualEnv if it exists.
     /// </summary>
-    private static string VirtualEnvPath => Path.Combine(IFileHandler.AppDataFolderPath, "VirtualEnv");
+    private static readonly string VirtualEnvPath = Path.Combine(IFileHandler.AppDataFolderPath, VirtualEnvFolder);
 
     /// <summary>
     /// A handle to Python threads
