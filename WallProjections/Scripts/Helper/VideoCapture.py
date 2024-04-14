@@ -1,10 +1,12 @@
-import logging
 import threading
 
 import cv2
 import numpy as np
 
-logger = logging.getLogger("logger")
+# noinspection PyPackages
+from .logger import get_logger
+
+logger =get_logger()
 
 DEFAULT_TARGET: int | str = 0
 """Camera ID, video filename, image sequence filename or video stream URL to capture video from.

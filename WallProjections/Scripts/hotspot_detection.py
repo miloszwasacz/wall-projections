@@ -4,6 +4,7 @@ import datetime
 import cv2
 import mediapipe as mp
 
+
 # noinspection PyPackages
 from .Helper.EventHandler import EventHandler
 # noinspection PyPackages
@@ -16,14 +17,10 @@ from .Interop import numpy_dotnet_converters as npnet
 from .Interop.json_dict_converters import json_to_3dict
 # noinspection PyPackages
 from .calibration import Calibrator
+# noinspection PyPackages
+from .Helper.logger import setup_logger
 
-logging.basicConfig(filename=datetime.datetime.now().strftime("hotspot_detection%Y-%m-%d_%H-%M-%S.log"),
-                    filemode='a',
-                    format='%(asctime)s, %(filename)s, %(levelname)s: %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
-
-logger = logging.getLogger("logger")
+logger = setup_logger("hotspot_detection")
 
 
 MAX_NUM_HANDS: int = 4

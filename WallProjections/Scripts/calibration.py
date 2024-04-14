@@ -6,14 +6,10 @@ from .Helper.Calibrator import Calibrator
 from .Interop import numpy_dotnet_converters as npnet
 # noinspection PyPackages
 from .Interop.json_dict_converters import json_to_2dict
+# noinspection PyPackages
+from .Helper.logger import setup_logger
 
-logging.basicConfig(filename=datetime.datetime.now().strftime("calibrate_%Y-%m-%d_%H-%M-%S.log"),
-                    filemode='a',
-                    format='%(asctime)s, %(filename)s, %(levelname)s: %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
-
-logger = logging.getLogger("logger")
+logger = setup_logger("calibration")
 
 
 def calibrate(projector_id_to_coord_json: str):

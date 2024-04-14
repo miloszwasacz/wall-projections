@@ -1,9 +1,11 @@
 from typing import Tuple
-import logging
+
 # noinspection PyPackages
 from .EventHandler import EventHandler
+# noinspection PyPackages
+from .logger import get_logger
 
-logger = logging.getLogger("logger")
+logger = get_logger()
 
 class Hotspot:
     """
