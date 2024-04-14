@@ -14,7 +14,10 @@ public interface IProcessProxy
     /// Gets the full path and the DLL for the Python virtual environment.
     /// </summary>
     /// <param name="virtualEnvPath">Path where the virtual environment is located.</param>
-    /// <returns>(Python DLL, path) of virtual environment stored at <see cref="virtualEnvPath"/> </returns>
+    /// <returns>
+    ///     (Python DLL - used to run PythonNET, Python Path - location of all executable files accessible to python)
+    ///     of virtual environment stored at <see cref="virtualEnvPath"/>
+    /// </returns>
     /// <exception>If the virtual environment cannot be loaded for PythonNET</exception>
     public (string, string) LoadPythonVirtualEnv(string virtualEnvPath);
 
