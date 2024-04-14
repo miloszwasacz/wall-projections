@@ -48,7 +48,7 @@ body:
       label: Relevant log output
       description: |
         Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks. 
-        You can also attach a files from `%APPDATA%\Roaming\WallProjections\Logs` or `~/.config/WallProjections/Logs`.
+        You can also attach files from `%APPDATA%\Roaming\WallProjections\Logs` or `~/.config/WallProjections/Logs`.
       render: shell
   - type: textarea
     id: additional-context
