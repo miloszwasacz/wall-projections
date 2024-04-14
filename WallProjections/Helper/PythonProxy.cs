@@ -5,6 +5,7 @@ using WallProjections.Helper.Interfaces;
 #if !DEBUGSKIPPYTHON
 using WallProjections.Models.Interfaces;
 using System.Diagnostics;
+using System.IO;
 using Python.Runtime;
 
 #else
@@ -19,6 +20,16 @@ namespace WallProjections.Helper;
 public sealed class PythonProxy : IPythonProxy
 {
     /// <summary>
+    /// Folder to store virtual environment.
+    /// </summary>
+    private const string VirtualEnvFolder = "VirtualEnv";
+    
+    /// <summary>
+    /// Path to VirtualEnv if it exists.
+    /// </summary>
+    private static readonly string VirtualEnvPath = Path.Combine(IFileHandler.AppDataFolderPath, VirtualEnvFolder);
+
+    /// <summary>
     /// A handle to Python threads
     /// </summary>
     private readonly IntPtr _threadsPtr;
@@ -31,9 +42,25 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Initializes the Python runtime
     /// </summary>
-    public PythonProxy()
+    /// <remarks>Reference for VirtualEnv code: https://gist.github.com/AMArostegui/9b2ecf9d87042f2c119e417b4e38524b</remarks>
+    public PythonProxy(IProcessProxy processProxy)
     {
-        Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
+        // Only use VirtualEnv if directory for VirtualEnv exists.
+        if (Directory.Exists(VirtualEnvPath))
+        {
+            Debug.WriteLine("Virtual environment detected. Loading Python from Virtual environment.");
+
+            // TODO: Show error message to user before shutting down program if virtual environment cannot be loaded.
+            var (pythonDll, pythonPath) = processProxy.LoadPythonVirtualEnv(VirtualEnvPath);
+
+            Runtime.PythonDLL = pythonDll;
+            PythonEngine.PythonPath = pythonPath;
+        }
+        else
+        {
+            Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
+        }
+
         Debug.Write("Initializing Python...    ");
         PythonEngine.Initialize();
         _threadsPtr = PythonEngine.BeginAllowThreads();
@@ -151,6 +178,15 @@ public sealed class PythonProxy : IPythonProxy
 [ExcludeFromCodeCoverage(Justification = "Mock Python proxy for manual testing")]
 public sealed class PythonProxy : IPythonProxy
 {
+    /// <summary>
+    /// Constructor to keep definitions consistent with the Python version.
+    /// </summary>
+    /// <param name="processProxy">Not used.</param>
+    public PythonProxy(IProcessProxy processProxy)
+    {
+
+    }
+
     /// <summary>
     /// Prints a message to the console
     /// </summary>
