@@ -13,11 +13,11 @@ def _get_folder_path() -> str:
     else:
         # Unsupported
         logging.error("Unsupported OS for logging, storing in Scripts/Logs")
-        scripts_path = os.path.dirname(os.getcwd())  # navigates up one level from current working dir
+        if os.path.basename(os.getcwd()) == "Scripts":
+            scripts_path = os.getcwd()
+        else:
+            scripts_path = os.path.dirname(os.getcwd())  # navigates up one level from current working dir
         path = os.path.join(scripts_path, 'Logs')
-        if not os.path.exists(path):
-            logging.info(f"Creating folder {path}")
-            os.makedirs(path)
         return path
 
 
@@ -27,20 +27,24 @@ def setup_logger(log_name, level=logging.INFO) -> logging.Logger:
     at entry points.
     Returns the setup logger.
     """
-    date_time = datetime.datetime.now().strftime("_%Y-%m-%d.log")
+    date = datetime.datetime.now().strftime("%Y-%m-%d")
     folder_path = _get_folder_path()
 
     if not os.path.exists(folder_path):
         logging.info(f"Creating folder {folder_path}")
         os.makedirs(folder_path)
 
-    logging.basicConfig(filename=os.path.join(folder_path, log_name + date_time),
-                        filemode='a',
-                        format='%(asctime)s, %(filename)s, %(levelname)s: %(message)s',
-                        datefmt='%H:%M:%S',
-                        level=level)
+    file_handler = logging.FileHandler(os.path.join(folder_path, log_name + '_' + date + '.log'))
+    file_handler.setLevel(level)
 
-    return logging.getLogger("logger")
+    formatter = logging.Formatter('%(asctime)s, %(filename)s, %(levelname)s: %(message)s')
+    file_handler.setFormatter(formatter)
+
+    logger = logging.getLogger("logger")
+    logger.setLevel(level)
+    logger.addHandler(file_handler)
+    logger.propagate = False
+    return logger
 
 
 def get_logger() -> logging.Logger:
@@ -48,15 +52,4 @@ def get_logger() -> logging.Logger:
     return logging.getLogger('logger')
 
 
-def test():
-    # Unknown
-    logging.error("Unsupported OS for logging, storing in Scripts/Logs")
-    scripts_path = os.path.dirname(os.getcwd())  # navigates up one level from current dir
-    path = os.path.join(scripts_path, 'Logs')
-    if not os.path.exists(path):
-        os.mkdir(path)
-    return path
 
-
-if __name__ == '__main__':
-    test()
