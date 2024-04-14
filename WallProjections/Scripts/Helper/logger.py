@@ -18,7 +18,8 @@ def _get_folder_path() -> str:
 
 def setup_logger(log_name, level=logging.INFO) -> logging.Logger:
     """
-    Sets up a logger that stores logs in log folder with the format log_name_date_time.log
+    Sets up a logger that stores logs in log folder with the format log_name_date_time.log. Should only be called
+    at entry points.
     Returns the setup logger.
     """
     date_time = datetime.datetime.now().strftime("_%Y-%m-%d_%H-%M-%S.log")
@@ -38,5 +39,5 @@ def setup_logger(log_name, level=logging.INFO) -> logging.Logger:
 
 
 def get_logger() -> logging.Logger:
-    """Returns a previous setup logger, or default logger otherwise"""
+    """Returns a previous setup logger, or default logger otherwise. Should only be called at non-entry points."""
     return logging.getLogger('logger')
