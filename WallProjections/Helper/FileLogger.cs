@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper;
 
@@ -73,8 +74,7 @@ public class FileLoggerProvider : ILoggerProvider
     /// The path to the default folder where log files are stored.
     /// </summary>
     public static readonly string DefaultLogFolderPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "WallProjections",
+        IFileHandler.AppDataFolderPath,
         "Logs"
     );
 
