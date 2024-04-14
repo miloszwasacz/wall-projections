@@ -34,7 +34,8 @@ class Calibrator:
         """
         Detects ArUcos in an image and returns a dictionary of ids to coordinates
         """
-        corners, ids, _ = aruco.detectMarkers(img, DICT, parameters=aruco.DetectorParameters())
+        aruco_detector = aruco.ArucoDetector(dictionary=DICT, detectorParams=aruco.DetectorParameters())
+        corners, ids, _ = aruco_detector.detectMarkers(img)
 
         if DISPLAY_RESULTS:
             cv2.imshow("Labeled Aruco Markers", aruco.drawDetectedMarkers(img, corners, ids))
@@ -86,7 +87,7 @@ class Calibrator:
         Transforms a coordinate in projector space to a coordinate in camera space
         """
         rotated_vector = np.array(proj_coords, np.float32).reshape(-1, 1, 2)
-        transformed_vector = cv2.perspectiveTransform(rotated_vector, self._inverse_transformation_matrix)[0][0]
+        transformed_vector = cv2.transform(rotated_vector, self._inverse_transformation_matrix)[0][0]
         return np.float32(transformed_vector[0]), np.float32(transformed_vector[1])
 
     def proj_to_norm(self, proj_coords: tuple[int, int]) -> tuple[float, float]:
@@ -102,7 +103,7 @@ class Calibrator:
         Transforms a coordinate in camera space to a coordinate in projector space
         """
         rotated_vector = np.array(cam_coords, np.float32).reshape(-1, 1, 2)
-        transformed_vector = cv2.perspectiveTransform(rotated_vector, self._transformation_matrix)[0][0]
+        transformed_vector = cv2.transform(rotated_vector, self._transformation_matrix)[0][0]
         return int(transformed_vector[0]), int(transformed_vector[1])
 
     def norm_to_proj(self, norm_coords: tuple[float, float]) -> tuple[int, int]:
