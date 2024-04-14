@@ -55,7 +55,7 @@ public class MockProcessProxy : IProcessProxy
     /// <summary>
     /// Virtual env only required when running the actual program, so not required on mock.
     /// </summary>
-    public (string, string) LoadPythonVirtualEnv()
+    public (string, string) LoadPythonVirtualEnv(string virtualEnvPath)
     {
         throw new NotImplementedException();
     }
