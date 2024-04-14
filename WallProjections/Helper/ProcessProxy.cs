@@ -16,7 +16,10 @@ public class ProcessProxy : IProcessProxy
     /// </summary>
     private const string PythonErrorMessage = "Could not load Python virtual environment. Please check installation guide on website.";
 
-    private static readonly string VenvLocatorScript = $"import sys;" +
+    /// <summary>
+    /// Script used to load the Python DLL location and the Python Path from the virtual environment.
+    /// </summary>
+    private static readonly string VEnvLocatorScript = $"import sys;" +
                                                        $"import find_libpython;" +
                                                        $"print(" +
                                                        $"  find_libpython.find_libpython(), " +
@@ -56,7 +59,7 @@ public class ProcessProxy : IProcessProxy
         // Process calls Python script to find location of
         var proc = new Process();
         proc.StartInfo.FileName = Path.Combine(virtualEnvScriptsPath, "python");
-        proc.StartInfo.Arguments = $"-c \"{VenvLocatorScript}\"";
+        proc.StartInfo.Arguments = $"-c \"{VEnvLocatorScript}\"";
         proc.StartInfo.RedirectStandardOutput = true;
 
         if (!proc.Start())
