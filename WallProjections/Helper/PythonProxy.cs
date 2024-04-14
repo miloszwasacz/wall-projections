@@ -1,6 +1,7 @@
 ﻿#if !DEBUGSKIPPYTHON
 using System;
 using System.Collections.Immutable;
+using System.IO;
 using Microsoft.Extensions.Logging;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
@@ -22,6 +23,18 @@ namespace WallProjections.Helper;
 /// <inheritdoc />
 public sealed class PythonProxy : IPythonProxy
 {
+    private const string PythonDllExceptionMessage = "Could not load Python environment.";
+
+    /// <summary>
+    /// Folder to store virtual environment.
+    /// </summary>
+    private const string VirtualEnvFolder = "VirtualEnv";
+
+    /// <summary>
+    /// Path to VirtualEnv if it exists.
+    /// </summary>
+    private static readonly string VirtualEnvPath = Path.Combine(IFileHandler.AppDataFolderPath, VirtualEnvFolder);
+
     /// <summary>
     /// A handle to Python threads
     /// </summary>
@@ -40,11 +53,43 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Initializes the Python runtime
     /// </summary>
-    public PythonProxy(ILoggerFactory loggerFactory)
+    /// <exception cref="DllNotFoundException">If Python could not be initialized</exception>
+    /// <remarks>Reference for VirtualEnv code: https://gist.github.com/AMArostegui/9b2ecf9d87042f2c119e417b4e38524b</remarks>
+    public PythonProxy(IProcessProxy processProxy, ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<PythonProxy>();
-        Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
-        _logger.LogInformation("Initializing Python...    ");
+        _logger.LogInformation("Initializing Python.");
+
+        // Only use VirtualEnv if directory for VirtualEnv exists.
+        if (Directory.Exists(VirtualEnvPath))
+        {
+            _logger.LogInformation("Virtual environment detected. Loading Python from Virtual environment.");
+            // TODO: Show error message to user before shutting down program if virtual environment cannot be loaded.
+            try
+            {
+                var (pythonDll, pythonPath) = processProxy.LoadPythonVirtualEnv(VirtualEnvPath);
+                Runtime.PythonDLL = pythonDll;
+                PythonEngine.PythonPath = pythonPath;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    "Could not load Python virtual environment. Please check installation guide on website."
+                );
+                throw new DllNotFoundException(PythonDllExceptionMessage, e);
+            }
+        }
+        else
+        {
+            _logger.LogInformation("No virtual environment detected. Loading Python from system.");
+            Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
+            if (Runtime.PythonDLL is null)
+            {
+                _logger.LogError("PythonDLL environment variable not set.");
+                throw new DllNotFoundException(PythonDllExceptionMessage);
+            }
+        }
+
         PythonEngine.Initialize();
         _threadsPtr = PythonEngine.BeginAllowThreads();
         _logger.LogInformation("Python initialized.");
@@ -55,7 +100,7 @@ public sealed class PythonProxy : IPythonProxy
     {
         RunPythonAction(PythonModule.HotspotDetection, module =>
         {
-            _logger.LogInformation("Starting hotspot detection...");
+            _logger.LogInformation("Starting hotspot detection.");
             module.StartDetection(eventListener, config);
         });
     }
@@ -68,7 +113,7 @@ public sealed class PythonProxy : IPythonProxy
 
         using (Py.GIL())
         {
-            _logger.LogInformation("Stopping hotspot detection...");
+            _logger.LogInformation("Stopping hotspot detection.");
             module.StopDetection();
         }
     }
@@ -169,11 +214,15 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     private readonly ILogger _logger;
 
-    // ReSharper disable once UnusedParameter.Local
-    public PythonProxy(ILoggerFactory loggerFactory)
+    // ReSharper disable UnusedParameter.Local
+    /// <summary>
+    /// Constructor to keep definitions consistent with the Python version.
+    /// </summary>
+    public PythonProxy(IProcessProxy processProxy, ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<PythonProxy>();
     }
+    // ReSharper restore UnusedParameter.Local
 
     /// <summary>
     /// Prints a message to the console

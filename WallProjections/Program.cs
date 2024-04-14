@@ -42,7 +42,7 @@ internal class Program
         var logger = loggerFactory.CreateLogger("Program");
         logger.LogInformation("Starting application");
 
-        using var pythonProxy = new PythonProxy(loggerFactory);
+        using var pythonProxy = new PythonProxy(new ProcessProxy(loggerFactory), loggerFactory);
         using var pythonHandler = new PythonHandler(pythonProxy, loggerFactory);
         BuildAvaloniaApp(pythonHandler, loggerFactory).StartWithClassicDesktopLifetime(args);
 
