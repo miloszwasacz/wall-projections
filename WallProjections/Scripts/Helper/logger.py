@@ -11,9 +11,14 @@ def _get_folder_path() -> str:
         # Windows
         return os.path.join(os.getenv('APPDATA'), 'WallProjections', 'Logs')
     else:
-        # Unknown
-        logging.error("Unsupported OS for logging, storing in Scripts")
-        return ''
+        # Unsupported
+        logging.error("Unsupported OS for logging, storing in Scripts/Logs")
+        scripts_path = os.path.dirname(os.getcwd())  # navigates up one level from current working dir
+        path = os.path.join(scripts_path, 'Logs')
+        if not os.path.exists(path):
+            logging.info(f"Creating folder {path}")
+            os.makedirs(path)
+        return path
 
 
 def setup_logger(log_name, level=logging.INFO) -> logging.Logger:
@@ -22,7 +27,7 @@ def setup_logger(log_name, level=logging.INFO) -> logging.Logger:
     at entry points.
     Returns the setup logger.
     """
-    date_time = datetime.datetime.now().strftime("_%Y-%m-%d_%H-%M-%S.log")
+    date_time = datetime.datetime.now().strftime("_%Y-%m-%d.log")
     folder_path = _get_folder_path()
 
     if not os.path.exists(folder_path):
@@ -41,3 +46,17 @@ def setup_logger(log_name, level=logging.INFO) -> logging.Logger:
 def get_logger() -> logging.Logger:
     """Returns a previous setup logger, or default logger otherwise. Should only be called at non-entry points."""
     return logging.getLogger('logger')
+
+
+def test():
+    # Unknown
+    logging.error("Unsupported OS for logging, storing in Scripts/Logs")
+    scripts_path = os.path.dirname(os.getcwd())  # navigates up one level from current dir
+    path = os.path.join(scripts_path, 'Logs')
+    if not os.path.exists(path):
+        os.mkdir(path)
+    return path
+
+
+if __name__ == '__main__':
+    test()
