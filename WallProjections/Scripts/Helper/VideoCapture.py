@@ -1,8 +1,12 @@
-import logging
 import threading
 
 import cv2
 import numpy as np
+
+# noinspection PyPackages
+from .logger import get_logger
+
+logger =get_logger()
 
 DEFAULT_TARGET: int | str = 0
 """Camera ID, video filename, image sequence filename or video stream URL to capture video from.
@@ -53,7 +57,7 @@ class VideoCapture:
         if self._video_capture_thread is not None:
             raise RuntimeError("Error starting video capture: Video capture is already running.")
 
-        logging.info("Starting video capture...")
+        logger.info("Starting video capture...")
         self._video_capture_thread = threading.Thread(target=self._thread)
         self._video_capture_thread.start()
 
@@ -72,7 +76,7 @@ class VideoCapture:
 
         cv2.waitKey(1000)  # wait for a bit more as it returns garbage at first
 
-        logging.info("Video capture started.")
+        logger.info("Video capture started.")
 
     def _thread(self) -> None:
         video_capture = cv2.VideoCapture()
@@ -83,12 +87,12 @@ class VideoCapture:
         for prop_id, prop_value in self.properties.items():
             supported = video_capture.set(prop_id, prop_value)
             if not supported:
-                logging.warning(f"Property id {prop_id} is not supported by video capture backend {self.backend}.")
+                logger.warning(f"Property id {prop_id} is not supported by video capture backend {self.backend}.")
 
         while video_capture.isOpened():
             success, video_capture_img = video_capture.read()
             if not success:
-                logging.warning("Unsuccessful video read; ignoring frame.")
+                logger.warning("Unsuccessful video read; ignoring frame.")
                 continue
 
             # normalise and downscale resolution
@@ -121,12 +125,12 @@ class VideoCapture:
         if self._video_capture_thread is None:
             raise RuntimeError("Error stopping video capture: Video capture is not running.")
 
-        logging.info("Stopping video capture...")
+        logger.info("Stopping video capture...")
         self._stopping = True
         self._video_capture_thread.join()
         self._video_capture_thread = None
         self._current_frame = None
-        logging.info("Video capture stopped.")
+        logger.info("Video capture stopped.")
 
     @staticmethod
     def take_photo(target: int | str | None = None, backend: int | None = None,
