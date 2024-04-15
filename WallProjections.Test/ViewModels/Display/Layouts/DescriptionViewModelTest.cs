@@ -24,21 +24,6 @@ public class DescriptionViewModelTest
         });
     }
 
-    [Test]
-    public void ConstructorNoHotspotTest()
-    {
-        const string title = "Title";
-        const string description = "Description";
-
-        var descriptionViewModel = new DescriptionViewModel(title, description);
-        Assert.Multiple(() =>
-        {
-            Assert.That(descriptionViewModel.HotspotId, Is.Null);
-            Assert.That(descriptionViewModel.Title, Is.EqualTo(title));
-            Assert.That(descriptionViewModel.Description, Is.EqualTo(description));
-        });
-    }
-
     [TestFixture]
     public class FactoryTest : LayoutFactoryTest<DescriptionViewModel, DescriptionViewModel.Factory>
     {

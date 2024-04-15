@@ -99,7 +99,6 @@ public sealed class HotspotHandler : IHotspotHandler
         }
     }
 
-    //TODO Mark _currentlyActivated as null only when the screen is actually cleared
     /// <summary>
     /// An event callback for when a hotspot is <see cref="IPythonHandler.HotspotReleased">released</see>.
     /// </summary>
@@ -127,6 +126,19 @@ public sealed class HotspotHandler : IHotspotHandler
 
             if (_currentlyActivated is null || _currentlyActivated != e.Id)
                 InvokeDeactivating(e.Id);
+        }
+    }
+
+    /// <inheritdoc />
+    public void DeactivateHotspot(int id)
+    {
+        lock (_cancelledTasks)
+        {
+            if (_currentlyActivated != id) return;
+
+            _logger.LogTrace("Deactivating hotspot with id {HotspotId}", id);
+            InvokeForcefullyDeactivated(id);
+            _currentlyActivated = null;
         }
     }
 

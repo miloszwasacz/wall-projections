@@ -11,17 +11,6 @@ namespace WallProjections.Helper;
 public class ProcessProxy : IProcessProxy
 {
     /// <summary>
-    /// A logger for this class.
-    /// </summary>
-    private readonly ILogger _logger;
-
-    [ExcludeFromCodeCoverage]
-    public ProcessProxy(ILoggerFactory loggerFactory)
-    {
-        _logger = loggerFactory.CreateLogger<ProcessProxy>();
-    }
-
-    /// <summary>
     /// Error message if Python virtual environment cannot be loaded.
     /// </summary>
     private const string PythonErrorMessage =
@@ -36,6 +25,17 @@ public class ProcessProxy : IProcessProxy
                                                        $"  find_libpython.find_libpython(), " +
                                                        $"  '{Path.PathSeparator}'.join(sys.path), " +
                                                        $"  sep = ',' )";
+
+    /// <summary>
+    /// A logger for this class.
+    /// </summary>
+    private readonly ILogger _logger;
+
+    [ExcludeFromCodeCoverage]
+    public ProcessProxy(ILoggerFactory loggerFactory)
+    {
+        _logger = loggerFactory.CreateLogger<ProcessProxy>();
+    }
 
     // ReSharper disable once ConvertIfStatementToReturnStatement
     /// <inheritdoc />

@@ -1,3 +1,4 @@
+using System;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
@@ -37,18 +38,24 @@ public class ImageWithDescriptionViewModel : Layout
     /// <param name="title">The title of the hotspot.</param>
     /// <param name="description">The description of the hotspot.</param>
     /// <param name="imagePath">The path to the image to show.</param>
+    /// <param name="deactivateAfter">
+    /// The time after which the layout should deactivate.
+    /// If <i>null</i>, the layout will deactivate after the <see cref="Layout.DefaultDeactivationTime">default time</see>.
+    /// </param>
     public ImageWithDescriptionViewModel(
         IViewModelProvider vmProvider,
         int hotspotId,
         string title,
         string description,
-        string imagePath
+        string imagePath,
+        TimeSpan? deactivateAfter = null
     ) : base(hotspotId)
     {
         Title = title;
         Description = description;
         ImageViewModel = vmProvider.GetImageViewModel();
         ImageViewModel.ShowImage(imagePath);
+        DeactivateAfterAsync(deactivateAfter ?? DefaultDeactivationTime);
     }
 
     // ReSharper disable once UnusedType.Global

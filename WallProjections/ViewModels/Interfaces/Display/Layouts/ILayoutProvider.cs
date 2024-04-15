@@ -21,17 +21,14 @@ public interface ILayoutProvider
     public Layout GetLayout(IViewModelProvider vmProvider, Hotspot.Media hotspot);
 
     /// <summary>
-    /// Gets a simple layout with a title and description.
+    /// Gets a layout with a welcome message.
     /// </summary>
-    /// <param name="title">Title displayed by the layout.</param>
-    /// <param name="description">Description displayed by the layout.</param>
-    public Layout GetSimpleDescriptionLayout(string title, string description);
+    public Layout GetWelcomeLayout();
 
     /// <summary>
     /// Gets a layout with an error message.
     /// </summary>
     /// <param name="message">Error message to display.</param>
     /// <param name="title">Title displayed by the layout.</param>
-    public Layout GetErrorLayout(string message, string title = DefaultErrorTitle) =>
-        GetSimpleDescriptionLayout(title, message);
+    public Layout GetErrorLayout(string message, string title = DefaultErrorTitle);
 }

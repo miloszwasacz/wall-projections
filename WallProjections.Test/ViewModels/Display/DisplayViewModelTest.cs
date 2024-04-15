@@ -8,6 +8,7 @@ using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
 using static WallProjections.Test.TestExtensions;
 
@@ -421,8 +422,8 @@ public class DisplayViewModelTest
         var content = (MockSimpleDescriptionLayout)displayViewModel.ContentViewModel;
         Assert.Multiple(() =>
         {
-            Assert.That(content.Title, Is.EqualTo(DisplayViewModel.WelcomeTitle));
-            Assert.That(content.Description, Is.EqualTo(DisplayViewModel.WelcomeMessage));
+            Assert.That(content.Title, Is.EqualTo(WelcomeViewModel.WelcomeTitle));
+            Assert.That(content.Description, Is.EqualTo(WelcomeViewModel.WelcomeMessage));
         });
     }
 }
