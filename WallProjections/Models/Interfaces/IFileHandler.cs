@@ -55,6 +55,7 @@ public interface IFileHandler
     /// <exception cref="ConfigPackageFormatException">If format of config package is invalid.</exception>
     public IConfig? ImportConfig(string zipPath);
 
+    //TODO Make this method try other path (i.e. with a number at the end) if the provided path already has a config and return the actual path of the exported file
     /// <summary>
     /// Export config file and media file to a zip file.
     /// </summary>

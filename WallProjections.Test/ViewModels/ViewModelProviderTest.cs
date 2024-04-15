@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
 using WallProjections.Models;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
@@ -35,7 +36,8 @@ public class ViewModelProviderTest
             processProxy,
             _ => hotspotHandler,
             _ => contentProvider,
-            () => layoutProvider
+            () => layoutProvider,
+            new MockLoggerFactory()
         );
     }
 

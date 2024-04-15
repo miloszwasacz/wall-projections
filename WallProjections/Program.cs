@@ -1,9 +1,13 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper;
+using WallProjections.Helper.Interfaces;
 
 [assembly: InternalsVisibleTo("WallProjections.Test")]
 
@@ -22,20 +26,36 @@ internal class Program
     [ExcludeFromCodeCoverage]
     public static void Main(string[] args)
     {
-        var pythonProxy = new PythonProxy(new ProcessProxy());
-        var pythonHandler = PythonHandler.Initialize(pythonProxy);
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-        pythonHandler.Dispose();
-        pythonProxy.Dispose();
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            var logPath = Path.Combine(
+                FileLoggerProvider.DefaultLogFolderPath,
+                $"WallProjections_{DateTime.Now:yyyy-MM-dd}.log"
+            );
+
+            if (args.Contains("--trace"))
+                builder.AddFilter(level => level >= LogLevel.Trace);
+
+            builder.AddSimpleConsole(options => options.TimestampFormat = "HH:mm:ss ");
+            builder.AddProvider(new FileLoggerProvider(logPath));
+        });
+        var logger = loggerFactory.CreateLogger("Program");
+        logger.LogInformation("Starting application");
+
+        using var pythonProxy = new PythonProxy(new ProcessProxy(loggerFactory), loggerFactory);
+        using var pythonHandler = new PythonHandler(pythonProxy, loggerFactory);
+        BuildAvaloniaApp(pythonHandler, loggerFactory).StartWithClassicDesktopLifetime(args);
+
+        logger.LogInformation("Closing application");
     }
 
     /// <summary>
     /// Avalonia configuration, don't remove; also used by visual designer.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    private static AppBuilder BuildAvaloniaApp()
+    private static AppBuilder BuildAvaloniaApp(IPythonHandler pythonHandler, ILoggerFactory loggerFactory)
     {
-        return AppBuilder.Configure<App>()
+        return AppBuilder.Configure(() => new App(pythonHandler, loggerFactory))
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()

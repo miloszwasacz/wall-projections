@@ -1,5 +1,6 @@
 ﻿using System;
 using LibVLCSharp.Shared;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
@@ -17,6 +18,11 @@ namespace WallProjections.ViewModels;
 /// <inheritdoc cref="IViewModelProvider" />
 public sealed class ViewModelProvider : IViewModelProvider, IDisposable
 {
+    /// <summary>
+    /// A factory for creating loggers, passed to the viewmodels that need it
+    /// </summary>
+    private readonly ILoggerFactory _loggerFactory;
+
     /// <summary>
     /// The backing field for the <see cref="LibVlc" /> property
     /// </summary>
@@ -74,15 +80,18 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// A factory for creating <see cref="IContentProvider" />s based on the given <see cref="IConfig" />
     /// </param>
     /// <param name="layoutProviderFactory">A factory for creating <see cref="ILayoutProvider" />s</param>
+    /// <param name="loggerFactory">A factory for creating loggers</param>
     public ViewModelProvider(
         INavigator navigator,
         IPythonHandler pythonHandler,
         IProcessProxy processProxy,
         Func<IPythonHandler, IHotspotHandler> hotspotHandlerFactory,
         Func<IConfig, IContentProvider> contentProviderFactory,
-        Func<ILayoutProvider> layoutProviderFactory
+        Func<ILayoutProvider> layoutProviderFactory,
+        ILoggerFactory loggerFactory
     )
     {
+        _loggerFactory = loggerFactory;
         _navigator = navigator;
         _pythonHandler = pythonHandler;
         _processProxy = processProxy;
@@ -115,20 +124,22 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
         this,
         _contentProviderFactory(config),
         _layoutProviderFactory(),
-        HotspotHandler
+        HotspotHandler,
+        _loggerFactory
     );
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="ImageViewModel" /> instance</returns>
-    public IImageViewModel GetImageViewModel() => new ImageViewModel();
+    public IImageViewModel GetImageViewModel() => new ImageViewModel(_loggerFactory);
 
     /// <summary>
     /// Creates a new <see cref="VideoViewModel" /> instance
     /// </summary>
     /// <returns>A new <see cref="VideoViewModel" /> instance</returns>
-    public IVideoViewModel GetVideoViewModel() => new VideoViewModel(LibVlc, new VLCMediaPlayer(LibVlc));
+    public IVideoViewModel GetVideoViewModel() =>
+        new VideoViewModel(LibVlc, new VLCMediaPlayer(LibVlc), _loggerFactory);
 
     #endregion
 
@@ -140,7 +151,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IConfig config, IFileHandler fileHandler) =>
-        new EditorViewModel(config, _navigator, fileHandler, _pythonHandler, this);
+        new EditorViewModel(config, _navigator, fileHandler, _pythonHandler, this, _loggerFactory);
 
     /// <summary>
     /// Creates a new empty <see cref="EditorViewModel" /> instance
@@ -148,7 +159,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <inheritdoc />
     /// <returns>A new <see cref="EditorViewModel" /> instance</returns>
     public IEditorViewModel GetEditorViewModel(IFileHandler fileHandler) =>
-        new EditorViewModel(_navigator, fileHandler, _pythonHandler, this);
+        new EditorViewModel(_navigator, fileHandler, _pythonHandler, this, _loggerFactory);
 
     /// <summary>
     /// Creates a new <see cref="EditorHotspotViewModel" /> instance
@@ -197,7 +208,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <seealso cref="VideoThumbnailViewModel" />
     public IThumbnailViewModel GetThumbnailViewModel(MediaEditorType type, string filePath) => type switch
     {
-        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, _processProxy),
+        MediaEditorType.Images => new ImageThumbnailViewModel(filePath, _processProxy, _loggerFactory),
         MediaEditorType.Videos => new VideoThumbnailViewModel(filePath, _processProxy),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown media type")
     };
@@ -207,7 +218,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// </summary>
     /// <inheritdoc />
     /// <returns>A new <see cref="ImportViewModel" /> instance</returns>
-    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) => new ImportViewModel(descVm);
+    public IImportViewModel GetImportViewModel(IDescriptionEditorViewModel descVm) =>
+        new ImportViewModel(descVm, _loggerFactory);
 
     #endregion
 
@@ -218,7 +230,8 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// with <i>TH</i> being <see cref="HotspotDisplayViewModel" />
     /// </summary>
     /// <returns>A new <see cref="SecondaryWindowViewModel" /> instance</returns>
-    public ISecondaryWindowViewModel GetSecondaryWindowViewModel() => new SecondaryWindowViewModel(this);
+    public ISecondaryWindowViewModel GetSecondaryWindowViewModel() =>
+        new SecondaryWindowViewModel(this, _loggerFactory);
 
     /// <summary>
     /// Creates a new <see cref="HotspotDisplayViewModel" /> instance
@@ -226,7 +239,7 @@ public sealed class ViewModelProvider : IViewModelProvider, IDisposable
     /// <param name="config">The <see cref="IConfig" /> containing data about the hotspots</param>
     /// <returns>A new <see cref="HotspotDisplayViewModel" /> instance</returns>
     public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config) =>
-        new HotspotDisplayViewModel(config, HotspotHandler, this);
+        new HotspotDisplayViewModel(config, HotspotHandler, this, _loggerFactory);
 
     /// <summary>
     /// Creates a new <see cref="HotspotProjectionViewModel" /> instance

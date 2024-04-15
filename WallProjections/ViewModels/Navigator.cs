@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.VisualTree;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
@@ -21,6 +22,11 @@ namespace WallProjections.ViewModels;
 /// <inheritdoc cref="INavigator" />
 public sealed class Navigator : ViewModelBase, INavigator
 {
+    /// <summary>
+    /// A logger for this class.
+    /// </summary>
+    private readonly ILogger _logger;
+
     /// <summary>
     /// The application lifetime.
     /// </summary>
@@ -63,13 +69,16 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <param name="pythonHandler">The handler for Python interop.</param>
     /// <param name="vmProviderFactory">A factory to create a <see cref="IViewModelProvider" /> instance.</param>
     /// <param name="fileHandlerFactory">A factory to create <see cref="IFileHandler">file handlers</see>.</param>
+    /// <param name="loggerFactory">A factory to create loggers.</param>
     public Navigator(
         AppLifetime appLifetime,
         IPythonHandler pythonHandler,
         Func<INavigator, IPythonHandler, IViewModelProvider> vmProviderFactory,
-        Func<IFileHandler> fileHandlerFactory
+        Func<IFileHandler> fileHandlerFactory,
+        ILoggerFactory loggerFactory
     )
     {
+        _logger = loggerFactory.CreateLogger<Navigator>();
         _appLifetime = appLifetime;
         _pythonHandler = pythonHandler;
         _fileHandlerFactory = fileHandlerFactory;
@@ -94,8 +103,8 @@ public sealed class Navigator : ViewModelBase, INavigator
         }
         catch (Exception e)
         {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
+            //TODO Distinguish between an error and a missing config file
+            _logger.LogError(e, "Error loading configuration file");
             OpenEditor();
         }
     }
@@ -187,8 +196,8 @@ public sealed class Navigator : ViewModelBase, INavigator
             }
             catch (Exception e)
             {
-                //TODO Log to file
-                Console.Error.WriteLine(e);
+                //TODO Distinguish between an error and a missing config file
+                _logger.LogError(e, "Error loading configuration file");
                 _config = null;
                 //TODO Show error message
                 Shutdown();

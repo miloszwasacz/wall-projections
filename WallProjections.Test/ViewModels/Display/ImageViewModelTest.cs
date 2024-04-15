@@ -1,3 +1,4 @@
+using WallProjections.Test.Mocks;
 using WallProjections.ViewModels.Display;
 
 namespace WallProjections.Test.ViewModels.Display;
@@ -11,7 +12,7 @@ public class ImageViewModelTest
     [AvaloniaTest]
     public void HasImageTest()
     {
-        var imageViewModel = new ImageViewModel();
+        var imageViewModel = new ImageViewModel(new MockLoggerFactory());
         imageViewModel.ShowImage(ImagePath);
         Assert.That(imageViewModel.HasImages, Is.True);
         imageViewModel.HideImage();
@@ -21,7 +22,7 @@ public class ImageViewModelTest
     [AvaloniaTest]
     public void DisplayImageTest()
     {
-        var imageViewModel = new ImageViewModel();
+        var imageViewModel = new ImageViewModel(new MockLoggerFactory());
         Assert.Multiple(() =>
             {
                 Assert.That(imageViewModel.ShowImage(ImagePath), Is.True);
@@ -36,7 +37,9 @@ public class ImageViewModelTest
     public void DisplayNonExistentImageTest()
     {
         const string path = "nonexistent.png";
-        var imageViewModel = new ImageViewModel();
+        var imageViewModel = new ImageViewModel(new MockLoggerFactory());
         Assert.That(imageViewModel.ShowImage(path), Is.False);
     }
+
+    //TODO Add tests for throwing exceptions while loading images
 }

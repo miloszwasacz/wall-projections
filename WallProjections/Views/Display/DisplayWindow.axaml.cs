@@ -5,7 +5,6 @@ using WallProjections.ViewModels.Interfaces.Display;
 #if DEBUGSKIPPYTHON
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Data;
-using WallProjections.Helper;
 #endif
 #if !RELEASE
 using Avalonia;
@@ -132,7 +131,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             _ => new Optional<int>()
         };
         if (keyVal.HasValue)
-            PythonHandler.Instance.OnHotspotPressed(keyVal.Value);
+            (Application.Current as App)?.PythonHandler.OnHotspotPressed(keyVal.Value);
 
 
         var keyValUnpressed = key switch
@@ -150,7 +149,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             _ => new Optional<int>()
         };
         if (keyValUnpressed.HasValue)
-            PythonHandler.Instance.OnHotspotUnpressed(keyValUnpressed.Value);
+            (Application.Current as App)?.PythonHandler.OnHotspotUnpressed(keyValUnpressed.Value);
     }
 #endif
 }

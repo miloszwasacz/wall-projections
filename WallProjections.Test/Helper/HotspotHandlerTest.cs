@@ -1,5 +1,6 @@
 ﻿using WallProjections.Helper;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using HotspotArgs = WallProjections.Helper.Interfaces.IHotspotHandler.HotspotArgs;
 
@@ -17,7 +18,7 @@ public class HotspotHandlerTest
     public void ConstructorTest()
     {
         var pythonHandler = new MockPythonHandler();
-        using var hotspotHandler = new HotspotHandler(pythonHandler);
+        using var hotspotHandler = new HotspotHandler(pythonHandler, new MockLoggerFactory());
 
         Assert.Multiple(() =>
         {
@@ -41,7 +42,7 @@ public class HotspotHandlerTest
     public async Task ActivationTest()
     {
         var pythonHandler = new MockPythonHandler();
-        using var hotspotHandler = new HotspotHandler(pythonHandler);
+        using var hotspotHandler = new HotspotHandler(pythonHandler, new MockLoggerFactory());
 
         await AssertCallbacks(hotspotHandler, async getEventArgs =>
         {
@@ -99,7 +100,7 @@ public class HotspotHandlerTest
     public async Task DeactivationTest()
     {
         var pythonHandler = new MockPythonHandler();
-        using var hotspotHandler = new HotspotHandler(pythonHandler);
+        using var hotspotHandler = new HotspotHandler(pythonHandler, new MockLoggerFactory());
 
         await AssertCallbacks(hotspotHandler, async getEventArgs =>
         {
@@ -175,7 +176,7 @@ public class HotspotHandlerTest
     public async Task InvalidHotspotsTest()
     {
         var pythonHandler = new MockPythonHandler();
-        using var hotspotHandler = new HotspotHandler(pythonHandler);
+        using var hotspotHandler = new HotspotHandler(pythonHandler, new MockLoggerFactory());
 
         await AssertCallbacks(hotspotHandler, async getEventArgs =>
         {

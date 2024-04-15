@@ -1,15 +1,19 @@
-﻿using System;
+﻿#if !DEBUGSKIPPYTHON
+using System;
 using System.Collections.Immutable;
+using System.IO;
+using Microsoft.Extensions.Logging;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
-#if !DEBUGSKIPPYTHON
 using WallProjections.Models.Interfaces;
-using System.Diagnostics;
-using System.IO;
 using Python.Runtime;
 
 #else
 using System.Diagnostics.CodeAnalysis;
+using System.Collections.Immutable;
+using Microsoft.Extensions.Logging;
+using Avalonia;
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 #endif
 
@@ -19,11 +23,13 @@ namespace WallProjections.Helper;
 /// <inheritdoc />
 public sealed class PythonProxy : IPythonProxy
 {
+    private const string PythonDllExceptionMessage = "Could not load Python environment.";
+
     /// <summary>
     /// Folder to store virtual environment.
     /// </summary>
     private const string VirtualEnvFolder = "VirtualEnv";
-    
+
     /// <summary>
     /// Path to VirtualEnv if it exists.
     /// </summary>
@@ -35,42 +41,68 @@ public sealed class PythonProxy : IPythonProxy
     private readonly IntPtr _threadsPtr;
 
     /// <summary>
-    /// The currently running Python module for hotspot detection
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
+    /// <summary>
+    /// The currently running Python module
     /// </summary>
     private readonly AtomicPythonModule _currentModule = new();
 
     /// <summary>
     /// Initializes the Python runtime
     /// </summary>
+    /// <exception cref="DllNotFoundException">If Python could not be initialized</exception>
     /// <remarks>Reference for VirtualEnv code: https://gist.github.com/AMArostegui/9b2ecf9d87042f2c119e417b4e38524b</remarks>
-    public PythonProxy(IProcessProxy processProxy)
+    public PythonProxy(IProcessProxy processProxy, ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<PythonProxy>();
+        _logger.LogInformation("Initializing Python.");
+
         // Only use VirtualEnv if directory for VirtualEnv exists.
         if (Directory.Exists(VirtualEnvPath))
         {
-            Debug.WriteLine("Virtual environment detected. Loading Python from Virtual environment.");
-
+            _logger.LogInformation("Virtual environment detected. Loading Python from Virtual environment.");
             // TODO: Show error message to user before shutting down program if virtual environment cannot be loaded.
-            var (pythonDll, pythonPath) = processProxy.LoadPythonVirtualEnv(VirtualEnvPath);
-
-            Runtime.PythonDLL = pythonDll;
-            PythonEngine.PythonPath = pythonPath;
+            try
+            {
+                var (pythonDll, pythonPath) = processProxy.LoadPythonVirtualEnv(VirtualEnvPath);
+                Runtime.PythonDLL = pythonDll;
+                PythonEngine.PythonPath = pythonPath;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    "Could not load Python virtual environment. Please check installation guide on website."
+                );
+                throw new DllNotFoundException(PythonDllExceptionMessage, e);
+            }
         }
         else
         {
+            _logger.LogInformation("No virtual environment detected. Loading Python from system.");
             Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
+            if (Runtime.PythonDLL is null)
+            {
+                _logger.LogError("PythonDLL environment variable not set.");
+                throw new DllNotFoundException(PythonDllExceptionMessage);
+            }
         }
 
-        Debug.Write("Initializing Python...    ");
         PythonEngine.Initialize();
         _threadsPtr = PythonEngine.BeginAllowThreads();
-        Debug.WriteLine("Done");
+        _logger.LogInformation("Python initialized.");
     }
 
     /// <inheritdoc />
     public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
-        RunPythonAction(PythonModule.HotspotDetection, module => { module.StartDetection(eventListener, config); });
+        RunPythonAction(PythonModule.HotspotDetection, module =>
+        {
+            _logger.LogInformation("Starting hotspot detection.");
+            module.StartDetection(eventListener, config);
+        });
     }
 
     /// <inheritdoc />
@@ -81,6 +113,7 @@ public sealed class PythonProxy : IPythonProxy
 
         using (Py.GIL())
         {
+            _logger.LogInformation("Stopping hotspot detection.");
             module.StopDetection();
         }
     }
@@ -100,7 +133,6 @@ public sealed class PythonProxy : IPythonProxy
     {
         using (Py.GIL())
         {
-            //TODO Maybe Import a module once and reuse it?
             var module = moduleFactory();
             _currentModule.Set(module);
             action(module);
@@ -119,7 +151,6 @@ public sealed class PythonProxy : IPythonProxy
     {
         using (Py.GIL())
         {
-            //TODO Maybe Import a module once and reuse it?
             var module = moduleFactory();
             _currentModule.Set(module);
             return action(module);
@@ -179,20 +210,26 @@ public sealed class PythonProxy : IPythonProxy
 public sealed class PythonProxy : IPythonProxy
 {
     /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
+    // ReSharper disable UnusedParameter.Local
+    /// <summary>
     /// Constructor to keep definitions consistent with the Python version.
     /// </summary>
-    /// <param name="processProxy">Not used.</param>
-    public PythonProxy(IProcessProxy processProxy)
+    public PythonProxy(IProcessProxy processProxy, ILoggerFactory loggerFactory)
     {
-
+        _logger = loggerFactory.CreateLogger<PythonProxy>();
     }
+    // ReSharper restore UnusedParameter.Local
 
     /// <summary>
     /// Prints a message to the console
     /// </summary>
     public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
-        Console.WriteLine("Starting hotspot detection");
+        _logger.LogInformation("Starting hotspot detection");
     }
 
     /// <summary>
@@ -200,7 +237,7 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     public void StopCurrentAction()
     {
-        Console.WriteLine("Stopping currently running action");
+        _logger.LogInformation("Stopping currently running action");
     }
 
     /// <summary>
@@ -208,7 +245,7 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     public double[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
     {
-        Console.WriteLine("Calibrating camera");
+        _logger.LogInformation("Calibrating camera");
         return new double[,]
         {
             { 1, 0, 0 },
@@ -222,7 +259,7 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     public void Dispose()
     {
-        Console.WriteLine("Disposing PythonProxy");
+        _logger.LogInformation("Disposing PythonProxy");
     }
 }
 #endif

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
@@ -12,6 +13,11 @@ namespace WallProjections.ViewModels.SecondaryScreens;
 /// <inheritdoc cref="AbsHotspotDisplayViewModel" />
 public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 {
+    /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
     /// <summary>
     /// The <see cref="IHotspotHandler" /> that sends events about hotspot activation and deactivation
     /// </summary>
@@ -32,8 +38,15 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     /// <param name="vmProvider">
     /// The <see cref="IViewModelProvider" /> for creating <see cref="IHotspotProjectionViewModel" />s
     /// </param>
-    public HotspotDisplayViewModel(IConfig config, IHotspotHandler hotspotHandler, IViewModelProvider vmProvider)
+    /// <param name="loggerFactory">A factory for creating loggers</param>
+    public HotspotDisplayViewModel(
+        IConfig config,
+        IHotspotHandler hotspotHandler,
+        IViewModelProvider vmProvider,
+        ILoggerFactory loggerFactory
+    )
     {
+        _logger = loggerFactory.CreateLogger<HotspotDisplayViewModel>();
         _hotspotHandler = hotspotHandler;
         _projections = GetHotspots(config, vmProvider);
 
@@ -53,8 +66,8 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     /// <inheritdoc/>
     public override void DeactivateHotspots()
     {
-        var active = Projections.Where(coord => coord.IsActive);
-        foreach (var coord in active)
+        _logger.LogTrace("Deactivating all hotspots");
+        foreach (var coord in Projections)
             coord.IsActive = false;
     }
 
@@ -90,11 +103,20 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
     private void HotspotActivating(object? sender, IHotspotHandler.HotspotArgs e)
     {
-        if (!_projections.TryGetValue(e.Id, out var hotspot)) return;
+        if (!_projections.TryGetValue(e.Id, out var hotspot))
+        {
+            _logger.LogWarning("Hotspot with id {Id} not found.", e.Id);
+            return;
+        }
 
-        hotspot.IsDeactivating = false;
-        hotspot.IsActive = false;
-        hotspot.IsActivating = true;
+        lock (this)
+        {
+            hotspot.IsDeactivating = false;
+            hotspot.IsActive = false;
+            hotspot.IsActivating = true;
+        }
+
+        _logger.LogTrace("Activating hotspot with id {Id}.", e.Id);
     }
 
     /// <summary>
@@ -106,11 +128,20 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
     private void HotspotActivated(object? sender, IHotspotHandler.HotspotArgs e)
     {
-        if (!_projections.TryGetValue(e.Id, out var hotspot)) return;
+        if (!_projections.TryGetValue(e.Id, out var hotspot))
+        {
+            _logger.LogWarning("Hotspot with id {Id} not found.", e.Id);
+            return;
+        }
 
-        hotspot.IsDeactivating = false;
-        hotspot.IsActivating = false;
-        hotspot.IsActive = true;
+        lock (this)
+        {
+            hotspot.IsDeactivating = false;
+            hotspot.IsActivating = false;
+            hotspot.IsActive = true;
+        }
+
+        _logger.LogTrace("Hotspot with id {Id} activated.", e.Id);
     }
 
     /// <summary>
@@ -122,11 +153,20 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     /// <param name="e">The event arguments containing the id of the hotspot to be deactivated.</param>
     private void HotspotDeactivating(object? sender, IHotspotHandler.HotspotArgs e)
     {
-        if (!_projections.TryGetValue(e.Id, out var hotspot)) return;
+        if (!_projections.TryGetValue(e.Id, out var hotspot))
+        {
+            _logger.LogWarning("Hotspot with id {Id} not found.", e.Id);
+            return;
+        }
 
-        hotspot.IsActivating = false;
-        hotspot.IsActive = false;
-        hotspot.IsDeactivating = true;
+        lock (this)
+        {
+            hotspot.IsActivating = false;
+            hotspot.IsActive = false;
+            hotspot.IsDeactivating = true;
+        }
+
+        _logger.LogTrace("Deactivating hotspot with id {Id}.", e.Id);
     }
 
     /// <summary>
@@ -138,11 +178,20 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     /// <param name="e"></param>
     private void HotspotForcefullyDeactivated(object? sender, IHotspotHandler.HotspotArgs e)
     {
-        if (!_projections.TryGetValue(e.Id, out var hotspot)) return;
+        if (!_projections.TryGetValue(e.Id, out var hotspot))
+        {
+            _logger.LogWarning("Hotspot with id {Id} not found.", e.Id);
+            return;
+        }
 
-        hotspot.IsActivating = false;
-        hotspot.IsActive = false;
-        hotspot.IsDeactivating = false;
+        lock (this)
+        {
+            hotspot.IsActivating = false;
+            hotspot.IsActive = false;
+            hotspot.IsDeactivating = false;
+        }
+
+        _logger.LogTrace("Hotspot with id {Id} forcefully deactivated.", e.Id);
     }
 
     #endregion

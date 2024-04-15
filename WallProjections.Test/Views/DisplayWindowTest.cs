@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿#if DEBUGSKIPPYTHON
+using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
@@ -279,3 +280,4 @@ public class DisplayWindowTest
         return instance ?? throw new MissingMethodException("Could not create WindowClosingEventArgs instance");
     }
 }
+#endif

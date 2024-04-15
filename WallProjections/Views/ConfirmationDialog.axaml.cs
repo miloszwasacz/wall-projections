@@ -44,7 +44,9 @@ public partial class ConfirmationDialog : Window
     )
     {
         InitializeComponent();
+#if !RELEASE
         this.AttachDevTools();
+#endif
         DataContext = new ConfirmationDialogViewModel(
             title,
             iconPath,
@@ -170,11 +172,9 @@ public partial class ConfirmationDialog : Window
     /// <exception cref="InvalidOperationException">Always thrown.</exception>
     [ExcludeFromCodeCoverage]
     [Obsolete("This constructor should not be called. See the documentation for more information.", true)]
-    public ConfirmationDialog()
-    {
-        throw new InvalidOperationException(
-            "This constructor should not be called. See the documentation for more information.");
-    }
+    public ConfirmationDialog() => throw new InvalidOperationException(
+        "This constructor should not be called. See the documentation for more information."
+    );
 }
 
 /// <summary>

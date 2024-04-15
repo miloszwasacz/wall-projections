@@ -2,6 +2,7 @@
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
@@ -159,7 +160,8 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            hotspotHandler
+            hotspotHandler,
+            new MockLoggerFactory()
         );
 
         AssertJustInitialized(displayViewModel);
@@ -180,7 +182,8 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            hotspotHandler
+            hotspotHandler,
+            new MockLoggerFactory()
         );
 
         hotspotHandler.StartHotspotActivation(hotspot.Id);
@@ -220,7 +223,8 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            hotspotHandler
+            hotspotHandler,
+            new MockLoggerFactory()
         );
 
         var args = new IHotspotHandler.HotspotArgs(hotspot.Id);
@@ -277,7 +281,8 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            hotspotHandler
+            hotspotHandler,
+            new MockLoggerFactory()
         );
 
         var args = new IHotspotHandler.HotspotArgs(HotspotId);
@@ -312,7 +317,8 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            hotspotHandler
+            hotspotHandler,
+            new MockLoggerFactory()
         );
 
         var args = new IHotspotHandler.HotspotArgs(HotspotId);
@@ -343,7 +349,8 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            hotspotHandler
+            hotspotHandler,
+            new MockLoggerFactory()
         );
         displayViewModel.OpenEditor();
 
@@ -363,7 +370,8 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            hotspotHandler
+            hotspotHandler,
+            new MockLoggerFactory()
         );
         displayViewModel.CloseDisplay();
 
@@ -384,7 +392,8 @@ public class DisplayViewModelTest
             ViewModelProvider,
             contentProvider,
             LayoutProvider,
-            hotspotHandler
+            hotspotHandler,
+            new MockLoggerFactory()
         );
         displayViewModel.OnHotspotActivated(null, new IHotspotHandler.HotspotArgs(hotspot.Id));
         await Task.Delay(200);

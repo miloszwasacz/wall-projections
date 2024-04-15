@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using NUnit.Framework.Constraints;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -98,7 +99,8 @@ public class ThumbnailViewModelTest
             get
             {
                 yield return new TestFixtureData(
-                    new ThumbnailVmFactory((path, proxy) => new ImageThumbnailViewModel(path, proxy)),
+                    new ThumbnailVmFactory((path, proxy) =>
+                        new ImageThumbnailViewModel(path, proxy, new MockLoggerFactory())),
                     TestImage,
                     NonexistentImage
                 )

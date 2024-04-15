@@ -1,5 +1,5 @@
 ﻿name: Other issue
-description: File an issue that doesn't fit into the other categories.
+description: File an issue that doesn't fit into the other categories
 body:
   - type: markdown
     attributes:

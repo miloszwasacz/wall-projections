@@ -2,9 +2,8 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
-using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper;
 
@@ -12,9 +11,21 @@ namespace WallProjections.Helper;
 public class ProcessProxy : IProcessProxy
 {
     /// <summary>
+    /// A logger for this class.
+    /// </summary>
+    private readonly ILogger _logger;
+
+    [ExcludeFromCodeCoverage]
+    public ProcessProxy(ILoggerFactory loggerFactory)
+    {
+        _logger = loggerFactory.CreateLogger<ProcessProxy>();
+    }
+
+    /// <summary>
     /// Error message if Python virtual environment cannot be loaded.
     /// </summary>
-    private const string PythonErrorMessage = "Could not load Python virtual environment. Please check installation guide on website.";
+    private const string PythonErrorMessage =
+        "Could not load Python virtual environment. Please check installation guide on website.";
 
     /// <summary>
     /// Script used to load the Python DLL location and the Python Path from the virtual environment.
@@ -45,10 +56,10 @@ public class ProcessProxy : IProcessProxy
     }
 
     /// <inheritdoc />
-    [ExcludeFromCodeCoverage( Justification = "Unit tests should not start external processes")]
+    [ExcludeFromCodeCoverage(Justification = "Unit tests should not start external processes")]
     public (string, string) LoadPythonVirtualEnv(string virtualEnvPath)
     {
-        Debug.WriteLine("Getting Python information from VirtualEnv...");
+        _logger.LogInformation("Getting Python information from VirtualEnv.");
 
         var virtualEnvScriptsPath = virtualEnvPath + (
             OperatingSystem.IsWindows()
@@ -56,22 +67,22 @@ public class ProcessProxy : IProcessProxy
                 : "/bin"
         );
 
-        // Process calls Python script to find location of
-        var proc = new Process();
-        proc.StartInfo.FileName = Path.Combine(virtualEnvScriptsPath, "python");
-        proc.StartInfo.Arguments = $"-c \"{VEnvLocatorScript}\"";
-        proc.StartInfo.RedirectStandardOutput = true;
-
-        if (!proc.Start())
-            throw new Exception(PythonErrorMessage);
-
+        // Process calls Python script to find location of the Python DLL and the Python Path
+        var proc = Process.Start(new ProcessStartInfo
+        {
+            FileName = Path.Combine(virtualEnvScriptsPath, "python"),
+            Arguments = $"-c \"{VEnvLocatorScript}\"",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true
+        }) ?? throw new Exception(PythonErrorMessage);
         proc.WaitForExit();
 
         var rawOutput = proc.StandardOutput.ReadToEnd();
-
         if (string.IsNullOrEmpty(rawOutput))
             throw new Exception(PythonErrorMessage);
 
+        _logger.LogTrace("Python output:\n{RawOutput}", rawOutput);
         var pythonOutput = rawOutput
             .Replace(Environment.NewLine, "")
             .Split(',');
@@ -79,10 +90,15 @@ public class ProcessProxy : IProcessProxy
         if (pythonOutput.Length != 2)
             throw new Exception(PythonErrorMessage);
 
+        _logger.LogTrace("Python DLL: {PythonDll}, Python Path: {PythonPath}", pythonOutput[0], pythonOutput[1]);
         return (pythonOutput[0], pythonOutput[1]);
     }
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage(Justification = "Unit tests should not start external processes")]
-    public void Start(string fileName, string arguments) => Process.Start(fileName, arguments);
+    public void Start(string fileName, string arguments)
+    {
+        _logger.LogInformation("Starting process: {FileName} {Arguments}", fileName, arguments);
+        Process.Start(fileName, arguments);
+    }
 }

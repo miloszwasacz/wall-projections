@@ -1,6 +1,6 @@
 ﻿name: Bug Report
-description: File a bug report.
-labels: [ "bug" ]
+description: File a bug report
+labels: ["bug"]
 body:
   - type: textarea
     id: what-happened
@@ -51,7 +51,7 @@ body:
         You can also attach files from `%APPDATA%\Roaming\WallProjections\Logs` or `~/.config/WallProjections/Logs`.
       render: shell
   - type: textarea
-    id: additional-context
+    id: additional-info
     attributes:
       label: Additional context
       description: |
