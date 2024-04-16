@@ -37,6 +37,7 @@ ARUCO_GRID_DICT =     {0: (25, 25), 1: (175, 25), 2: (325, 25), 3: (475, 25),
     12: (25, 175), 13: (175, 175), 14: (325, 175), 15: (475, 175)}
 class TestDetectArUcos(unittest.TestCase):
     def test_detect_from_aruco_grid(self):
+        print("temp")
         self.assertTrue(True)
 
 #TESTGETTRANSFORMATIONMATRIX
