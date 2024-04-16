@@ -33,6 +33,9 @@ callouts:
   note:
     title: Note
     color: blue
+  important:
+    title: Important
+    color: blue
 
 color_scheme: dark
 

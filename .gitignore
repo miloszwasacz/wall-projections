@@ -907,6 +907,7 @@ pyrightconfig.json
 
 .DS_STORE
 .avalonia-build-tasks
+WallProjections/Assets/ArUcos
 
 # Jekyll Ignore
 _site
