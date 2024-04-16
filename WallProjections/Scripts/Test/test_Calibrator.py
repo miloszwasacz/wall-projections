@@ -1,10 +1,12 @@
-import unittest
-import numpy as np
 import logging
-import cv2
-from cv2 import aruco
+import unittest
 from typing import Union
-from WallProjections.Scripts.Helper.Calibrator import Calibrator
+
+import cv2
+import numpy as np
+
+from Helper.Calibrator import Calibrator
+
 logging.basicConfig(level=logging.INFO)
 
 #HELPER FUNCTIONS:
@@ -37,7 +39,7 @@ class TestDetectArUcos(unittest.TestCase):
         """
         Test that we can detect all the aruco's on aruco_grid.jpg as represented in ARUCO_GRID_DICT
         """
-        img = cv2.imread("../../Assets/Python/aruco_grid.jpg")
+        img = cv2.imread("../../../WallProjections.Test/Assets/Python/aruco_grid.jpg")
         detected_dict = Calibrator._detect_ArUcos(img)
         self.assertTrue(dictionaries_the_same(as_numpy_dict(ARUCO_GRID_DICT), detected_dict))
 
