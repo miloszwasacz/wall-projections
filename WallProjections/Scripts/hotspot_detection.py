@@ -1,6 +1,4 @@
-﻿import logging
-import threading
-import datetime
+﻿import threading
 import cv2
 import mediapipe as mp
 
@@ -79,10 +77,10 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
 
     detection_running = True
 
-    logger.info("Starting hotspot detection...")
+    logger.info("Starting hotspot detection.")
 
     # initialise ML hand-tracking model
-    logger.info("Initialising hand-tracking model...")
+    logger.info("Initialising hand-tracking model.")
     hands_model = mp.solutions.hands.Hands(max_num_hands=MAX_NUM_HANDS,
                                            min_detection_confidence=MIN_DETECTION_CONFIDENCE,
                                            min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
@@ -126,7 +124,7 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
 
 def stop_hotspot_detection():
     global detection_running
-    logger.info("Stopping hotspot detection...")
+    logger.info("Stopping hotspot detection.")
     detection_running = False
     detection_mutex.acquire()  # wait until hotspot detection has stopped
     detection_mutex.release()
