@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Globalization;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Controls.Shapes;
+using Avalonia.Controls;
+using Avalonia.Data.Converters;
 
 namespace WallProjections.Views;
 
 /// <summary>
 /// A circle representing a hotspot. Set the <see cref="StyledElement.DataContext" />
 /// </summary>
-public partial class HotspotCircle : Ellipse, IDisposable
+public partial class HotspotCircle : Panel, IDisposable
 {
     /// <summary>
     /// The time required to pulse the hotspot (one direction only)
@@ -203,5 +205,54 @@ public partial class HotspotCircle : Ellipse, IDisposable
         _isActivating.Dispose();
         _isActivated.Dispose();
         GC.SuppressFinalize(this);
+    }
+}
+
+public class FullArcDiameterConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not double diameter) return 0.0;
+
+        return diameter * 1.25 + 20;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ArcRadiusConverter : IValueConverter
+{
+    private readonly FullArcDiameterConverter _diameterConverter = new();
+
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return _diameterConverter.Convert(value, typeof(double), null, culture) is double diameter
+            ? new Size(diameter / 2, diameter / 2)
+            : new Size(0.0, 0.0);
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ArcStartPointConverter : IValueConverter
+{
+    private readonly FullArcDiameterConverter _diameterConverter = new();
+
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return _diameterConverter.Convert(value, typeof(double), null, culture) is double diameter
+            ? new Point(diameter / 2 + 5, 5)
+            : new Point(0, 0);
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
 }
