@@ -3,7 +3,7 @@ import numpy as np
 from cv2 import aruco
 
 # noinspection PyPackages
-from .VideoCapture import VideoCapture
+from ..video_capture_factory import take_photo
 # noinspection PyPackages
 from .logger import get_logger
 
@@ -22,11 +22,11 @@ class Calibrator:
     # Methods for generating transformation matrix
 
     @staticmethod
-    def calibrate(projector_id_to_coord: dict[int, tuple[float, float]]) -> np.ndarray:
+    def calibrate(camera_index: int, projector_id_to_coord: dict[int, tuple[float, float]]) -> np.ndarray:
         """
         Takes a photo, detects ArUcos and returns a transformation matrix between provided and detected coordinates.
         """
-        photo = VideoCapture.take_photo()
+        photo = take_photo(camera_index)
         camera_id_to_coord = Calibrator._detect_ArUcos(photo)
         return Calibrator._get_transformation_matrix(camera_id_to_coord, projector_id_to_coord)
 

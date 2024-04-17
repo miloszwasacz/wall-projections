@@ -19,21 +19,21 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
-        <Content Include="Scripts\**\*" Exclude="Scripts\Internal\**;Scripts\CameraIdentification\**">
+        <Content Include="Scripts\**\*" Exclude="Scripts\Internal\**;Scripts\Platform\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'Release' OR '$(RuntimeIdentifier)' != ''">
-        <Content Include="Scripts\CameraIdentification\Windows\*.py" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+        <Content Include="Scripts\Platform\Windows\*.py" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
             <Link>Scripts\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="Scripts\CameraIdentification\Linux\*.py" Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'">
+        <Content Include="Scripts\Platform\Linux\*.py" Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'">
             <Link>Scripts\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="Scripts\CameraIdentification\Other\*.py" Condition="'$(RuntimeIdentifier)' != 'win-x64' AND '$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'linux-arm64'">
+        <Content Include="Scripts\Platform\Other\*.py" Condition="'$(RuntimeIdentifier)' != 'win-x64' AND '$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'linux-arm64'">
             <Link>Scripts\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
@@ -41,15 +41,15 @@
 
     <!-- For local development -->
     <ItemGroup Condition="'$(Configuration)' != 'Release'">
-        <Content Include="Scripts\CameraIdentification\Windows\*.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+        <Content Include="Scripts\Platform\Windows\*.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
             <Link>Scripts\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="Scripts\CameraIdentification\Linux\*.py" Condition="$([MSBuild]::IsOsPlatform('Linux'))">
+        <Content Include="Scripts\Platform\Linux\*.py" Condition="$([MSBuild]::IsOsPlatform('Linux'))">
             <Link>Scripts\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="Scripts\CameraIdentification\Other\*.py" Condition="!$([MSBuild]::IsOsPlatform('Windows')) AND !$([MSBuild]::IsOsPlatform('Linux'))">
+        <Content Include="Scripts\Platform\Other\*.py" Condition="!$([MSBuild]::IsOsPlatform('Windows')) AND !$([MSBuild]::IsOsPlatform('Linux'))">
             <Link>Scripts\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
