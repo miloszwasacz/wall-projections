@@ -23,6 +23,10 @@ public class MockPythonHandler : IPythonHandler
     /// </summary>
     public int Delay { get; set; }
 
+#pragma warning disable CA1822
+    public int CameraIndex => 700;
+#pragma warning restore CA1822
+
     public async Task RunHotspotDetection(IConfig config)
     {
         CurrentScript = PythonScript.HotspotDetection;

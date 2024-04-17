@@ -483,6 +483,13 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
 
             return matrix is not null;
         }
+        catch (Exception e)
+        {
+            _navigator.HideCalibrationMarkers();
+
+            _logger.LogError(e, "Failed to calibrate camera.");
+            return false;
+        }
         finally
         {
             IsCalibrating = false;

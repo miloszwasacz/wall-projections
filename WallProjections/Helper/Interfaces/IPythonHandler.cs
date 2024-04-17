@@ -19,6 +19,11 @@ public interface IPythonHandler : IDisposable
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotReleased;
 
     /// <summary>
+    /// The index of the camera that will be passed to OpenCV
+    /// </summary>
+    public int CameraIndex { get; }
+
+    /// <summary>
     /// Starts an asynchronous Python task that listens for hotspot presses
     /// </summary>
     public Task RunHotspotDetection(IConfig config);

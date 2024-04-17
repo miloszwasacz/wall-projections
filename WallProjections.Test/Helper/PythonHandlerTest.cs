@@ -14,6 +14,8 @@ namespace WallProjections.Test.Helper;
 [TestFixture]
 public class PythonHandlerTest
 {
+    private const int CameraIndex = 700;
+
     /// <summary>
     /// An empty configuration for testing (the mocks ignore it)
     /// </summary>
@@ -37,6 +39,14 @@ public class PythonHandlerTest
             async (IPythonHandler h) => { await h.RunCalibration(ImmutableDictionary.Create<int, Point>()); },
             nameof(IPythonHandler.RunCalibration)
         );
+    }
+
+    [Test]
+    public void ConstructorTest()
+    {
+        var (handler, _) = CreateInstance();
+        Assert.That(handler.CameraIndex, Is.EqualTo(CameraIndex));
+        handler.Dispose();
     }
 
     [Test]
@@ -151,7 +161,7 @@ public class PythonHandlerTest
     private static (PythonHandler handler, MockPythonProxy python) CreateInstance()
     {
         var python = new MockPythonProxy();
-        var handler = new PythonHandler(python, new MockLoggerFactory());
+        var handler = new PythonHandler(CameraIndex, python, new MockLoggerFactory());
         return (handler, python);
     }
 

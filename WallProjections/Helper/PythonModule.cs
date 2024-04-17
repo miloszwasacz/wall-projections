@@ -28,6 +28,9 @@ public abstract class PythonModule
     /// <inheritdoc cref="CalibrationModule" />
     public static Func<CalibrationModule> Calibration => () => new CalibrationModule();
 
+    /// <inheritdoc cref="CameraIdentificationModule" />
+    public static Func<CameraIdentificationModule> CameraIdentification => () => new CameraIdentificationModule();
+
     /// <summary>
     /// The Python module object that this class wraps.
     /// This is a dynamic object and can cause runtime errors if used incorrectly.
@@ -67,7 +70,12 @@ public abstract class PythonModule
             );
             var serialized = JsonSerializer.Serialize(positions);
 
-            _rawModule.hotspot_detection(eventListener.ToPython(), config.HomographyMatrix, serialized);
+            _rawModule.hotspot_detection(
+                eventListener.CameraIndex,
+                eventListener.ToPython(),
+                config.HomographyMatrix,
+                serialized
+            );
         }
 
         /// <summary>
@@ -91,8 +99,9 @@ public abstract class PythonModule
         /// <summary>
         /// Calibrates the camera and returns the homography matrix
         /// </summary>
+        /// <param name="cameraIndex">The index of the camera that will be passed to OpenCV</param>
         /// <param name="arucoPositions">The positions of the ArUco markers (ID, top-left corner)</param>
-        public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+        public double[,]? CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions)
         {
             var positions = arucoPositions.ToDictionary(
                 pair => pair.Key,
@@ -102,13 +111,45 @@ public abstract class PythonModule
             try
             {
                 var serialized = JsonSerializer.Serialize(positions);
-                PyObject? homography = _rawModule.calibrate(serialized);
+                PyObject? homography = _rawModule.calibrate(cameraIndex, serialized);
                 return homography?.As<double[,]>();
             }
             catch (Exception e)
             {
                 //TODO Refactor to use a custom exceptions based on the reason for the failure
                 throw new Exception($"Failed to calibrate the camera: {e.Message}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// A module that identifies the available cameras on the system that OpenCV can access
+    /// </summary>
+    public sealed class CameraIdentificationModule : PythonModule
+    {
+        public CameraIdentificationModule() : base("camera_identifier")
+        {
+        }
+
+        /// <summary>
+        /// Identifies the available cameras on the system that OpenCV can access
+        /// </summary>
+        /// <returns>A dictionary of camera indices (passed to OpenCV) and their corresponding names</returns>
+        public ImmutableDictionary<int, string> GetAvailableCameras()
+        {
+            PyObject? camerasPy = _rawModule.get_cameras();
+            var serialized = camerasPy?.As<string>();
+            if (serialized is null)
+                return ImmutableDictionary<int, string>.Empty;
+
+            try
+            {
+                var cameras = JsonSerializer.Deserialize<ImmutableDictionary<int, string>>(serialized);
+                return cameras ?? ImmutableDictionary<int, string>.Empty;
+            }
+            catch (Exception)
+            {
+                return ImmutableDictionary<int, string>.Empty;
             }
         }
     }

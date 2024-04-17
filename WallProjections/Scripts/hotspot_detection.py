@@ -1,16 +1,13 @@
-﻿import logging
-import threading
-import datetime
+﻿import threading
 import cv2
 import mediapipe as mp
-
 
 # noinspection PyPackages
 from .Helper.EventHandler import EventHandler
 # noinspection PyPackages
 from .Helper.Hotspot import Hotspot
 # noinspection PyPackages
-from .Helper.VideoCapture import VideoCapture
+from .video_capture_factory import getVideoCapture
 # noinspection PyPackages
 from .Interop import numpy_dotnet_converters as npnet
 # noinspection PyPackages
@@ -21,7 +18,6 @@ from .calibration import Calibrator
 from .Helper.logger import setup_logger
 
 logger = setup_logger("hotspot_detection")
-
 
 MAX_NUM_HANDS: int = 4
 """The maximum number of hands to detect."""
@@ -45,7 +41,6 @@ FINGERTIP_INDICES: tuple[int, ...] = (4, 8, 12, 16, 20)
 
 This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
 
-
 detection_running = False
 detection_mutex = threading.Lock()
 
@@ -65,7 +60,12 @@ def generate_hotspots(
     return hotspots
 
 
-def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array, hotspot_coords_str: str) -> None:
+def hotspot_detection(
+        camera_index: int,
+        event_handler: EventHandler,
+        calibration_matrix_net_array,
+        hotspot_coords_str: str
+) -> None:
     """
     Given hotspot projector coords, a transformation matrix and an event_handler
     calls events when hotspots are pressed or unpressed
@@ -79,16 +79,16 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
 
     detection_running = True
 
-    logger.info("Starting hotspot detection...")
+    logger.info("Starting hotspot detection.")
 
     # initialise ML hand-tracking model
-    logger.info("Initialising hand-tracking model...")
+    logger.info("Initialising hand-tracking model.")
     hands_model = mp.solutions.hands.Hands(max_num_hands=MAX_NUM_HANDS,
                                            min_detection_confidence=MIN_DETECTION_CONFIDENCE,
                                            min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
 
     # initialise video capture
-    video_capture = VideoCapture()
+    video_capture = getVideoCapture(camera_index)
     video_capture.start()
 
     # initialise calibrator
@@ -126,7 +126,7 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
 
 def stop_hotspot_detection():
     global detection_running
-    logger.info("Stopping hotspot detection...")
+    logger.info("Stopping hotspot detection.")
     detection_running = False
     detection_mutex.acquire()  # wait until hotspot detection has stopped
     detection_mutex.release()

@@ -18,10 +18,14 @@ public sealed class PythonHandler : IPythonHandler
     /// <summary>
     /// Creates a new instance of <see cref="PythonHandler" /> which uses the given <see cref="IPythonProxy" />
     /// </summary>
-    public PythonHandler(IPythonProxy pythonProxy, ILoggerFactory loggerFactory)
+    /// <param name="cameraIndex">The index of the camera that will be passed to OpenCV</param>
+    /// <param name="pythonProxy">A proxy for setting up Python runtime and executing Python scripts</param>
+    /// <param name="loggerFactory">A factory for creating loggers</param>
+    public PythonHandler(int cameraIndex, IPythonProxy pythonProxy, ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<PythonHandler>();
         _pythonProxy = pythonProxy;
+        CameraIndex = cameraIndex;
     }
 
     /// <summary>
@@ -41,12 +45,15 @@ public sealed class PythonHandler : IPythonHandler
     private CancellationTokenSource? _currentTask;
 
     /// <inheritdoc />
+    public int CameraIndex { get; }
+
+    /// <inheritdoc />
     public Task RunHotspotDetection(IConfig config) =>
         RunNewPythonAction(python => python.StartHotspotDetection(this, config), "Hotspot Detection");
 
     /// <inheritdoc />
     public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions) =>
-        RunNewPythonAction(python => python.CalibrateCamera(arucoPositions), "Calibration");
+        RunNewPythonAction(python => python.CalibrateCamera(CameraIndex, arucoPositions), "Calibration");
 
     /// <inheritdoc />
     public void CancelCurrentTask()

@@ -10,6 +10,7 @@ using Python.Runtime;
 
 #else
 using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 using Avalonia;
@@ -96,14 +97,12 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
-    {
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config) =>
         RunPythonAction(PythonModule.HotspotDetection, module =>
         {
             _logger.LogInformation("Starting hotspot detection.");
             module.StartDetection(eventListener, config);
         });
-    }
 
     /// <inheritdoc />
     public void StopCurrentAction()
@@ -119,8 +118,20 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions) =>
-        RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));
+    public double[,]? CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions) =>
+        RunPythonAction(PythonModule.Calibration, module =>
+        {
+            _logger.LogInformation("Calibrating camera.");
+            return module.CalibrateCamera(cameraIndex, arucoPositions);
+        });
+
+    /// <inheritdoc />
+    public ImmutableDictionary<int, string> GetAvailableCameras() =>
+        RunPythonAction(PythonModule.CameraIdentification, module =>
+        {
+            _logger.LogInformation("Identifying available cameras.");
+            return module.GetAvailableCameras();
+        });
 
     /// <summary>
     /// Runs the given action after acquiring the Python GIL importing the given module
@@ -243,7 +254,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Prints a message to the console and returns an identity matrix
     /// </summary>
-    public double[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+    public double[,] CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions)
     {
         _logger.LogInformation("Calibrating camera");
         return new double[,]
@@ -252,6 +263,17 @@ public sealed class PythonProxy : IPythonProxy
             { 0, 1, 0 },
             { 0, 0, 1 }
         };
+    }
+
+    public ImmutableDictionary<int, string> GetAvailableCameras()
+    {
+        _logger.LogInformation("Identifying available cameras");
+        return new Dictionary<int, string>
+        {
+            { 0, "Camera 0" },
+            { 700, "Camera 1" },
+            { 702, "Camera 2" }
+        }.ToImmutableDictionary();
     }
 
     /// <summary>
