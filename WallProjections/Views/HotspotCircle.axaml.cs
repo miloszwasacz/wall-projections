@@ -222,37 +222,3 @@ public class FullArcDiameterConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
-
-public class ArcRadiusConverter : IValueConverter
-{
-    private readonly FullArcDiameterConverter _diameterConverter = new();
-
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return _diameterConverter.Convert(value, typeof(double), null, culture) is double diameter
-            ? new Size(diameter / 2, diameter / 2)
-            : new Size(0.0, 0.0);
-    }
-
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class ArcStartPointConverter : IValueConverter
-{
-    private readonly FullArcDiameterConverter _diameterConverter = new();
-
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return _diameterConverter.Convert(value, typeof(double), null, culture) is double diameter
-            ? new Point(diameter / 2 + 5, 5)
-            : new Point(0, 0);
-    }
-
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}

@@ -12,14 +12,7 @@
     
     <Panel.Resources>
         <views:FullArcDiameterConverter x:Key="FullArcDiameterConverter" />
-        <views:ArcRadiusConverter x:Key="ArcRadiusConverter" />
-        <views:ArcStartPointConverter x:Key="ArcStartPointConverter" />
     </Panel.Resources>
-
-    <Ellipse Width="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}" 
-             Height="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
-             Stroke="Chartreuse"
-             StrokeThickness="10"/>
     
     <Ellipse Width="{Binding $parent[views:HotspotCircle].Diameter}"
              Height="{Binding $parent[views:HotspotCircle].Diameter}"
@@ -27,21 +20,12 @@
              Classes.pulse="{Binding $parent[views:HotspotCircle].Pulse}"
              Classes="inner"/>
     
-    
-    <Path Stroke="Gray"
-           StrokeThickness="10">
-        <Path.Data>
-            <PathGeometry>
-                <PathFigure IsClosed="False" 
-                            StartPoint="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource ArcStartPointConverter}}">
-                    <ArcSegment 
-                         Size="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource ArcRadiusConverter}}"
-                         IsLargeArc="False"
-                         Point="130,60"/>
-                </PathFigure>
-            </PathGeometry>
-        </Path.Data>
-    </Path>
+    <Arc Width="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
+         Height="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
+        Stroke="Aqua" 
+        StrokeThickness="10" 
+        StartAngle="-90" 
+        SweepAngle="360" />
 
     <!--TODO Style this properly -->
     <Panel.Styles>
