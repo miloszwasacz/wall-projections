@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
+using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.Views;
 
@@ -26,34 +27,11 @@ public partial class HotspotCircle : Panel, IDisposable
     public static readonly StyledProperty<double> DiameterProperty =
         AvaloniaProperty.Register<HotspotCircle, double>(nameof(Diameter));
 
-    /// <summary>
-    /// A <see cref="DirectProperty{T, TP}">DirectProperty</see> that defines the <see cref="IsActivating" /> property.
-    /// </summary>
-    public static readonly DirectProperty<HotspotCircle, bool> IsActivatingProperty =
-        AvaloniaProperty.RegisterDirect<HotspotCircle, bool>(
-            nameof(IsActivating),
-            o => o.IsActivating,
-            (o, v) => o.IsActivating = v
-        );
-
-    /// <summary>
-    /// A <see cref="DirectProperty{T, TP}">DirectProperty</see> that defines the <see cref="IsDeactivating" /> property.
-    /// </summary>
-    public static readonly DirectProperty<HotspotCircle, bool> IsDeactivatingProperty =
-        AvaloniaProperty.RegisterDirect<HotspotCircle, bool>(
-            nameof(IsDeactivating),
-            o => o.IsDeactivating,
-            (o, v) => o.IsDeactivating = v
-        );
-
-    /// <summary>
-    /// A <see cref="DirectProperty{T, TP}">DirectProperty</see> that defines the <see cref="IsActivated" /> property.
-    /// </summary>
-    public static readonly DirectProperty<HotspotCircle, bool> IsActivatedProperty =
-        AvaloniaProperty.RegisterDirect<HotspotCircle, bool>(
-            nameof(IsActivated),
-            o => o.IsActivated,
-            (o, v) => o.IsActivated = v
+    public static readonly DirectProperty<HotspotCircle, HotspotState> HotspotStateProperty =
+        AvaloniaProperty.RegisterDirect<HotspotCircle, HotspotState>(
+            nameof(HotspotState),
+            o => o.HotspotState,
+            (o, v) => o.HotspotState = v
         );
 
     /// <summary>
@@ -71,19 +49,9 @@ public partial class HotspotCircle : Panel, IDisposable
     #region Backing fields
 
     /// <summary>
-    /// The subject that holds the value of <see cref="IsActivating" />
+    /// The subject that holds the value of <see cref="HotspotState" />
     /// </summary>
-    private readonly BehaviorSubject<bool> _isActivating = new(false);
-
-    /// <summary>
-    /// The subject that holds the value of <see cref="IsDeactivating" />
-    /// </summary>
-    private readonly BehaviorSubject<bool> _isDeactivating = new(false);
-
-    /// <summary>
-    /// The subject that holds the value of <see cref="IsActivated" />
-    /// </summary>
-    private readonly BehaviorSubject<bool> _isActivated = new(false);
+    private readonly BehaviorSubject<HotspotState> _hotspotState = new(HotspotState.None);
 
     /// <summary>
     /// The subject that holds the value of <see cref="Pulse" />
@@ -101,53 +69,14 @@ public partial class HotspotCircle : Panel, IDisposable
         set => SetValue(DiameterProperty, value);
     }
 
-    /// <summary>
-    /// Whether the hotspot is activating
-    /// </summary>
-    public bool IsActivating
+    public HotspotState HotspotState
     {
-        get => _isActivating.Value;
+        get => _hotspotState.Value;
         set
         {
-            var oldValue = _isActivating.Value;
-            _isActivating.OnNext(value);
-            RaisePropertyChanged(IsActivatingProperty, oldValue, value);
-        }
-    }
-
-    /// <summary>
-    /// Whether the hotspot is deactivating
-    /// </summary>
-    public bool IsDeactivating
-    {
-        get => _isDeactivating.Value;
-        set
-        {
-            var oldValue = _isDeactivating.Value;
-            _isDeactivating.OnNext(value);
-            RaisePropertyChanged(IsDeactivatingProperty, oldValue, value);
-        }
-    }
-
-    /// <summary>
-    /// Whether the hotspot is fully activated
-    /// </summary>
-    public bool IsActivated
-    {
-        get => _isActivated.Value;
-        set
-        {
-            var oldValue = _isActivated.Value;
-            _isActivated.OnNext(value);
-            lock (_pulse)
-            {
-                RaisePropertyChanged(IsActivatedProperty, oldValue, value);
-
-                if (value)
-                    StartPulsing();
-                else
-                    Pulse = false;
-            }
+            var oldValue = _hotspotState.Value;
+            _hotspotState.OnNext(value);
+            RaisePropertyChanged(HotspotStateProperty, oldValue, value);
         }
     }
 
@@ -156,7 +85,7 @@ public partial class HotspotCircle : Panel, IDisposable
     /// </summary>
     private bool Pulse
     {
-        get => _pulse.Value && IsActivated;
+        get => _pulse.Value && HotspotState == HotspotState.Active;
         set
         {
             var oldValue = _pulse.Value;
@@ -182,7 +111,7 @@ public partial class HotspotCircle : Panel, IDisposable
             {
                 Pulse = false;
 
-                if (!IsActivated)
+                if (HotspotState != HotspotState.Active)
                     return;
             }
 
@@ -190,7 +119,7 @@ public partial class HotspotCircle : Panel, IDisposable
 
             lock (_pulse)
             {
-                if (!IsActivated)
+                if (HotspotState != HotspotState.Active)
                     return;
 
                 Pulse = true;
@@ -202,8 +131,7 @@ public partial class HotspotCircle : Panel, IDisposable
 
     public void Dispose()
     {
-        _isActivating.Dispose();
-        _isActivated.Dispose();
+        _hotspotState.Dispose();
         GC.SuppressFinalize(this);
     }
 }
