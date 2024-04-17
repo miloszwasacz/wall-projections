@@ -76,7 +76,19 @@ public partial class HotspotCircle : Panel, IDisposable
         {
             var oldValue = _hotspotState.Value;
             _hotspotState.OnNext(value);
-            RaisePropertyChanged(HotspotStateProperty, oldValue, value);
+            lock (_pulse)
+            {
+                RaisePropertyChanged(HotspotStateProperty, oldValue, value);
+                if (value == HotspotState.Active)
+                {
+                    StartPulsing();
+                }
+                else
+                {
+                    Pulse = false;
+                }
+            }
+            
         }
     }
 
@@ -102,7 +114,7 @@ public partial class HotspotCircle : Panel, IDisposable
     /// <summary>
     /// Starts pulsing the hotspot
     /// </summary>
-    /// <remarks>Stops pulsing if the hotspot is no longer <see cref="IsActivated">activated</see></remarks>
+    /// <remarks>Stops pulsing if the <see cref="HotspotState"/> is no longer set to active</remarks>
     private async void StartPulsing()
     {
         while (true)
@@ -143,6 +155,20 @@ public class FullArcDiameterConverter : IValueConverter
         if (value is not double diameter) return 0.0;
 
         return diameter * 1.25 + 20;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class StateConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        Console.WriteLine("value: "+ value + ", parameter: "+parameter);
+        return value == parameter;
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

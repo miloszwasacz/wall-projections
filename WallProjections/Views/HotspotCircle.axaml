@@ -7,12 +7,14 @@
        xmlns:views="using:WallProjections.Views"
        mc:Ignorable="d" d:DesignWidth="20" d:DesignHeight="20"
        x:Class="WallProjections.Views.HotspotCircle"
-       Classes.activating="{Binding IsActivating, RelativeSource={RelativeSource Self}}"
-       Classes.deactivating="{Binding IsDeactivating, RelativeSource={RelativeSource Self}}"
-       Classes.activated="{Binding IsActivated, RelativeSource={RelativeSource Self}, ConverterParameter={x:Static enums:HotspotState.Active}}">
-
+       Classes.activating="{Binding $parent[views:HotspotCircle].HotspotState, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Activating}}"
+       Classes.deactivating="{Binding $parent[views:HotspotCircle].HotspotState, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Deactivating}}"
+       Classes.activated="{Binding $parent[views:HotspotCircle].HotspotState, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Active}}"
+       >
+   
     <Panel.Resources>
         <views:FullArcDiameterConverter x:Key="FullArcDiameterConverter" />
+        <views:StateConverter x:Key="StateConverter" />
     </Panel.Resources>
 
     <Ellipse Classes="inner"
