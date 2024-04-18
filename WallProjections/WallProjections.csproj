@@ -19,9 +19,13 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
-        <Content Include="Scripts\**\*" Exclude="Scripts\Internal\**;Scripts\Platform\**">
+        <Content Include="Scripts\**\*"  Exclude="Scripts\Internal\**;Scripts\Platform\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <None Include="$(Pkgpython)\tools\**\*" Link="python\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'Release' OR '$(RuntimeIdentifier)' != ''">
@@ -55,11 +59,12 @@
         </Content>
     </ItemGroup>
     
+    <Target Name="Set Up Python" BeforeTargets="GenerateArUcos">
+        <Exec Command="$(Pkgpython)\tools\python -m pip install &quot;mediapipe==0.10.9&quot; opencv-python pygrabber numpy find-libpython"/>
+    </Target>
+    
     <Target Name="GenerateArUcos" BeforeTargets="PrepareForBuild">
-        <Exec Command="python Scripts\Internal\aruco_generator.py" Condition="!Exists('$(AppDataDir)\WallProjections\VirtualEnv') AND $([MSBuild]::IsOsPlatform('Windows'))"/>
-        <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
-        <Exec Command="$(AppDataDir)/WallProjections/VirtualEnv/bin/python Scripts/Internal/aruco_generator.py" Condition="Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
-        <Exec Command="$(AppDataDir)\WallProjections\VirtualEnv\Scripts\python Scripts\Internal\aruco_generator.py" Condition="Exists('$(AppDataDir)\WallProjections\VirtualEnv') AND $([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="$(Pkgpython)\tools\python Scripts\Internal\aruco_generator.py"/>
         <ItemGroup>
             <AvaloniaResource Include="Assets\**"/>
         </ItemGroup>
@@ -80,5 +85,8 @@
         <PackageReference Include="pythonnet" Version="3.0.3"/>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+        <PackageReference Include="python" Version="3.11.9">
+            <ExcludeVersion>true</ExcludeVersion>
+        </PackageReference>
     </ItemGroup>
 </Project>

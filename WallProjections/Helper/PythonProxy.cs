@@ -26,16 +26,17 @@ public sealed class PythonProxy : IPythonProxy
 {
     private const string PythonDllExceptionMessage = "Could not load Python environment.";
 
-    /// <summary>
-    /// Folder to store virtual environment.
-    /// </summary>
-    private const string VirtualEnvFolder = "VirtualEnv";
+    private const string EmbeddedEnvFolder = "python";
 
     /// <summary>
-    /// Path to VirtualEnv if it exists.
+    /// Path to embedded Python environment executable.
     /// </summary>
-    private static readonly string VirtualEnvPath = Path.Combine(IFileHandler.AppDataFolderPath, VirtualEnvFolder);
-
+    private static readonly string EmbeddedEnvExecutablePath = EmbeddedEnvFolder + (
+        OperatingSystem.IsWindows()
+            ? @"\python.exe"
+            : "/python"
+    );
+    
     /// <summary>
     /// A handle to Python threads
     /// </summary>
@@ -61,28 +62,33 @@ public sealed class PythonProxy : IPythonProxy
         _logger = loggerFactory.CreateLogger<PythonProxy>();
         _logger.LogInformation("Initializing Python.");
 
-        // Only use VirtualEnv if directory for VirtualEnv exists.
-        if (Directory.Exists(VirtualEnvPath))
+        string? pythonExecutablePath = null;
+
+        if (File.Exists(EmbeddedEnvExecutablePath))
+            pythonExecutablePath = EmbeddedEnvExecutablePath;
+
+        // Only use embedded environment if executable exists.
+        if (File.Exists(EmbeddedEnvExecutablePath))
         {
-            _logger.LogInformation("Virtual environment detected. Loading Python from Virtual environment.");
+            _logger.LogInformation("Embedded environment detected. Loading Python from Virtual environment.");
             // TODO: Show error message to user before shutting down program if virtual environment cannot be loaded.
             try
             {
-                var (pythonDll, pythonPath) = processProxy.LoadPythonVirtualEnv(VirtualEnvPath);
+                var (pythonDll, pythonPath) = processProxy.LoadPythonEnv(EmbeddedEnvExecutablePath);
                 Runtime.PythonDLL = pythonDll;
                 PythonEngine.PythonPath = pythonPath;
             }
             catch (Exception e)
             {
                 _logger.LogError(
-                    "Could not load Python virtual environment. Please check installation guide on website."
+                    "Could not load Python embedded environment."
                 );
                 throw new DllNotFoundException(PythonDllExceptionMessage, e);
             }
         }
         else
         {
-            _logger.LogInformation("No virtual environment detected. Loading Python from system.");
+            _logger.LogInformation("No embedded environment detected. Loading Python from system.");
             Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
             if (Runtime.PythonDLL is null)
             {
