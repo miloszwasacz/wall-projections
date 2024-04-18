@@ -49,14 +49,6 @@
 
     </ItemsControl.Styles>
 
-    <!-- Styles relating to hotspot (ellipse) activation -->
-    <ItemsControl.Styles>
-        <Style Selector="views|HotspotCircle">
-            <!-- <Setter Property="Fill" Value="{Binding $parent[views:HotspotView].HotspotFill}" /> -->
-            <!-- <Setter Property="Stroke" Value="{Binding $parent[views:HotspotView].HotspotStroke}" /> -->
-        </Style>
-    </ItemsControl.Styles>
-
     <!-- Transitions for the whole ItemsControl -->
     <ItemsControl.Transitions>
         <Transitions>

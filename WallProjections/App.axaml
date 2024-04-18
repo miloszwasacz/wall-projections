@@ -11,6 +11,7 @@
     </Application.DataTemplates>
     
     <Application.Resources>
+        <!-- Static resources  -->
         <converters:StateConverter x:Key="StateConverter" />
     </Application.Resources>
 

@@ -27,6 +27,9 @@ public interface IHotspotProjectionViewModel : IPosition
     public HotspotState State { get; set; }
 }
 
+/// <summary>
+/// An enum to hold the current state of the hotspot, to be used to trigger the animations
+/// </summary>
 public enum HotspotState
 {
     None,

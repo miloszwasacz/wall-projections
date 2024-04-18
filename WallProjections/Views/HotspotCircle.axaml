@@ -9,26 +9,28 @@
        x:Class="WallProjections.Views.HotspotCircle"
        Classes.activating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Activating}}"
        Classes.deactivating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Deactivating}}"
-       Classes.activated="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Active}}"
-       >
+       Classes.activated="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Active}}">
    
     <Panel.Resources>
         <views:FullArcDiameterConverter x:Key="FullArcDiameterConverter" />
     </Panel.Resources>
 
+    <!-- Pulsing circle -->
     <Ellipse Classes="inner"
              Width="{Binding $parent[views:HotspotCircle].Diameter}"
              Height="{Binding $parent[views:HotspotCircle].Diameter}"
              Fill="White"
              Classes.pulse="{Binding $parent[views:HotspotCircle].Pulse}" />
 
+    <!-- Charging arc -->
     <Arc Classes="outer"
          Width="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
          Height="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
-         Stroke="Aqua"
+         Stroke="White"
          StrokeThickness="10"
          StartAngle="-90" />
     
+    <!-- Animations -->
     <Panel.Styles>
         <!-- Base transitions -->
         <Style Selector="views|HotspotCircle">

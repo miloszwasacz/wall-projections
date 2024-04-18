@@ -26,7 +26,10 @@ public partial class HotspotCircle : Panel, IDisposable
     /// </summary>
     public static readonly StyledProperty<double> DiameterProperty =
         AvaloniaProperty.Register<HotspotCircle, double>(nameof(Diameter));
-
+    
+    /// <summary>
+    /// A <see cref="DirectProperty{TOwner,TValue}">DirectProperty</see> that defines the <see cref="HotspotState"/> property.
+    /// </summary>
     public static readonly DirectProperty<HotspotCircle, HotspotState> HotspotStateProperty =
         AvaloniaProperty.RegisterDirect<HotspotCircle, HotspotState>(
             nameof(HotspotState),
@@ -69,6 +72,9 @@ public partial class HotspotCircle : Panel, IDisposable
         set => SetValue(DiameterProperty, value);
     }
 
+    /// <summary>
+    /// The state of the hotspot
+    /// </summary>
     public HotspotState HotspotState
     {
         get => _hotspotState.Value;
@@ -148,8 +154,20 @@ public partial class HotspotCircle : Panel, IDisposable
     }
 }
 
+/// <summary>
+/// A converter which finds the diameter of the fully pulsed hotspot and 
+/// converts to the required diameter of the arc
+/// </summary>
 public class FullArcDiameterConverter : IValueConverter
 {
+    /// <summary>
+    /// Converts the diameter of the hotspot to the diameter of the surrounding arc
+    /// </summary>
+    /// <param name="value">The diameter of the hotspot</param>
+    /// <param name="targetType"></param>
+    /// <param name="parameter"></param>
+    /// <param name="culture"></param>
+    /// <returns></returns>
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not double diameter) return 0.0;
