@@ -168,14 +168,14 @@ public class HotspotDisplayViewModelTest
     /// </param>
     private static void AssertActivatingHotspot(AbsHotspotDisplayViewModel vm, int? activatingId)
     {
-        AssertChangedHotspot(vm, activatingId, coord => coord.IsActivating);
+        AssertChangedHotspot(vm, activatingId, coord => coord.State == HotspotState.Activating);
 
         if (activatingId is null) return;
         var hotspot = vm.Projections.FirstOrDefault(coord => coord.Id == activatingId);
         Assert.Multiple(() =>
         {
-            Assert.That(hotspot?.IsActive, Is.False);
-            Assert.That(hotspot?.IsDeactivating, Is.False);
+            Assert.That(hotspot?.State, Is.Not.EqualTo(HotspotState.Active));
+            Assert.That(hotspot?.State, Is.Not.EqualTo(HotspotState.Deactivating));
         });
     }
 
@@ -188,14 +188,14 @@ public class HotspotDisplayViewModelTest
     /// </param>
     private static void AssertActiveHotspot(AbsHotspotDisplayViewModel vm, int? activeId)
     {
-        AssertChangedHotspot(vm, activeId, coord => coord.IsActive);
+        AssertChangedHotspot(vm, activeId, coord => coord.State == HotspotState.Active);
 
         if (activeId is null) return;
         var hotspot = vm.Projections.FirstOrDefault(coord => coord.Id == activeId);
         Assert.Multiple(() =>
         {
-            Assert.That(hotspot?.IsActivating, Is.False);
-            Assert.That(hotspot?.IsDeactivating, Is.False);
+            Assert.That(hotspot?.State, Is.Not.EqualTo(HotspotState.Activating));
+            Assert.That(hotspot?.State, Is.Not.EqualTo(HotspotState.Deactivating));
         });
     }
 
@@ -208,14 +208,14 @@ public class HotspotDisplayViewModelTest
     /// </param>
     public static void AssertDeactivatingHotspot(AbsHotspotDisplayViewModel vm, int? deactivatingId)
     {
-        AssertChangedHotspot(vm, deactivatingId, coord => coord.IsDeactivating);
+        AssertChangedHotspot(vm, deactivatingId, coord => coord.State == HotspotState.Deactivating);
 
         if (deactivatingId is null) return;
         var hotspot = vm.Projections.FirstOrDefault(coord => coord.Id == deactivatingId);
         Assert.Multiple(() =>
         {
-            Assert.That(hotspot?.IsActivating, Is.False);
-            Assert.That(hotspot?.IsActive, Is.False);
+            Assert.That(hotspot?.State, Is.Not.EqualTo(HotspotState.Activating));
+            Assert.That(hotspot?.State, Is.Not.EqualTo(HotspotState.Active));
         });
     }
 

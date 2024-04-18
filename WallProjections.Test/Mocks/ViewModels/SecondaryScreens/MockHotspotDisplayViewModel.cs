@@ -44,7 +44,7 @@ public class MockHotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposab
     /// </summary>
     public override void DeactivateHotspots()
     {
-        Projections.First().IsActive = false;
+        Projections.First().State = HotspotState.None;
     }
 
     /// <inheritdoc/>
