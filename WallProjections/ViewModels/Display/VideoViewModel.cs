@@ -12,6 +12,9 @@ namespace WallProjections.ViewModels.Display;
 /// <inheritdoc cref="IVideoViewModel" />
 public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 {
+    /// <inheritdoc />
+    public event EventHandler? AllVideosFinished;
+
     /// <summary>
     /// A logger for this class
     /// </summary>
@@ -198,9 +201,12 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         {
             case false when _playQueue.IsEmpty:
                 _logger.LogInformation("End of video queue reached");
+                AllVideosFinished?.Invoke(this, EventArgs.Empty);
                 break;
             case false:
                 _logger.LogError("Failed to play next video");
+                //TODO Maybe send an error message?
+                AllVideosFinished?.Invoke(this, EventArgs.Empty);
                 break;
         }
     }

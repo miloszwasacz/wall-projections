@@ -84,6 +84,9 @@ public class LayoutProvider : ILayoutProvider
     }
 
     /// <inheritdoc />
-    public Layout GetSimpleDescriptionLayout(string title, string description) =>
-        new DescriptionViewModel(title, description);
+    public Layout GetWelcomeLayout() => new WelcomeViewModel();
+
+    /// <inheritdoc />
+    public Layout GetErrorLayout(string message, string title = ILayoutProvider.DefaultErrorTitle) =>
+        new ErrorViewModel(title, message);
 }

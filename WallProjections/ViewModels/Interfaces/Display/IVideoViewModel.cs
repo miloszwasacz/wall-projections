@@ -10,6 +10,11 @@ namespace WallProjections.ViewModels.Interfaces.Display;
 public interface IVideoViewModel : IDisposable
 {
     /// <summary>
+    /// An event that is triggered when all the videos have finished playing.
+    /// </summary>
+    public event EventHandler? AllVideosFinished;
+
+    /// <summary>
     /// The <see cref="IMediaPlayer" /> used to play videos.
     /// </summary>
     public IMediaPlayer? MediaPlayer { get; }

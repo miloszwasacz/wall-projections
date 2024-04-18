@@ -43,6 +43,13 @@ public interface IHotspotHandler : IDisposable
     public event EventHandler<HotspotArgs>? HotspotForcefullyDeactivated;
 
     /// <summary>
+    /// Immediately deactivates the hotspot with the given <paramref name="id" />
+    /// (i.e. invokes <see cref="HotspotForcefullyDeactivated" />).
+    /// </summary>
+    /// <param name="id"></param>
+    public void DeactivateHotspot(int id);
+
+    /// <summary>
     /// Arguments for the events in <see cref="IHotspotHandler" />
     /// </summary>
     public class HotspotArgs : EventArgs
