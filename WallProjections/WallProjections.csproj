@@ -25,7 +25,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <None Include="$(Pkgpython)\tools\**\*" Link="python\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>
+        <None Include="$(Pkgpython)\tools\**\*" Link="python\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'Release' OR '$(RuntimeIdentifier)' != ''">
@@ -58,13 +58,15 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
-    
-    <Target Name="Set Up Python" BeforeTargets="GenerateArUcos">
+
+    <Target Name="SetUpPython" BeforeTargets="GenerateArUcos" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
         <Exec Command="$(Pkgpython)\tools\python -m pip install &quot;mediapipe==0.10.9&quot; opencv-python pygrabber numpy find-libpython"/>
     </Target>
     
     <Target Name="GenerateArUcos" BeforeTargets="PrepareForBuild">
-        <Exec Command="$(Pkgpython)\tools\python Scripts\Internal\aruco_generator.py"/>
+        <Exec Command="$(Pkgpython)\tools\python Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="$(AppDataDir)/WallProjections/VirtualEnv/bin/python Scripts/Internal/aruco_generator.py" Condition="Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
         <ItemGroup>
             <AvaloniaResource Include="Assets\**"/>
         </ItemGroup>

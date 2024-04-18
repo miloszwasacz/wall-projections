@@ -25,7 +25,26 @@ namespace WallProjections.Helper;
 public sealed class PythonProxy : IPythonProxy
 {
     private const string PythonDllExceptionMessage = "Could not load Python environment.";
+    
+    /// <summary>
+    /// Folder to store virtual environment.
+    /// </summary>
+    private const string VirtualEnvFolder = "VirtualEnv";
 
+    /// <summary>
+    /// Path to VirtualEnv if it exists.
+    /// </summary>
+    private static readonly string VirtualEnvPath = Path.Combine(IFileHandler.AppDataFolderPath, VirtualEnvFolder);
+
+    private static readonly string VirtualEnvExecutablePath = Path.Combine(VirtualEnvPath,
+        OperatingSystem.IsWindows()
+            ? @"\Scripts\python"
+            : "/bin/python"
+    );
+
+    /// <summary>
+    /// Folder where the embedded Python environment is stored.
+    /// </summary>
     private const string EmbeddedEnvFolder = "python";
 
     /// <summary>
@@ -66,29 +85,31 @@ public sealed class PythonProxy : IPythonProxy
 
         if (File.Exists(EmbeddedEnvExecutablePath))
             pythonExecutablePath = EmbeddedEnvExecutablePath;
+        else if (File.Exists(VirtualEnvExecutablePath))
+            pythonExecutablePath = VirtualEnvExecutablePath;
 
         // Only use embedded environment if executable exists.
-        if (File.Exists(EmbeddedEnvExecutablePath))
+        if (pythonExecutablePath is not null)
         {
-            _logger.LogInformation("Embedded environment detected. Loading Python from Virtual environment.");
-            // TODO: Show error message to user before shutting down program if virtual environment cannot be loaded.
+            _logger.LogInformation("Non-global Python environment detected. Loading Python from non-global environment.");
+            // TODO: Show error message to user before shutting down program if environment cannot be loaded.
             try
             {
-                var (pythonDll, pythonPath) = processProxy.LoadPythonEnv(EmbeddedEnvExecutablePath);
+                var (pythonDll, pythonPath) = processProxy.LoadPythonEnv(pythonExecutablePath);
                 Runtime.PythonDLL = pythonDll;
                 PythonEngine.PythonPath = pythonPath;
             }
             catch (Exception e)
             {
                 _logger.LogError(
-                    "Could not load Python embedded environment."
+                    "Could not load Python non-global environment."
                 );
                 throw new DllNotFoundException(PythonDllExceptionMessage, e);
             }
         }
         else
         {
-            _logger.LogInformation("No embedded environment detected. Loading Python from system.");
+            _logger.LogInformation("No non-global environment detected. Loading Python from system.");
             Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
             if (Runtime.PythonDLL is null)
             {

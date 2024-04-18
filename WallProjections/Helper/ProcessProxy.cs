@@ -59,7 +59,7 @@ public class ProcessProxy : IProcessProxy
     [ExcludeFromCodeCoverage(Justification = "Unit tests should not start external processes")]
     public (string, string) LoadPythonEnv(string pythonExecutablePath)
     {
-        _logger.LogInformation("Getting Python information from embedded environment.");
+        _logger.LogInformation("Getting Python information from environment.");
 
         // Process calls Python script to find location of the Python DLL and the Python Path
         var proc = Process.Start(new ProcessStartInfo
