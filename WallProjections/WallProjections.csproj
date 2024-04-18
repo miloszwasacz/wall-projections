@@ -87,8 +87,6 @@
         <PackageReference Include="pythonnet" Version="3.0.3"/>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
-        <PackageReference Include="python" Version="3.11.9">
-            <ExcludeVersion>true</ExcludeVersion>
-        </PackageReference>
+        <PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="python" Version="3.11.9"/>
     </ItemGroup>
 </Project>
