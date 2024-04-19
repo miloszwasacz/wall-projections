@@ -38,8 +38,8 @@ public sealed class PythonProxy : IPythonProxy
 
     private static readonly string VirtualEnvExecutablePath = Path.Combine(VirtualEnvPath,
         OperatingSystem.IsWindows()
-            ? @"\Scripts\python"
-            : "/bin/python"
+            ? @"Scripts\python"
+            : "bin/python"
     );
 
     /// <summary>
