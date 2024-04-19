@@ -10,10 +10,17 @@
        Classes.activating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Activating}}"
        Classes.deactivating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Deactivating}}"
        Classes.activated="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Active}}">
-   
+
     <Panel.Resources>
         <views:FullArcDiameterConverter x:Key="FullArcDiameterConverter" />
     </Panel.Resources>
+
+    <!-- Active circle, need to appear when circle becomes active to counter the transition behaviour -->
+    <!-- that occurs between the activating and activated animation -->
+    <Ellipse Classes="full"
+             Width="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
+             Height="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
+             Stroke="White"/>
 
     <!-- Pulsing circle -->
     <Ellipse Classes="inner"
@@ -29,7 +36,7 @@
          Stroke="White"
          StrokeThickness="10"
          StartAngle="-90" />
-    
+
     <!-- Animations -->
     <Panel.Styles>
         <!-- Base transitions -->
@@ -45,29 +52,33 @@
                 <Setter Property="RenderTransform" Value="scale(1)" />
             </Style>
             <Style Selector="^ Arc.outer">
-            <Setter Property="Transitions">
-                <Transitions>
-                    <DoubleTransition
-                        Property="SweepAngle"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
-                </Transitions>
-            </Setter>
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <DoubleTransition
+                            Property="SweepAngle"
+                            Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
+                    </Transitions>
+                </Setter>
                 <Setter Property="SweepAngle" Value="0" />
+            </Style>
+            <Style Selector="^ Ellipse.full">
+                <Setter Property="StrokeThickness" Value="0" />
             </Style>
         </Style>
 
         <!-- ACTIVATING animation -->
-        <Style Selector="views|HotspotCircle.activating Arc.outer">
-            <!-- Sweeping arc animation -->
-            <Setter Property="Transitions">
-                <Transitions>
-                    <DoubleTransition
-                        Property="SweepAngle"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
-                </Transitions>
-            </Setter>
-            <!-- if exactly 360 animation will loop round a second time due to the base transitions -->
-            <Setter Property="SweepAngle" Value="359.99" />
+        <Style Selector="views|HotspotCircle.activating">
+            <Style Selector="^ Arc.outer">
+                <!-- Sweeping arc animation -->
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <DoubleTransition
+                            Property="SweepAngle"
+                            Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
+                    </Transitions>
+                </Setter>
+                <Setter Property="SweepAngle" Value="360" />
+            </Style>
         </Style>
 
         <!-- DEACTIVATING animation -->
@@ -100,6 +111,9 @@
             </Style>
             <Style Selector="^ Arc.outer">
                 <Setter Property="SweepAngle" Value="360" />
+            </Style>
+            <Style Selector="^ Ellipse.full">
+                <Setter Property="StrokeThickness" Value="10" />
             </Style>
         </Style>
 
