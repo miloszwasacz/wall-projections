@@ -25,25 +25,55 @@ public class ImageViewModel : ViewModelBase, IImageViewModel, IDisposable
     /// </summary>
     private static readonly Uri FallbackImagePath = new("avares://WallProjections/Assets/fallback.png");
 
+    /// <summary>
+    /// If <see cref="ImageViewModel"/> is disposed.
+    /// </summary>
     private bool _isDisposed;
 
+    /// <summary>
+    /// Timer for the slideshow while slideshow is running using <see cref="StartSlideshow"/>.
+    /// </summary>
     private Timer? _slideShowTimer;
 
+    /// <summary>
+    /// Stores all current images.
+    /// </summary>
     private readonly ObservableCollection<Bitmap> _imageList;
 
+    /// <summary>
+    /// Backing field for <see cref="CurrentIndex"/>
+    /// </summary>
     private int _currentIndex;
 
+    /// <summary>
+    /// Backing field for <see cref="Image"/>
+    /// </summary>
     private readonly ObservableAsPropertyHelper<Bitmap?> _image;
 
-    private readonly ObservableAsPropertyHelper<bool> _hasImage;
+    /// <summary>
+    /// Backing field for <see cref="HasImages"/>
+    /// </summary>
+    private readonly ObservableAsPropertyHelper<bool> _hasImages;
 
-    private int ImageCount => _imageList.Count;
+    /// <summary>
+    /// The number of images currently added.
+    /// </summary>
+    public int ImageCount => _imageList.Count;
 
+    /// <summary>
+    /// The current index of the image to be displayed on the screen.
+    /// </summary>
     private int CurrentIndex
     {
         get => _currentIndex;
         set => this.RaiseAndSetIfChanged(ref _currentIndex, value);
     }
+    
+    /// <inheritdoc />
+    public Bitmap? Image => _image.Value;
+
+    /// <inheritdoc />
+    public bool HasImages => _hasImages.Value;
 
     /// <summary>
     /// Creates a new <see cref="ImageViewModel" />
@@ -56,27 +86,11 @@ public class ImageViewModel : ViewModelBase, IImageViewModel, IDisposable
 
         _imageList = new ObservableCollection<Bitmap>();
 
-        _image = this.WhenAnyValue(x => x.CurrentIndex, x => x._imageList.Count, (index, imageList) =>
-        {
-            if (ImageCount == 0)
-                return null;
-            
-            if (index >= ImageCount || index < 0)
-                return new Bitmap(AssetLoader.Open(FallbackImagePath));
-            
-            return _imageList[index];
-        }).ToProperty(this, x => x.Image);
-        
-        _hasImage = this.WhenAnyValue(x => x._imageList.Count, imageList => imageList > 0)
-            .ToProperty(this, x => x.HasImages);
+        _image = GetImageProperty();
+        _hasImages = GetHasImagesProperty();
     }
 
     /// <inheritdoc />
-    public Bitmap? Image => _image.Value;
-
-    /// <inheritdoc />
-    public bool HasImages => _hasImage.Value;
-
     public bool AddImages(IEnumerable<string> imagePaths)
     {
         var temp = new List<Bitmap>();
@@ -133,6 +147,8 @@ public class ImageViewModel : ViewModelBase, IImageViewModel, IDisposable
     /// <inheritdoc />
     public void ClearImages()
     {
+        StopSlideshow();
+        
         var copy = new List<Bitmap>(_imageList);
         _imageList.Clear();
         this.RaisePropertyChanged(nameof(_imageList));
@@ -142,7 +158,30 @@ public class ImageViewModel : ViewModelBase, IImageViewModel, IDisposable
             image.Dispose();
         }
     }
-
+    
+    /// <summary>
+    /// Creates a new observable property for <see cref="_image"/>
+    /// </summary>
+    private ObservableAsPropertyHelper<Bitmap?> GetImageProperty() => this
+        .WhenAnyValue(x => x.CurrentIndex, x => x._imageList.Count, (index, imageCount) =>
+        {
+            if (imageCount == 0)
+                return null;
+                
+            if (index >= imageCount || index < 0)
+                return new Bitmap(AssetLoader.Open(FallbackImagePath));
+                
+            return _imageList[index];
+        })
+        .ToProperty(this, x => x.Image);
+    
+    /// <summary>
+    /// Creates a new observable property for <see cref="_hasImages"/>
+    /// </summary>
+    private ObservableAsPropertyHelper<bool> GetHasImagesProperty() => this
+        .WhenAnyValue(x => x._imageList.Count, imageList => imageList > 0)
+        .ToProperty(this, x => x.HasImages);
+ 
 
     public void Dispose()
     {

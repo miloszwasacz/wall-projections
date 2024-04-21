@@ -29,7 +29,7 @@ public class MockImageViewModel : IImageViewModel
     /// <summary>
     /// The number of times <see cref="AddImages" /> has been called with empty <see cref="ImagePaths"/>
     /// </summary>
-    public int ShowCount => _imagePaths.Count;
+    public int ShowCount { get; private set; }
 
     /// <summary>
     /// The number of times <see cref="ClearImages" /> has been called
@@ -42,7 +42,12 @@ public class MockImageViewModel : IImageViewModel
 
     /// <inheritdoc />
     public bool HasImages { get; private set; }
-    
+
+    /// <summary>
+    /// The number of images currently added.
+    /// </summary>
+    public int ImageCount => _imagePaths.Count;
+
     /// <summary>
     /// <i>true</i> once <see cref="StartSlideshow"/> called,
     /// <i>false</i> at initialisation and if <see cref="StopSlideshow"/> called
@@ -58,6 +63,8 @@ public class MockImageViewModel : IImageViewModel
         var temp = imagePaths.ToList();
         if (temp.Any())
         {
+            if (HasImages == false)
+                ShowCount++;
             HasImages = true;
         }
         _imagePaths.AddRange(temp);
@@ -90,5 +97,6 @@ public class MockImageViewModel : IImageViewModel
         _previousImagePaths.Add(_imagePaths);
         _imagePaths.Clear();
         HasImages = false;
+        HideCount++;
     }
 }

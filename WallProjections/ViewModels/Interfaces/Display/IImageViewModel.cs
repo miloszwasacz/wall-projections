@@ -15,6 +15,11 @@ public interface IImageViewModel
     /// Whether or not the viewmodel has an image to display.
     /// </summary>
     public bool HasImages { get; }
+    
+    /// <summary>
+    /// The number of images currently imported.
+    /// </summary>
+    public int ImageCount { get; }
 
     /// <summary>
     /// Add images to the slideshow.
