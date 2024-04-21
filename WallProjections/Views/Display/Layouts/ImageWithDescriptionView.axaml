@@ -26,10 +26,23 @@
                    TextAlignment="Start"
                    FontSize="24" />
 
-        <Image Grid.Column="2" Grid.Row="1"
-               IsVisible="{Binding HasImages, FallbackValue=false}"
-               DataContext="{Binding ImageViewModel}"
-               Source="{Binding Image}" />
+        <TransitioningContentControl DataContext="{Binding ImageViewModel}" 
+                                     Content="{Binding Image}" 
+                                     IsVisible="{Binding HasImages, FallbackValue=false}" 
+                                     Grid.Column="2" Grid.Row="1"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch">
+            
+            <TransitioningContentControl.ContentTemplate>
+                <DataTemplate DataType="Bitmap">
+                    <Image Source="{Binding}"/>
+                </DataTemplate>
+            </TransitioningContentControl.ContentTemplate>
+            
+            <TransitioningContentControl.PageTransition>
+                <CrossFade Duration="0:0:0:1" />
+            </TransitioningContentControl.PageTransition>
+        </TransitioningContentControl>
 
     </Grid>
 

@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using Avalonia.Media.Imaging;
 
 namespace WallProjections.ViewModels.Interfaces.Display;
 
@@ -15,14 +17,26 @@ public interface IImageViewModel
     public bool HasImages { get; }
 
     /// <summary>
-    /// Shows the image at the given path.
+    /// Add images to the slideshow.
     /// </summary>
-    /// <param name="filePath">The path to the image.</param>
-    /// <returns>Whether or not the image was successfully shown.</returns>
-    public bool ShowImage(string filePath);
+    /// <param name="imagePaths">Image paths to add to slideshow.</param>
+    /// <returns><i>true</i> if all images are added successfully, <i>false</i> otherwise.</returns>
+    public bool AddImages(IEnumerable<string> imagePaths);
 
     /// <summary>
-    /// Hides the currently displayed image.
+    /// Start the slideshow of images imported.
     /// </summary>
-    public void HideImage();
+    /// <param name="interval">Time between images being updated.</param>
+    /// <exception cref="InvalidOperationException">If no images added to <see cref="IImageViewModel"/> (See <see cref="AddImages"/>)</exception>
+    public void StartSlideshow(TimeSpan? interval);
+
+    /// <summary>
+    /// Stop current slideshow from running.
+    /// </summary>
+    public void StopSlideshow();
+
+    /// <summary>
+    /// Removes all current images from the view model.
+    /// </summary>
+    public void ClearImages();
 }

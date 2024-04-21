@@ -1,5 +1,6 @@
 using WallProjections.Test.Mocks;
 using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Interfaces.Display;
 
 namespace WallProjections.Test.ViewModels.Display;
 
@@ -13,9 +14,9 @@ public class ImageViewModelTest
     public void HasImageTest()
     {
         var imageViewModel = new ImageViewModel(new MockLoggerFactory());
-        imageViewModel.ShowImage(ImagePath);
+        imageViewModel.AddImages(new List<string>{ImagePath});
         Assert.That(imageViewModel.HasImages, Is.True);
-        imageViewModel.HideImage();
+        imageViewModel.ClearImages();
         Assert.That(imageViewModel.HasImages, Is.False);
     }
 
@@ -23,13 +24,11 @@ public class ImageViewModelTest
     public void DisplayImageTest()
     {
         var imageViewModel = new ImageViewModel(new MockLoggerFactory());
-        Assert.Multiple(() =>
-            {
-                Assert.That(imageViewModel.ShowImage(ImagePath), Is.True);
-                Assert.That(imageViewModel.Image, Is.Not.Null);
-            }
-        );
-        imageViewModel.HideImage();
+
+        Assert.That(imageViewModel.AddImages(new List<string> { ImagePath }), Is.True);
+        Assert.That(imageViewModel.Image, Is.Not.Null);
+            
+        imageViewModel.ClearImages();
         Assert.That(imageViewModel.Image, Is.Null);
     }
 
@@ -38,7 +37,8 @@ public class ImageViewModelTest
     {
         const string path = "nonexistent.png";
         var imageViewModel = new ImageViewModel(new MockLoggerFactory());
-        Assert.That(imageViewModel.ShowImage(path), Is.False);
+        
+        Assert.That(imageViewModel.AddImages(new List<string>{path}), Is.False);
     }
 
     //TODO Add tests for throwing exceptions while loading images

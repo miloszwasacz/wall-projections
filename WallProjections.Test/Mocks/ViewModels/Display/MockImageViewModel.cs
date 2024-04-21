@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using FluentAvalonia.Core;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Interfaces.Display;
 
@@ -11,6 +12,8 @@ namespace WallProjections.Test.Mocks.ViewModels.Display;
 /// </summary>
 public class MockImageViewModel : IImageViewModel
 {
+    private readonly List<List<string>> _previousImagePaths = new();
+    
     /// <summary>
     /// The backing field for <see cref="ImagePaths" />
     /// </summary>
@@ -21,13 +24,15 @@ public class MockImageViewModel : IImageViewModel
     /// </summary>
     public IReadOnlyList<string> ImagePaths => _imagePaths;
 
+    public IReadOnlyList<IReadOnlyList<string>> PreviousImagePaths => _previousImagePaths;
+
     /// <summary>
-    /// The number of times <see cref="ShowImage" /> has been called
+    /// The number of times <see cref="AddImages" /> has been called with empty <see cref="ImagePaths"/>
     /// </summary>
     public int ShowCount => _imagePaths.Count;
 
     /// <summary>
-    /// The number of times <see cref="HideImage" /> has been called
+    /// The number of times <see cref="ClearImages" /> has been called
     /// </summary>
     public int HideCount { get; private set; }
 
@@ -37,25 +42,53 @@ public class MockImageViewModel : IImageViewModel
 
     /// <inheritdoc />
     public bool HasImages { get; private set; }
+    
+    /// <summary>
+    /// <i>true</i> once <see cref="StartSlideshow"/> called,
+    /// <i>false</i> at initialisation and if <see cref="StopSlideshow"/> called
+    /// </summary>
+    public bool IsSlideshowRunning { get; private set; }
 
     /// <summary>
-    /// Increases the number of times <see cref="ShowImage" /> has been called
-    /// and adds <paramref name="filePath" /> to <see cref="ImagePaths" />
+    /// Adds list of new images to current list of images
     /// </summary>
-    /// <returns>True</returns>
-    public bool ShowImage(string filePath)
+    /// <param name="imagePaths">List of images to add to current list</param>
+    public bool AddImages(IEnumerable<string> imagePaths)
     {
-        _imagePaths.Add(filePath);
-        HasImages = true;
+        var temp = imagePaths.ToList();
+        if (temp.Any())
+        {
+            HasImages = true;
+        }
+        _imagePaths.AddRange(temp);
+
         return true;
     }
 
     /// <summary>
-    /// Increases the number of times <see cref="HideImage" /> has been called
+    /// Sets the start slideshow bool to true
     /// </summary>
-    public void HideImage()
+    /// <param name="interval"></param>
+    public void StartSlideshow(TimeSpan? interval)
     {
-        HideCount++;
+        IsSlideshowRunning = true;
+    }
+
+    /// <summary>
+    /// Sets the stop slideshow bool to false
+    /// </summary>
+    public void StopSlideshow()
+    {
+        IsSlideshowRunning = false;
+    }
+
+    /// <summary>
+    /// Increments the <see cref="HideCount"/> by 1, and moves current images to <see cref="PreviousImagePaths"/>
+    /// </summary>
+    public void ClearImages()
+    {
+        _previousImagePaths.Add(_imagePaths);
+        _imagePaths.Clear();
         HasImages = false;
     }
 }
