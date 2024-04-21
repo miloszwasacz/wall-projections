@@ -2,12 +2,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="WallProjections.App"
              xmlns:local="using:WallProjections"
+             xmlns:converters="using:WallProjections.Views.Converters"
              RequestedThemeVariant="Light">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
+    
+    <Application.Resources>
+        <!-- Static resources  -->
+        <converters:StateConverter x:Key="StateConverter" />
+    </Application.Resources>
 
     <Application.Styles>
         <FluentTheme />

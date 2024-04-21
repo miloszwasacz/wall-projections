@@ -307,7 +307,7 @@ public class ViewModelProviderTest
             Assert.That(hotspotProjectionViewModel.X, Is.EqualTo(hotspot.Position.X));
             Assert.That(hotspotProjectionViewModel.Y, Is.EqualTo(hotspot.Position.Y));
             Assert.That(hotspotProjectionViewModel.D, Is.EqualTo(hotspot.Position.R * 2));
-            Assert.That(hotspotProjectionViewModel.IsActive, Is.False);
+            Assert.That(hotspotProjectionViewModel.State, Is.EqualTo(HotspotState.None));
         });
     }
 

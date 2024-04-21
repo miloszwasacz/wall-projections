@@ -22,26 +22,18 @@ public interface IHotspotProjectionViewModel : IPosition
     public double D { get; }
 
     /// <summary>
-    /// Whether the hotspot is being activated
+    /// The current state of the hotspot projection
     /// </summary>
-    /// <remarks>
-    /// Note that mutating <see cref="IsActive" /> or <see cref="IsDeactivating" /> does not change this property
-    /// </remarks>
-    public bool IsActivating { get; set; }
+    public HotspotState State { get; set; }
+}
 
-    /// <summary>
-    /// Whether the hotspot is being deactivated
-    /// </summary>
-    /// <remarks>
-    /// Note that mutating <see cref="IsActive" /> or <see cref="IsActivating" /> does not change this property
-    /// </remarks>
-    public bool IsDeactivating { get; set; }
-
-    /// <summary>
-    /// Whether the hotspot is fully activated
-    /// </summary>
-    /// <remarks>
-    /// Note that mutating <see cref="IsActivating" /> or <see cref="IsDeactivating" /> does not change this property
-    /// </remarks>
-    public bool IsActive { get; set; }
+/// <summary>
+/// An enum to hold the current state of the hotspot, to be used to trigger the animations
+/// </summary>
+public enum HotspotState
+{
+    None,
+    Activating,
+    Active,
+    Deactivating
 }

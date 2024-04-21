@@ -8,19 +8,9 @@ namespace WallProjections.ViewModels.SecondaryScreens;
 public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewModel
 {
     /// <summary>
-    /// The backing field for <see cref="IsActivating" />
+    /// The backing field for <see cref="State" />.
     /// </summary>
-    private bool _isActivating;
-
-    /// <summary>
-    /// The backing field for <see cref="IsDeactivating" />
-    /// </summary>
-    private bool _isDeactivating;
-
-    /// <summary>
-    /// The backing field for <see cref="IsActive" />
-    /// </summary>
-    private bool _isActive;
+    private HotspotState _state;
 
     /// <inheritdoc />
     public int Id { get; }
@@ -45,24 +35,10 @@ public class HotspotProjectionViewModel : ViewModelBase, IHotspotProjectionViewM
     public double D { get; }
 
     /// <inheritdoc />
-    public bool IsActivating
+    public HotspotState State
     {
-        get => _isActivating;
-        set => this.RaiseAndSetIfChanged(ref _isActivating, value);
-    }
-
-    /// <inheritdoc />
-    public bool IsDeactivating
-    {
-        get => _isDeactivating;
-        set => this.RaiseAndSetIfChanged(ref _isDeactivating, value);
-    }
-
-    /// <inheritdoc />
-    public bool IsActive
-    {
-        get => _isActive;
-        set => this.RaiseAndSetIfChanged(ref _isActive, value);
+        get => _state;
+        set => this.RaiseAndSetIfChanged(ref _state, value);
     }
 
     /// <summary>

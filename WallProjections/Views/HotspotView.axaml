@@ -22,9 +22,7 @@
         <!-- Template for Display -->
         <DataTemplate DataType="{x:Type vm:IHotspotProjectionViewModel}">
             <views:HotspotCircle Diameter="{Binding D}"
-                                 IsActivating="{Binding IsActivating}"
-                                 IsDeactivating="{Binding IsDeactivating}"
-                                 IsActivated="{Binding IsActive}" />
+                                 HotspotState="{Binding State}" />
         </DataTemplate>
 
         <!-- Template for Position Editor -->
@@ -49,14 +47,6 @@
             <Setter Property="Canvas.Top" Value="{Binding Y}" />
         </Style>
 
-    </ItemsControl.Styles>
-
-    <!-- Styles relating to hotspot (ellipse) activation -->
-    <ItemsControl.Styles>
-        <Style Selector="views|HotspotCircle">
-            <Setter Property="Fill" Value="{Binding $parent[views:HotspotView].HotspotFill}" />
-            <Setter Property="Stroke" Value="{Binding $parent[views:HotspotView].HotspotStroke}" />
-        </Style>
     </ItemsControl.Styles>
 
     <!-- Transitions for the whole ItemsControl -->
