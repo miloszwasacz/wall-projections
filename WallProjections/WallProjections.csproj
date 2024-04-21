@@ -23,6 +23,10 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
+    
+    <ItemGroup>
+        <None Include="$(Pkgpython)\tools\**\*" Link="python\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
+    </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'Release' OR '$(RuntimeIdentifier)' != ''">
         <Content Include="Scripts\Platform\Windows\*.py" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
@@ -54,12 +58,16 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
+
+    <Target Name="SetUpPython" BeforeTargets="GenerateArUcos" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+<!--        TODO: Use requirements.txt file when file created.-->
+        <Exec Command="$(Pkgpython)\tools\python -m pip install &quot;mediapipe==0.10.9&quot; &quot;opencv-python==4.9.0.80&quot; pygrabber &quot;numpy==1.26.4&quot; find-libpython"/>
+    </Target>
     
     <Target Name="GenerateArUcos" BeforeTargets="PrepareForBuild">
-        <Exec Command="python Scripts\Internal\aruco_generator.py" Condition="!Exists('$(AppDataDir)\WallProjections\VirtualEnv') AND $([MSBuild]::IsOsPlatform('Windows'))"/>
+        <Exec Command="$(Pkgpython)\tools\python Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
         <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
         <Exec Command="$(AppDataDir)/WallProjections/VirtualEnv/bin/python Scripts/Internal/aruco_generator.py" Condition="Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
-        <Exec Command="$(AppDataDir)\WallProjections\VirtualEnv\Scripts\python Scripts\Internal\aruco_generator.py" Condition="Exists('$(AppDataDir)\WallProjections\VirtualEnv') AND $([MSBuild]::IsOsPlatform('Windows'))"/>
         <ItemGroup>
             <AvaloniaResource Include="Assets\**"/>
         </ItemGroup>
@@ -80,5 +88,6 @@
         <PackageReference Include="pythonnet" Version="3.0.3"/>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+        <PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="python" Version="3.11.9"/>
     </ItemGroup>
 </Project>
