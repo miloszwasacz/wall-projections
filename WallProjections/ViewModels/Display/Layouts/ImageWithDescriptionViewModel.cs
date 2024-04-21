@@ -56,7 +56,7 @@ public class ImageWithDescriptionViewModel : Layout
         Description = description;
         ImageViewModel = vmProvider.GetImageViewModel();
         ImageViewModel.AddImages(imagePaths);
-        ImageViewModel.StartSlideshow(TimeSpan.FromSeconds(5));
+        ImageViewModel.StartSlideshow(TimeSpan.FromSeconds(20));
         DeactivateAfterAsync(deactivateAfter ?? DefaultDeactivationTime);
     }
 

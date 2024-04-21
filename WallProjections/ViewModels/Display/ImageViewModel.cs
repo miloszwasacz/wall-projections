@@ -119,7 +119,7 @@ public class ImageViewModel : ViewModelBase, IImageViewModel, IDisposable
     }
 
     /// <inheritdoc />
-    public void StartSlideshow(TimeSpan? interval = null)
+    public void StartSlideshow(TimeSpan interval)
     {
         if (_slideShowTimer is not null || ImageCount <= 1)
             return;
@@ -127,12 +127,10 @@ public class ImageViewModel : ViewModelBase, IImageViewModel, IDisposable
         if (ImageCount == 0)
             throw new InvalidOperationException("Cannot slideshow with no images");
         
-        // 20 Seconds by default for slideshow.
-        var i = interval ?? TimeSpan.FromSeconds(20);
         _slideShowTimer = new Timer(_ =>
         {
             CurrentIndex = (CurrentIndex + 1) % ImageCount;
-        }, null, i, i);
+        }, null, interval, interval);
     }
 
     /// <inheritdoc />

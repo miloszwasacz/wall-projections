@@ -33,7 +33,7 @@ public interface IImageViewModel
     /// </summary>
     /// <param name="interval">Time between images being updated.</param>
     /// <exception cref="InvalidOperationException">If no images added to <see cref="IImageViewModel"/> (See <see cref="AddImages"/>)</exception>
-    public void StartSlideshow(TimeSpan? interval);
+    public void StartSlideshow(TimeSpan interval);
 
     /// <summary>
     /// Stop current slideshow from running.
