@@ -55,6 +55,11 @@ public class MockImageViewModel : IImageViewModel
     public bool IsSlideshowRunning { get; private set; }
 
     /// <summary>
+    /// The interval for the currently running slideshow
+    /// </summary>
+    public TimeSpan? SlideshowInterval { get; private set; }
+
+    /// <summary>
     /// Adds list of new images to current list of images
     /// </summary>
     /// <param name="imagePaths">List of images to add to current list</param>
@@ -73,12 +78,13 @@ public class MockImageViewModel : IImageViewModel
     }
 
     /// <summary>
-    /// Sets the start slideshow bool to true
+    /// Sets the start slideshow bool to true and store interval.
     /// </summary>
-    /// <param name="interval"></param>
+    /// <param name="interval">The current interval for the slideshow stored in <see cref="SlideshowInterval"/></param>
     public void StartSlideshow(TimeSpan? interval)
     {
         IsSlideshowRunning = true;
+        SlideshowInterval = interval;
     }
 
     /// <summary>
@@ -87,6 +93,7 @@ public class MockImageViewModel : IImageViewModel
     public void StopSlideshow()
     {
         IsSlideshowRunning = false;
+        SlideshowInterval = null;
     }
 
     /// <summary>
