@@ -19,7 +19,7 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
-        <Content Include="Scripts\**\*"  Exclude="Scripts\Internal\**;Scripts\Platform\**">
+        <Content Include="Scripts\**\*" Exclude="Scripts\Internal\**;Scripts\Platform\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
