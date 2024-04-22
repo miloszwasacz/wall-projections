@@ -15,20 +15,38 @@ logging.basicConfig(level=logging.INFO)
 TOLERANCE = 0.001
 
 
+def gen_random_dict(size: int, mul: int = 50) -> dict[int, tuple[np.float32, np.float32]]:
+    return {i: (np.float32(np.random.randn() * mul), np.float32(np.random.randn() * mul)) for i in range(size)}
+
+
+def gen_random_t_matrix(mul: int = 10) -> np.ndarray:
+    return (np.random.rand(3, 3) * mul).astype(np.float32)
+
+
+def transform(vect: (np.float32, np.float32), t_matrix: np.ndarray) -> (np.float32, np.float32):
+    rotated_vect = np.array(vect, np.float32).reshape(-1, 1, 2)
+    transformed_vect = cv2.transform(rotated_vect, t_matrix)[0][0]
+    return np.float32(transformed_vect[0]), np.float32(transformed_vect[1])
+
+
 def as_numpy_dict(dictionary: Union[dict[int, tuple[int, int]], dict[int, tuple[float, float]]]) -> dict[
     int, tuple[np.float32, np.float32]]:
     return {key: (np.float32(value[0]), np.float32(value[1])) for key, value in dictionary.items()}
 
 
+def as_python_dict(dictionary: Union[dict[int, tuple[np.float32, np.float32]], dict[int, tuple[float, float]]]) -> dict[
+    int, tuple[float, float]]:
+    return {key: (float(value[0]), float(value[1])) for key, value in dictionary.items()}
+
+
 def matrix_equivalent(a: np.ndarray, b: np.ndarray, tolerance: float = TOLERANCE) -> bool:
-    """Transforms a number of random vectors by both matrix a and b. Checks transformed vectors are equivallent"""
-    vector_count = 10
-    for _ in range(vector_count):
-        random_vector = np.random.rand(2)
-        rotated_vector = np.array(random_vector, np.float32).reshape(-1, 1, 2)
-        transformed_vector_a = cv2.transform(rotated_vector, a)[0][0]
-        transformed_vector_b = cv2.transform(rotated_vector, b)[0][0]
-        if not np.allclose(transformed_vector_a, transformed_vector_b, tolerance):
+    """Transforms a number of random vectors by both matrix a and b. Checks transformed vectors are equivalent"""
+    point_dict = gen_random_dict(10)
+    for point in point_dict.values():
+        transformed_point_a = transform(point, a)
+        transformed_point_b = transform(point, b)
+        if not np.allclose(transformed_point_a, transformed_point_b, tolerance):
+            logging.error(f"{a} not equivalent to {b}")
             return False
     return True
 
@@ -61,27 +79,23 @@ class TestDetectArUcos(unittest.TestCase):
         self.assertTrue(True)
 
 
-# TESTGETTRANSFORMATIONMATRIX
-
-DICT = {
-    1: (7.0, 1.0),
-    2: (5.3, 7.9),
-    3: (8.5, 7.9),
-    4: (3.2, 2.2)
-}
+REPEAT_COUNT = 5
 
 
 class TestGetTransformationMatrix(unittest.TestCase):
-    def test_identical_points_return_identity(self):
-        """
-        Test that passing in the same dictionary twice returns the identity matrix (no transformation)
-        """
-        t_matrix = Calibrator._get_transformation_matrix(as_numpy_dict(DICT), DICT)
-        self.assertTrue(matrix_equivalent(t_matrix, np.identity(3)))
+    def test_identical_matrix_return_identity(self):
+        for _ in range(REPEAT_COUNT):
+            points = gen_random_dict(50)
+            t_matrix = Calibrator._get_transformation_matrix(points, as_python_dict(points))
+            self.assertTrue(matrix_equivalent(t_matrix, np.identity(3)))
 
-
-# TEST
-
+    def test_recalculate_matrix(self):
+        for _ in range(REPEAT_COUNT):
+            points = gen_random_dict(50)
+            t_matrix = gen_random_t_matrix()
+            transformed_points = {key: transform(point, t_matrix) for key, point in points.items()}
+            recalculated_matrix = Calibrator._get_transformation_matrix(points, as_python_dict(transformed_points))
+            self.assertTrue(matrix_equivalent(t_matrix, recalculated_matrix))
 class TestTransformations(unittest.TestCase):
 
     def test_norm_to_proj_to_norm(self):
