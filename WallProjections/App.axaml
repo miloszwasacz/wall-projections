@@ -9,15 +9,52 @@
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
-    
+
     <Application.Resources>
-        <!-- Static resources  -->
+        <!-- Converters -->
         <converters:StateConverter x:Key="StateConverter" />
     </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light"
+                                       Accent="#ff005eb7"
+                                       AltHigh="White" AltLow="White" AltMedium="White"
+                                       AltMediumHigh="White" AltMediumLow="White"
+                                       BaseHigh="Black" BaseLow="#4df9f9f9" BaseMedium="#b8adadad"
+                                       BaseMediumHigh="#ff7a7a7a" BaseMediumLow="#db939393"
+                                       ChromeAltLow="#ff7a7a7a"
+                                       ChromeBlackHigh="Black" ChromeBlackLow="#4df9f9f9"
+                                       ChromeBlackMedium="#ff7a7a7a" ChromeBlackMediumLow="#b8adadad"
+                                       ChromeDisabledHigh="#4df9f9f9" ChromeDisabledLow="#b8adadad"
+                                       ChromeGray="#db939393" ChromeWhite="White"
+                                       ChromeHigh="#4df9f9f9" ChromeLow="#fffdfdfd"
+                                       ChromeMedium="#dbfcfcfc" ChromeMediumLow="#fffdfdfd"
+                                       ListLow="#09000000" ListMedium="#06000000"
+                                       RegionColor="#fff3f3f3" />
+                <ColorPaletteResources x:Key="Dark"
+                                       Accent="#ff60ccfe"
+                                       AltHigh="Black" AltLow="Black" AltMedium="Black"
+                                       AltMediumHigh="Black" AltMediumLow="Black"
+                                       BaseHigh="White" BaseLow="#4df9f9f9" BaseMedium="#dbfcfcfc"
+                                       BaseMediumHigh="#fffdfdfd" BaseMediumLow="#94fbfbfb"
+                                       ChromeAltLow="#fffdfdfd"
+                                       ChromeBlackHigh="Black" ChromeBlackLow="#fffdfdfd"
+                                       ChromeBlackMedium="Black" ChromeBlackMediumLow="Black"
+                                       ChromeDisabledHigh="#4df9f9f9" ChromeDisabledLow="#dbfcfcfc"
+                                       ChromeGray="#b8fbfbfb" ChromeWhite="Black"
+                                       ChromeHigh="#b8fbfbfb" ChromeLow="#db939393"
+                                       ChromeMedium="#b8adadad" ChromeMediumLow="#71e0e0e0"
+                                       ListLow="#0fffffff" ListMedium="#0affffff"
+                                       RegionColor="#ff0a0a0a" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+
         <StyleInclude Source="avares://FluentAvalonia.ProgressRing/Styling/Controls/ProgressRing.axaml" />
+        <StyleInclude Source="avares://WallProjections/Styles/General.axaml" />
+        <StyleInclude Source="avares://WallProjections/Styles/Buttons.axaml" />
+        <StyleInclude Source="avares://WallProjections/Styles/Card.axaml" />
         <StyleInclude Source="avares://WallProjections/Icons.axaml" />
 
         <!-- Templated Controls -->

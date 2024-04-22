@@ -1,0 +1,65 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+
+                <ResourceDictionary x:Key="Default">
+                    <StaticResource x:Key="ButtonBackground" ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
+                    <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+
+                    <StaticResource x:Key="RepeatButtonBackground"
+                                    ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
+                    <StaticResource x:Key="RepeatButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+
+                    <StaticResource x:Key="ToggleButtonBackground"
+                                    ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
+                    <StaticResource x:Key="ToggleButtonBackgroundIndeterminate"
+                                    ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
+                    <StaticResource x:Key="ToggleButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ToggleButtonForegroundIndeterminateDisabled"
+                                    ResourceKey="SystemChromeDisabledLowColor" />
+
+                    <StaticResource x:Key="HyperlinkButtonForegroundDisabled"
+                                    ResourceKey="SystemChromeDisabledLowColor" />
+
+                    <StaticResource x:Key="ComboBoxItemForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ComboBoxForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ComboBoxDropDownGlyphForegroundDisabled"
+                                    ResourceKey="SystemChromeDisabledLowColor" />
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Dark">
+                    <StaticResource x:Key="ButtonBackground" ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
+                    <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+
+                    <StaticResource x:Key="RepeatButtonBackground"
+                                    ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
+                    <StaticResource x:Key="RepeatButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+
+                    <StaticResource x:Key="ToggleButtonBackground"
+                                    ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
+                    <StaticResource x:Key="ToggleButtonBackgroundIndeterminate"
+                                    ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
+                    <StaticResource x:Key="ToggleButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ToggleButtonForegroundIndeterminateDisabled"
+                                    ResourceKey="SystemChromeDisabledLowColor" />
+
+                    <StaticResource x:Key="HyperlinkButtonForegroundDisabled"
+                                    ResourceKey="SystemChromeDisabledLowColor" />
+
+                    <StaticResource x:Key="ComboBoxItemForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ComboBoxForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ComboBoxDropDownGlyphForegroundDisabled"
+                                    ResourceKey="SystemChromeDisabledLowColor" />
+                </ResourceDictionary>
+
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <Style Selector="Button.accent">
+        <!-- The class has already been defined by the FluentTheme - this is just for the IDE -->
+    </Style>
+</Styles>
