@@ -13,7 +13,7 @@ using WallProjections.ViewModels.Interfaces.Display;
 namespace WallProjections.ViewModels.Display;
 
 /// <inheritdoc cref="IImageViewModel" />
-public class ImageViewModel : ViewModelBase, IImageViewModel, IDisposable
+public class ImageViewModel : ViewModelBase, IImageViewModel
 {
     /// <summary>
     /// A logger for this class
@@ -119,18 +119,20 @@ public class ImageViewModel : ViewModelBase, IImageViewModel, IDisposable
     }
 
     /// <inheritdoc />
-    public void StartSlideshow(TimeSpan interval)
+    public void StartSlideshow(TimeSpan? interval = null)
     {
         if (_slideShowTimer is not null || ImageCount <= 1)
             return;
         
         if (ImageCount == 0)
             throw new InvalidOperationException("Cannot slideshow with no images");
+
+        var i = interval ?? IImageViewModel.DefaultImageInterval;
         
         _slideShowTimer = new Timer(_ =>
         {
             CurrentIndex = (CurrentIndex + 1) % ImageCount;
-        }, null, interval, interval);
+        }, null, i, i);
     }
 
     /// <inheritdoc />

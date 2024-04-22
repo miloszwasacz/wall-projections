@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
@@ -40,6 +39,7 @@ public class ImagePlusVideoWithDescriptionViewModel : Layout
     /// <param name="hotspotId">The id of the hotspot.</param>
     /// <param name="title">The title of the hotspot.</param>
     /// <param name="description">The description of the hotspot.</param>
+    /// <param name="imagePaths">The paths to the images to show.</param>
     /// <param name="videoPaths">The paths to the videos to play.</param>
     /// <param name="deactivateAfter">
     /// The time after which the layout should deactivate.
@@ -63,7 +63,7 @@ public class ImagePlusVideoWithDescriptionViewModel : Layout
 
         ImageViewModel = vmProvider.GetImageViewModel();
         ImageViewModel.AddImages(imagePaths);
-        ImageViewModel.StartSlideshow(TimeSpan.FromSeconds(20));
+        ImageViewModel.StartSlideshow();
 
         VideoViewModel = vmProvider.GetVideoViewModel();
         VideoViewModel.AllVideosFinished += (_, _) => DeactivateAfterAsync(deactivateAfter ?? DefaultDeactivationTime);

@@ -7,6 +7,11 @@ namespace WallProjections.ViewModels.Interfaces.Display;
 public interface IImageViewModel : IDisposable
 {
     /// <summary>
+    /// The time to show each image before moving to the next image.
+    /// </summary>
+    public static TimeSpan DefaultImageInterval => TimeSpan.FromSeconds(20);
+    
+    /// <summary>
     /// The image to be displayed.
     /// </summary>
     public Bitmap? Image { get; }
@@ -31,9 +36,9 @@ public interface IImageViewModel : IDisposable
     /// <summary>
     /// Start the slideshow of images imported.
     /// </summary>
-    /// <param name="interval">Time between images being updated.</param>
+    /// <param name="interval">Time between images being updated. If empty, then interval is <see cref="DefaultImageInterval"/></param>
     /// <exception cref="InvalidOperationException">If no images added to <see cref="IImageViewModel"/> (See <see cref="AddImages"/>)</exception>
-    public void StartSlideshow(TimeSpan interval);
+    public void StartSlideshow(TimeSpan? interval = null);
 
     /// <summary>
     /// Stop current slideshow from running.

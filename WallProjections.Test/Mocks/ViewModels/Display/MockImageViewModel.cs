@@ -87,7 +87,7 @@ public class MockImageViewModel : IImageViewModel
     /// Sets the start slideshow bool to true and store interval.
     /// </summary>
     /// <param name="interval">The current interval for the slideshow stored in <see cref="SlideshowInterval"/></param>
-    public void StartSlideshow(TimeSpan interval)
+    public void StartSlideshow(TimeSpan? interval)
     {
         IsSlideshowRunning = true;
         SlideshowInterval = interval;
