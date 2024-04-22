@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -92,7 +93,7 @@ public partial class EditorWindow : Window
     /// </summary>
     private void MediaEditor_OnOpenExplorerFailed(object? sender, RoutedEventArgs e)
     {
-        ShowToast(ExplorerErrorMessage);
+        ShowToast(ExplorerErrorMessage, NotificationType.Error);
     }
 
     /// <summary>
@@ -258,7 +259,10 @@ public partial class EditorWindow : Window
         async Task Import(string configFile)
         {
             var success = await WithLoadingToast(ImportInProgressMessage, () => vm.ImportConfig(configFile));
-            ShowToast(success ? ImportSuccessMessage : ImportErrorMessage);
+            ShowToast(
+                success ? ImportSuccessMessage : ImportErrorMessage,
+                success ? NotificationType.Success : NotificationType.Error
+            );
         }
     });
 
@@ -282,7 +286,10 @@ public partial class EditorWindow : Window
 
         var folder = folders[0].Path.LocalPath;
         var success = await WithLoadingToast(ExportInProgressMessage, () => vm.ExportConfig(folder));
-        ShowToast(success ? ExportSuccessMessage : ExportErrorMessage);
+        ShowToast(
+            success ? ExportSuccessMessage : ExportErrorMessage,
+            success ? NotificationType.Success : NotificationType.Error
+        );
     });
 
     /// <summary>
@@ -304,7 +311,10 @@ public partial class EditorWindow : Window
         if (result == Result.Confirmed)
         {
             var success = await WithLoadingToast(CalibrationInProgressMessage, vm.CalibrateCamera);
-            ShowToast(success ? CalibrationSuccessMessage : CalibrationErrorMessage);
+            ShowToast(
+                success ? CalibrationSuccessMessage : CalibrationErrorMessage,
+                success ? NotificationType.Success : NotificationType.Error
+            );
         }
         else
             vm.HideCalibrationMarkers();
@@ -400,7 +410,7 @@ public partial class EditorWindow : Window
 
         // An error occurred while saving
         if (!success)
-            ShowToast(SaveErrorMessage);
+            ShowToast(SaveErrorMessage, NotificationType.Error);
 
         return success;
     }
@@ -507,11 +517,13 @@ public partial class EditorWindow : Window
     /// Shows a toast with the specified message.
     /// </summary>
     /// <param name="message">The text to show in the toast.</param>
+    /// <param name="type">The type of the notification.</param>
     /// <param name="duration">The duration for which the toast should be shown.</param>
-    private void ShowToast(string message, Toast.ShowDuration duration = Toast.ShowDuration.Short)
+    private void ShowToast(string message, NotificationType type,
+        Toast.ShowDuration duration = Toast.ShowDuration.Short)
     {
         Toast.Text = message;
-        Toast.Show(duration);
+        Toast.Show(duration, type);
     }
 
     /// <summary>
