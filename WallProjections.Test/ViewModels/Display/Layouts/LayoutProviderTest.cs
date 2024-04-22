@@ -25,7 +25,8 @@ public class LayoutProviderTest
         {
             typeof(DescriptionViewModel.Factory),
             typeof(ImageWithDescriptionViewModel.Factory),
-            typeof(VideoWithDescriptionViewModel.Factory)
+            typeof(VideoWithDescriptionViewModel.Factory),
+            typeof(ImagePlusVideoWithDescriptionViewModel.Factory)
         };
 
         var layoutProvider = new LayoutProvider(new MockLoggerFactory());

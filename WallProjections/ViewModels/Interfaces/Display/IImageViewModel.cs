@@ -4,7 +4,7 @@ using Avalonia.Media.Imaging;
 
 namespace WallProjections.ViewModels.Interfaces.Display;
 
-public interface IImageViewModel
+public interface IImageViewModel : IDisposable
 {
     /// <summary>
     /// The image to be displayed.
@@ -15,7 +15,7 @@ public interface IImageViewModel
     /// Whether or not the viewmodel has an image to display.
     /// </summary>
     public bool HasImages { get; }
-    
+
     /// <summary>
     /// The number of images currently imported.
     /// </summary>

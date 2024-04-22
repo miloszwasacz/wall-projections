@@ -13,7 +13,7 @@ namespace WallProjections.Test.Mocks.ViewModels.Display;
 public class MockImageViewModel : IImageViewModel
 {
     private readonly List<List<string>> _previousImagePaths = new();
-    
+
     /// <summary>
     /// The backing field for <see cref="ImagePaths" />
     /// </summary>
@@ -35,6 +35,11 @@ public class MockImageViewModel : IImageViewModel
     /// The number of times <see cref="ClearImages" /> has been called
     /// </summary>
     public int HideCount { get; private set; }
+
+    /// <summary>
+    /// The number of times <see cref="Dispose"/> has been called
+    /// </summary>
+    public int DisposeCount { get; private set; }
 
     public Bitmap? Image => _imagePaths.LastOrDefault() is not null
         ? new Bitmap(PixelFormats.Gray2, AlphaFormat.Opaque, IntPtr.Zero, PixelSize.Empty, Vector.Zero, 0)
@@ -72,6 +77,7 @@ public class MockImageViewModel : IImageViewModel
                 ShowCount++;
             HasImages = true;
         }
+
         _imagePaths.AddRange(temp);
 
         return true;
@@ -105,5 +111,13 @@ public class MockImageViewModel : IImageViewModel
         _imagePaths.Clear();
         HasImages = false;
         HideCount++;
+    }
+
+    /// <summary>
+    /// Increases the number of times
+    /// </summary>
+    public void Dispose()
+    {
+        DisposeCount++;
     }
 }
