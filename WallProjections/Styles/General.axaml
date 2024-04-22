@@ -20,4 +20,8 @@
         </Setter>
     </Style>
 
+    <Style Selector="Separator">
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    </Style>
+
 </Styles>

@@ -53,8 +53,7 @@
 
         <StyleInclude Source="avares://FluentAvalonia.ProgressRing/Styling/Controls/ProgressRing.axaml" />
         <StyleInclude Source="avares://WallProjections/Styles/General.axaml" />
-        <StyleInclude Source="avares://WallProjections/Styles/Buttons.axaml" />
-        <StyleInclude Source="avares://WallProjections/Styles/Card.axaml" />
+        <StyleInclude Source="avares://WallProjections/Styles/Controls.axaml" />
         <StyleInclude Source="avares://WallProjections/Icons.axaml" />
 
         <!-- Templated Controls -->
