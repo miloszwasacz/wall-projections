@@ -14,7 +14,7 @@
         <converters:CornerRadiusMultiConverter x:Key="CornerRadiusMultiConverter" />
     </Styles.Resources>
 
-    <Style Selector="ChromeOverlayLayer:disabled">
+    <Style Selector=":hasoverlay ChromeOverlayLayer">
         <Setter Property="Background">
             <SolidColorBrush Color="#4D000000" />
         </Setter>
