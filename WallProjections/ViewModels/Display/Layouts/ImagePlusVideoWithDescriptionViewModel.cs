@@ -7,16 +7,17 @@ using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
 namespace WallProjections.ViewModels.Display.Layouts;
 
-//TODO Add code generation for multiple viewmodels that have different number of images
-/// <summary>
-/// A viewmodel for a view that displays an image with a title and description.
-/// </summary>
-public class ImageWithDescriptionViewModel : Layout, IDisposable
+public class ImagePlusVideoWithDescriptionViewModel : Layout
 {
     /// <summary>
-    /// Image view model used to show image
+    /// Image view model used to show images
     /// </summary>
     public IImageViewModel ImageViewModel { get; }
+
+    /// <summary>
+    /// Video view model to show videos
+    /// </summary>
+    public IVideoViewModel VideoViewModel { get; }
 
     /// <summary>
     /// Title for hotspot
@@ -30,64 +31,77 @@ public class ImageWithDescriptionViewModel : Layout, IDisposable
 
     // ReSharper disable once MemberCanBePrivate.Global
     /// <summary>
-    /// Creates a new <see cref="ImageWithDescriptionViewModel" />
+    /// Creates a new <see cref="VideoWithDescriptionViewModel"/>
     /// with the given <paramref name="title" />, <paramref name="description" />,
-    /// and paths to the images that <see cref="ImageViewModel" /> will show.
+    /// and paths to the videos that <see cref="VideoViewModel" /> will play.
     /// </summary>
-    /// <param name="vmProvider">The <see cref="IViewModelProvider" /> to get the <see cref="IImageViewModel" />.</param>
+    /// <param name="vmProvider">The <see cref="IViewModelProvider" /> to get the <see cref="IVideoViewModel" />.</param>
     /// <param name="hotspotId">The id of the hotspot.</param>
     /// <param name="title">The title of the hotspot.</param>
     /// <param name="description">The description of the hotspot.</param>
     /// <param name="imagePaths">The paths to the images to show.</param>
+    /// <param name="videoPaths">The paths to the videos to play.</param>
     /// <param name="deactivateAfter">
     /// The time after which the layout should deactivate.
     /// If <i>null</i>, the layout will deactivate after the <see cref="Layout.DefaultDeactivationTime">default time</see>.
     /// </param>
-    public ImageWithDescriptionViewModel(
+    /// <remarks>
+    /// This layout will deactivate after the last video finishes playing (plus <paramref name="deactivateAfter" />).
+    /// </remarks>
+    public ImagePlusVideoWithDescriptionViewModel(
         IViewModelProvider vmProvider,
         int hotspotId,
         string title,
         string description,
         IEnumerable<string> imagePaths,
+        IEnumerable<string> videoPaths,
         TimeSpan? deactivateAfter = null
     ) : base(hotspotId)
     {
         Title = title;
         Description = description;
+
         ImageViewModel = vmProvider.GetImageViewModel();
         ImageViewModel.AddImages(imagePaths);
         ImageViewModel.StartSlideshow();
-        DeactivateAfterAsync(deactivateAfter ?? DefaultDeactivationTime);
+
+        VideoViewModel = vmProvider.GetVideoViewModel();
+        VideoViewModel.AllVideosFinished += (_, _) => DeactivateAfterAsync(deactivateAfter ?? DefaultDeactivationTime);
+        VideoViewModel.PlayVideos(videoPaths);
     }
 
     public void Dispose()
     {
         ImageViewModel.Dispose();
+        VideoViewModel.Dispose();
+        GC.SuppressFinalize(this);
     }
+
 
     // ReSharper disable once UnusedType.Global
     /// <summary>
-    /// A factory for creating <see cref="ImageWithDescriptionViewModel" />s.
+    /// A factory for creating <see cref="VideoWithDescriptionViewModel" />s.
     /// </summary>
     public class Factory : LayoutFactory
     {
         /// <inheritdoc />
         public override bool IsCompatibleData(Hotspot.Media hotspot)
         {
-            var imagesCompatible = hotspot.ImagePaths.Count > 0;
-            var videosCompatible = hotspot.VideoPaths.Count == 0;
+            var imagesCompatible = hotspot.ImagePaths.Count >= 1;
+            var videosCompatible = hotspot.VideoPaths.Count >= 1;
 
-            return videosCompatible && imagesCompatible;
+            return imagesCompatible && videosCompatible;
         }
 
         /// <inheritdoc />
         protected override Layout ConstructLayout(IViewModelProvider vmProvider, Hotspot.Media hotspot) =>
-            new ImageWithDescriptionViewModel(
+            new ImagePlusVideoWithDescriptionViewModel(
                 vmProvider,
                 hotspot.Id,
                 hotspot.Title,
                 hotspot.Description,
-                hotspot.ImagePaths
+                hotspot.ImagePaths,
+                hotspot.VideoPaths
             );
     }
 }
