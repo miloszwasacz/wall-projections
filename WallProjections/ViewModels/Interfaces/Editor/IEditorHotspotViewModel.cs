@@ -9,7 +9,7 @@ namespace WallProjections.ViewModels.Interfaces.Editor;
 /// <summary>
 /// A viewmodel for editing data about a <see cref="Hotspot" />.
 /// </summary>
-public interface IEditorHotspotViewModel: INotifyPropertyChanged
+public interface IEditorHotspotViewModel : INotifyPropertyChanged
 {
     /// <inheritdoc cref="Hotspot.Id" />
     public int Id { get; }
@@ -46,6 +46,11 @@ public interface IEditorHotspotViewModel: INotifyPropertyChanged
     /// Determines whether the title is empty and should be replaced with a fallback.
     /// </summary>
     public bool IsFallback => Title.Trim() == "";
+
+    /// <summary>
+    /// The title of the hotspot or a fallback title if the title is empty.
+    /// </summary>
+    public string TitleOrFallback => IsFallback ? FallbackTitle : Title;
 
     /// <summary>
     /// Adds media to the appropriate collection (<see cref="Images" /> or <see cref="Videos" />).

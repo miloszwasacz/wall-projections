@@ -6,73 +6,105 @@
              xmlns:views="using:WallProjections.Views"
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
              x:Class="WallProjections.Views.Editor.HotspotList"
-             x:DataType="vm:IEditorViewModel">
+             x:DataType="vm:IEditorViewModel"
+             ClipToBounds="False">
 
-    <!--TODO Add proper styles -->
-    <Border BorderBrush="LightGray"
-            BorderThickness="2"
-            CornerRadius="8">
+    <UserControl.Styles>
+        <Style Selector=":is(Control).header">
+            <Setter Property="Margin" Value="{StaticResource CardPadding}" />
 
-        <Grid ColumnDefinitions="*" RowDefinitions="Auto, *">
+            <Style Selector="^ > :is(Control)">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
 
-            <Border Grid.Column="0" Grid.Row="0"
-                    BorderBrush="LightGray"
-                    BorderThickness="0 0 0 2"
-                    CornerRadius="8 8 0 0 "
-                    Padding="8">
+            <Style Selector="^ TextBlock">
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontWeight" Value="Bold" />
+            </Style>
+        </Style>
 
-                <Grid ColumnDefinitions="*, 10, Auto" RowDefinitions="Auto">
-                    <!--TODO Get rid of this - use proper styling on IconButton -->
-                    <Grid.Styles>
-                        <Style Selector="PathIcon:disabled">
-                            <Setter Property="Foreground" Value="Transparent" />
-                        </Style>
-                    </Grid.Styles>
+        <Style Selector="Separator.divider">
+            <Setter Property="Margin">
+                <Setter.Value>
+                    <Binding Source="{StaticResource MenuFlyoutSeparatorThemePadding}"
+                             Converter="{StaticResource ThicknessConverter}"
+                             ConverterParameter="1 0" />
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-                    <TextBlock Grid.Column="0" Grid.Row="0"
-                               FontWeight="Bold"
-                               TextTrimming="CharacterEllipsis"
-                               Text="Hotspots" />
+        <Style Selector="ListBox.transparent">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
 
-                    <views:IconButton Grid.Column="2" Grid.Row="0"
-                                      ToolTip.Tip="Add a new Hotspot"
-                                      Padding="2"
-                                      IconData="{StaticResource add_regular}"
-                                      Click="Add_OnClick" />
+        <Style Selector="TextBlock.item-label">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <!-- TODO Use proper fonts -->
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Medium" />
 
-                </Grid>
+            <Style Selector="^.fallback">
+                <!-- TODO Use a proper font family -->
+                <Setter Property="FontFamily" Value="static" />
+                <Setter Property="FontStyle" Value="Oblique" />
+                <Setter Property="FontWeight" Value="Regular" />
+            </Style>
+        </Style>
 
-            </Border>
+    </UserControl.Styles>
 
-            <ListBox Grid.Column="0" Grid.Row="1"
-                ItemsSource="{Binding Hotspots}"
+    <Border Classes="Card no-padding">
+        <DockPanel>
+
+            <Grid DockPanel.Dock="Top"
+                  RowDefinitions="Auto"
+                  Classes="header">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{StaticResource DefaultGridItemSpacing}" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Grid.Row="0"
+                           Text="Hotspots" />
+
+                <views:IconButton Grid.Column="2" Grid.Row="0"
+                                  Classes="transparent"
+                                  ToolTip.Tip="Add a new Hotspot"
+                                  IconData="{StaticResource add_regular}"
+                                  Click="Add_OnClick" />
+
+            </Grid>
+
+            <Separator DockPanel.Dock="Top"
+                       Classes="divider" />
+
+            <ListBox Classes="classic-list cut-bottom-corners"
+                     ItemsSource="{Binding Hotspots}"
                      SelectedItem="{Binding SelectedHotspot}"
-                     SelectionMode="Single, AlwaysSelected"
-                     CornerRadius="0 0 7 7"
-                     ClipToBounds="True">
+                     SelectionMode="Single, AlwaysSelected">
 
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:IEditorHotspotViewModel">
 
-                        <Grid ColumnDefinitions="*, 10, Auto" RowDefinitions="Auto">
+                        <Grid RowDefinitions="Auto">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="{StaticResource DefaultGridItemSpacing}" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0" Grid.Row="0">
-
-                                <TextBlock IsVisible="{Binding !IsFallback}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Text="{Binding Title}" />
-
-                                <TextBlock IsVisible="{Binding IsFallback}"
-                                           FontFamily="static"
-                                           FontStyle="Oblique"
-                                           TextTrimming="CharacterEllipsis"
-                                           Text="{Binding FallbackTitle}" />
-
-                            </StackPanel>
+                            <TextBlock Grid.Column="0" Grid.Row="0"
+                                       Classes="item-label"
+                                       Classes.fallback="{Binding IsFallback}"
+                                       Text="{Binding TitleOrFallback}" />
 
                             <views:IconButton Grid.Column="2" Grid.Row="0"
                                               ToolTip.Tip="Delete Hotspot"
-                                              Padding="2"
+                                              Classes="small transparent"
                                               Tag="{Binding}"
                                               IconData="{StaticResource delete_regular}"
                                               Click="Delete_OnClick" />
@@ -84,8 +116,7 @@
 
             </ListBox>
 
-        </Grid>
-
+        </DockPanel>
     </Border>
 
 </UserControl>

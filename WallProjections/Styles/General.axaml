@@ -25,4 +25,10 @@
         <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
     </Style>
 
+    <Style Selector="ListBox.classic-list ListBoxItem">
+        <Setter Property="Margin" Value="{StaticResource MenuFlyoutSeparatorThemePadding}" />
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
 </Styles>
