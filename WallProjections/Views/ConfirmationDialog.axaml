@@ -30,7 +30,6 @@
                                   Text="{Binding Message}" />
 
         <Button Grid.Column="0" Grid.Row="2"
-                Classes="transparent"
                 IsVisible="{Binding HasRefuseButton}"
                 Content="{Binding RefuseButtonText}"
                 Click="Refuse_OnClick" />
@@ -41,7 +40,7 @@
                 Click="Confirm_OnClick" />
 
         <Button Grid.Column="4" Grid.Row="2"
-                Classes="transparent" IsCancel="True"
+                IsCancel="True"
                 Content="{Binding CancelButtonText}"
                 Click="Cancel_OnClick" />
 

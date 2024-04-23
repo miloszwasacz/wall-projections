@@ -55,8 +55,5 @@
         <StyleInclude Source="avares://WallProjections/Styles/General.axaml" />
         <StyleInclude Source="avares://WallProjections/Styles/Controls.axaml" />
         <StyleInclude Source="avares://WallProjections/Icons.axaml" />
-
-        <!-- Templated Controls -->
-        <StyleInclude Source="avares://WallProjections/Views/Editor/DescriptionEditor.axaml" />
     </Application.Styles>
 </Application>

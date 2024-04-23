@@ -8,10 +8,24 @@
                 <ResourceDictionary x:Key="Default">
                     <StaticResource x:Key="ButtonBackground" ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
                     <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ButtonBorderBrushPointerOver" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ButtonBorderBrushPressed" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ButtonBorderBrushDisabled" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="AccentButtonBorderBrushPointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="ControlStrokeDefaultBrush" />
 
                     <StaticResource x:Key="RepeatButtonBackground"
                                     ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
                     <StaticResource x:Key="RepeatButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="RepeatButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="RepeatButtonBorderBrushPointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="RepeatButtonBorderBrushPressed" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="RepeatButtonBorderBrushDisabled" ResourceKey="ControlStrokeDefaultBrush" />
 
                     <StaticResource x:Key="ToggleButtonBackground"
                                     ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
@@ -20,6 +34,26 @@
                     <StaticResource x:Key="ToggleButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
                     <StaticResource x:Key="ToggleButtonForegroundIndeterminateDisabled"
                                     ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ToggleButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushPointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushPressed" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushDisabled" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushChecked" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushCheckedPointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushCheckedPressed"
+                                    ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushCheckedDisabled"
+                                    ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushIndeterminate"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushIndeterminatePointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushIndeterminatePressed"
+                                    ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushIndeterminateDisabled"
+                                    ResourceKey="ControlStrokeDefaultBrush" />
 
                     <StaticResource x:Key="HyperlinkButtonForegroundDisabled"
                                     ResourceKey="SystemChromeDisabledLowColor" />
@@ -33,10 +67,24 @@
                 <ResourceDictionary x:Key="Dark">
                     <StaticResource x:Key="ButtonBackground" ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
                     <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ButtonBorderBrushPointerOver" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ButtonBorderBrushPressed" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ButtonBorderBrushDisabled" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="AccentButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="AccentButtonBorderBrushPointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="AccentButtonBorderBrushPressed" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="AccentButtonBorderBrushDisabled" ResourceKey="ControlStrokeDefaultBrush" />
 
                     <StaticResource x:Key="RepeatButtonBackground"
                                     ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
                     <StaticResource x:Key="RepeatButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="RepeatButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="RepeatButtonBorderBrushPointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="RepeatButtonBorderBrushPressed" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="RepeatButtonBorderBrushDisabled" ResourceKey="ControlStrokeDefaultBrush" />
 
                     <StaticResource x:Key="ToggleButtonBackground"
                                     ResourceKey="SystemControlBackgroundAltMediumLowBrush" />
@@ -45,6 +93,26 @@
                     <StaticResource x:Key="ToggleButtonForegroundDisabled" ResourceKey="SystemChromeDisabledLowColor" />
                     <StaticResource x:Key="ToggleButtonForegroundIndeterminateDisabled"
                                     ResourceKey="SystemChromeDisabledLowColor" />
+                    <StaticResource x:Key="ToggleButtonBorderBrush" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushPointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushPressed" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushDisabled" ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushChecked" ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushCheckedPointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushCheckedPressed"
+                                    ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushCheckedDisabled"
+                                    ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushIndeterminate"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushIndeterminatePointerOver"
+                                    ResourceKey="ControlElevationBorderBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushIndeterminatePressed"
+                                    ResourceKey="ControlStrokeDefaultBrush" />
+                    <StaticResource x:Key="ToggleButtonBorderBrushIndeterminateDisabled"
+                                    ResourceKey="ControlStrokeDefaultBrush" />
 
                     <StaticResource x:Key="HyperlinkButtonForegroundDisabled"
                                     ResourceKey="SystemChromeDisabledLowColor" />
@@ -65,6 +133,10 @@
 
     <Style Selector="Button.transparent">
         <Setter Property="Background" Value="Transparent" />
+
+        <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
 
         <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent" />

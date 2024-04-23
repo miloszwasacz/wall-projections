@@ -79,32 +79,41 @@
                                 DeleteHotspot="HotspotList_OnDeleteHotspot" />
 
             <editor:DescriptionEditor Grid.Column="2" Grid.Row="0" Grid.RowSpan="3"
-                                      Spacing="15"
-                                      DataContext="{Binding DescriptionEditor}"
-                                      ImportDescription="DescriptionEditor_OnImportDescription">
+                                      DataContext="{Binding DescriptionEditor}">
+                <editor:DescriptionEditor.MenuItems>
+                    <views:IconButton Grid.Column="2" Grid.Row="0"
+                                      Classes=""
+                                      IconData="{StaticResource document_import_regular}"
+                                      Click="DescriptionEditor_OnImportDescription">
+                        <ToolTip.Tip>
+                            <TextBlock TextAlignment="Center">
+                                Import title and description<LineBreak />
+                                from a text file
+                            </TextBlock>
+                        </ToolTip.Tip>
+                    </views:IconButton>
 
-                <views:IconToggleButton Name="PositionEditorToggle"
-                                        ToolTip.Tip="Edit position"
-                                        IsChecked="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
-                                        IconData="{StaticResource my_location_regular}"
-                                        Click="EditPosition_OnClick">
+                    <views:IconToggleButton Name="PositionEditorToggle"
+                                            Classes=""
+                                            ToolTip.Tip="Edit position"
+                                            IsChecked="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
+                                            IconData="{StaticResource my_location_regular}"
+                                            Click="EditPosition_OnClick">
+                        <FlyoutBase.AttachedFlyout>
+                            <Flyout FlyoutPresenterClasses="attached-bottom"
+                                    ShowMode="Transient"
+                                    Placement="BottomEdgeAlignedRight"
+                                    OverlayInputPassThroughElement="{Binding $parent[Window]}">
 
-                    <FlyoutBase.AttachedFlyout>
-                        <Flyout FlyoutPresenterClasses="attached-bottom"
-                                ShowMode="Transient"
-                                Placement="BottomEdgeAlignedRight"
-                                OverlayInputPassThroughElement="{Binding $parent[Window]}">
+                                <TextBlock MaxWidth="170"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           Text="Use your mouse to move the hotspot around on the second screen" />
 
-                            <TextBlock MaxWidth="170"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap"
-                                       Text="Use your mouse to move the hotspot around on the second screen" />
-
-                        </Flyout>
-                    </FlyoutBase.AttachedFlyout>
-
-                </views:IconToggleButton>
-
+                            </Flyout>
+                        </FlyoutBase.AttachedFlyout>
+                    </views:IconToggleButton>
+                </editor:DescriptionEditor.MenuItems>
             </editor:DescriptionEditor>
 
             <editor:MediaEditor Grid.Column="4" Grid.Row="0"

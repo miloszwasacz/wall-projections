@@ -12,6 +12,7 @@
         <converters:CornerRadiusConverter x:Key="CornerRadiusConverter" />
         <converters:ThicknessMultiConverter x:Key="ThicknessMultiConverter" />
         <converters:CornerRadiusMultiConverter x:Key="CornerRadiusMultiConverter" />
+        <converters:SpacingConverter x:Key="SpacingConverter" />
     </Styles.Resources>
 
     <Style Selector=":hasoverlay ChromeOverlayLayer">
