@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -137,15 +138,12 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         foreach (var path in paths)
             _playQueue.Enqueue(path);
 
-        lock (this)
-        {
-            var success = false;
-            if (_isLoaded && HasVideos)
-                success = PlayNextVideo();
+        var success = false;
+        if (_isLoaded && HasVideos)
+            success = PlayNextVideo().Result;
 
-            IsVisible = success;
-            return success;
-        }
+        IsVisible = success;
+        return success;
     }
 
     /// <inheritdoc />
@@ -171,7 +169,7 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     }
 
     /// <inheritdoc />
-    public bool PlayNextVideo()
+    public Task<bool> PlayNextVideo() => Task.Run(() =>
     {
         lock (this)
         {
@@ -188,16 +186,16 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
             media.Dispose();
             return success;
         }
-    }
+    });
 
     /// <summary>
     /// Event handler wrapper for playing the next video in the sequence when one ends.
     /// </summary>
     /// <param name="sender">Object who sent request</param>
     /// <param name="e">Arguments for the event</param>
-    private void PlayNextVideoEvent(object? sender, EventArgs e)
+    private async void PlayNextVideoEvent(object? sender, EventArgs e)
     {
-        switch (PlayNextVideo())
+        switch (await PlayNextVideo())
         {
             case false when _playQueue.IsEmpty:
                 _logger.LogInformation("End of video queue reached");
