@@ -91,15 +91,14 @@ class VideoCapture:
 
         while video_capture.isOpened():
             success, video_capture_img = video_capture.read()
-            if not success:
+            if success:
+                # normalise and downscale resolution
+                new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
+                video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)
+                self._current_frame = video_capture_img
+            else:
                 logger.warning("Unsuccessful video read; ignoring frame.")
                 continue
-
-            # normalise and downscale resolution
-            new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
-            video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)
-
-            self._current_frame = video_capture_img
 
             if self._stopping:
                 break

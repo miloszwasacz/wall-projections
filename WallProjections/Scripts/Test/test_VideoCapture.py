@@ -65,8 +65,9 @@ class TestVideoCapture(unittest.TestCase):
         self.assertTrue(frame is not None)
 
     def tearDown(self):  # this will get called after every test
-        if hasattr(self, 'vidcap') and self.vidcap._video_capture_thread.is_alive():
-            self.vidcap.stop()
+        # if hasattr(self, 'vidcap') and self.vidcap._video_capture_thread.is_alive():
+        #     self.vidcap.stop()
+        pass
 
 
 if __name__ == '__main__':
