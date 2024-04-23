@@ -38,6 +38,7 @@ public class VideoViewModelTest
         });
 
         videoViewModel.MarkLoaded();
+        Task.Delay(TimeSpan.FromSeconds(0.5)).Wait();
         Assert.Multiple(() =>
         {
             Assert.That(mediaPlayer.IsPlaying);
