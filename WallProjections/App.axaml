@@ -12,7 +12,14 @@
 
     <Application.Resources>
         <!-- Converters -->
-        <converters:StateConverter x:Key="StateConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/BaseResources.axaml" />
+                <ResourceDictionary>
+                    <converters:StateConverter x:Key="StateConverter" />
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 
     <Application.Styles>
@@ -52,8 +59,8 @@
         </FluentTheme>
 
         <StyleInclude Source="avares://FluentAvalonia.ProgressRing/Styling/Controls/ProgressRing.axaml" />
-        <StyleInclude Source="avares://WallProjections/Styles/General.axaml" />
         <StyleInclude Source="avares://WallProjections/Styles/Controls.axaml" />
+        <StyleInclude Source="avares://WallProjections/Styles/General.axaml" />
         <StyleInclude Source="avares://WallProjections/Icons.axaml" />
     </Application.Styles>
 </Application>

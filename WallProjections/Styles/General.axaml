@@ -1,19 +1,5 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:converters="using:WallProjections.Styles.Converters">
-    <Styles.Resources>
-        <Thickness x:Key="ControlPadding">4</Thickness>
-        <Thickness x:Key="OverlayPadding">8</Thickness>
-        <CornerRadius x:Key="ControlCornerRadius">4</CornerRadius>
-        <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
-
-        <!-- Converters -->
-        <converters:ThicknessConverter x:Key="ThicknessConverter" />
-        <converters:CornerRadiusConverter x:Key="CornerRadiusConverter" />
-        <converters:ThicknessMultiConverter x:Key="ThicknessMultiConverter" />
-        <converters:CornerRadiusMultiConverter x:Key="CornerRadiusMultiConverter" />
-        <converters:SpacingConverter x:Key="SpacingConverter" />
-    </Styles.Resources>
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style Selector=":hasoverlay ChromeOverlayLayer">
         <Setter Property="Background">
@@ -29,6 +15,58 @@
         <Setter Property="Margin" Value="{StaticResource MenuFlyoutSeparatorThemePadding}" />
         <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
         <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector=":is(Control).list-card">
+        <Setter Property="ClipToBounds" Value="False" />
+
+        <Style Selector="^ :is(Control).header">
+            <Setter Property="Margin">
+                <Binding Source="{StaticResource CardPadding}"
+                         Converter="{StaticResource ThicknessConverter}"
+                         ConverterParameter="1 1 1 0.5" />
+            </Setter>
+
+            <Style Selector="^ > :is(Control)">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style Selector="^ > TextBlock">
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontWeight" Value="Bold" />
+            </Style>
+        </Style>
+
+        <Style Selector="^ Separator.divider">
+            <Setter Property="Margin">
+                <Setter.Value>
+                    <Binding Source="{StaticResource MenuFlyoutSeparatorThemePadding}"
+                             Converter="{StaticResource ThicknessConverter}"
+                             ConverterParameter="1 0" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style Selector="^ ListBox.transparent">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style Selector="^ TextBlock.item-label">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+
+            <!-- TODO Use proper fonts -->
+            <Setter Property="FontWeight" Value="Medium" />
+            <Style Selector="^:not(.small)">
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+            <Style Selector="^.fallback">
+                <Setter Property="FontFamily" Value="static" />
+                <Setter Property="FontStyle" Value="Oblique" />
+                <Setter Property="FontWeight" Value="Regular" />
+            </Style>
+        </Style>
     </Style>
 
 </Styles>

@@ -44,6 +44,7 @@
             <Setter Property="Padding" Value="0" />
 
             <Style Selector="^ :is(TemplatedControl).cut-bottom-corners">
+                <Setter Property="ClipToBounds" Value="True" />
                 <Setter Property="CornerRadius">
                     <Setter.Value>
                         <MultiBinding Converter="{StaticResource CornerRadiusMultiConverter}">
@@ -59,6 +60,7 @@
             </Style>
 
             <Style Selector="^ :is(TemplatedControl).cut-top-corners">
+                <Setter Property="ClipToBounds" Value="True" />
                 <Setter Property="CornerRadius">
                     <Setter.Value>
                         <MultiBinding Converter="{StaticResource CornerRadiusMultiConverter}">

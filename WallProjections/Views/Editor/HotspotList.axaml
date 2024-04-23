@@ -7,53 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
              x:Class="WallProjections.Views.Editor.HotspotList"
              x:DataType="vm:IEditorViewModel"
-             ClipToBounds="False">
-
-    <UserControl.Styles>
-        <Style Selector=":is(Control).header">
-            <Setter Property="Margin" Value="{StaticResource CardPadding}" />
-
-            <Style Selector="^ > :is(Control)">
-                <Setter Property="VerticalAlignment" Value="Center" />
-            </Style>
-
-            <Style Selector="^ TextBlock">
-                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                <Setter Property="FontSize" Value="24" />
-                <Setter Property="FontWeight" Value="Bold" />
-            </Style>
-        </Style>
-
-        <Style Selector="Separator.divider">
-            <Setter Property="Margin">
-                <Setter.Value>
-                    <Binding Source="{StaticResource MenuFlyoutSeparatorThemePadding}"
-                             Converter="{StaticResource ThicknessConverter}"
-                             ConverterParameter="1 0" />
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style Selector="ListBox.transparent">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-
-        <Style Selector="TextBlock.item-label">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-            <!-- TODO Use proper fonts -->
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="FontWeight" Value="Medium" />
-
-            <Style Selector="^.fallback">
-                <!-- TODO Use a proper font family -->
-                <Setter Property="FontFamily" Value="static" />
-                <Setter Property="FontStyle" Value="Oblique" />
-                <Setter Property="FontWeight" Value="Regular" />
-            </Style>
-        </Style>
-
-    </UserControl.Styles>
+             Classes="list-card">
 
     <Border Classes="Card no-padding">
         <DockPanel>
