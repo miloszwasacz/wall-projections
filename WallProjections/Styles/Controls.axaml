@@ -5,6 +5,9 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="Toast.axaml" />
+                <ResourceDictionary>
+                    <GridLength x:Key="DefaultGridItemSpacing">10</GridLength>
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Styles.Resources>
@@ -12,5 +15,6 @@
     <StyleInclude Source="Buttons.axaml" />
     <StyleInclude Source="IconButtons.axaml" />
     <StyleInclude Source="Card.axaml" />
+    <StyleInclude Source="Dialogs.axaml" />
 
 </Styles>

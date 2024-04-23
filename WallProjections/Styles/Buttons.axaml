@@ -62,4 +62,12 @@
     <Style Selector="Button.accent">
         <!-- The class has already been defined by the FluentTheme - this is just for the IDE -->
     </Style>
+
+    <Style Selector="Button.transparent">
+        <Setter Property="Background" Value="Transparent" />
+
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </Style>
 </Styles>
