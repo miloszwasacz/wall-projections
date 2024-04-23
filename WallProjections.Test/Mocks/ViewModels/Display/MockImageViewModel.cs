@@ -27,14 +27,14 @@ public class MockImageViewModel : IImageViewModel
     public IReadOnlyList<IReadOnlyList<string>> PreviousImagePaths => _previousImagePaths;
 
     /// <summary>
-    /// The number of times <see cref="AddImages" /> has been called with empty <see cref="ImagePaths"/>
+    /// The number of times <see cref="AddImages" /> has been called
     /// </summary>
-    public int ShowCount { get; private set; }
+    public int AddCount { get; private set; }
 
     /// <summary>
     /// The number of times <see cref="ClearImages" /> has been called
     /// </summary>
-    public int HideCount { get; private set; }
+    public int ClearCount { get; private set; }
 
     /// <summary>
     /// The number of times <see cref="Dispose"/> has been called
@@ -73,8 +73,7 @@ public class MockImageViewModel : IImageViewModel
         var temp = imagePaths.ToList();
         if (temp.Any())
         {
-            if (HasImages == false)
-                ShowCount++;
+            AddCount++;
             HasImages = true;
         }
 
@@ -103,14 +102,14 @@ public class MockImageViewModel : IImageViewModel
     }
 
     /// <summary>
-    /// Increments the <see cref="HideCount"/> by 1, and moves current images to <see cref="PreviousImagePaths"/>
+    /// Increments the <see cref="ClearCount"/> by 1, and moves current images to <see cref="PreviousImagePaths"/>
     /// </summary>
     public void ClearImages()
     {
         _previousImagePaths.Add(_imagePaths);
         _imagePaths.Clear();
         HasImages = false;
-        HideCount++;
+        ClearCount++;
     }
 
     /// <summary>
