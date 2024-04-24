@@ -16,7 +16,7 @@ public class ImageWithDescriptionViewModelTest
         const int hotspotId = 0;
         const string title = "Title";
         const string description = "Description";
-        const string imagePath = "image_0.png";
+        var imagePaths = new List<string> { "image_0.png" };
         var vmProvider = new MockViewModelProvider();
 
         var imageWithDescriptionViewModel = new ImageWithDescriptionViewModel(
@@ -24,9 +24,9 @@ public class ImageWithDescriptionViewModelTest
             hotspotId,
             title,
             description,
-            imagePath
+            imagePaths
         );
-        AssertVMProperties(imageWithDescriptionViewModel, hotspotId, title, description, imagePath);
+        AssertVMProperties(imageWithDescriptionViewModel, hotspotId, title, description, imagePaths);
     }
 
     [TestFixture]
@@ -76,7 +76,7 @@ public class ImageWithDescriptionViewModelTest
                     media.Id,
                     media.Title,
                     media.Description,
-                    media.ImagePaths[0]
+                    media.ImagePaths
                 )
             );
         }
@@ -91,7 +91,7 @@ public class ImageWithDescriptionViewModelTest
         int hotspotId,
         string title,
         string description,
-        string imagePath
+        IEnumerable<string> imagePaths
     )
     {
         Assert.Multiple(() =>
@@ -106,7 +106,7 @@ public class ImageWithDescriptionViewModelTest
         Assert.Multiple(() =>
         {
             Assert.That(imageViewModel.HasImages);
-            Assert.That(imageViewModel.ImagePaths, Is.EquivalentTo(new[] { imagePath }));
+            CollectionAssert.AreEquivalent(imageViewModel.ImagePaths, imagePaths);
         });
     }
 }

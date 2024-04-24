@@ -105,17 +105,17 @@ public sealed class MockVideoViewModel : IVideoViewModel
     /// Sets the first unplayed video in <see cref="VideoPaths" /> to played
     /// </summary>
     /// <returns>Whether a video was played</returns>
-    public bool PlayNextVideo()
+    public Task<bool> PlayNextVideo()
     {
         for (var i = 0; i < _videoPaths.Count; i++)
         {
             if (_videoPaths[i].hasPlayed) continue;
 
             _videoPaths[i] = (_videoPaths[i].path, true);
-            return true;
+            return Task.FromResult(true);
         }
 
-        return false;
+        return Task.FromResult(false);
     }
 
     /// <summary>
