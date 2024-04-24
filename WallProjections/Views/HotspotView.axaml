@@ -21,8 +21,13 @@
 
         <!-- Template for Display -->
         <DataTemplate DataType="{x:Type vm:IHotspotProjectionViewModel}">
-            <views:HotspotCircle Diameter="{Binding D}"
-                                 HotspotState="{Binding State}" />
+            <Grid Width="{Binding D}"
+                  Height="{Binding D}"
+                  ColumnDefinitions="*,*,*"
+                  RowDefinitions="*,*,*">
+                <views:HotspotCircle Grid.Row="1" Grid.Column="1" Diameter="{Binding D}"
+                                     HotspotState="{Binding State}" />
+            </Grid>
         </DataTemplate>
 
         <!-- Template for Position Editor -->
