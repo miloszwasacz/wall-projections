@@ -4,21 +4,18 @@
     <Style Selector="Border.Card">
         <Style.Resources>
             <ResourceDictionary>
-                <ResourceDictionary.MergedDictionaries>
+                <Thickness x:Key="CardPadding">16</Thickness>
+                <StaticResource x:Key="CardCornerRadius" ResourceKey="OverlayCornerRadius" />
 
-                    <ResourceDictionary>
-                        <Thickness x:Key="CardPadding">16</Thickness>
-                        <StaticResource x:Key="CardCornerRadius" ResourceKey="OverlayCornerRadius" />
-                    </ResourceDictionary>
-
-                </ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary.ThemeDictionaries>
 
                     <ResourceDictionary x:Key="Default">
+                        <StaticResource x:Key="CardBackground" ResourceKey="SystemControlBackgroundAltMediumHighBrush" />
                         <SolidColorBrush x:Key="CardStrokeBrush" Color="#0F000000" />
                     </ResourceDictionary>
 
                     <ResourceDictionary x:Key="Dark">
+                        <StaticResource x:Key="CardBackground" ResourceKey="SystemControlBackgroundAltMediumHighBrush" />
                         <SolidColorBrush x:Key="CardStrokeBrush" Color="#0F000000" />
                     </ResourceDictionary>
 
@@ -26,7 +23,7 @@
             </ResourceDictionary>
         </Style.Resources>
 
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltMediumHighBrush}" />
+        <Setter Property="Background" Value="{DynamicResource CardBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BoxShadow" Value="0 2 4 0 #29000000" />
@@ -78,4 +75,3 @@
     </Style>
 
 </Styles>
-

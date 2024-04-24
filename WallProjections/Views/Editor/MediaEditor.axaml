@@ -99,16 +99,9 @@
                         <Style Selector="^ Border.item-content">
                             <Setter Property="ClipToBounds" Value="True" />
                             <Setter Property="CornerRadius">
-                                <Setter.Value>
-                                    <MultiBinding Converter="{StaticResource CornerRadiusMultiConverter}">
-                                        <Binding Source="{StaticResource CardCornerRadius}"
-                                                 Converter="{StaticResource CornerRadiusConverter}"
-                                                 ConverterParameter="0, 0, 1, 1" />
-                                        <Binding Source="{StaticResource CardChildCornerRadiusModifier}"
-                                                 Converter="{StaticResource CornerRadiusConverter}"
-                                                 ConverterParameter="0, 0, 1, 1" />
-                                    </MultiBinding>
-                                </Setter.Value>
+                                <Binding Source="{StaticResource ControlCornerRadius}"
+                                         Converter="{StaticResource CornerRadiusConverter}"
+                                         ConverterParameter="0, 0, 1, 1" />
                             </Setter>
 
                             <Style Selector="^ > Image">

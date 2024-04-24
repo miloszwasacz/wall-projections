@@ -120,4 +120,26 @@
         </Style>
     </Style>
 
+    <Style Selector="StackPanel.toolbar">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="{StaticResource DefaultToolbarItemSpacing}" />
+        <Setter Property="Margin">
+            <Binding Source="{StaticResource TopLevelPadding}"
+                     Converter="{StaticResource ThicknessConverter}"
+                     ConverterParameter="1 0.5 1 0" />
+        </Setter>
+
+        <Style Selector="^ > :is(Control)">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Style>
+
+    <Style Selector="ToolTip > TextBlock">
+        <Setter Property="TextAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="FlyoutPresenter.attached-bottom">
+        <Setter Property="Margin" Value="0 5 0 0" />
+    </Style>
+
 </Styles>

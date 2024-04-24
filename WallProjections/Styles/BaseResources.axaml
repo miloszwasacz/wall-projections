@@ -6,6 +6,7 @@
     <!-- Overriding default values -->
     <Thickness x:Key="ControlPadding">4</Thickness>
     <Thickness x:Key="OverlayPadding">8</Thickness>
+    <Thickness x:Key="TopLevelPadding">16</Thickness>
     <CornerRadius x:Key="ControlCornerRadius">4</CornerRadius>
     <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
 

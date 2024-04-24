@@ -1,5 +1,6 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System">
 
     <Styles.Resources>
         <ResourceDictionary>
@@ -9,6 +10,7 @@
                 <ResourceDictionary>
                     <GridLength x:Key="DefaultGridItemSpacing">8</GridLength>
                     <GridLength x:Key="DefaultFormFieldSpacing">16</GridLength>
+                    <sys:Double x:Key="DefaultToolbarItemSpacing">12</sys:Double>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
 
@@ -43,5 +45,6 @@
     <StyleInclude Source="IconButtons.axaml" />
     <StyleInclude Source="Card.axaml" />
     <StyleInclude Source="Dialogs.axaml" />
+    <StyleInclude Source="Menus.axaml" />
 
 </Styles>

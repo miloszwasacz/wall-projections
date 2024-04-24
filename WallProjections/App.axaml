@@ -37,7 +37,7 @@
                                        ChromeDisabledHigh="#4df9f9f9" ChromeDisabledLow="#b8adadad"
                                        ChromeGray="#db939393" ChromeWhite="White"
                                        ChromeHigh="#4df9f9f9" ChromeLow="#fffdfdfd"
-                                       ChromeMedium="#dbfcfcfc" ChromeMediumLow="#fffdfdfd"
+                                       ChromeMedium="#dbfcfcfc" ChromeMediumLow="#fff9f9f9"
                                        ListLow="#09000000" ListMedium="#06000000"
                                        RegionColor="#fff3f3f3" />
                 <ColorPaletteResources x:Key="Dark"
@@ -52,7 +52,7 @@
                                        ChromeDisabledHigh="#4df9f9f9" ChromeDisabledLow="#dbfcfcfc"
                                        ChromeGray="#b8fbfbfb" ChromeWhite="Black"
                                        ChromeHigh="#b8fbfbfb" ChromeLow="#db939393"
-                                       ChromeMedium="#b8adadad" ChromeMediumLow="#71e0e0e0"
+                                       ChromeMedium="#b8adadad" ChromeMediumLow="#ff2c2c2c"
                                        ListLow="#0fffffff" ListMedium="#0affffff"
                                        RegionColor="#ff0a0a0a" />
             </FluentTheme.Palettes>

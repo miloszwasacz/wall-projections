@@ -7,9 +7,8 @@
         x:Class="WallProjections.Views.SecondaryScreens.SecondaryWindow"
         x:DataType="vm:ISecondaryWindowViewModel"
         Icon="/Assets/app-icon.ico"
-        Title="HotspotWindow"
+        Title="Hotspot Projections"
         Content="{Binding Content}"
         KeyDown="OnKeyDown"
         Closing="OnClosing">
 </Window>
-

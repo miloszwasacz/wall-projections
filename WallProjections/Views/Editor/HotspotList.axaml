@@ -36,7 +36,7 @@
             <Separator DockPanel.Dock="Top"
                        Classes="divider" />
 
-            <ListBox Classes="classic-list cut-bottom-corners"
+            <ListBox Classes="classic-list transparent cut-bottom-corners"
                      ItemsSource="{Binding Hotspots}"
                      SelectedItem="{Binding SelectedHotspot}"
                      SelectionMode="Single, AlwaysSelected">
