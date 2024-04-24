@@ -22,7 +22,7 @@
         <!-- Template for Display -->
         <DataTemplate DataType="{x:Type vm:IHotspotProjectionViewModel}">
             <views:HotspotCircle Diameter="{Binding D}"
-                                 HotspotState="{Binding State}" />
+                                 HotspotState="{Binding State}"/>
         </DataTemplate>
 
         <!-- Template for Position Editor -->

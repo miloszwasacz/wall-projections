@@ -9,7 +9,9 @@
        x:Class="WallProjections.Views.HotspotCircle"
        Classes.activating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Activating}}"
        Classes.deactivating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Deactivating}}"
-       Classes.activated="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Active}}">
+       Classes.activated="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Active}}"
+       Width="{Binding Diameter, RelativeSource={RelativeSource Self}}"
+       Height="{Binding Diameter, RelativeSource={RelativeSource Self}}">
 
     <Panel.Resources>
         <views:FullArcDiameterConverter x:Key="FullArcDiameterConverter" />
