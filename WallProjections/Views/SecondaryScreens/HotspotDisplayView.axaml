@@ -7,11 +7,9 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.SecondaryScreens.HotspotDisplayView"
              x:DataType="vm:AbsHotspotDisplayViewModel"
-             Background="Black">
+             Classes="ProjectionContainer">
 
     <views:HotspotView Name="HotspotList"
-                       HotspotFill="White"
-                       HotspotStroke="LightGray"
                        ItemsSource="{Binding Projections}" />
 
 </UserControl>

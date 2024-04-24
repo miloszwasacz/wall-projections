@@ -1,0 +1,19 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System">
+
+    <Styles.Resources>
+        <SolidColorBrush x:Key="ProjectionBackgroundBrush" Color="Black" />
+        <SolidColorBrush x:Key="HotspotFillBrush" Color="White" />
+        <SolidColorBrush x:Key="HotspotStrokeBrush" Color="White" />
+        <sys:Double x:Key="HotspotStrokeThickness">10</sys:Double>
+    </Styles.Resources>
+
+    <Style Selector=":is(TemplatedControl).ProjectionContainer">
+        <Setter Property="Background" Value="{StaticResource ProjectionBackgroundBrush}" />
+    </Style>
+
+    <Style Selector="Path.hotspot, Ellipse.hotspot">
+        <Setter Property="Fill" Value="{StaticResource HotspotFillBrush}" />
+    </Style>
+</Styles>

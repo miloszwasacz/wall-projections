@@ -27,7 +27,7 @@
 
         <!-- Template for Position Editor -->
         <DataTemplate DataType="{x:Type models:Coord}">
-            <Path Fill="{Binding $parent[views:HotspotView].HotspotFill}">
+            <Path Classes="hotspot">
                 <Path.Data>
                     <EllipseGeometry
                         RadiusX="{Binding R}"

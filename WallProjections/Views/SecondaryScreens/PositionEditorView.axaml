@@ -7,17 +7,23 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.SecondaryScreens.PositionEditorView"
              x:DataType="vm:AbsPositionEditorViewModel"
-             Background="Black"
+             Classes="ProjectionContainer"
              PointerMoved="OnPointerMoved"
              PointerWheelChanged="OnScroll"
              PointerPressed="OnPointerPressed"
              KeyDown="OnKeyDown">
 
+    <UserControl.Styles>
+        <Style Selector=":is(Control).unselected">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+    </UserControl.Styles>
+
     <Grid ColumnDefinitions="*" RowDefinitions="*">
 
         <!-- Unselected Hotspots -->
         <views:HotspotView Grid.Column="0" Grid.Row="0"
-                           HotspotFill="Gray"
+                           Classes="unselected"
                            ItemsSource="{Binding UnselectedHotspots}" />
 
         <!-- Selected Hotspot -->
@@ -25,7 +31,7 @@
 
             <Path Canvas.Left="{Binding X}"
                   Canvas.Top="{Binding Y}"
-                  Fill="White">
+                  Classes="hotspot">
                 <Path.Data>
                     <EllipseGeometry
                         RadiusX="{Binding R}"

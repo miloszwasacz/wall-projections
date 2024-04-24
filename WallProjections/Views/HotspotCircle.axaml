@@ -17,27 +17,40 @@
         <views:FullArcDiameterConverter x:Key="FullArcDiameterConverter" />
     </Panel.Resources>
 
+    <Panel.Styles>
+        <Style Selector="Ellipse.inner">
+            <Setter Property="Width" Value="{Binding $parent[views:HotspotCircle].Diameter}" />
+            <Setter Property="Height" Value="{Binding $parent[views:HotspotCircle].Diameter}" />
+        </Style>
+
+        <Style Selector="Ellipse.outer, Arc.outer">
+            <Setter Property="Width">
+                <Binding Path="$parent[views:HotspotCircle].Diameter"
+                         Converter="{StaticResource FullArcDiameterConverter}" />
+            </Setter>
+            <Setter Property="Height">
+                <Binding Path="$parent[views:HotspotCircle].Diameter"
+                         Converter="{StaticResource FullArcDiameterConverter}" />
+            </Setter>
+            <Setter Property="Stroke" Value="{StaticResource HotspotStrokeBrush}" />
+            <Setter Property="StrokeThickness" Value="{StaticResource HotspotStrokeThickness}" />
+        </Style>
+
+        <Style Selector="Arc.outer">
+            <Setter Property="StartAngle" Value="-90" />
+        </Style>
+    </Panel.Styles>
+
     <!-- Active circle, need to appear when circle becomes active to counter the transition behaviour -->
     <!-- that occurs between the activating and activated animation -->
-    <Ellipse Classes="full"
-             Width="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
-             Height="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
-             Stroke="White"/>
+    <Ellipse Classes="outer full" />
 
     <!-- Pulsing circle -->
-    <Ellipse Classes="inner"
-             Width="{Binding $parent[views:HotspotCircle].Diameter}"
-             Height="{Binding $parent[views:HotspotCircle].Diameter}"
-             Fill="White"
+    <Ellipse Classes="hotspot inner"
              Classes.pulse="{Binding $parent[views:HotspotCircle].Pulse}" />
 
     <!-- Charging arc -->
-    <Arc Classes="outer"
-         Width="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
-         Height="{Binding $parent[views:HotspotCircle].Diameter, Converter={StaticResource FullArcDiameterConverter}}"
-         Stroke="White"
-         StrokeThickness="10"
-         StartAngle="-90" />
+    <Arc Classes="outer" />
 
     <!-- Animations -->
     <Panel.Styles>
@@ -63,8 +76,8 @@
                 </Setter>
                 <Setter Property="SweepAngle" Value="0" />
             </Style>
-            <Style Selector="^ Ellipse.full">
-                <Setter Property="StrokeThickness" Value="0" />
+            <Style Selector="^ Ellipse.outer.full">
+                <Setter Property="Opacity" Value="0" />
             </Style>
         </Style>
 
@@ -114,8 +127,8 @@
             <Style Selector="^ Arc.outer">
                 <Setter Property="SweepAngle" Value="360" />
             </Style>
-            <Style Selector="^ Ellipse.full">
-                <Setter Property="StrokeThickness" Value="10" />
+            <Style Selector="^ Ellipse.outer.full">
+                <Setter Property="Opacity" Value="1" />
             </Style>
         </Style>
 
