@@ -13,7 +13,7 @@ using WallProjections.Models.Interfaces;
 namespace WallProjections.Views;
 
 /// <summary>
-/// Avalonia VideoView for Windows, MacOS and Linux.
+/// Avalonia VideoView for Windows, macOS and Linux.
 /// </summary>
 public class NativeVideoView : NativeControlHost
 {

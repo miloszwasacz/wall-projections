@@ -3,7 +3,7 @@
              x:Class="WallProjections.App"
              xmlns:local="using:WallProjections"
              xmlns:converters="using:WallProjections.Views.Converters"
-             RequestedThemeVariant="Light">
+             RequestedThemeVariant="Default">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
