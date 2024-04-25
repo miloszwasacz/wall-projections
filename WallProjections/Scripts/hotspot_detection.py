@@ -1,9 +1,7 @@
-﻿import logging
-import threading
-import datetime
+﻿import threading
+
 import cv2
 import mediapipe as mp
-
 
 # noinspection PyPackages
 from .Helper.EventHandler import EventHandler
@@ -12,13 +10,13 @@ from .Helper.Hotspot import Hotspot
 # noinspection PyPackages
 from .Helper.VideoCapture import VideoCapture
 # noinspection PyPackages
+from .Helper.logger import setup_logger
+# noinspection PyPackages
 from .Interop import numpy_dotnet_converters as npnet
 # noinspection PyPackages
 from .Interop.json_dict_converters import json_to_3dict
 # noinspection PyPackages
 from .calibration import Calibrator
-# noinspection PyPackages
-from .Helper.logger import setup_logger
 
 logger = setup_logger("hotspot_detection")
 
@@ -44,6 +42,8 @@ FINGERTIP_INDICES: tuple[int, ...] = (4, 8, 12, 16, 20)
 """The indices for the thumb fingertip, index fingertip, ring fingertip, etc. 
 
 This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
+
+DEBUG_HAND_LANDMARKS: bool = True
 
 
 detection_running = False
@@ -107,6 +107,13 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
         # run model
         model_output = hands_model.process(video_capture_img_rgb)
 
+        # draw hotspots on landmarks view (for debugging)
+        if DEBUG_HAND_LANDMARKS:
+            for hotspot in hotspots:
+                radius = int(hotspot._radius)
+                cv2.circle(video_capture_img_bgr, tuple(int(x) for x in hotspot._proj_pos), radius,
+                           (255, 255, 255), thickness=-1)
+
         # noinspection PyUnresolvedReferences
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
             # update hotspots
@@ -117,9 +124,20 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
             for hotspot in hotspots:
                 hotspot.update(fingertip_coords_proj)
 
+            # hand landmarks view (for debugging)
+            if DEBUG_HAND_LANDMARKS:
+                for landmarks in model_output.multi_hand_landmarks:
+                    mp.solutions.drawing_utils.draw_landmarks(video_capture_img_bgr, landmarks,
+                                                              connections=mp.solutions.hands.HAND_CONNECTIONS)
+
+        # show hand landmarks view (for debugging)
+        if DEBUG_HAND_LANDMARKS:
+            cv2.imshow("Hand landmarks", video_capture_img_bgr)
+            cv2.waitKey(1)
+
     # clean up
     video_capture.stop()
-    cv2.destroyAllWindows()  # there shouldn't be any windows but just in case
+    cv2.destroyAllWindows()
     hands_model.close()
     detection_mutex.release()
 
