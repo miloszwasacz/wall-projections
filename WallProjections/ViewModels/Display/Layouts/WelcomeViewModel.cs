@@ -7,7 +7,7 @@ public class WelcomeViewModel : DescriptionViewModel
 {
     //TODO Localized strings?
     internal const string WelcomeTitle = "Select a hotspot";
-    internal const string WelcomeMessage = "Tap a hotspot to view more information about the exhibit.";
+    internal const string WelcomeMessage = "Tap a hotspot to view more\ninformation about the exhibit.";
 
     /// <summary>
     /// Creates a new <see cref="WelcomeViewModel" />.

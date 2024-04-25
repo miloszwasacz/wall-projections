@@ -5,6 +5,9 @@
     <Styles.Resources>
         <ResourceDictionary>
             <sys:Double x:Key="HotspotStrokeThickness">10</sys:Double>
+            <StaticResource x:Key="ProjectionMessageFontSize" ResourceKey="TitleLargeFontSize" />
+            <sys:Double x:Key="ProjectionMessageLineHeight">68</sys:Double>
+            <FontWeight x:Key="ProjectionMessageFontWeight">Medium</FontWeight>
 
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
@@ -33,6 +36,13 @@
         <Setter Property="FontSize" Value="{StaticResource TitleFontSize}" />
         <Setter Property="LineHeight" Value="{StaticResource TitleLineHeight}" />
         <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBlock.projection-message">
+        <Setter Property="FontSize" Value="{StaticResource ProjectionMessageFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource ProjectionMessageLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource ProjectionMessageFontWeight}" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 </Styles>

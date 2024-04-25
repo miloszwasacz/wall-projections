@@ -8,6 +8,6 @@
              x:Class="WallProjections.Views.Display.Layouts.WelcomeView"
              x:DataType="layouts:WelcomeViewModel">
 
-    <views:DescriptionView DataContext="{Binding}" />
+    <views:MessageView DataContext="{Binding}" />
 
 </UserControl>
