@@ -35,9 +35,6 @@ jobs:
       - name: Install OpenCV
         run: pip install opencv-python-headless
 
-      - name: Install Zip
-        run: sudo apt-get install zip
-
       - name: Restore dependencies
         run: dotnet restore -r ${{ inputs.target }}
 
@@ -47,10 +44,7 @@ jobs:
               --sc -o $HOME/build/WallProjections --verbosity normal
 
       - name: Zip
-        run: >
-          pushd $HOME/build &&
-          zip -r $OLDPWD/WallProjections-${{ inputs.target }}.zip WallProjections &&
-          popd
+        run: 7z a WallProjections-${{ inputs.target }}.zip $HOME/build/WallProjections
 
       - name: Archive production artifact
         uses: actions/upload-artifact@v4
