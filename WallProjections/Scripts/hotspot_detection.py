@@ -110,9 +110,9 @@ def hotspot_detection(event_handler: EventHandler, calibration_matrix_net_array,
         # draw hotspots on landmarks view (for debugging)
         if DEBUG_HAND_LANDMARKS:
             for hotspot in hotspots:
-                radius = int(hotspot._radius)
-                cv2.circle(video_capture_img_bgr, tuple(int(x) for x in hotspot._proj_pos), radius,
-                           (255, 255, 255), thickness=-1)
+                pos_float = calibrator.proj_to_cam((int(hotspot._proj_pos[0]), int(hotspot._proj_pos[1])))
+                pos = (int(pos_float[0]), int(pos_float[1]))
+                cv2.circle(video_capture_img_bgr, pos, 7, (0, 255, 0), thickness=-1)
 
         # noinspection PyUnresolvedReferences
         if hasattr(model_output, "multi_hand_landmarks") and model_output.multi_hand_landmarks is not None:
