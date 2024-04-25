@@ -98,7 +98,6 @@ class VideoCapture:
                 self._current_frame = video_capture_img
             else:
                 logger.warning("Unsuccessful video read; ignoring frame.")
-                continue
 
             if self._stopping:
                 break
