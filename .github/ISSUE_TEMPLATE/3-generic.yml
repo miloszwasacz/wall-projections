@@ -1,9 +1,11 @@
-name: Other issue
+name: General issue
 description: File an issue that doesn't fit into any other category
 body:
   - type: markdown
     attributes:
-      value: Please use this template only as a last resort. If you can't find a more specific template that fits your issue, please provide as much detail as possible.
+      value: >
+        Please use this template only as a last resort.
+        If you can't find a more specific template that fits your issue, please provide as much detail as possible.
   - type: textarea
     id: description
     attributes:
