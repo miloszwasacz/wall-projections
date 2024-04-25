@@ -8,6 +8,7 @@
         x:DataType="vm:ISecondaryWindowViewModel"
         Icon="/Assets/app-icon.ico"
         Title="Hotspot Projections"
+        Classes="Projection"
         Content="{Binding Content}"
         KeyDown="OnKeyDown"
         Closing="OnClosing">

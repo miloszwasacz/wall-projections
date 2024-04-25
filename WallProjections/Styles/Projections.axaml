@@ -3,17 +3,29 @@
         xmlns:sys="using:System">
 
     <Styles.Resources>
-        <SolidColorBrush x:Key="ProjectionBackgroundBrush" Color="Black" />
-        <SolidColorBrush x:Key="HotspotFillBrush" Color="White" />
-        <SolidColorBrush x:Key="HotspotStrokeBrush" Color="White" />
-        <sys:Double x:Key="HotspotStrokeThickness">10</sys:Double>
+        <ResourceDictionary>
+            <sys:Double x:Key="HotspotStrokeThickness">10</sys:Double>
+
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <StaticResource x:Key="ProjectionBackgroundBrush" ResourceKey="RegionBrush" />
+                    <StaticResource x:Key="HotspotFillBrush" ResourceKey="TextControlForeground" />
+                    <StaticResource x:Key="HotspotStrokeBrush" ResourceKey="TextControlForeground" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <StaticResource x:Key="ProjectionBackgroundBrush" ResourceKey="RegionBrush" />
+                    <StaticResource x:Key="HotspotFillBrush" ResourceKey="TextControlForeground" />
+                    <StaticResource x:Key="HotspotStrokeBrush" ResourceKey="TextControlForeground" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
     </Styles.Resources>
 
-    <Style Selector=":is(TemplatedControl).ProjectionContainer">
-        <Setter Property="Background" Value="{StaticResource ProjectionBackgroundBrush}" />
+    <Style Selector="Window.Projection">
+        <Setter Property="RequestedThemeVariant" Value="Dark" />
     </Style>
 
     <Style Selector="Path.hotspot, Ellipse.hotspot">
-        <Setter Property="Fill" Value="{StaticResource HotspotFillBrush}" />
+        <Setter Property="Fill" Value="{DynamicResource HotspotFillBrush}" />
     </Style>
 </Styles>
