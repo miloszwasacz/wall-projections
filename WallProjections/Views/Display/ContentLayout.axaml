@@ -7,6 +7,7 @@
     <Thickness x:Key="ContentLayoutPadding">48</Thickness>
     <sys:Double x:Key="ContentLayoutSeparatorHeight">4</sys:Double>
     <Thickness x:Key="ContentLayoutSeparatorMargin">0, 32, 0, 48</Thickness>
+    <GridLength x:Key="DefaultContentSpacing">48</GridLength>
 
     <ControlTheme x:Key="{x:Type views:ContentLayout}" TargetType="views:ContentLayout">
         <Setter Property="Template">

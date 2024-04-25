@@ -3,36 +3,29 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:layouts="using:WallProjections.ViewModels.Display.Layouts"
+             xmlns:text="using:WallProjections.Views"
              xmlns:views="using:WallProjections.Views.Display"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.Display.Layouts.ImageWithDescriptionView"
              x:DataType="layouts:ImageWithDescriptionViewModel">
 
-    <Grid ColumnDefinitions="*, 10, *" RowDefinitions="Auto, *">
 
-        <Border Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
-                Margin="0 0 0 24"
-                Padding="0 0 0 12"
-                BorderThickness="0 0 0 4"
-                BorderBrush="Black">
+    <views:ContentLayout HotspotTitle="{Binding Title}">
+        <Grid RowDefinitions="*">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{StaticResource DefaultContentSpacing}" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-            <TextBlock FontSize="42"
-                       FontWeight="Bold"
-                       Text="{Binding Title}" />
-        </Border>
+            <text:JustifiedTextBlock Grid.Column="0" Grid.Row="0"
+                                     Classes="hotspot-description"
+                                     Text="{Binding Description}" />
 
-        <TextBlock Grid.Column="0" Grid.Row="1"
-                   Text="{Binding Description}"
-                   TextWrapping="Wrap"
-                   TextAlignment="Start"
-                   FontSize="24" />
+            <views:ImageView Grid.Column="2" Grid.Row="0"
+                             DataContext="{Binding ImageViewModel}" />
 
-        <views:ImageView Grid.Column="2"
-                           Grid.Row="1"
-                           DataContext="{Binding ImageViewModel}"  />
-
-    </Grid>
+        </Grid>
+    </views:ContentLayout>
 
 </UserControl>
-
-
