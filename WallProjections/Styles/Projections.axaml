@@ -28,4 +28,11 @@
     <Style Selector="Path.hotspot, Ellipse.hotspot">
         <Setter Property="Fill" Value="{DynamicResource HotspotFillBrush}" />
     </Style>
+
+    <Style Selector="TextBlock.hotspot-description">
+        <Setter Property="FontSize" Value="{StaticResource TitleFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource TitleLineHeight}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
 </Styles>

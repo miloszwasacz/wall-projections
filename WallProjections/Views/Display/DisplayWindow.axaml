@@ -8,8 +8,8 @@
         x:DataType="vm:IDisplayViewModel"
         Icon="/Assets/app-icon.ico"
         Title="WallProjections"
+        Classes="Projection"
         WindowState="FullScreen"
-        Padding="42"
         Closing="Window_OnClosing"
         KeyDown="OnKeyDown">
 

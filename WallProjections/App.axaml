@@ -11,11 +11,12 @@
     </Application.DataTemplates>
 
     <Application.Resources>
-        <!-- Converters -->
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="/Styles/BaseResources.axaml" />
+                <ResourceInclude Source="/Views/Display/ContentLayout.axaml" />
                 <ResourceDictionary>
+                    <!-- Converters -->
                     <converters:StateConverter x:Key="StateConverter" />
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
