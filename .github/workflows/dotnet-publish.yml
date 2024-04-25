@@ -7,10 +7,14 @@ on:
         description: 'Target runtime'
         type: string
         required: true
+      runner:
+        description: 'The Operating System used for building'
+        type: string
+        required: true
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     steps:
       - uses: actions/checkout@v4
 
