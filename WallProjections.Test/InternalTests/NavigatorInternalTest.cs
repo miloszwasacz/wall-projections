@@ -33,8 +33,10 @@ public class NavigatorInternalTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => {},
             new MockLoggerFactory()
         );
+        lifetime.MainWindow?.CloseAndDispose();
         lifetime.MainWindow = null;
         Assert.That(lifetime.MainWindow, Is.Null);
 

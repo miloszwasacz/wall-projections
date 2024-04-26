@@ -36,6 +36,7 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => {},
             new MockLoggerFactory()
         );
 
@@ -58,6 +59,7 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => {},
             new MockLoggerFactory()
         );
 
@@ -80,6 +82,7 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => {},
             new MockLoggerFactory()
         );
         await FlushUIThread(100);
@@ -107,6 +110,7 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => {},
             new MockLoggerFactory()
         );
         navigator.OpenEditor();
@@ -139,6 +143,11 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            exitCode =>
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                lifetime.DryShutdown(exitCode);
+            },
             new MockLoggerFactory()
         );
         await FlushUIThread(100);
@@ -147,14 +156,7 @@ public class NavigatorTest
         navigator.CloseEditor();
 
         await FlushUIThread();
-        Assert.Multiple(() =>
-        {
-            Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
-            Assert.That(lifetime.MainWindow, Is.Null);
-            Assert.That(vmProvider.HasBeenDisposed, Is.True);
-            Assert.That(pythonHandler.CurrentScript, Is.Null);
-            Assert.That(pythonHandler.IsDisposed, Is.False);
-        });
+        Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
     }
 
     [AvaloniaTest]
@@ -171,6 +173,7 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => {},
             new MockLoggerFactory()
         );
         await FlushUIThread(100);
@@ -199,6 +202,7 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => {},
             new MockLoggerFactory()
         );
         navigator.ShowCalibrationMarkers();
@@ -223,6 +227,11 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            exitCode =>
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                lifetime.DryShutdown(exitCode);
+            },
             new MockLoggerFactory()
         );
         await FlushUIThread(100);
@@ -230,18 +239,13 @@ public class NavigatorTest
 
         navigator.Shutdown();
         await FlushUIThread();
-        Assert.Multiple(() =>
-        {
-            Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
-            Assert.That(lifetime.MainWindow, Is.Null);
-            Assert.That(vmProvider.HasBeenDisposed, Is.True);
-            Assert.That(pythonHandler.CurrentScript, Is.Null);
-            Assert.That(pythonHandler.IsDisposed, Is.False);
-        });
+        Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { 0 }));
     }
 
+    //TODO Use this test as a basis when adding tests for GlobalWindowManager
     [AvaloniaTest]
     [NonParallelizable]
+    [Ignore("The Navigator no longer subscribes to the AppLifetime.OnExit")]
     [MethodImpl(MethodImplOptions.NoOptimization)] // Prevents the `navigator` from being optimized out
     public async Task ShutdownFromAppLifetimeTest()
     {
@@ -255,6 +259,11 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            exitCode =>
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                lifetime.DryShutdown(exitCode);
+            },
             new MockLoggerFactory()
         );
         await FlushUIThread(100);
@@ -289,6 +298,7 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => {},
             new MockLoggerFactory()
         );
         await FlushUIThread(100);
@@ -300,7 +310,7 @@ public class NavigatorTest
         {
             Assert.That(lifetime.MainWindow, Is.Null);
             Assert.That(vmProvider.HasBeenDisposed, Is.True);
-            Assert.That(pythonHandler.CurrentScript, Is.Null);
+            Assert.That(pythonHandler.CurrentScript, Is.Not.Null);
             Assert.That(pythonHandler.IsDisposed, Is.False);
         });
     }

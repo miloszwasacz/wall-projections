@@ -32,4 +32,13 @@ public class MockDesktopLifetime : ClassicDesktopStyleApplicationLifetime, IClas
         Exit?.Invoke(this, new ControlledApplicationLifetimeExitEventArgs(exitCode));
         MainWindow?.Close();
     }
+
+    /// <summary>
+    /// Adds <paramref name="exitCode" /> to <see cref="Shutdowns" /> without actually shutting down the application
+    /// </summary>
+    /// <param name="exitCode">The exit code to quit the application with</param>
+    public void DryShutdown(ExitCode exitCode)
+    {
+        _shutdowns.Add((int)exitCode);
+    }
 }

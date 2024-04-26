@@ -13,6 +13,7 @@ using WallProjections.Helper;
 namespace WallProjections;
 
 // ReSharper disable once ClassNeverInstantiated.Global
+[ExcludeFromCodeCoverage(Justification = "This is the main entry point, which uses not testable application lifetime")]
 internal class Program
 {
     /// <summary>
@@ -22,7 +23,6 @@ internal class Program
     /// </summary>
     /// <param name="args">Application arguments</param>
     [STAThread]
-    [ExcludeFromCodeCoverage]
     public static void Main(string[] args)
     {
         using var loggerFactory = LoggerFactory.Create(builder =>
@@ -49,7 +49,6 @@ internal class Program
     /// <summary>
     /// Avalonia configuration, don't remove; also used by visual designer.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     private static AppBuilder BuildAvaloniaApp(ILoggerFactory loggerFactory) =>
         AppBuilder.Configure(() => new App(loggerFactory))
             .UsePlatformDetect()
@@ -61,7 +60,6 @@ internal class Program
     /// Don't use this method. It is only used by the visual designer.
     /// Use <see cref="BuildAvaloniaApp(ILoggerFactory)"/> instead.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     [Obsolete("This method is only used by the visual designer.", true)]
     private static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<App>()

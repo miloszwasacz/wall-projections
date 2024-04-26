@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ namespace WallProjections;
 /// <summary>
 /// Manages the global application state.
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "This class manages the application lifetime, which is not testable")]
 public class GlobalWindowManager
 {
     /// <summary>
@@ -115,6 +117,7 @@ public class GlobalWindowManager
                 _loggerFactory
             ),
             () => new FileHandler(),
+            exitCode => _appLifetime.Shutdown(exitCode),
             _loggerFactory
         );
 

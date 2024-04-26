@@ -33,6 +33,11 @@ public sealed class Navigator : ViewModelBase, INavigator
     private readonly AppLifetime _appLifetime;
 
     /// <summary>
+    /// A method to shut down the application.
+    /// </summary>
+    private readonly Action<ExitCode> _shutdown;
+
+    /// <summary>
     /// The viewmodel provider.
     /// </summary>
     private readonly IViewModelProvider _vmProvider;
@@ -73,17 +78,20 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <param name="pythonHandler">The handler for Python interop.</param>
     /// <param name="vmProviderFactory">A factory to create a <see cref="IViewModelProvider" /> instance.</param>
     /// <param name="fileHandlerFactory">A factory to create <see cref="IFileHandler">file handlers</see>.</param>
+    /// <param name="shutdown">A method to shut down the application.</param>
     /// <param name="loggerFactory">A factory to create loggers.</param>
     public Navigator(
         AppLifetime appLifetime,
         IPythonHandler pythonHandler,
         Func<INavigator, IPythonHandler, IViewModelProvider> vmProviderFactory,
         Func<IFileHandler> fileHandlerFactory,
+        Action<ExitCode> shutdown,
         ILoggerFactory loggerFactory
     )
     {
         _logger = loggerFactory.CreateLogger<Navigator>();
         _appLifetime = appLifetime;
+        _shutdown = shutdown;
         _pythonHandler = pythonHandler;
         _fileHandlerFactory = fileHandlerFactory;
         _vmProvider = vmProviderFactory(this, pythonHandler);
@@ -244,7 +252,7 @@ public sealed class Navigator : ViewModelBase, INavigator
     public void Shutdown()
     {
         _secondaryScreen.window.Close();
-        _appLifetime.Shutdown();
+        _shutdown(ExitCode.Success);
     }
 
     /// <summary>
