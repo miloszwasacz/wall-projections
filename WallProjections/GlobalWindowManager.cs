@@ -8,6 +8,7 @@ using WallProjections.Models;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
+using WallProjections.Views;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 
 namespace WallProjections;
@@ -69,16 +70,8 @@ public class GlobalWindowManager
         _processProxy = new ProcessProxy(loggerFactory);
         _pythonProxy = new PythonProxy(_processProxy, loggerFactory);
         _appLifetime.Exit += OnExit;
-        Initialize();
-    }
 
-    /// <summary>
-    /// Initializes the application.
-    /// </summary>
-    private void Initialize()
-    {
         var cameras = _pythonProxy.GetAvailableCameras();
-        int cameraIndex;
         switch (cameras.Count)
         {
             case 0:
@@ -87,17 +80,28 @@ public class GlobalWindowManager
                 return;
             case > 1:
                 _logger.LogTrace("Multiple cameras detected");
-                // Show dialog to select camera if multiple cameras are detected
-                //TODO Allow user to select camera
-                cameraIndex = cameras.First().Key;
+                var dialog = new CameraChooserDialog
+                {
+                    DataContext = new CameraChooserViewModel(cameras, Initialize)
+                };
+                _appLifetime.MainWindow = dialog;
+                dialog.Show();
                 break;
             default:
                 _logger.LogTrace("Single camera detected");
-                cameraIndex = cameras.First().Key;
+                Initialize(cameras.First());
                 break;
         }
+    }
 
-        _pythonHandler = new PythonHandler(cameraIndex, _pythonProxy, _loggerFactory);
+    /// <summary>
+    /// Initializes the application.
+    /// </summary>
+    private void Initialize(Camera camera)
+    {
+        _logger.LogInformation("Selected camera: {Camera}", camera.DisplayName);
+
+        _pythonHandler = new PythonHandler(camera.Index, _pythonProxy, _loggerFactory);
         _navigator = new Navigator(
             _appLifetime,
             _pythonHandler,
@@ -113,6 +117,8 @@ public class GlobalWindowManager
             () => new FileHandler(),
             _loggerFactory
         );
+
+        _logger.LogInformation("Application initialized successfully");
     }
 
     /// <summary>
