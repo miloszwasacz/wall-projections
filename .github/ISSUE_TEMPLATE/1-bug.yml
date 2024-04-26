@@ -1,6 +1,7 @@
-﻿name: Bug Report
+name: Bug report
 description: File a bug report
-labels: ["bug"]
+labels:
+  - bug
 body:
   - type: textarea
     id: what-happened
@@ -40,7 +41,6 @@ body:
         - macOS (x64)
         - Linux (x64)
         - Linux (ARM64)
-        - Raspberry Pi OS (ARM64)
         - Other (please specify in _Additional context_)
   - type: textarea
     id: logs
