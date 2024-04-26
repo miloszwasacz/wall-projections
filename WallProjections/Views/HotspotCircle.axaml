@@ -32,7 +32,7 @@
                 <Binding Path="$parent[views:HotspotCircle].Diameter"
                          Converter="{StaticResource FullArcDiameterConverter}" />
             </Setter>
-            <Setter Property="Stroke" Value="{StaticResource HotspotStrokeBrush}" />
+            <Setter Property="Stroke" Value="{DynamicResource HotspotStrokeBrush}" />
             <Setter Property="StrokeThickness" Value="{StaticResource HotspotStrokeThickness}" />
         </Style>
 
