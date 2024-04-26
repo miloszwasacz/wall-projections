@@ -26,7 +26,7 @@ public partial class HotspotCircle : Panel, IDisposable
     /// </summary>
     public static readonly StyledProperty<double> DiameterProperty =
         AvaloniaProperty.Register<HotspotCircle, double>(nameof(Diameter));
-    
+
     /// <summary>
     /// A <see cref="DirectProperty{TOwner,TValue}">DirectProperty</see> that defines the <see cref="HotspotState"/> property.
     /// </summary>
@@ -94,7 +94,6 @@ public partial class HotspotCircle : Panel, IDisposable
                     Pulse = false;
                 }
             }
-            
         }
     }
 
@@ -175,8 +174,6 @@ public class FullArcDiameterConverter : IValueConverter
         return diameter * 1.25 + 20;
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotSupportedException();
-    }
 }

@@ -16,7 +16,7 @@ public class ImageWithDescriptionViewModelTest
         const int hotspotId = 0;
         const string title = "Title";
         const string description = "Description";
-        var  imagePaths = new List<string>{"image_0.png"};
+        var imagePaths = new List<string> { "image_0.png" };
         var vmProvider = new MockViewModelProvider();
 
         var imageWithDescriptionViewModel = new ImageWithDescriptionViewModel(

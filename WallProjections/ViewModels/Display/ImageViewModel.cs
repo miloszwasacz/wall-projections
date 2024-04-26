@@ -16,14 +16,14 @@ namespace WallProjections.ViewModels.Display;
 public class ImageViewModel : ViewModelBase, IImageViewModel
 {
     /// <summary>
-    /// A logger for this class
-    /// </summary>
-    private readonly ILogger _logger;
-
-    /// <summary>
     /// The path to the fallback image
     /// </summary>
     private static readonly Uri FallbackImagePath = new("avares://WallProjections/Assets/fallback.png");
+
+    /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
 
     /// <summary>
     /// If <see cref="ImageViewModel"/> is disposed.
@@ -191,5 +191,6 @@ public class ImageViewModel : ViewModelBase, IImageViewModel
         _isDisposed = true;
         StopSlideshow();
         ClearImages();
+        GC.SuppressFinalize(this);
     }
 }

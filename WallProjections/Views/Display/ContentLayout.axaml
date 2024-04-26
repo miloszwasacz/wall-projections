@@ -1,0 +1,42 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:views="using:WallProjections.Views.Display"
+                    xmlns:sys="using:System"
+                    x:ClassModifier="internal">
+
+    <Thickness x:Key="ContentLayoutPadding">48</Thickness>
+    <sys:Double x:Key="ContentLayoutSeparatorHeight">4</sys:Double>
+    <Thickness x:Key="ContentLayoutSeparatorMargin">0, 32, 0, 48</Thickness>
+    <GridLength x:Key="DefaultContentSpacing">48</GridLength>
+
+    <ControlTheme x:Key="{x:Type views:ContentLayout}" TargetType="views:ContentLayout">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <DockPanel Margin="{StaticResource ContentLayoutPadding}">
+                    <DockPanel.Styles>
+                        <Style Selector="Separator.decorative">
+                            <Setter Property="Background" Value="{DynamicResource TextControlForeground}" />
+                            <Setter Property="Height" Value="{StaticResource ContentLayoutSeparatorHeight}" />
+                            <Setter Property="CornerRadius">
+                                <Binding Source="{StaticResource ContentLayoutSeparatorHeight}"
+                                         Converter="{StaticResource CornerRadiusConverter}" />
+                            </Setter>
+                            <Setter Property="Margin" Value="{StaticResource ContentLayoutSeparatorMargin}" />
+                        </Style>
+                    </DockPanel.Styles>
+
+                    <TextBlock DockPanel.Dock="Top"
+                               Classes="display"
+                               Text="{TemplateBinding HotspotTitle}" />
+
+                    <Separator DockPanel.Dock="Top"
+                               Classes="decorative" />
+
+                    <ContentPresenter Content="{TemplateBinding Content}" />
+
+                </DockPanel>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

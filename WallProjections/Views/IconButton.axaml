@@ -6,11 +6,13 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.IconButton"
         Width="{Binding Bounds.Height, RelativeSource={RelativeSource Self}}"
-        VerticalAlignment="Stretch"
-        Padding="10">
+        Classes="IconButton">
 
-    <Viewbox>
-        <PathIcon Width="20" Height="20"
+    <Viewbox StretchDirection="UpOnly">
+        <!-- ReSharper disable once InconsistentNaming -->
+        <PathIcon x:Name="PART_PathIcon"
+                  Width="{StaticResource IconButtonIconMinSize}"
+                  Height="{StaticResource IconButtonIconMinSize}"
                   Data="{Binding $parent[views:IconButton].IconData}" />
     </Viewbox>
 

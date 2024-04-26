@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:layouts="using:WallProjections.ViewModels.Display.Layouts"
+             xmlns:views="using:WallProjections.Views.Display"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="WallProjections.Views.Display.Layouts.MessageView"
+             x:DataType="layouts:DescriptionViewModel">
+
+    <views:ContentLayout HotspotTitle="{Binding Title}">
+        <Grid ColumnDefinitions="*, 6*, *" RowDefinitions="4*, *">
+
+            <TextBlock Grid.Column="1" Grid.Row="0"
+                       Classes="projection-message"
+                       VerticalAlignment="Center"
+                       TextAlignment="Center"
+                       Text="{Binding Description}" />
+
+        </Grid>
+    </views:ContentLayout>
+
+</UserControl>

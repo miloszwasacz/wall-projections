@@ -8,6 +8,6 @@
              x:Class="WallProjections.Views.Display.Layouts.ErrorView"
              x:DataType="layouts:ErrorViewModel">
 
-    <views:DescriptionView DataContext="{Binding}" />
+    <views:MessageView DataContext="{Binding}" />
 
 </UserControl>

@@ -112,10 +112,10 @@ public sealed class MockVideoViewModel : IVideoViewModel
             if (_videoPaths[i].hasPlayed) continue;
 
             _videoPaths[i] = (_videoPaths[i].path, true);
-            return new Task<bool>(() => true);
+            return Task.FromResult(true);
         }
 
-        return new Task<bool>(() => false);
+        return Task.FromResult(false);
     }
 
     /// <summary>

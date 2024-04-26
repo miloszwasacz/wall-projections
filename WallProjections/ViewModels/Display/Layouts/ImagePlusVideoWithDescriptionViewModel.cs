@@ -7,15 +7,15 @@ using WallProjections.ViewModels.Interfaces.Display.Layouts;
 
 namespace WallProjections.ViewModels.Display.Layouts;
 
-public class ImagePlusVideoWithDescriptionViewModel : Layout
+public class ImagePlusVideoWithDescriptionViewModel : Layout, IDisposable
 {
     /// <summary>
-    /// Image view model used to show images
+    /// Viewmodel used to show images
     /// </summary>
     public IImageViewModel ImageViewModel { get; }
 
     /// <summary>
-    /// Video view model to show videos
+    /// Viewmodel used to show videos
     /// </summary>
     public IVideoViewModel VideoViewModel { get; }
 

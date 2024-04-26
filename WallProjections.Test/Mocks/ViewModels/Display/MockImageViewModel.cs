@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using FluentAvalonia.Core;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Interfaces.Display;
 

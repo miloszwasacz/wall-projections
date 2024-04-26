@@ -3,9 +3,22 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:WallProjections.ViewModels.SecondaryScreens"
+             xmlns:sys="using:System"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.SecondaryScreens.ArUcoGridView"
              x:DataType="vm:ArUcoGridViewModel">
+
+    <UserControl.Resources>
+        <Thickness x:Key="ArUcoContainerPadding">10</Thickness>
+        <sys:Double x:Key="ArUcoSize">100</sys:Double>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Image.ArUco">
+            <Setter Property="Width" Value="{StaticResource ArUcoSize}" />
+            <Setter Property="Height" Value="{StaticResource ArUcoSize}" />
+        </Style>
+    </UserControl.Styles>
 
     <ItemsControl ItemsSource="{Binding ArUcoList}">
 
@@ -17,14 +30,14 @@
 
         <ItemsControl.Styles>
             <Style Selector="ItemsControl > ContentPresenter">
-                <Setter Property="Padding" Value="10" />
+                <Setter Property="Padding" Value="{StaticResource ArUcoContainerPadding}" />
             </Style>
         </ItemsControl.Styles>
 
         <ItemsControl.ItemTemplate>
             <DataTemplate>
 
-                <Image Height="100" Width="100"
+                <Image Classes="ArUco"
                        Tag="{Binding}"
                        Source="{Binding Image}" />
 

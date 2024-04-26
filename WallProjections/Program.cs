@@ -67,7 +67,20 @@ internal class Program
     {
         return AppBuilder.Configure(() => new App(pythonHandler, loggerFactory))
             .UsePlatformDetect()
-            .WithInterFont()
+            .LogToTrace()
+            .UseReactiveUI();
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    /// <summary>
+    /// Don't use this method. It is only used by the visual designer.
+    /// </summary>
+    [ExcludeFromCodeCoverage]
+    [Obsolete("This method is only used by the visual designer.", true)]
+    private static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure(() => new App(null!, null!))
+            .UsePlatformDetect()
             .LogToTrace()
             .UseReactiveUI();
     }

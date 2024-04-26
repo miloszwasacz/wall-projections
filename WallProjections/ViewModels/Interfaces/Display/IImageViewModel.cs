@@ -17,7 +17,7 @@ public interface IImageViewModel : IDisposable
     public Bitmap? Image { get; }
 
     /// <summary>
-    /// Whether or not the viewmodel has an image to display.
+    /// Whether the viewmodel has images to display.
     /// </summary>
     public bool HasImages { get; }
 
@@ -46,7 +46,7 @@ public interface IImageViewModel : IDisposable
     public void StopSlideshow();
 
     /// <summary>
-    /// Removes all current images from the view model.
+    /// Removes all current images from the viewmodel.
     /// </summary>
     public void ClearImages();
 }
