@@ -41,7 +41,7 @@ jobs:
       - name: Publish
         run: >
           dotnet publish WallProjections --no-restore -c Release -r ${{ inputs.target }} \
-              --sc -o $HOME/build/WallProjections --verbosity normal
+              --self-contained -o $HOME/build/WallProjections --verbosity normal
 
       - name: Zip
         run: 7z a WallProjections-${{ inputs.target }}.zip $HOME/build/WallProjections
