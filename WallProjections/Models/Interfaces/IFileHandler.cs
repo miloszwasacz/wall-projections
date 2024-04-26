@@ -70,6 +70,7 @@ public interface IFileHandler
     /// Loads the config.json file from the config folder.
     /// </summary>
     /// <returns>Loaded <see cref="IConfig"/></returns>
+    /// <exception cref="ConfigNotImportedException">If the config.json file is not found.</exception>
     /// <exception cref="ConfigInvalidException">If the config.json file is not a valid <see cref="IConfig"/></exception>
     /// <exception cref="ConfigIOException">If there is an issue accessing internal config files/folders.</exception>
     public IConfig LoadConfig();

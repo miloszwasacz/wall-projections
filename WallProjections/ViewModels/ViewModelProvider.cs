@@ -16,7 +16,7 @@ using WallProjections.ViewModels.SecondaryScreens;
 namespace WallProjections.ViewModels;
 
 /// <inheritdoc cref="IViewModelProvider" />
-public sealed class ViewModelProvider : IViewModelProvider, IDisposable
+public sealed class ViewModelProvider : IViewModelProvider
 {
     /// <summary>
     /// A factory for creating loggers, passed to the viewmodels that need it

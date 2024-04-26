@@ -10,7 +10,7 @@ namespace WallProjections.ViewModels.Interfaces;
 /// <summary>
 /// A provider for creating viewmodels using Dependency Injection
 /// </summary>
-public interface IViewModelProvider
+public interface IViewModelProvider : IDisposable
 {
     #region Display
 

@@ -7,7 +7,6 @@ using Avalonia;
 using Avalonia.ReactiveUI;
 using Microsoft.Extensions.Logging;
 using WallProjections.Helper;
-using WallProjections.Helper.Interfaces;
 
 [assembly: InternalsVisibleTo("WallProjections.Test")]
 
@@ -42,19 +41,7 @@ internal class Program
         var logger = loggerFactory.CreateLogger("Program");
         logger.LogInformation("Starting application");
 
-        using var pythonProxy = new PythonProxy(new ProcessProxy(loggerFactory), loggerFactory);
-        var cameras = pythonProxy.GetAvailableCameras();
-
-        //TODO Allow user to select camera
-        if (cameras.Count == 0)
-        {
-            logger.LogError("No cameras detected. Exiting application.");
-            return;
-        }
-        var (cameraIndex, _) = cameras.First();
-
-        using var pythonHandler = new PythonHandler(cameraIndex, pythonProxy, loggerFactory);
-        BuildAvaloniaApp(pythonHandler, loggerFactory).StartWithClassicDesktopLifetime(args);
+        BuildAvaloniaApp(loggerFactory).StartWithClassicDesktopLifetime(args);
 
         logger.LogInformation("Closing application");
     }
@@ -63,25 +50,22 @@ internal class Program
     /// Avalonia configuration, don't remove; also used by visual designer.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    private static AppBuilder BuildAvaloniaApp(IPythonHandler pythonHandler, ILoggerFactory loggerFactory)
-    {
-        return AppBuilder.Configure(() => new App(pythonHandler, loggerFactory))
+    private static AppBuilder BuildAvaloniaApp(ILoggerFactory loggerFactory) =>
+        AppBuilder.Configure(() => new App(loggerFactory))
             .UsePlatformDetect()
             .LogToTrace()
             .UseReactiveUI();
-    }
 
     // ReSharper disable once UnusedMember.Local
     /// <summary>
     /// Don't use this method. It is only used by the visual designer.
+    /// Use <see cref="BuildAvaloniaApp(ILoggerFactory)"/> instead.
     /// </summary>
     [ExcludeFromCodeCoverage]
     [Obsolete("This method is only used by the visual designer.", true)]
-    private static AppBuilder BuildAvaloniaApp()
-    {
-        return AppBuilder.Configure(() => new App(null!, null!))
+    private static AppBuilder BuildAvaloniaApp() =>
+        AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace()
             .UseReactiveUI();
-    }
 }

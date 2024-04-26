@@ -55,7 +55,11 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <summary>
     /// Currently opened main window
     /// </summary>
-    private Window? _mainWindow;
+    private Window? MainWindow
+    {
+        get => _appLifetime.MainWindow;
+        set => _appLifetime.MainWindow = value;
+    }
 
     /// <summary>
     /// Secondary screen window and its viewmodel
@@ -84,7 +88,6 @@ public sealed class Navigator : ViewModelBase, INavigator
         _fileHandlerFactory = fileHandlerFactory;
         _vmProvider = vmProviderFactory(this, pythonHandler);
         _secondaryScreen = OpenSecondaryWindow(_vmProvider);
-        _appLifetime.Exit += OnExit;
 
         Initialize();
     }
@@ -219,7 +222,7 @@ public sealed class Navigator : ViewModelBase, INavigator
     {
         lock (this)
         {
-            if (_mainWindow?.DataContext is IEditorViewModel editorViewModel)
+            if (MainWindow?.DataContext is IEditorViewModel editorViewModel)
                 _secondaryScreen.viewModel.ShowPositionEditor(editorViewModel);
         }
     }
@@ -245,17 +248,19 @@ public sealed class Navigator : ViewModelBase, INavigator
     }
 
     /// <summary>
-    /// Opens the specified window, sets it as the <see cref="_mainWindow" /> and the <see cref="AppLifetime.MainWindow" />,
+    /// Opens the specified window, sets it as the <see cref="MainWindow" /> and the <see cref="AppLifetime.MainWindow" />,
     /// and <see cref="WindowExtensions.CloseAndDispose">closes</see> the currently opened window.
     /// </summary>
     /// <param name="newWindow">The new window to open.</param>
     private void Navigate(Window newWindow)
     {
-        var currentWindow = _mainWindow;
-        _mainWindow = newWindow;
-        newWindow.Show();
-        _appLifetime.MainWindow = newWindow;
-        currentWindow?.CloseAndDispose();
+        lock (this)
+        {
+            var currentWindow = MainWindow;
+            newWindow.Show();
+            MainWindow = newWindow;
+            currentWindow?.CloseAndDispose();
+        }
     }
 
     /// <summary>
@@ -292,30 +297,17 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <inheritdoc />
     public void Dispose()
     {
-        if (_vmProvider is IDisposable vmProvider)
-            vmProvider.Dispose();
+        lock (this)
+        {
+            var mainWindow = MainWindow;
+            MainWindow = null;
+            if (_vmProvider is IDisposable vmProvider)
+                vmProvider.Dispose();
 
-        if (_appLifetime.MainWindow?.DataContext is IDisposable vm)
-            vm.Dispose();
-
-        _pythonHandler.CancelCurrentTask();
-
-        _appLifetime.MainWindow = null;
-        _appLifetime.Exit -= OnExit;
+            if (mainWindow?.DataContext is IDisposable vm)
+                vm.Dispose();
+        }
     }
-
-    // ReSharper disable UnusedParameter.Local
-
-    /// <summary>
-    /// A callback for the <see cref="_appLifetime" />'s <see cref="AppLifetime.Exit" /> event
-    /// which simply <see cref="Dispose">disposes</see> the <see cref="Navigator" />.
-    /// </summary>
-    private void OnExit(object? sender, EventArgs e)
-    {
-        Dispose();
-    }
-
-    // ReSharper restore UnusedParameter.Local
 }
 
 /// <summary>

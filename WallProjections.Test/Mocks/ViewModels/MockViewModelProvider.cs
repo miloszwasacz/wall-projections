@@ -12,7 +12,7 @@ using WallProjections.ViewModels.SecondaryScreens;
 
 namespace WallProjections.Test.Mocks.ViewModels;
 
-public class MockViewModelProvider : IViewModelProvider, IDisposable
+public class MockViewModelProvider : IViewModelProvider
 {
     /// <summary>
     /// Whether <see cref="Dispose" /> has been called
