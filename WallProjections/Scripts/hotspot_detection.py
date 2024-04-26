@@ -43,7 +43,7 @@ FINGERTIP_INDICES: tuple[int, ...] = (4, 8, 12, 16, 20)
 
 This shouldn't need to be changed unless there's a breaking change upstream in mediapipe."""
 
-DEBUG_HAND_LANDMARKS: bool = True
+DEBUG_HAND_LANDMARKS: bool = False
 
 
 detection_running = False
