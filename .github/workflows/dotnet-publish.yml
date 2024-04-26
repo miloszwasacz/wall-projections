@@ -39,6 +39,7 @@ jobs:
         run: dotnet restore -r ${{ inputs.target }}
 
       - name: Publish
+        shell: bash
         run: >
           dotnet publish WallProjections --no-restore -c Release -r ${{ inputs.target }} \
               --self-contained -o $HOME/build/WallProjections --verbosity normal
