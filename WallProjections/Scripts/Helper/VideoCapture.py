@@ -30,6 +30,8 @@ Tweaking these properties could be found useful in case of any issues with captu
 See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d and
 https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
 
+RECORD_VIDEO: bool = True
+
 
 class VideoCapture:
     """Helper class for capturing video (or a photo)."""
@@ -50,6 +52,9 @@ class VideoCapture:
         """The current frame in BGR."""
         self._stopping: bool = False
         self._lock: threading.Lock = threading.Lock()
+        if RECORD_VIDEO:
+            codec = cv2.VideoWriter.fourcc(*'DIVX')
+            self._video_writer = cv2.VideoWriter('output.avi', codec, 30.0, (640, 480))
 
     def start(self) -> None:
         """Start capturing video. Blocks for a few seconds until the webcam is opened."""
@@ -96,6 +101,8 @@ class VideoCapture:
                 new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
                 video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)
                 self._current_frame = video_capture_img
+                if RECORD_VIDEO:
+                    self._video_writer.write(video_capture_img)
             else:
                 logger.warning("Unsuccessful video read; ignoring frame.")
 
@@ -107,6 +114,8 @@ class VideoCapture:
                 cv2.waitKey(int(1000/30))
 
         video_capture.release()
+        if RECORD_VIDEO:
+            self._video_writer.release()
 
     def get_current_frame(self) -> np.ndarray:
         """Get the current frame in BGR. Throws a RuntimeError if the video capture is not running. (Or if video capture
