@@ -102,6 +102,10 @@ class VideoCapture:
             if self._stopping:
                 break
 
+            # cap framerate if it's a test video
+            if self.target is str and len(self.target) >= 4 and self.target[-4:] == ".mp4":
+                cv2.waitKey(int(1000/30))
+
         video_capture.release()
 
     def get_current_frame(self) -> np.ndarray:
