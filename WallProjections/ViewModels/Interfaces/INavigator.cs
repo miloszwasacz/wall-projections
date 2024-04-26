@@ -41,5 +41,6 @@ public interface INavigator : IDisposable
     /// <summary>
     /// Shuts down the application.
     /// </summary>
-    public void Shutdown();
+    /// <param name="exitCode">The exit code to return to the operating system.</param>
+    public void Shutdown(ExitCode exitCode = ExitCode.Success);
 }

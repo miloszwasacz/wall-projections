@@ -12,6 +12,7 @@ using WallProjections.Models;
 #else
 using System.Diagnostics.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
@@ -116,7 +117,7 @@ public sealed class PythonProxy : IPythonProxy
             }
             catch (Exception e)
             {
-                _logger.LogError("Could not load Python non-global environment.");
+                _logger.LogError(e, "Could not load Python non-global environment.");
                 throw new DllNotFoundException(PythonDllExceptionMessage, e);
             }
         }
@@ -308,6 +309,7 @@ public sealed class PythonProxy : IPythonProxy
     public ImmutableList<Camera> GetAvailableCameras()
     {
         _logger.LogInformation("Identifying available cameras");
+        Task.Delay(2000).Wait();
         return ImmutableList.Create(
             new Camera(0, "Camera 0"),
             new Camera(700, "Camera 1"),

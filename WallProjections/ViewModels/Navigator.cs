@@ -249,10 +249,10 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// Shuts down the application.
     /// </summary>
     /// <seealso cref="AppLifetime.Shutdown(int)"/>
-    public void Shutdown()
+    public void Shutdown(ExitCode exitCode = ExitCode.Success)
     {
         _secondaryScreen.window.Close();
-        _shutdown(ExitCode.Success);
+        _shutdown(exitCode);
     }
 
     /// <summary>

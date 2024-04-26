@@ -97,7 +97,7 @@ public class MockNavigator : INavigator
     /// <summary>
     /// Sets <see cref="HasBeenShutDown"/> to true and calls <see cref="Dispose"/>.
     /// </summary>
-    public void Shutdown()
+    public void Shutdown(ExitCode exitCode = ExitCode.Success)
     {
         HasBeenShutDown = true;
         Dispose();

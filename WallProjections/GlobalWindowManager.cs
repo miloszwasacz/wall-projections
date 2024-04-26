@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.Logging;
 using WallProjections.Helper;
@@ -68,7 +69,11 @@ public class GlobalWindowManager
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<GlobalWindowManager>();
         _appLifetime = appLifetime;
-        // Show splash screen
+
+        var splashScreen = new SplashScreen();
+        _appLifetime.MainWindow = splashScreen;
+        splashScreen.Show();
+
         _processProxy = new ProcessProxy(loggerFactory);
         _pythonProxy = new PythonProxy(_processProxy, loggerFactory);
         _appLifetime.Exit += OnExit;
@@ -82,12 +87,10 @@ public class GlobalWindowManager
                 return;
             case > 1:
                 _logger.LogTrace("Multiple cameras detected");
-                var dialog = new CameraChooserDialog
+                Navigate(new CameraChooserDialog
                 {
                     DataContext = new CameraChooserViewModel(cameras, Initialize)
-                };
-                _appLifetime.MainWindow = dialog;
-                dialog.Show();
+                });
                 break;
             default:
                 _logger.LogTrace("Single camera detected");
@@ -139,6 +142,15 @@ public class GlobalWindowManager
         _navigator?.Dispose();
         _pythonHandler?.Dispose();
         _pythonProxy.Dispose();
+    }
+
+    private void Navigate(Window newWindow)
+    {
+        var oldWindow = _appLifetime.MainWindow;
+        _appLifetime.MainWindow = newWindow;
+        oldWindow?.Hide();
+        newWindow.Show();
+        oldWindow?.CloseAndDispose();
     }
 }
 
