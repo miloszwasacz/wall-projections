@@ -2,12 +2,12 @@
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.VisualTree;
 using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -33,7 +33,7 @@ public sealed class Navigator : ViewModelBase, INavigator
     private readonly AppLifetime _appLifetime;
 
     /// <summary>
-    /// A method to shut down the application.
+    /// A method executed when the navigator is shut down (usually because of an error).
     /// </summary>
     private readonly Action<ExitCode> _shutdown;
 
@@ -106,17 +106,21 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     private void Initialize()
     {
-        var fileHandler = _fileHandlerFactory();
         try
         {
+            var fileHandler = _fileHandlerFactory();
             _config = fileHandler.LoadConfig();
             OpenDisplay();
         }
+        catch (ConfigNotImportedException)
+        {
+            _logger.LogInformation("No configuration found");
+            OpenEditor();
+        }
         catch (Exception e)
         {
-            //TODO Distinguish between an error and a missing config file
             _logger.LogError(e, "Error loading configuration file");
-            OpenEditor();
+            Shutdown(ExitCode.ConfigLoadError);
         }
     }
 
@@ -146,7 +150,9 @@ public sealed class Navigator : ViewModelBase, INavigator
                 return;
             }
 
+            // TODO Await the task and handle exceptions
             _pythonHandler.RunHotspotDetection(config);
+
             var displayWindow = new DisplayWindow
             {
                 DataContext = _vmProvider.GetDisplayViewModel(config)
@@ -181,7 +187,17 @@ public sealed class Navigator : ViewModelBase, INavigator
             ? _vmProvider.GetEditorViewModel(config, fileHandler)
             : _vmProvider.GetEditorViewModel(fileHandler);
 
-        _pythonHandler.CancelCurrentTask();
+        try
+        {
+            _pythonHandler.CancelCurrentTask();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error cancelling current Python task");
+            Shutdown(ExitCode.PythonError);
+            return;
+        }
+
         var editorWindow = new EditorWindow
         {
             DataContext = vm
@@ -199,19 +215,32 @@ public sealed class Navigator : ViewModelBase, INavigator
     {
         lock (this)
         {
-            var fileHandler = _fileHandlerFactory();
+            // If _config is null, it means that there was no configuration to begin with.
+            var isInitial = _config is null;
             try
             {
+                var fileHandler = _fileHandlerFactory();
                 _config = fileHandler.LoadConfig();
                 OpenDisplayInternal();
             }
+            catch (ConfigNotImportedException e)
+            {
+                // If there was no configuration in the first place, closing the editor is the same as closing the app.
+                if (isInitial)
+                {
+                    _logger.LogInformation("Configuration not initialized and not created, closing application");
+                    Shutdown();
+                    return;
+                }
+
+                _logger.LogError(e, "No configuration found");
+                Shutdown(ExitCode.ConfigLoadError);
+            }
             catch (Exception e)
             {
-                //TODO Distinguish between an error and a missing config file
                 _logger.LogError(e, "Error loading configuration file");
                 _config = null;
-                //TODO Show error message
-                Shutdown();
+                Shutdown(ExitCode.ConfigLoadError);
             }
         }
     }
@@ -328,7 +357,7 @@ internal static class WindowExtensions
     /// and <see cref="Window.Close()">closes</see> the <paramref name="window" />.
     /// </summary>
     /// <param name="window">The window to close and dispose.</param>
-    public static async void CloseAndDispose(this Window window)
+    public static void CloseAndDispose(this Window window)
     {
         var dataContext = window.DataContext;
         window.ShowInTaskbar = false;
@@ -336,8 +365,7 @@ internal static class WindowExtensions
         if (dataContext is IDisposable vm)
             vm.Dispose();
 
-        // A delay to allow a smooth transition between windows.
-        await Task.Delay(200);
+        window.Hide();
         window.Close();
     }
 }

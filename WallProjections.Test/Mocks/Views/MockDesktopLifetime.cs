@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace WallProjections.Test.Mocks.Views;
 
@@ -8,6 +9,11 @@ namespace WallProjections.Test.Mocks.Views;
 public class MockDesktopLifetime : ClassicDesktopStyleApplicationLifetime, IClassicDesktopStyleApplicationLifetime
 {
     // "Override" methods and properties as needed
+
+    public MockDesktopLifetime()
+    {
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+    }
 
     /// <summary>
     /// The backing field for <see cref="Shutdowns" />

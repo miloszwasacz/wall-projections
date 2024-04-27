@@ -160,7 +160,9 @@ public class GlobalWindowManager
 public enum ExitCode
 {
     Success = 0,
-    NoCamerasDetected = 100
+    NoCamerasDetected = 100,
+    ConfigLoadError = 101,
+    PythonError = 200,
 }
 
 /// <summary>
