@@ -37,6 +37,14 @@
                     <Setter Property="SelectionMode" Value="Single" />
                 </Style>
             </Style>
+
+            <Style Selector="^.app-cleanup">
+                <Setter Property="MinWidth" Value="0" />
+
+                <Style Selector="^ > :is(Control)">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+            </Style>
         </Style>
 
         <Style Selector="^ TextBlock.DialogMessage">

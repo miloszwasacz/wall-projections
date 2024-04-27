@@ -1,30 +1,20 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+#if !RELEASE
+using Avalonia;
+#endif
 
 namespace WallProjections.Views;
 
 /// <summary>
 /// A generic confirmation dialog.
 /// </summary>
-public partial class ConfirmationDialog : Window
+public partial class ConfirmationDialog : ResultDialog
 {
-    /// <summary>
-    /// Whether the dialog has been handled (confirmed or cancelled).
-    /// </summary>
-    private bool _handled;
-
-    /// <summary>
-    /// The result of the dialog.
-    /// </summary>
-    /// <seealso cref="ShowDialog" />
-    private Result _result = Result.Cancelled;
-
     /// <summary>
     /// Creates a new <see cref="ConfirmationDialog"/>.
     /// </summary>
@@ -57,106 +47,9 @@ public partial class ConfirmationDialog : Window
         );
     }
 
-    // ReSharper disable UnusedParameter.Local
-
-    /// <summary>
-    /// A callback for when the user confirms the action.
-    /// Sets <see cref="_result" /> to <see cref="Result.Confirmed" /> and closes the dialog.
-    /// </summary>
-    /// <param name="sender">The sender of the event (unused).</param>
-    /// <param name="e">The event arguments (unused).</param>
-    private void Confirm_OnClick(object? sender, RoutedEventArgs? e)
-    {
-        lock (this)
-        {
-            if (_handled) return;
-
-            _handled = true;
-        }
-
-        _result = Result.Confirmed;
-        Close();
-    }
-
-    /// <summary>
-    /// A callback for when the user refuses the action.
-    /// Sets <see cref="_result" /> to <see cref="Result.Refused" /> and closes the dialog.
-    /// </summary>
-    /// <param name="sender">The sender of the event (unused).</param>
-    /// <param name="e">The event arguments (unused).</param>
-    private void Refuse_OnClick(object? sender, RoutedEventArgs e)
-    {
-        lock (this)
-        {
-            if (_handled) return;
-
-            _handled = true;
-        }
-
-        _result = Result.Refused;
-        Close();
-    }
-
-    /// <summary>
-    /// A callback for when the user cancels the action.
-    /// Sets <see cref="_result" /> to <see cref="Result.Cancelled" /> and closes the dialog.
-    /// </summary>
-    /// <param name="sender">The sender of the event (unused).</param>
-    /// <param name="e">The event arguments (unused).</param>
-    private void Cancel_OnClick(object? sender, RoutedEventArgs? e)
-    {
-        lock (this)
-        {
-            if (_handled) return;
-
-            _handled = true;
-        }
-
-        _result = Result.Cancelled;
-        Close();
-    }
-
-    /// <summary>
-    /// A callback for when the dialog is closed. Sets <see cref="_result" /> to <see cref="Result.Cancelled" />
-    /// if it hasn't already been <see cref="_handled">handled</see>.
-    /// </summary>
-    /// <param name="sender">The sender of the event (unused).</param>
-    /// <param name="e">The event arguments (unused).</param>
-    private void Dialog_OnClosed(object? sender, EventArgs e)
-    {
-        lock (this)
-        {
-            if (_handled) return;
-
-            _handled = true;
-        }
-
-        _result = Result.Cancelled;
-    }
-
-    // ReSharper restore UnusedParameter.Local
-
-    /// <inheritdoc cref="Window.ShowDialog" />
-    /// <returns>A task that can be used to retrieve the result of the dialog when it closes.</returns>
-    public new async Task<Result> ShowDialog(Window owner)
-    {
-        await base.ShowDialog(owner);
-        return _result;
-    }
-
-    /// <summary>
-    /// The possible results of the dialog.
-    /// </summary>
-    public enum Result
-    {
-        Cancelled,
-        Confirmed,
-        Refused
-    }
-
     // ReSharper disable once UnusedMember.Global
     /// <summary>
-    /// This method should not be called. Use <see cref="ShowDialog(Window)" /> instead.
+    /// This method should not be called. Use <see cref="ResultDialog.ShowDialog(Window)" /> instead.
     /// </summary>
     /// <exception cref="InvalidOperationException">Always thrown.</exception>
     [Obsolete("This method should not be called. See the documentation for more information.", true)]

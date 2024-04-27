@@ -26,10 +26,11 @@ public class NavigatorTest
 {
     [AvaloniaTest]
     [NonParallelizable]
-    public void ConstructorTest()
+    public async Task ConstructorTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
+        await pythonHandler.RunHotspotDetection(null!);
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
@@ -48,10 +49,11 @@ public class NavigatorTest
 
     [AvaloniaTest]
     [NonParallelizable]
-    public void ConstructorNoConfigTest()
+    public async Task ConstructorNoConfigTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
+        await pythonHandler.RunHotspotDetection(null!);
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new ConfigNotImportedException(null!));
 
@@ -60,12 +62,19 @@ public class NavigatorTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
-            _ => { },
+            exitCode =>
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                lifetime.DryShutdown(exitCode);
+            },
             new MockLoggerFactory()
         );
 
-        AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>(navigator);
-        Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
+        Assert.Multiple(() =>
+        {
+            Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { (int)ExitCode.ConfigNotFound }));
+            Assert.That(pythonHandler.CurrentScript, Is.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
+        });
     }
 
     [AvaloniaTest]
@@ -187,39 +196,11 @@ public class NavigatorTest
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
         var vmProvider = new MockViewModelProvider();
-        var fileHandler = new MockFileHandler(new ConfigNotImportedException(null!));
-
-        var navigator = new Navigator(
-            lifetime,
-            pythonHandler,
-            (_, _) => vmProvider,
-            () => fileHandler,
-            exitCode =>
-            {
-                // ReSharper disable once AccessToDisposedClosure
-                lifetime.DryShutdown(exitCode);
-            },
-            new MockLoggerFactory()
-        );
-        AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>(navigator);
-
-        navigator.CloseEditor();
-
-        Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { (int)ExitCode.Success }));
-    }
-
-    [AvaloniaTest]
-    [NonParallelizable]
-    public void CloseEditorExceptionTest()
-    {
-        using var lifetime = new MockDesktopLifetime();
-        var pythonHandler = new MockPythonHandler();
-        var vmProvider = new MockViewModelProvider();
-        var fileHandler1 = new MockFileHandler(new ConfigNotImportedException(null!));
-        var fileHandler2 = new MockFileHandler(new IOException());
+        var fileHandler1 = new MockFileHandler(new List<Hotspot.Media>());
+        var fileHandler2 = new MockFileHandler(new ConfigNotImportedException(null!));
         var fileHandlerSwitch = false;
 
-        using var navigator = new Navigator(
+        var navigator = new Navigator(
             lifetime,
             pythonHandler,
             (_, _) => vmProvider,
@@ -239,6 +220,7 @@ public class NavigatorTest
             },
             new MockLoggerFactory()
         );
+        navigator.OpenEditor();
         AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>(navigator);
 
         navigator.CloseEditor();
@@ -248,13 +230,13 @@ public class NavigatorTest
 
     [AvaloniaTest]
     [NonParallelizable]
-    public void CloseEditorNotInitialExceptionTest()
+    public void CloseEditorExceptionTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
         var vmProvider = new MockViewModelProvider();
         var fileHandler1 = new MockFileHandler(new List<Hotspot.Media>());
-        var fileHandler2 = new MockFileHandler(new ConfigNotImportedException(null!));
+        var fileHandler2 = new MockFileHandler(new IOException());
         var fileHandlerSwitch = false;
 
         using var navigator = new Navigator(
@@ -287,12 +269,56 @@ public class NavigatorTest
 
     [AvaloniaTest]
     [NonParallelizable]
+    public void CloseEditorNotInitialExceptionTest()
+    {
+        using var lifetime = new MockDesktopLifetime();
+        var pythonHandler = new MockPythonHandler();
+        var vmProvider = new MockViewModelProvider();
+        var fileHandler1 = new MockFileHandler(new ConfigNotImportedException(null!));
+        var fileHandler2 = new MockFileHandler(new List<Hotspot.Media>());
+        var fileHandlerSwitch = false;
+
+        using var navigator = new Navigator(
+            lifetime,
+            pythonHandler,
+            (_, _) => vmProvider,
+            () =>
+            {
+                var fileHandler = !fileHandlerSwitch
+                    ? fileHandler1
+                    : fileHandler2;
+
+                fileHandlerSwitch = !fileHandlerSwitch;
+                return fileHandler;
+            },
+            exitCode =>
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                lifetime.DryShutdown(exitCode);
+            },
+            new MockLoggerFactory()
+        );
+        Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { (int)ExitCode.ConfigNotFound }));
+
+        navigator.OpenEditor();
+        AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>(navigator);
+
+        navigator.CloseEditor();
+
+        Assert.That(
+            lifetime.Shutdowns,
+            Is.EquivalentTo(new[] { (int)ExitCode.ConfigNotFound, (int)ExitCode.Success })
+        );
+    }
+
+    [AvaloniaTest]
+    [NonParallelizable]
     public void ShowHideCalibrationMarkersTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
         var vmProvider = new MockViewModelProvider();
-        var fileHandler = new MockFileHandler(new ConfigNotImportedException(null!));
+        var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
         using var navigator = new Navigator(
             lifetime,
@@ -302,6 +328,7 @@ public class NavigatorTest
             _ => { },
             new MockLoggerFactory()
         );
+        navigator.OpenEditor();
         AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>(navigator);
 
         navigator.ShowCalibrationMarkers();
@@ -318,7 +345,7 @@ public class NavigatorTest
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
         var vmProvider = new MockViewModelProvider();
-        var fileHandler = new MockFileHandler(new ConfigNotImportedException(null!));
+        var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
         using var navigator = new Navigator(
             lifetime,
@@ -328,6 +355,7 @@ public class NavigatorTest
             _ => { },
             new MockLoggerFactory()
         );
+        navigator.OpenEditor();
         navigator.ShowCalibrationMarkers();
         Dispatcher.UIThread.RunJobs();
         AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsArUcoGridViewModel>(navigator);
@@ -343,7 +371,7 @@ public class NavigatorTest
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
         var vmProvider = new MockViewModelProvider();
-        var fileHandler = new MockFileHandler(new ConfigNotImportedException(null!));
+        var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
 
         var navigator = new Navigator(
             lifetime,
@@ -357,7 +385,7 @@ public class NavigatorTest
             },
             new MockLoggerFactory()
         );
-        AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>(navigator);
+        AssertOpenedWindows<DisplayWindow, IDisplayViewModel, AbsHotspotDisplayViewModel>(navigator);
 
         navigator.Shutdown();
         Assert.That(lifetime.Shutdowns, Is.EquivalentTo(new[] { (int)ExitCode.Success }));

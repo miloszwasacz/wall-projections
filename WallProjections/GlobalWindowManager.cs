@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Avalonia.Controls;
@@ -11,6 +12,7 @@ using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.Views;
+using static WallProjections.Views.ResultDialog;
 using AppLifetime = Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
 
 namespace WallProjections;
@@ -19,8 +21,13 @@ namespace WallProjections;
 /// Manages the global application state.
 /// </summary>
 [ExcludeFromCodeCoverage(Justification = "This class manages the application lifetime, which is not testable")]
-public class GlobalWindowManager
+public class GlobalWindowManager : IDisposable
 {
+    /// <summary>
+    /// The path to the warning icon.
+    /// </summary>
+    private static readonly Uri WarningIconPath = new("avares://WallProjections/Assets/warning-icon.ico");
+
     /// <summary>
     /// A factory for creating loggers.
     /// </summary>
@@ -61,6 +68,11 @@ public class GlobalWindowManager
     public IPythonHandler PythonHandler =>
         _pythonHandler ?? throw new InvalidOperationException("PythonHandler is not initialized");
 
+    /// <summary>
+    /// Whether the object has been disposed.
+    /// </summary>
+    private bool _disposed;
+
     /// <inheritdoc cref="GlobalWindowManager" />
     /// <param name="appLifetime">The application lifetime.</param>
     /// <param name="loggerFactory">A factory for creating loggers.</param>
@@ -76,7 +88,7 @@ public class GlobalWindowManager
 
         _processProxy = new ProcessProxy(loggerFactory);
         _pythonProxy = new PythonProxy(_processProxy, loggerFactory);
-        _appLifetime.Exit += OnExit;
+        _appLifetime.Exit += (_, _) => OnExit();
 
         var cameras = _pythonProxy.GetAvailableCameras();
         switch (cameras.Count)
@@ -120,7 +132,7 @@ public class GlobalWindowManager
                 _loggerFactory
             ),
             () => new FileHandler(_loggerFactory),
-            exitCode => _appLifetime.Shutdown(exitCode),
+            OnNavigatorShutdown,
             _loggerFactory
         );
 
@@ -128,22 +140,122 @@ public class GlobalWindowManager
     }
 
     /// <summary>
-    /// Handles the application exit event.
+    /// A callback for when the navigator shuts down (usually due to an error).
     /// </summary>
-    /// <param name="sender">The sender of the event (unused).</param>
-    /// <param name="e">The event arguments, containing the exit code.</param>
-    private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    /// <param name="exitCode">The exit code.</param>
+    private void OnNavigatorShutdown(ExitCode exitCode)
     {
-        if (!e.ApplicationExitCode.IsExitCode(ExitCode.Success))
+        switch (exitCode)
         {
-            //TODO Show a dialog on error
-        }
+            case ExitCode.Success:
+                _logger.LogInformation("Application exited successfully");
+                OnExit();
+                return;
 
-        _navigator?.Dispose();
-        _pythonHandler?.Dispose();
-        _pythonProxy.Dispose();
+            case ExitCode.ConfigNotFound:
+                _logger.LogTrace("No configuration file found, showing dialog");
+                new ConfirmationDialog(
+                    "Configuration Not Found",
+                    WarningIconPath,
+                    "No configuration file was found. Would you like to open the editor to create one?",
+                    "Open Editor",
+                    cancelButtonText: "Close"
+                ).ShowStandaloneDialog(result =>
+                {
+                    if (result == Result.Confirmed)
+                    {
+                        _logger.LogInformation("No configuration file found, opening editor");
+                        _navigator?.OpenEditor();
+                    }
+                    else
+                    {
+                        _logger.LogTrace("Dialog dismissed, exiting application");
+                        OnExit();
+                    }
+                });
+                return;
+
+            case ExitCode.NoCamerasDetected:
+            case ExitCode.ConfigLoadError:
+            case ExitCode.PythonError:
+            default:
+                var message = exitCode switch
+                {
+                    ExitCode.NoCamerasDetected => "No compatible cameras detected",
+                    ExitCode.ConfigLoadError => "Error loading configuration",
+                    ExitCode.PythonError => "Error running computer vision",
+                    _ => "An unknown error occurred"
+                };
+
+                new InfoDialog(
+                    "Error",
+                    WarningIconPath,
+                    $"{message}. See the logs for more information."
+                ).ShowStandaloneDialog(_ =>
+                {
+                    _logger.LogTrace("Error dialog dismissed, exiting application");
+                    OnExit();
+                });
+                return;
+        }
     }
 
+    /// <summary>
+    /// Hides all windows, shows a closing dialog and <see cref="Dispose">disposes</see> of the application.
+    /// </summary>
+    private void OnExit()
+    {
+        lock (this)
+        {
+            if (_disposed) return;
+        }
+
+        _logger.LogTrace("Hiding windows and showing closing dialog");
+        var windows = _appLifetime.Windows.ToImmutableList();
+        foreach (var window in windows)
+        {
+            window.ShowInTaskbar = false;
+            window.Hide();
+        }
+
+        new AppClosingDialog(() =>
+        {
+            _logger.LogTrace("Closing windows and disposing application");
+            foreach (var window in windows)
+                window.CloseAndDispose();
+
+            Dispose();
+
+            _logger.LogTrace("Application disposed, shutting down");
+        }).Show();
+    }
+
+    /// <summary>
+    /// Disposes of <see cref="_navigator" />.
+    /// </summary>
+    public void Dispose()
+    {
+        lock (this)
+        {
+            _disposed = true;
+            _logger.LogTrace("Performing cleanup");
+
+            _navigator?.Dispose();
+            _navigator = null;
+            _pythonHandler?.Dispose();
+            _pythonHandler = null;
+            _pythonProxy.Dispose();
+
+            _logger.LogTrace("Cleanup complete");
+        }
+
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Navigates to a new window and <see cref="WindowExtensions.CloseAndDispose">closes</see> the old one.
+    /// </summary>
+    /// <param name="newWindow">The new window to navigate to.</param>
     private void Navigate(Window newWindow)
     {
         var oldWindow = _appLifetime.MainWindow;
@@ -162,6 +274,7 @@ public enum ExitCode
     Success = 0,
     NoCamerasDetected = 100,
     ConfigLoadError = 101,
+    ConfigNotFound = 102,
     PythonError = 200,
 }
 

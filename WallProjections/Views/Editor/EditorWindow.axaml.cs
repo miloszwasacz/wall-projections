@@ -12,7 +12,7 @@ using Avalonia.Platform.Storage;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
-using static WallProjections.Views.ConfirmationDialog;
+using static WallProjections.Views.ResultDialog;
 
 namespace WallProjections.Views.Editor;
 

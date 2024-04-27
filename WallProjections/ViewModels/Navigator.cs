@@ -95,7 +95,13 @@ public sealed class Navigator : ViewModelBase, INavigator
         _pythonHandler = pythonHandler;
         _fileHandlerFactory = fileHandlerFactory;
         _vmProvider = vmProviderFactory(this, pythonHandler);
-        _secondaryScreen = OpenSecondaryWindow(_vmProvider);
+
+        var vm = _vmProvider.GetSecondaryWindowViewModel();
+        var window = new SecondaryWindow
+        {
+            DataContext = vm
+        };
+        _secondaryScreen = (window, vm);
 
         Initialize();
     }
@@ -115,7 +121,7 @@ public sealed class Navigator : ViewModelBase, INavigator
         catch (ConfigNotImportedException)
         {
             _logger.LogInformation("No configuration found");
-            OpenEditor();
+            Shutdown(ExitCode.ConfigNotFound);
         }
         catch (Exception e)
         {
@@ -157,7 +163,7 @@ public sealed class Navigator : ViewModelBase, INavigator
             {
                 DataContext = _vmProvider.GetDisplayViewModel(config)
             };
-            Navigate(displayWindow);
+            Navigate(displayWindow, true);
             _secondaryScreen.viewModel.ShowHotspotDisplay(config);
         }
     }
@@ -202,7 +208,7 @@ public sealed class Navigator : ViewModelBase, INavigator
         {
             DataContext = vm
         };
-        Navigate(editorWindow);
+        Navigate(editorWindow, true);
         _secondaryScreen.viewModel.ShowPositionEditor(vm);
     }
 
@@ -274,13 +280,21 @@ public sealed class Navigator : ViewModelBase, INavigator
         }
     }
 
-    /// <summary>
-    /// Shuts down the application.
-    /// </summary>
-    /// <seealso cref="AppLifetime.Shutdown(int)"/>
+    /// <inheritdoc />
     public void Shutdown(ExitCode exitCode = ExitCode.Success)
     {
-        _secondaryScreen.window.Close();
+        var main = MainWindow;
+        var secondary = _secondaryScreen.window;
+
+        secondary.ShowInTaskbar = false;
+        secondary.Hide();
+
+        if (main is not null)
+        {
+            main.ShowInTaskbar = false;
+            main.Hide();
+        }
+
         _shutdown(exitCode);
     }
 
@@ -289,32 +303,36 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// and <see cref="WindowExtensions.CloseAndDispose">closes</see> the currently opened window.
     /// </summary>
     /// <param name="newWindow">The new window to open.</param>
-    private void Navigate(Window newWindow)
+    /// <param name="showSecondary">Whether to show the secondary screen.</param>
+    private void Navigate(Window newWindow, bool showSecondary)
     {
         lock (this)
         {
             var currentWindow = MainWindow;
+
+            if (showSecondary)
+                OpenSecondaryWindow();
+            else
+            {
+                _secondaryScreen.window.ShowInTaskbar = false;
+                _secondaryScreen.window.Hide();
+            }
+
             newWindow.Show();
             MainWindow = newWindow;
+
             currentWindow?.CloseAndDispose();
         }
     }
 
     /// <summary>
-    /// Opens a <see cref="SecondaryWindow" /> on the secondary screen (if available).
+    /// Shows the <see cref="_secondaryScreen">secondary window</see> on the secondary screen (if available).
     /// </summary>
-    /// <param name="vmProvider">
-    /// The <see cref="IViewModelProvider" /> for creating the <see cref="ISecondaryWindowViewModel" />
-    /// </param>
-    /// <returns>The opened window and its viewmodel</returns>
     [ExcludeFromCodeCoverage(Justification = "Headless mode doesn't support multiple screens")]
-    private static (SecondaryWindow, ISecondaryWindowViewModel) OpenSecondaryWindow(IViewModelProvider vmProvider)
+    private void OpenSecondaryWindow()
     {
-        var vm = vmProvider.GetSecondaryWindowViewModel();
-        var window = new SecondaryWindow
-        {
-            DataContext = vm
-        };
+        var window = _secondaryScreen.window;
+        window.ShowInTaskbar = true;
 
         var screens = window.Screens;
         var secondaryScreen = screens.All.FirstOrDefault(s => !s.IsPrimary);
@@ -327,8 +345,6 @@ public sealed class Navigator : ViewModelBase, INavigator
         }
         else
             window.Show();
-
-        return (window, vm);
     }
 
     /// <inheritdoc />
