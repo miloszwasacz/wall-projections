@@ -8,7 +8,7 @@ nav_order: 2
 
 # Installation
 
-WallProjections currently has support [Windows]({%link docs/installation/windows.md %}), macOS, and Linux.
+WallProjections currently has support for [Windows]({%link docs/installation/windows.md %}), macOS, and Linux.
 
 {: .note-title}
 > Recommended
