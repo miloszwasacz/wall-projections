@@ -88,6 +88,7 @@
                 <editor:DescriptionEditor.MenuItems>
 
                     <views:IconButton IconData="{StaticResource document_import_regular}"
+                                      IsEnabled="{Binding IsEnabled}"
                                       Click="DescriptionEditor_OnImportDescription">
                         <ToolTip.Tip>
                             <TextBlock>
@@ -99,8 +100,9 @@
 
                     <views:IconToggleButton Name="PositionEditorToggle"
                                             ToolTip.Tip="Edit position"
-                                            IsChecked="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
                                             IconData="{StaticResource my_location_regular}"
+                                            IsChecked="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
+                                            IsEnabled="{Binding IsEnabled}"
                                             Click="EditPosition_OnClick">
                         <FlyoutBase.AttachedFlyout>
                             <Flyout FlyoutPresenterClasses="teaching-tip attached-bottom"

@@ -7,5 +7,5 @@
 /// <param name="Name">The device name.</param>
 public record struct Camera(int Index, string Name)
 {
-    public string DisplayName => $"{Name}(index: {Index})";
+    public string DisplayName => $"{Name} (index: {Index})";
 }

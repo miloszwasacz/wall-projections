@@ -34,6 +34,9 @@ public class FileHandler : IFileHandler
     {
         try
         {
+            if (File.Exists(exportPath))
+                File.Delete(exportPath);
+
             ZipFile.CreateFromDirectory(CurrentConfigFolderPath, exportPath);
             return true;
         }
@@ -43,9 +46,6 @@ public class FileHandler : IFileHandler
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            if (File.Exists(exportPath))
-                throw new ConfigDuplicateFileException(exportPath, e);
-
             throw new ConfigIOException(exportPath, e);
         }
     }
@@ -79,7 +79,7 @@ public class FileHandler : IFileHandler
             using var configFile = File.OpenRead(configLocation);
             return JsonSerializer.Deserialize<Config>(configFile) ??
                    // Edge case if file contains "null"
-                   throw new ConfigInvalidException(new Exception());
+                   throw new ConfigInvalidException(new Exception("File contains null value"));
 
         }
         catch (DirectoryNotFoundException e)
@@ -174,8 +174,8 @@ public class FileHandler : IFileHandler
             // Can only import if a new config isn't being created
             if (IsNewConfig())
                 throw new InvalidOperationException("Cannot import when a new config is being created");
-            _configImported = true;
 
+            _configImported = true;
             try
             {
                 ZipFile.ExtractToDirectory(zipPath, TempConfigFolderPath);
