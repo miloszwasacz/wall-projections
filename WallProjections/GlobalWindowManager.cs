@@ -119,7 +119,7 @@ public class GlobalWindowManager
                 () => new LayoutProvider(_loggerFactory),
                 _loggerFactory
             ),
-            () => new FileHandler(),
+            () => new FileHandler(_loggerFactory),
             exitCode => _appLifetime.Shutdown(exitCode),
             _loggerFactory
         );
