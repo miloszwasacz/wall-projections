@@ -23,7 +23,7 @@
             <Setter Property="Height" Value="{Binding $parent[views:HotspotCircle].Diameter}" />
         </Style>
 
-        <Style Selector="Ellipse.outer, Arc.outer">
+        <Style Selector="Arc.outer">
             <Setter Property="Width">
                 <Binding Path="$parent[views:HotspotCircle].Diameter"
                          Converter="{StaticResource FullArcDiameterConverter}" />
@@ -34,26 +34,25 @@
             </Setter>
             <Setter Property="Stroke" Value="{DynamicResource HotspotStrokeBrush}" />
             <Setter Property="StrokeThickness" Value="{StaticResource HotspotStrokeThickness}" />
-        </Style>
-
-        <Style Selector="Arc.outer">
             <Setter Property="StartAngle" Value="-90" />
         </Style>
     </Panel.Styles>
-
-    <!-- Active circle, need to appear when circle becomes active to counter the transition behaviour -->
-    <!-- that occurs between the activating and activated animation -->
-    <Ellipse Classes="outer full" />
 
     <!-- Pulsing circle -->
     <Ellipse Classes="hotspot inner"
              Classes.pulse="{Binding $parent[views:HotspotCircle].Pulse}" />
 
     <!-- Charging arc -->
-    <Arc Classes="outer" />
+    <Arc Name="OuterArc"
+         Classes="outer"
+         Tag="{Binding $parent[views:HotspotCircle].AnimationDuration}" />
 
-    <!-- Animations -->
+    <!-- NOTE: Animations for OuterArc are defined in code-behind, -->
+    <!--       because they have dynamic duration based on the current activation progress -->
+
+    <!-- Animations for inner ellipse -->
     <Panel.Styles>
+
         <!-- Base transitions -->
         <Style Selector="views|HotspotCircle">
             <Style Selector="^ Ellipse.inner">
@@ -66,46 +65,6 @@
                 </Setter>
                 <Setter Property="RenderTransform" Value="scale(1)" />
             </Style>
-            <Style Selector="^ Arc.outer">
-                <Setter Property="Transitions">
-                    <Transitions>
-                        <DoubleTransition
-                            Property="SweepAngle"
-                            Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
-                    </Transitions>
-                </Setter>
-                <Setter Property="SweepAngle" Value="0" />
-            </Style>
-            <Style Selector="^ Ellipse.outer.full">
-                <Setter Property="Opacity" Value="0" />
-            </Style>
-        </Style>
-
-        <!-- ACTIVATING animation -->
-        <Style Selector="views|HotspotCircle.activating">
-            <Style Selector="^ Arc.outer">
-                <!-- Sweeping arc animation -->
-                <Setter Property="Transitions">
-                    <Transitions>
-                        <DoubleTransition
-                            Property="SweepAngle"
-                            Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
-                    </Transitions>
-                </Setter>
-                <Setter Property="SweepAngle" Value="360" />
-            </Style>
-        </Style>
-
-        <!-- DEACTIVATING animation -->
-        <Style Selector="views|HotspotCircle.deactivating Arc.outer">
-            <Setter Property="Transitions">
-                <Transitions>
-                    <DoubleTransition
-                        Property="SweepAngle"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
-                </Transitions>
-            </Setter>
-            <Setter Property="SweepAngle" Value="0" />
         </Style>
 
         <!-- ACTIVE animation -->
@@ -119,16 +78,11 @@
                             Duration="{Binding Source={x:Static views:HotspotCircle.PulseTime}}" />
                     </Transitions>
                 </Setter>
+
                 <!-- Single pulse -->
                 <Style Selector="^.pulse">
                     <Setter Property="RenderTransform" Value="scale(1.25)" />
                 </Style>
-            </Style>
-            <Style Selector="^ Arc.outer">
-                <Setter Property="SweepAngle" Value="360" />
-            </Style>
-            <Style Selector="^ Ellipse.outer.full">
-                <Setter Property="Opacity" Value="1" />
             </Style>
         </Style>
 

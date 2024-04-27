@@ -242,11 +242,11 @@ public sealed class ViewModelProvider : IViewModelProvider
         new HotspotDisplayViewModel(config, HotspotHandler, this, _loggerFactory);
 
     /// <summary>
-    /// Creates a new <see cref="HotspotProjectionViewModel" /> instance
+    /// Creates a new <see cref="AbsHotspotProjectionViewModel" /> instance
     /// </summary>
     /// <param name="hotspot">The hotspot to be projected</param>
-    /// <returns>A new <see cref="HotspotProjectionViewModel" /> instance</returns>
-    public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
+    /// <returns>A new <see cref="AbsHotspotProjectionViewModel" /> instance</returns>
+    public AbsHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
         new HotspotProjectionViewModel(hotspot);
 
     /// <summary>

@@ -146,7 +146,7 @@ public class MockViewModelProvider : IViewModelProvider
     /// </summary>
     /// <param name="hotspot">The hotspot to be projected</param>
     /// <returns>A new <see cref="MockHotspotProjectionViewModel" /></returns>
-    public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
+    public AbsHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot) =>
         new MockHotspotProjectionViewModel(hotspot);
 
     /// <summary>

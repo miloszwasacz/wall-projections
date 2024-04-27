@@ -3,13 +3,12 @@ using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
 
-public class MockHotspotProjectionViewModel : IHotspotProjectionViewModel
+public class MockHotspotProjectionViewModel : AbsHotspotProjectionViewModel
 {
-    public int Id { get; }
-    public double X { get; }
-    public double Y { get; }
-    public double D { get; }
-    public HotspotState State { get; set; }
+    public override int Id { get; }
+    public override double X { get; }
+    public override double Y { get; }
+    public override double D { get; }
 
     public MockHotspotProjectionViewModel(Hotspot hotspot)
     {
@@ -30,7 +29,7 @@ public static class MockHotspotProjectionViewModelExtensions
     /// <summary>
     /// Checks if the viewmodel has the same ID, X, Y and D as the hotspot
     /// </summary>
-    public static bool IsSameAsHotspot(this IHotspotProjectionViewModel self, Hotspot hotspot)
+    public static bool IsSameAsHotspot(this AbsHotspotProjectionViewModel self, Hotspot hotspot)
     {
         var id = self.Id == hotspot.Id;
         var x = Math.Abs(self.X - (hotspot.Position.X - hotspot.Position.R)) < PositionCmpTolerance;

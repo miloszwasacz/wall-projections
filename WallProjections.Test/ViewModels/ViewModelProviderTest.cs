@@ -288,7 +288,7 @@ public class ViewModelProviderTest
         });
         Assert.That(
             hotspotViewModel.Projections,
-            Is.EquivalentTo(config.Hotspots).Using<IHotspotProjectionViewModel, Hotspot>(
+            Is.EquivalentTo(config.Hotspots).Using<AbsHotspotProjectionViewModel, Hotspot>(
                 (actual, expected) => actual.IsSameAsHotspot(expected)
             )
         );
@@ -300,7 +300,7 @@ public class ViewModelProviderTest
         var hotspot = CreateHotspot(0);
         using var vmProvider = CreateViewModelProvider();
         var hotspotProjectionViewModel = vmProvider.GetHotspotProjectionViewModel(hotspot);
-        Assert.That(hotspotProjectionViewModel, Is.InstanceOf<HotspotProjectionViewModel>());
+        Assert.That(hotspotProjectionViewModel, Is.InstanceOf<AbsHotspotProjectionViewModel>());
         Assert.Multiple(() =>
         {
             Assert.That(hotspotProjectionViewModel.Id, Is.EqualTo(hotspot.Id));
