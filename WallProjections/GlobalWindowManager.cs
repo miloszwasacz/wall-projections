@@ -148,19 +148,23 @@ public class GlobalWindowManager : IDisposable
         switch (exitCode)
         {
             case ExitCode.Success:
+            {
                 _logger.LogInformation("Application exited successfully");
                 OnExit();
                 return;
-
+            }
             case ExitCode.ConfigNotFound:
+            {
                 _logger.LogTrace("No configuration file found, showing dialog");
-                new ConfirmationDialog(
+
+                var dialog = new ConfirmationDialog(
                     "Configuration Not Found",
                     WarningIconPath,
                     "No configuration file was found. Would you like to open the editor to create one?",
                     "Open Editor",
                     cancelButtonText: "Close"
-                ).ShowStandaloneDialog(result =>
+                );
+                OpenStandaloneDialog(dialog, result =>
                 {
                     if (result == Result.Confirmed)
                     {
@@ -174,11 +178,12 @@ public class GlobalWindowManager : IDisposable
                     }
                 });
                 return;
-
+            }
             case ExitCode.NoCamerasDetected:
             case ExitCode.ConfigLoadError:
             case ExitCode.PythonError:
             default:
+            {
                 var message = exitCode switch
                 {
                     ExitCode.NoCamerasDetected => "No compatible cameras detected",
@@ -187,16 +192,18 @@ public class GlobalWindowManager : IDisposable
                     _ => "An unknown error occurred"
                 };
 
-                new InfoDialog(
+                var dialog = new InfoDialog(
                     "Error",
                     WarningIconPath,
                     $"{message}. See the logs for more information."
-                ).ShowStandaloneDialog(_ =>
+                );
+                OpenStandaloneDialog(dialog, _ =>
                 {
                     _logger.LogTrace("Error dialog dismissed, exiting application");
                     OnExit();
                 });
                 return;
+            }
         }
     }
 
@@ -262,6 +269,20 @@ public class GlobalWindowManager : IDisposable
         _appLifetime.MainWindow = newWindow;
         oldWindow?.Hide();
         newWindow.Show();
+        oldWindow?.CloseAndDispose();
+    }
+
+    /// <summary>
+    /// <see cref="Navigate">Navigates</see> to the specified <see cref="ResultDialog.ShowStandaloneDialog">standalone dialog</see>.
+    /// </summary>
+    /// <param name="dialog">The dialog to show.</param>
+    /// <param name="onDialogClose">A callback for when the dialog is closed.</param>
+    private void OpenStandaloneDialog(ResultDialog dialog, Action<Result> onDialogClose)
+    {
+        var oldWindow = _appLifetime.MainWindow;
+        _appLifetime.MainWindow = dialog;
+        oldWindow?.Hide();
+        dialog.ShowStandaloneDialog(onDialogClose);
         oldWindow?.CloseAndDispose();
     }
 }

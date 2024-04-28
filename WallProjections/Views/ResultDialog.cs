@@ -128,6 +128,7 @@ public abstract class ResultDialog : Window
     public void ShowStandaloneDialog(Action<Result> onClose)
     {
         OnClose = onClose;
+        ShowInTaskbar = true;
         Show();
     }
 
