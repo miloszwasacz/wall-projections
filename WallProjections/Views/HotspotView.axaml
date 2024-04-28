@@ -20,8 +20,9 @@
     <ItemsControl.DataTemplates>
 
         <!-- Template for Display -->
-        <DataTemplate DataType="{x:Type vm:IHotspotProjectionViewModel}">
+        <DataTemplate DataType="{x:Type vm:AbsHotspotProjectionViewModel}">
             <views:HotspotCircle Diameter="{Binding D}"
+                                 AnimationDuration="{Binding AnimationDuration}"
                                  HotspotState="{Binding State}" />
         </DataTemplate>
 

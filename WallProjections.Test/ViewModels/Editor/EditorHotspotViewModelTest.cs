@@ -81,6 +81,7 @@ public class EditorHotspotViewModelTest
             Assert.That(editorHotspotViewModel.Videos.Select(x => x.FilePath), Is.EquivalentTo(hotspot.VideoPaths));
             Assert.That(editorHotspotViewModel.FallbackTitle, Is.EqualTo($"Hotspot {hotspot.Id}"));
             Assert.That(editorHotspotViewModel.IsFallback, Is.False);
+            Assert.That(editorHotspotViewModel.TitleOrFallback, Is.EqualTo(hotspot.Title));
         });
     }
 
@@ -102,6 +103,8 @@ public class EditorHotspotViewModelTest
             Assert.That(editorHotspotViewModel.Position, Is.EqualTo(hotspot.Position));
             Assert.That(editorHotspotViewModel.Title, Is.EqualTo(hotspot.Title));
             Assert.That(editorHotspotViewModel.Description, Is.EqualTo(originalDescription));
+            Assert.That(editorHotspotViewModel.IsFallback, Is.False);
+            Assert.That(editorHotspotViewModel.TitleOrFallback, Is.EqualTo(hotspot.Title));
         });
 
         editorHotspotViewModel.Position = position;
@@ -113,6 +116,17 @@ public class EditorHotspotViewModelTest
             Assert.That(editorHotspotViewModel.Position, Is.EqualTo(position));
             Assert.That(editorHotspotViewModel.Title, Is.EqualTo(title));
             Assert.That(editorHotspotViewModel.Description, Is.EqualTo(description));
+            Assert.That(editorHotspotViewModel.IsFallback, Is.False);
+            Assert.That(editorHotspotViewModel.TitleOrFallback, Is.EqualTo(title));
+        });
+
+        editorHotspotViewModel.Title = "";
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(editorHotspotViewModel.Title, Is.Empty);
+            Assert.That(editorHotspotViewModel.IsFallback, Is.True);
+            Assert.That(editorHotspotViewModel.TitleOrFallback, Is.EqualTo($"Hotspot {hotspot.Id}"));
         });
     }
 

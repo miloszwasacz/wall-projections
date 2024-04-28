@@ -7,14 +7,16 @@ using Avalonia;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using Python.Runtime;
+using WallProjections.Models;
 
 #else
 using System.Diagnostics.CodeAnalysis;
-using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 #endif
 
@@ -115,7 +117,7 @@ public sealed class PythonProxy : IPythonProxy
             }
             catch (Exception e)
             {
-                _logger.LogError("Could not load Python non-global environment.");
+                _logger.LogError(e, "Could not load Python non-global environment.");
                 throw new DllNotFoundException(PythonDllExceptionMessage, e);
             }
         }
@@ -165,11 +167,11 @@ public sealed class PythonProxy : IPythonProxy
         });
 
     /// <inheritdoc />
-    public ImmutableDictionary<int, string> GetAvailableCameras() =>
+    public ImmutableList<Camera> GetAvailableCameras() =>
         RunPythonAction(PythonModule.CameraIdentification, module =>
         {
             _logger.LogInformation("Identifying available cameras.");
-            return module.GetAvailableCameras();
+            return module.GetAvailableCameras(_logger);
         });
 
     /// <summary>
@@ -304,15 +306,15 @@ public sealed class PythonProxy : IPythonProxy
         };
     }
 
-    public ImmutableDictionary<int, string> GetAvailableCameras()
+    public ImmutableList<Camera> GetAvailableCameras()
     {
         _logger.LogInformation("Identifying available cameras");
-        return new Dictionary<int, string>
-        {
-            { 0, "Camera 0" },
-            { 700, "Camera 1" },
-            { 702, "Camera 2" }
-        }.ToImmutableDictionary();
+        Task.Delay(2000).Wait();
+        return ImmutableList.Create(
+            new Camera(0, "Camera 0"),
+            new Camera(700, "Camera 1"),
+            new Camera(702, "Camera 2")
+        );
     }
 
     /// <summary>

@@ -159,8 +159,8 @@ public interface IEditorViewModel
     /// <summary>
     /// Exports the current configuration to a file at the specified path.
     /// </summary>
-    /// <param name="exportPath">A path to a folder where the configuration will be exported.</param>
-    /// <returns>Whether the file was exported successfully.</returns>
+    /// <param name="exportPath">A path to the new file to export the configuration to.</param>
+    /// <returns>Whether the configuration was exported successfully.</returns>
     public Task<bool> ExportConfig(string exportPath);
 
     #endregion

@@ -5,8 +5,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text.Json;
 using Avalonia;
+using Microsoft.Extensions.Logging;
 using Python.Runtime;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper;
@@ -135,21 +137,28 @@ public abstract class PythonModule
         /// Identifies the available cameras on the system that OpenCV can access
         /// </summary>
         /// <returns>A dictionary of camera indices (passed to OpenCV) and their corresponding names</returns>
-        public ImmutableDictionary<int, string> GetAvailableCameras()
+        public ImmutableList<Camera> GetAvailableCameras(ILogger logger)
         {
             PyObject? camerasPy = _rawModule.get_cameras();
             var serialized = camerasPy?.As<string>();
             if (serialized is null)
-                return ImmutableDictionary<int, string>.Empty;
+            {
+                logger.LogError("Failed to get cameras from Python");
+                return ImmutableList<Camera>.Empty;
+            }
 
             try
             {
                 var cameras = JsonSerializer.Deserialize<ImmutableDictionary<int, string>>(serialized);
-                return cameras ?? ImmutableDictionary<int, string>.Empty;
+                if (cameras is null) throw new NullReferenceException("Deserialized cameras is null");
+
+                logger.LogTrace("Cameras detected by Python: {Cameras}", serialized);
+                return cameras.Select(pair => new Camera(pair.Key, pair.Value)).ToImmutableList();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return ImmutableDictionary<int, string>.Empty;
+                logger.LogError(e, "Failed to deserialize cameras");
+                return ImmutableList<Camera>.Empty;
             }
         }
     }

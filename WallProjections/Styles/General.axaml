@@ -63,6 +63,42 @@
         <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
     </Style>
 
+    <Style Selector="Window.splash-screen">
+        <Setter Property="MaxWidth" Value="500" />
+        <Setter Property="MaxHeight" Value="250" />
+        <Setter Property="WindowStartupLocation" Value="CenterScreen" />
+        <Setter Property="SystemDecorations" Value="BorderOnly" />
+        <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+        <Setter Property="CanResize" Value="False" />
+        <Setter Property="Padding" Value="30" />
+        <Setter Property="Background">
+            <LinearGradientBrush StartPoint="0%,200%" EndPoint="100%,-50%">
+                <GradientStop Color="#ffffec80" Offset="0.25" />
+                <GradientStop Color="#ffb39800" Offset="0.75" />
+                <GradientStop Color="#ff806c00" Offset="1" />
+            </LinearGradientBrush>
+        </Setter>
+        <Setter Property="Foreground" Value="#ff332b00" />
+
+        <Style Selector="^ > StackPanel">
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="Spacing" Value="30" />
+
+            <Style Selector="^ > :is(Control)">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style Selector="^ > TextBlock">
+                <Setter Property="FontWeight" Value="UltraBlack" />
+            </Style>
+
+            <Style Selector="^ > Image">
+                <Setter Property="MaxHeight" Value="160" />
+            </Style>
+        </Style>
+
+    </Style>
+
     <Style Selector="ListBox.classic-list ListBoxItem">
         <Setter Property="Margin" Value="{StaticResource MenuFlyoutSeparatorThemePadding}" />
         <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />

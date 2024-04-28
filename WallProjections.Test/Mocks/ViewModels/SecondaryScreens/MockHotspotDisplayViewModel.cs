@@ -16,7 +16,7 @@ public class MockHotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposab
     public bool IsDisposed { get; private set; }
 
     /// <inheritdoc/>
-    public override ImmutableList<IHotspotProjectionViewModel> Projections { get; } = new[]
+    public override ImmutableList<AbsHotspotProjectionViewModel> Projections { get; } = new[]
     {
         (0, 10.0, 10.0, 10.0),
         (1, 90.0, 130.0, 30.0),
@@ -32,7 +32,7 @@ public class MockHotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposab
             ImmutableList<string>.Empty,
             ImmutableList<string>.Empty
         );
-        return new HotspotProjectionViewModel(hotspot) as IHotspotProjectionViewModel;
+        return new HotspotProjectionViewModel(hotspot) as AbsHotspotProjectionViewModel;
     }).ToImmutableList();
 
     /// <inheritdoc/>
@@ -40,7 +40,7 @@ public class MockHotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposab
 
     /// <summary>
     /// Mock version of the DeactivateHotspot function in <see cref="HotspotDisplayViewModel"/> which just
-    /// sets <see cref="IHotspotProjectionViewModel.IsActive" /> of the first hotspot in the list to false
+    /// sets <see cref="AbsHotspotProjectionViewModel.State" /> of the first hotspot in the list to <see cref="HotspotState.None" />
     /// </summary>
     public override void DeactivateHotspots()
     {

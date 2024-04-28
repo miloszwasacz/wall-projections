@@ -20,7 +20,7 @@ public interface IHotspotHandler : IDisposable
     /// <summary>
     /// An event that is fired when a hotspot is being activated.
     /// </summary>
-    public event EventHandler<HotspotArgs>? HotspotActivating;
+    public event EventHandler<HotspotChangingArgs>? HotspotActivating;
 
     /// <summary>
     /// An event that is fired when a hotspot has been activated.
@@ -31,7 +31,7 @@ public interface IHotspotHandler : IDisposable
     /// An event that is fired when a hotspot is being deactivated.
     /// </summary>
     /// <remarks>Note that there is no event for when the hotspot has fully deactivated.</remarks>
-    public event EventHandler<HotspotArgs>? HotspotDeactivating;
+    public event EventHandler<HotspotChangingArgs>? HotspotDeactivating;
 
     /// <summary>
     /// An event that is fired when a hotspot has been forcefully deactivated.
@@ -65,6 +65,27 @@ public interface IHotspotHandler : IDisposable
         public HotspotArgs(int id)
         {
             Id = id;
+        }
+    }
+
+    /// <summary>
+    /// Arguments for <see cref="HotspotActivating" /> and <see cref="HotspotDeactivating" /> events.
+    /// </summary>
+    public class HotspotChangingArgs : HotspotArgs
+    {
+        /// <summary>
+        /// The time remaining until the hotspot is fully activated/deactivated.
+        /// </summary>
+        public TimeSpan RemainingTime { get; }
+
+        /// <summary>
+        /// <inheritdoc cref="HotspotChangingArgs" /> with the given <paramref name="id" /> and <paramref name="remainingTime" />
+        /// </summary>
+        /// <param name="id">The id of the changing hotspot</param>
+        /// <param name="remainingTime">The time remaining until the hotspot is fully activated/deactivated</param>
+        public HotspotChangingArgs(int id, TimeSpan remainingTime) : base(id)
+        {
+            RemainingTime = remainingTime;
         }
     }
 }

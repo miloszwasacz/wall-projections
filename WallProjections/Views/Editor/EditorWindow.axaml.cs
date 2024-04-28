@@ -12,7 +12,7 @@ using Avalonia.Platform.Storage;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
-using static WallProjections.Views.ConfirmationDialog;
+using static WallProjections.Views.ResultDialog;
 
 namespace WallProjections.Views.Editor;
 
@@ -287,23 +287,23 @@ public partial class EditorWindow : Window
     /// <param name="e">The event arguments (unused).</param>
     private async void ConfigExport_OnClick(object? sender, RoutedEventArgs e) => await WithActionLock(async vm =>
     {
-        var folders = await WithOverlay(async () =>
+        var file = await WithOverlay(async () =>
         {
             var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-            return await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            return await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
             {
                 Title = "Choose export location...",
-                AllowMultiple = false,
-                SuggestedStartLocation = startFolder
+                SuggestedStartLocation = startFolder,
+                SuggestedFileName = IEditorViewModel.ExportFileName,
+                ShowOverwritePrompt = true
             });
         });
 
-        // No folder selected
-        if (folders.Count == 0) return;
+        // No file selected
+        if (file is null) return;
 
-        var folder = folders[0].Path.LocalPath;
-
-        var success = await WithLoadingToast(ExportInProgressMessage, () => vm.ExportConfig(folder));
+        var path = file.Path.LocalPath;
+        var success = await WithLoadingToast(ExportInProgressMessage, () => vm.ExportConfig(path));
         ShowToast(
             success ? ExportSuccessMessage : ExportErrorMessage,
             success ? NotificationType.Success : NotificationType.Error

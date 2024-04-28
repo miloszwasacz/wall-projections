@@ -35,7 +35,7 @@ public class HotspotHandlerInternalTest
             // Create a task without running it
             _ = new HotspotHandler.ActivationTask(
                 inputId,
-                id => actualId = id,
+                (id, _) => actualId = id,
                 out var runTask,
                 out var cts
             );
@@ -59,6 +59,8 @@ public class HotspotHandlerInternalTest
             await task;
             Assert.That(actualId, Is.EqualTo(expectedId));
         }
+
+        private static void EmptyCallback(int i, TimeSpan t) { }
 
         /// <summary>
         /// An empty callback that takes an <i>int</i> does nothing

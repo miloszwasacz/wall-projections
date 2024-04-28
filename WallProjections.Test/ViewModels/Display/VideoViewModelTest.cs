@@ -69,7 +69,7 @@ public class VideoViewModelTest
     }
 
     [Test]
-    [Timeout(5000)]
+    [Timeout(10000)]
     public async Task PlayMultipleVideosTest()
     {
         var mediaPlayer = new MockMediaPlayer();
@@ -78,6 +78,7 @@ public class VideoViewModelTest
         var paths = new[] { VideoPath, "test2.mp4" };
 
         Assert.That(videoViewModel.PlayVideos(paths), Is.True);
+        await Task.Delay(1000);
         Assert.Multiple(() =>
         {
             Assert.That(mediaPlayer.LastPlayedVideo, Does.EndWith(paths[0]));
@@ -85,6 +86,7 @@ public class VideoViewModelTest
         });
 
         mediaPlayer.MarkVideoAsEnded();
+        await Task.Delay(1000);
         Assert.Multiple(() =>
         {
             Assert.That(mediaPlayer.LastPlayedVideo, Does.EndWith(paths[1]));
@@ -92,6 +94,7 @@ public class VideoViewModelTest
         });
 
         mediaPlayer.MarkVideoAsEnded();
+        await Task.Delay(1000);
         Assert.Multiple(() =>
         {
             Assert.That(videoViewModel.HasVideos, Is.False);

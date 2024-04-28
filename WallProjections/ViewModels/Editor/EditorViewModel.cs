@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
@@ -420,22 +419,21 @@ public class EditorViewModel : ViewModelBase, IEditorViewModel
     /// <inheritdoc />
     public async Task<bool> ExportConfig(string exportPath)
     {
-        var path = Path.Combine(exportPath, IEditorViewModel.ExportFileName);
         try
         {
             IsExporting = true;
 
-            var result = await Task.Run(() => _fileHandler.ExportConfig(path));
+            var result = await Task.Run(() => _fileHandler.ExportConfig(exportPath));
             if (result)
-                _logger.LogInformation("Config exported successfully at {Path}.", path);
+                _logger.LogInformation("Config exported successfully at {Path}.", exportPath);
             else
-                _logger.LogWarning("Failed to export config at {Path}.", path);
+                _logger.LogWarning("Failed to export config at {Path}.", exportPath);
 
             return result;
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to export config at {Path}.", path);
+            _logger.LogError(e, "Failed to export config at {Path}.", exportPath);
             return false;
         }
         finally

@@ -3,8 +3,13 @@ using System.Globalization;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
+using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Data.Converters;
+using WallProjections.Helper.Interfaces;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 
 namespace WallProjections.Views;
@@ -38,6 +43,16 @@ public partial class HotspotCircle : Panel, IDisposable
         );
 
     /// <summary>
+    /// A <see cref="DirectProperty{TOwner,TValue}">DirectProperty</see> that defines the <see cref="AnimationDuration" /> property.
+    /// </summary>
+    public static readonly DirectProperty<HotspotCircle, TimeSpan> AnimationDurationProperty =
+        AvaloniaProperty.RegisterDirect<HotspotCircle, TimeSpan>(
+            nameof(AnimationDuration),
+            o => o.AnimationDuration,
+            (o, v) => o.AnimationDuration = v
+        );
+
+    /// <summary>
     /// A <see cref="DirectProperty{T, TP}">DirectProperty</see> that defines the <see cref="Pulse" /> property.
     /// </summary>
     public static readonly DirectProperty<HotspotCircle, bool> PulseProperty =
@@ -57,6 +72,11 @@ public partial class HotspotCircle : Panel, IDisposable
     private readonly BehaviorSubject<HotspotState> _hotspotState = new(HotspotState.None);
 
     /// <summary>
+    /// The subject that holds the value of <see cref="AnimationDuration" />
+    /// </summary>
+    private readonly BehaviorSubject<TimeSpan> _animationDuration = new(IHotspotHandler.ActivationTime);
+
+    /// <summary>
     /// The subject that holds the value of <see cref="Pulse" />
     /// </summary>
     private readonly BehaviorSubject<bool> _pulse = new(false);
@@ -73,6 +93,21 @@ public partial class HotspotCircle : Panel, IDisposable
     }
 
     /// <summary>
+    /// The duration of the animation (activation/deactivation)
+    /// </summary>
+    public TimeSpan AnimationDuration
+    {
+        get => _animationDuration.Value;
+        set
+        {
+            UpdateArcTransition(value);
+            var oldValue = _animationDuration.Value;
+            _animationDuration.OnNext(value);
+            RaisePropertyChanged(AnimationDurationProperty, oldValue, value);
+        }
+    }
+
+    /// <summary>
     /// The state of the hotspot
     /// </summary>
     public HotspotState HotspotState
@@ -82,17 +117,14 @@ public partial class HotspotCircle : Panel, IDisposable
         {
             var oldValue = _hotspotState.Value;
             _hotspotState.OnNext(value);
+            UpdateArcTargetAngle(value);
             lock (_pulse)
             {
                 RaisePropertyChanged(HotspotStateProperty, oldValue, value);
                 if (value == HotspotState.Active)
-                {
                     StartPulsing();
-                }
                 else
-                {
                     Pulse = false;
-                }
             }
         }
     }
@@ -144,6 +176,47 @@ public partial class HotspotCircle : Panel, IDisposable
 
             await Task.Delay(PulseTime);
         }
+    }
+
+    /// <summary>
+    /// Updates the target angle of the outer arc based on the hotspot state:
+    /// <ul>
+    ///     <li>Activating or Active: 360 degrees</li>
+    ///     <li>Deactivating or None: 0 degrees</li>
+    /// </ul>
+    /// </summary>
+    /// <param name="newState">The new state of the hotspot</param>
+    private void UpdateArcTargetAngle(HotspotState newState)
+    {
+        OuterArc.SweepAngle = newState switch
+        {
+            HotspotState.Activating or HotspotState.Active => 360,
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Updates the transition of the outer arc based on the new duration
+    /// </summary>
+    /// <param name="newDuration">The new duration of the animation</param>
+    private void UpdateArcTransition(TimeSpan newDuration)
+    {
+        var current = OuterArc.SweepAngle;
+        var transitions = new Transitions
+        {
+            ResetBehavior = ResetBehavior.Remove
+        };
+        transitions.Add(new DoubleTransition
+        {
+            Property = Arc.SweepAngleProperty,
+            Duration = newDuration,
+            Easing = new LinearEasing()
+        });
+
+        // We need to set the value here to ensure the animation starts from the current value,
+        // not the previous target value (like 0 or 360)
+        OuterArc.SetValue(Arc.SweepAngleProperty, current);
+        OuterArc.Transitions = transitions;
     }
 
     public void Dispose()

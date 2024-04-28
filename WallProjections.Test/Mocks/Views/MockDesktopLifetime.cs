@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace WallProjections.Test.Mocks.Views;
 
@@ -8,6 +9,11 @@ namespace WallProjections.Test.Mocks.Views;
 public class MockDesktopLifetime : ClassicDesktopStyleApplicationLifetime, IClassicDesktopStyleApplicationLifetime
 {
     // "Override" methods and properties as needed
+
+    public MockDesktopLifetime()
+    {
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+    }
 
     /// <summary>
     /// The backing field for <see cref="Shutdowns" />
@@ -31,5 +37,14 @@ public class MockDesktopLifetime : ClassicDesktopStyleApplicationLifetime, IClas
         _shutdowns.Add(exitCode);
         Exit?.Invoke(this, new ControlledApplicationLifetimeExitEventArgs(exitCode));
         MainWindow?.Close();
+    }
+
+    /// <summary>
+    /// Adds <paramref name="exitCode" /> to <see cref="Shutdowns" /> without actually shutting down the application
+    /// </summary>
+    /// <param name="exitCode">The exit code to quit the application with</param>
+    public void DryShutdown(ExitCode exitCode)
+    {
+        _shutdowns.Add((int)exitCode);
     }
 }

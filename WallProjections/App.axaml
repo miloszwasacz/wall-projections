@@ -27,7 +27,7 @@
         <FluentTheme>
             <FluentTheme.Palettes>
                 <ColorPaletteResources x:Key="Light"
-                                       Accent="#ff005eb7"
+                                       Accent="#ff806C00"
                                        AltHigh="White" AltLow="White" AltMedium="White"
                                        AltMediumHigh="White" AltMediumLow="White"
                                        BaseHigh="Black" BaseLow="#4df9f9f9" BaseMedium="#b8adadad"
@@ -42,7 +42,7 @@
                                        ListLow="#09000000" ListMedium="#06000000"
                                        RegionColor="#fff3f3f3" />
                 <ColorPaletteResources x:Key="Dark"
-                                       Accent="#ff60ccfe"
+                                       Accent="#ffccad00"
                                        AltHigh="Black" AltLow="Black" AltMedium="Black"
                                        AltMediumHigh="Black" AltMediumLow="Black"
                                        BaseHigh="White" BaseLow="#4df9f9f9" BaseMedium="#dbfcfcfc"
