@@ -39,12 +39,12 @@ class Hotspot:
 
         # Case1: fingertip inside hotspot on last update, now no fingertips inside
         if self._prev_fingertip_inside and not fingertip_inside:
-            print(f"Hotspot {self.id} unpressed.")
+            logger.info(f"Hotspot {self.id} unpressed.")
             self._event_handler.OnHotspotUnpressed(self.id)
 
         # Case2: no fingertips inside hotspot on last update, now fingertips inside
         if not self._prev_fingertip_inside and fingertip_inside:
-            print(f"Hotspot {self.id} pressed.")
+            logger.info(f"Hotspot {self.id} pressed.")
             self._event_handler.OnHotspotPressed(self.id)
 
         # Case3: nothings changed do nothing
