@@ -49,27 +49,34 @@ class TestVideoCapture(unittest.TestCase):
         self.assertVidCapStopped(self.vidcap)
 
     def test_multiple_instances(self):
-        vidcap1 = VideoCapture(target="Assets/test_video.mp4")
-        vidcap2 = VideoCapture(target="Assets/test_video.mp4")
-        vidcap1.start()
-        vidcap2.start()  # should work for a video file but not for a webcam live feed
-        frame1 = vidcap1.get_current_frame()
+        self.vidcap = VideoCapture(target="Assets/test_video.mp4")
+        self.vidcap2 = VideoCapture(target="Assets/test_video.mp4")
+        self.vidcap.start()
+        self.vidcap2.start()  # should work for a video file but not for a webcam live feed
+        frame1 = self.vidcap.get_current_frame()
         self.assertTrue(frame1 is not None)
-        frame2 = vidcap2.get_current_frame()
+        frame2 = self.vidcap2.get_current_frame()
         self.assertTrue(frame2 is not None)
-        vidcap1.stop()
-        vidcap2.stop()
-        self.assertVidCapStopped(vidcap1)
-        self.assertVidCapStopped(vidcap2)
+        self.vidcap.stop()
+        self.vidcap2.stop()
+        self.assertVidCapStopped(self.vidcap)
+        self.assertVidCapStopped(self.vidcap2)
 
     def test_take_photo(self):
         frame = VideoCapture.take_photo(target="Assets/test_video.mp4")
         self.assertTrue(frame is not None)
 
     def tearDown(self):  # this will get called after every test
-        # if hasattr(self, 'vidcap') and self.vidcap._video_capture_thread.is_alive():
-        #     self.vidcap.stop()
-        pass
+        # make sure that all video captures are stopped
+        if (hasattr(self, 'vidcap') and self.vidcap is not None and
+                self.vidcap._video_capture_thread is not None and
+                self.vidcap._video_capture_thread.is_alive()):
+            self.vidcap.stop()
+
+        if (hasattr(self, 'vidcap2') and self.vidcap2 is not None and
+                self.vidcap2._video_capture_thread is not None and
+                self.vidcap2._video_capture_thread.is_alive()):
+            self.vidcap2.stop()
 
 
 if __name__ == '__main__':
