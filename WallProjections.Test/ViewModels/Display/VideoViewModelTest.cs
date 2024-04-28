@@ -19,7 +19,8 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void CreationTest()
+    [Timeout(5000)]
+    public async Task CreationTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
@@ -37,7 +38,7 @@ public class VideoViewModelTest
             Assert.That(videoViewModel.IsVisible, Is.False);
         });
 
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         Assert.Multiple(() =>
         {
             Assert.That(mediaPlayer.IsPlaying);
@@ -53,11 +54,12 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void PlayVideoTest()
+    [Timeout(5000)]
+    public async Task PlayVideoTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         using IVideoViewModel videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         Assert.Multiple(() =>
         {
             Assert.That(videoViewModel.PlayVideo(VideoPath), Is.True);
@@ -67,11 +69,12 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void PlayMultipleVideosTest()
+    [Timeout(5000)]
+    public async Task PlayMultipleVideosTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         using var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         var paths = new[] { VideoPath, "test2.mp4" };
 
         Assert.That(videoViewModel.PlayVideos(paths), Is.True);
@@ -97,12 +100,13 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void PlayNonExistentVideoTest()
+    [Timeout(5000)]
+    public async Task PlayNonExistentVideoTest()
     {
         const string path = "nonexistent.mp4";
         var mediaPlayer = new MockMediaPlayer(false);
         using var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         Assert.Multiple(() =>
         {
             Assert.That(videoViewModel.PlayVideos(new[] { path }), Is.False);
@@ -111,11 +115,12 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void StopVideoTest()
+    [Timeout(5000)]
+    public async Task StopVideoTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         using var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         videoViewModel.PlayVideos(new[] { VideoPath });
         videoViewModel.StopVideo();
         Assert.Multiple(() =>
@@ -127,12 +132,13 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void VolumeTest()
+    [Timeout(5000)]
+    public async Task VolumeTest()
     {
         const int volume = 50;
         var mediaPlayer = new MockMediaPlayer();
         using var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         videoViewModel.PlayVideos(new[] { VideoPath });
 
         videoViewModel.Volume = volume;
@@ -144,21 +150,23 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void DisposeTest()
+    [Timeout(5000)]
+    public async Task DisposeTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         videoViewModel.Dispose();
         Assert.That(mediaPlayer.HasBeenDisposedOnce(), Is.True);
     }
 
     [Test]
-    public void PlayOrStopVideoAfterDisposeTest()
+    [Timeout(5000)]
+    public async Task PlayOrStopVideoAfterDisposeTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         videoViewModel.PlayVideos(new[] { VideoPath });
         videoViewModel.Dispose();
         videoViewModel.PlayVideos(new[] { VideoPath });
@@ -172,13 +180,24 @@ public class VideoViewModelTest
     }
 
     [Test]
-    public void DisposeTwiceTest()
+    [Timeout(5000)]
+    public async Task DisposeTwiceTest()
     {
         var mediaPlayer = new MockMediaPlayer();
         var videoViewModel = new VideoViewModel(LibVlc, mediaPlayer, new MockLoggerFactory());
-        videoViewModel.MarkLoaded();
+        await MarkLoadedAndWait(videoViewModel);
         videoViewModel.Dispose();
         videoViewModel.Dispose();
         Assert.That(mediaPlayer.HasBeenDisposedOnce(), Is.True);
+    }
+
+    /// <summary>
+    /// Calls <see cref="IVideoViewModel.MarkLoaded" /> and waits for 2 seconds
+    /// </summary>
+    /// <param name="videoViewModel">The viewmodel to mark as loaded</param>
+    private static async Task MarkLoadedAndWait(IVideoViewModel videoViewModel)
+    {
+        videoViewModel.MarkLoaded();
+        await Task.Delay(2000);
     }
 }

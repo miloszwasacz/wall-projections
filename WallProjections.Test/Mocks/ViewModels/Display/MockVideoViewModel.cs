@@ -10,6 +10,11 @@ namespace WallProjections.Test.Mocks.ViewModels.Display;
 /// </summary>
 public sealed class MockVideoViewModel : IVideoViewModel
 {
+    /// <summary>
+    /// This event can be raised using <see cref="InvokeAllVideosFinished" />
+    /// </summary>
+    public event EventHandler? AllVideosFinished;
+
     private readonly List<(string path, bool hasPlayed)> _videoPaths = new();
 
     /// <summary>
@@ -100,17 +105,17 @@ public sealed class MockVideoViewModel : IVideoViewModel
     /// Sets the first unplayed video in <see cref="VideoPaths" /> to played
     /// </summary>
     /// <returns>Whether a video was played</returns>
-    public bool PlayNextVideo()
+    public Task<bool> PlayNextVideo()
     {
         for (var i = 0; i < _videoPaths.Count; i++)
         {
             if (_videoPaths[i].hasPlayed) continue;
 
             _videoPaths[i] = (_videoPaths[i].path, true);
-            return true;
+            return Task.FromResult(true);
         }
 
-        return false;
+        return Task.FromResult(false);
     }
 
     /// <summary>
@@ -122,6 +127,11 @@ public sealed class MockVideoViewModel : IVideoViewModel
         _isVisible = false;
         CanPlay = false;
     }
+
+    /// <summary>
+    /// Invokes <see cref="AllVideosFinished" />
+    /// </summary>
+    public void InvokeAllVideosFinished() => AllVideosFinished?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
     /// Calls <see cref="StopVideo" /> and increases the number of times <see cref="Dispose" /> has been called

@@ -10,6 +10,7 @@ using Python.Runtime;
 
 #else
 using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 using Avalonia;
@@ -31,9 +32,36 @@ public sealed class PythonProxy : IPythonProxy
     private const string VirtualEnvFolder = "VirtualEnv";
 
     /// <summary>
-    /// Path to VirtualEnv if it exists.
+    /// Folder where the virtual environment is stored (if it exists).
     /// </summary>
     private static readonly string VirtualEnvPath = Path.Combine(IFileHandler.AppDataFolderPath, VirtualEnvFolder);
+
+    /// <summary>
+    /// Path to the Python executable in the virtual environment.
+    /// </summary>
+    /// <seealso cref="VirtualEnvPath"/>
+    private static readonly string VirtualEnvExecutablePath = Path.Combine(VirtualEnvPath,
+        OperatingSystem.IsWindows()
+            ? @"Scripts\python"
+            : "bin/python"
+    );
+
+    /// <summary>
+    /// Folder where the embedded Python environment is stored (if it exists).
+    /// </summary>
+    private static readonly string EmbeddedEnvFolder = Path.Combine(
+        AppDomain.CurrentDomain.BaseDirectory,
+        "python"
+    );
+
+    /// <summary>
+    /// Path to embedded Python environment executable.
+    /// </summary>
+    private static readonly string EmbeddedEnvExecutablePath = EmbeddedEnvFolder + (
+        OperatingSystem.IsWindows()
+            ? @"\python.exe"
+            : "/python"
+    );
 
     /// <summary>
     /// A handle to Python threads
@@ -60,28 +88,40 @@ public sealed class PythonProxy : IPythonProxy
         _logger = loggerFactory.CreateLogger<PythonProxy>();
         _logger.LogInformation("Initializing Python.");
 
-        // Only use VirtualEnv if directory for VirtualEnv exists.
-        if (Directory.Exists(VirtualEnvPath))
+        string? pythonExecutablePath = null;
+
+        if (File.Exists(EmbeddedEnvExecutablePath))
         {
-            _logger.LogInformation("Virtual environment detected. Loading Python from Virtual environment.");
-            // TODO: Show error message to user before shutting down program if virtual environment cannot be loaded.
+            _logger.LogInformation("Embedded Python environment detected.");
+            _logger.LogTrace("Python executable path: {Path}", EmbeddedEnvExecutablePath);
+            pythonExecutablePath = EmbeddedEnvExecutablePath;
+        }
+        else if (File.Exists(VirtualEnvExecutablePath))
+        {
+            _logger.LogInformation("Virtual Python environment detected.");
+            _logger.LogTrace("Python executable path: {Path}", VirtualEnvExecutablePath);
+            pythonExecutablePath = VirtualEnvExecutablePath;
+        }
+
+        // Only use embedded environment if executable exists.
+        if (pythonExecutablePath is not null)
+        {
+            // TODO: Show error message to user before shutting down program if environment cannot be loaded.
             try
             {
-                var (pythonDll, pythonPath) = processProxy.LoadPythonVirtualEnv(VirtualEnvPath);
+                var (pythonDll, pythonPath) = processProxy.LoadPythonEnv(pythonExecutablePath);
                 Runtime.PythonDLL = pythonDll;
                 PythonEngine.PythonPath = pythonPath;
             }
             catch (Exception e)
             {
-                _logger.LogError(
-                    "Could not load Python virtual environment. Please check installation guide on website."
-                );
+                _logger.LogError("Could not load Python non-global environment.");
                 throw new DllNotFoundException(PythonDllExceptionMessage, e);
             }
         }
         else
         {
-            _logger.LogInformation("No virtual environment detected. Loading Python from system.");
+            _logger.LogInformation("No non-global environment detected. Loading Python from system.");
             Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
             if (Runtime.PythonDLL is null)
             {
@@ -96,14 +136,12 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
-    {
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config) =>
         RunPythonAction(PythonModule.HotspotDetection, module =>
         {
             _logger.LogInformation("Starting hotspot detection.");
             module.StartDetection(eventListener, config);
         });
-    }
 
     /// <inheritdoc />
     public void StopCurrentAction()
@@ -119,8 +157,20 @@ public sealed class PythonProxy : IPythonProxy
     }
 
     /// <inheritdoc />
-    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions) =>
-        RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));
+    public double[,]? CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions) =>
+        RunPythonAction(PythonModule.Calibration, module =>
+        {
+            _logger.LogInformation("Calibrating camera.");
+            return module.CalibrateCamera(cameraIndex, arucoPositions);
+        });
+
+    /// <inheritdoc />
+    public ImmutableDictionary<int, string> GetAvailableCameras() =>
+        RunPythonAction(PythonModule.CameraIdentification, module =>
+        {
+            _logger.LogInformation("Identifying available cameras.");
+            return module.GetAvailableCameras();
+        });
 
     /// <summary>
     /// Runs the given action after acquiring the Python GIL importing the given module
@@ -243,7 +293,7 @@ public sealed class PythonProxy : IPythonProxy
     /// <summary>
     /// Prints a message to the console and returns an identity matrix
     /// </summary>
-    public double[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+    public double[,] CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions)
     {
         _logger.LogInformation("Calibrating camera");
         return new double[,]
@@ -252,6 +302,17 @@ public sealed class PythonProxy : IPythonProxy
             { 0, 1, 0 },
             { 0, 0, 1 }
         };
+    }
+
+    public ImmutableDictionary<int, string> GetAvailableCameras()
+    {
+        _logger.LogInformation("Identifying available cameras");
+        return new Dictionary<int, string>
+        {
+            { 0, "Camera 0" },
+            { 700, "Camera 1" },
+            { 702, "Camera 2" }
+        }.ToImmutableDictionary();
     }
 
     /// <summary>

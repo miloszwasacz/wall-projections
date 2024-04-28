@@ -8,7 +8,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macOS-latest ]
+        # Not using macos-latest because it can be run on ARM machines, which don't support LibVLCSharp
+        os: [ ubuntu-latest, windows-latest, macos-12 ]
     uses: ./.github/workflows/dotnet-ci-generic.yml
     with:
       os: ${{ matrix.os }}

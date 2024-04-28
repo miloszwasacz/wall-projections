@@ -60,7 +60,7 @@ public class MockPythonProxy : IPythonProxy
         Task.Delay(Delay).Wait();
     }
 
-    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+    public double[,]? CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions)
     {
         Task.Delay(Delay).Wait();
         if (Exception != null)
@@ -68,6 +68,20 @@ public class MockPythonProxy : IPythonProxy
 
         IsCameraCalibrated = true;
         return arucoPositions.Count > 0 ? CalibrationResult : null;
+    }
+
+    public ImmutableDictionary<int, string> GetAvailableCameras()
+    {
+        Task.Delay(Delay).Wait();
+        if (Exception != null)
+            throw Exception;
+
+        return new Dictionary<int, string>
+        {
+            { 0, "Camera 0" },
+            { 700, "Camera 1" },
+            { 702, "Camera 2" }
+        }.ToImmutableDictionary();
     }
 
     public void Dispose()

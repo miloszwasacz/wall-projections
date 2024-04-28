@@ -10,7 +10,7 @@ public interface IHotspotHandler : IDisposable
     /// <summary>
     /// The total time required to activate a hotspot.
     /// </summary>
-    public static readonly TimeSpan ActivationTime = TimeSpan.FromSeconds(5);
+    public static readonly TimeSpan ActivationTime = TimeSpan.FromSeconds(2);
 
     /// <summary>
     /// The total time required to deactivate a hotspot.
@@ -41,6 +41,13 @@ public interface IHotspotHandler : IDisposable
     /// this event will not be fired.
     /// </remarks>
     public event EventHandler<HotspotArgs>? HotspotForcefullyDeactivated;
+
+    /// <summary>
+    /// Immediately deactivates the hotspot with the given <paramref name="id" />
+    /// (i.e. invokes <see cref="HotspotForcefullyDeactivated" />).
+    /// </summary>
+    /// <param name="id"></param>
+    public void DeactivateHotspot(int id);
 
     /// <summary>
     /// Arguments for the events in <see cref="IHotspotHandler" />

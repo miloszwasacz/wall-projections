@@ -4,66 +4,68 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
              xmlns:views="using:WallProjections.Views"
+             xmlns:sys="using:System"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.Editor.MediaEditor"
              x:DataType="vm:IMediaEditorViewModel"
+             Classes="list-card"
              IsEnabled="{Binding IsEnabled}">
 
-    <!--TODO Style this and children properly -->
-    <Border BorderBrush="LightGray"
-            BorderThickness="2"
-            CornerRadius="8">
+    <UserControl.Resources>
+        <sys:Double x:Key="MaxThumbnailHeight">128</sys:Double>
+    </UserControl.Resources>
 
-        <Grid ColumnDefinitions="*" RowDefinitions="Auto, *">
+    <UserControl.Styles>
+        <Style Selector="ListBox.with-padding">
+            <Setter Property="Padding" Value="{StaticResource CardPadding}" />
+        </Style>
+    </UserControl.Styles>
 
-            <Border Grid.Column="0" Grid.Row="0"
-                    BorderBrush="LightGray"
-                    BorderThickness="0 0 0 2"
-                    CornerRadius="8 8 0 0 "
-                    Padding="8">
+    <Border Classes="Card no-padding">
+        <DockPanel>
 
-                <Grid ColumnDefinitions="*, 10, Auto" RowDefinitions="Auto">
+            <Grid DockPanel.Dock="Top"
+                  RowDefinitions="Auto"
+                  Classes="header">
 
-                    <TextBlock Grid.Column="0" Grid.Row="0"
-                               FontWeight="Bold"
-                               TextTrimming="CharacterEllipsis"
-                               Text="{Binding Title}" />
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{StaticResource DefaultGridItemSpacing}" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="2" Grid.Row="0"
-                                Orientation="Horizontal"
-                                Spacing="10">
+                <TextBlock Grid.Column="0" Grid.Row="0"
+                           Text="{Binding Title}" />
 
-                        <!--TODO Get rid of this - use proper styling on IconButton -->
-                        <StackPanel.Styles>
-                            <Style Selector="PathIcon:disabled">
-                                <Setter Property="Foreground" Value="Transparent" />
-                            </Style>
-                        </StackPanel.Styles>
+                <StackPanel Grid.Column="2" Grid.Row="0"
+                            Orientation="Horizontal">
+                    <StackPanel.Spacing>
+                        <Binding Source="{StaticResource DefaultGridItemSpacing}"
+                                 Converter="{StaticResource SpacingConverter}" />
+                    </StackPanel.Spacing>
 
-                        <views:IconButton ToolTip.Tip="{Binding AddMediaButtonLabel}"
-                                          Padding="2"
-                                          IconData="{StaticResource add_regular}"
-                                          Click="AddMedia_OnClick" />
+                    <views:IconButton ToolTip.Tip="{Binding AddMediaButtonLabel}"
+                                      Classes="transparent"
+                                      IconData="{StaticResource add_regular}"
+                                      Click="AddMedia_OnClick" />
 
-                        <views:IconButton ToolTip.Tip="{Binding RemoveMediaButtonLabel}"
-                                          Padding="2"
-                                          IsEnabled="{Binding CanRemoveMedia}"
-                                          IconData="{StaticResource delete_regular}"
-                                          Click="RemoveMedia_OnClick" />
+                    <views:IconButton ToolTip.Tip="{Binding RemoveMediaButtonLabel}"
+                                      Classes="transparent"
+                                      IsEnabled="{Binding CanRemoveMedia}"
+                                      IconData="{StaticResource delete_regular}"
+                                      Click="RemoveMedia_OnClick" />
 
-                    </StackPanel>
+                </StackPanel>
 
-                </Grid>
+            </Grid>
 
-            </Border>
+            <Separator DockPanel.Dock="Top"
+                       Classes="divider" />
 
-            <ListBox Grid.Column="0" Grid.Row="1"
+            <ListBox Classes="classic-list transparent with-padding"
                      ItemsSource="{Binding Media}"
                      Selection="{Binding SelectedMedia}"
-                     SelectionMode="Multiple, Toggle"
-                     CornerRadius="0 0 7 7"
-                     ClipToBounds="True"
-                     d:ShowGridLines="True">
+                     SelectionMode="Multiple, Toggle">
 
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -74,62 +76,74 @@
                 <ListBox.Styles>
                     <Style Selector="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="10" />
-                        <Setter Property="CornerRadius" Value="5" />
                         <Setter Property="VerticalAlignment" Value="Top" />
+                        <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="{StaticResource ButtonBorderThemeThickness}" />
+
+                        <Style Selector="^ :is(Control).item-header">
+                            <Setter Property="Margin" Value="{StaticResource ControlPadding}" />
+
+                            <Style Selector="^ > :is(Control)">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                            </Style>
+
+                            <Style Selector="^ > TextBlock.item-label">
+                                <Setter Property="Margin">
+                                    <Binding Source="{StaticResource ControlPadding}"
+                                             Converter="{StaticResource ThicknessConverter}"
+                                             ConverterParameter="1 0" />
+                                </Setter>
+                            </Style>
+                        </Style>
+
+                        <Style Selector="^ Border.item-content">
+                            <Setter Property="ClipToBounds" Value="True" />
+                            <Setter Property="CornerRadius">
+                                <Binding Source="{StaticResource ControlCornerRadius}"
+                                         Converter="{StaticResource CornerRadiusConverter}"
+                                         ConverterParameter="0, 0, 1, 1" />
+                            </Setter>
+
+                            <Style Selector="^ > Image">
+                                <Setter Property="MaxHeight" Value="{StaticResource MaxThumbnailHeight}" />
+                                <Setter Property="Stretch" Value="UniformToFill" />
+                            </Style>
+                        </Style>
                     </Style>
                 </ListBox.Styles>
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="LightGray"
-                                BorderThickness="2"
-                                CornerRadius="5"
-                                ClipToBounds="True">
+                        <DockPanel>
 
-                            <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto">
+                            <Grid DockPanel.Dock="Top"
+                                  ColumnDefinitions="*, Auto" RowDefinitions="Auto"
+                                  Classes="item-header">
 
-                                <Border Grid.Column="0" Grid.Row="0"
-                                        BorderBrush="LightGray"
-                                        BorderThickness="0 0 0 2"
-                                        CornerRadius="5 5 0 0 "
-                                        Padding="5">
+                                <TextBlock Grid.Column="0" Grid.Row="0"
+                                           Classes="item-label small"
+                                           Text="{Binding Name}" />
 
-                                    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto">
-
-                                        <TextBlock Grid.Column="0" Grid.Row="0"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Text="{Binding Name}" />
-
-                                        <views:IconButton Grid.Column="1" Grid.Row="0"
-                                                          ToolTip.Tip="Open in File Explorer"
-                                                          Padding="2"
-                                                          IconData="{StaticResource open_folder_regular}"
-                                                          Click="ItemOpenExplorer_OnClick" />
-
-                                    </Grid>
-
-                                </Border>
-
-                                <Border Grid.Column="0" Grid.Row="1"
-                                        Background="Transparent"
-                                        CornerRadius="0 0 4 4"
-                                        ClipToBounds="True">
-
-                                    <Image Height="128"
-                                           Stretch="UniformToFill"
-                                           Source="{Binding Image}" />
-                                </Border>
+                                <views:IconButton Grid.Column="1" Grid.Row="0"
+                                                  Classes="small transparent"
+                                                  ToolTip.Tip="Open in File Explorer"
+                                                  IconData="{StaticResource open_folder_regular}"
+                                                  Click="ItemOpenExplorer_OnClick" />
 
                             </Grid>
 
-                        </Border>
+                            <Border Classes="item-content">
+                                <Image Source="{Binding Image}" />
+                            </Border>
+
+                        </DockPanel>
+
                     </DataTemplate>
                 </ListBox.ItemTemplate>
 
             </ListBox>
 
-        </Grid>
+        </DockPanel>
 
     </Border>
 

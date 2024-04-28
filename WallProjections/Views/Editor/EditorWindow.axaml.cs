@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Notifications;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -14,6 +16,7 @@ using static WallProjections.Views.ConfirmationDialog;
 
 namespace WallProjections.Views.Editor;
 
+[PseudoClasses(":hasoverlay")]
 public partial class EditorWindow : Window
 {
     private const string ImportInProgressMessage = "Importing configuration...";
@@ -48,6 +51,11 @@ public partial class EditorWindow : Window
     /// The backing field for the <see cref="IsInPositionEditMode" /> property.
     /// </summary>
     private bool _isInPositionEditMode;
+
+    // /// <summary>
+    // /// Whether a dialog is currently open.
+    // /// </summary>
+    // private bool _hasOpenDialog;
 
     /// <summary>
     /// A <see cref="DirectProperty{TOwner,TValue}">DirectProperty</see> that defines the <see cref="IsInPositionEditMode" /> property.
@@ -92,7 +100,7 @@ public partial class EditorWindow : Window
     /// </summary>
     private void MediaEditor_OnOpenExplorerFailed(object? sender, RoutedEventArgs e)
     {
-        ShowToast(ExplorerErrorMessage);
+        ShowToast(ExplorerErrorMessage, NotificationType.Error);
     }
 
     /// <summary>
@@ -107,35 +115,37 @@ public partial class EditorWindow : Window
         {
             var importer = vm.DescriptionEditor.Importer;
 
-            var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            var (result, file) = await WithOverlay(async () =>
             {
-                Title = "Select a text file to import...",
-                AllowMultiple = false,
-                FileTypeFilter = new[] { FilePickerFileTypes.TextPlain },
-                SuggestedStartLocation = startFolder
+                var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
+                var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Select a text file to import...",
+                    AllowMultiple = false,
+                    FileTypeFilter = new[] { FilePickerFileTypes.TextPlain },
+                    SuggestedStartLocation = startFolder
+                });
+
+                // No file was selected
+                if (files.Count == 0) return (Result.Cancelled, "");
+
+                var file = files[0].Path.LocalPath;
+                var safety = importer.IsImportSafe();
+                if (safety is ImportWarningLevel.None)
+                    return (Result.Confirmed, file);
+
+                // Import is not safe
+                var result = await new ConfirmationDialog(
+                    "Data overwrite warning",
+                    WarningIconPath,
+                    $"{safety.ToWarningText()} {ImportGenericWarningMessage}",
+                    "Import anyway"
+                ).ShowDialog(this);
+
+                return (result, file);
             });
 
-            // No file was selected
-            if (files.Count == 0) return;
-
-            var file = files[0].Path.LocalPath;
-            var safety = importer.IsImportSafe();
-            if (safety is ImportWarningLevel.None)
-            {
-                //TODO Use the result of ImportFromFile to show an error message
-                importer.ImportFromFile(file);
-                return;
-            }
-
-            // Import is not safe
-            var result = await new ConfirmationDialog(
-                "Data overwrite warning",
-                WarningIconPath,
-                $"{safety.ToWarningText()} {ImportGenericWarningMessage}",
-                "Import anyway"
-            ).ShowDialog(this);
-
+            //TODO Use the result of ImportFromFile to show an error message
             if (result == Result.Confirmed)
                 importer.ImportFromFile(file);
         });
@@ -160,12 +170,14 @@ public partial class EditorWindow : Window
     private async void HotspotList_OnDeleteHotspot(object? sender, HotspotList.DeleteArgs e) =>
         await WithActionLock(async vm =>
         {
-            var result = await new ConfirmationDialog(
-                "Delete Hotspot",
-                WarningIconPath,
-                "Are you sure you want to delete this hotspot? All associated data will be lost.",
-                "Delete"
-            ).ShowDialog(this);
+            var result = await WithOverlay(() =>
+                new ConfirmationDialog(
+                    "Delete Hotspot",
+                    WarningIconPath,
+                    "Are you sure you want to delete this hotspot? All associated data will be lost.",
+                    "Delete"
+                ).ShowDialog(this)
+            );
 
             if (result == Result.Confirmed)
                 vm.DeleteHotspot(e.Hotspot);
@@ -217,39 +229,42 @@ public partial class EditorWindow : Window
     /// <param name="e">The event arguments (unused).</param>
     private async void ConfigImport_OnClick(object? sender, RoutedEventArgs e) => await WithActionLock(async vm =>
     {
-        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var (result, file) = await WithOverlay(async () =>
         {
-            Title = "Select a configuration file to import...",
-            AllowMultiple = false,
-            FileTypeFilter = new[]
+            var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                new FilePickerFileType("Configuration")
+                Title = "Select a configuration file to import...",
+                AllowMultiple = false,
+                FileTypeFilter = new[]
                 {
-                    Patterns = new[] { "*.zip" }, //TODO Change to custom file type
-                    AppleUniformTypeIdentifiers = new[] { "public.zip-archive" },
-                    MimeTypes = new[] { "application/zip" }
-                }
-            },
-            SuggestedStartLocation = startFolder
+                    new FilePickerFileType("Configuration")
+                    {
+                        Patterns = new[] { "*.zip" }, //TODO Change to custom file type
+                        AppleUniformTypeIdentifiers = new[] { "public.zip-archive" },
+                        MimeTypes = new[] { "application/zip" }
+                    }
+                },
+                SuggestedStartLocation = startFolder
+            });
+
+            if (files.Count == 0) return (Result.Cancelled, "");
+
+            var file = files[0].Path.LocalPath;
+
+            // If the import is safe, don't show a warning dialog
+            if (vm.IsImportSafe)
+                return (Result.Confirmed, file);
+
+            var result = await new ConfirmationDialog(
+                "Import Configuration",
+                WarningIconPath,
+                "Are you sure you want to import a new configuration? All currently saved data will be lost.",
+                "Import"
+            ).ShowDialog(this);
+
+            return (result, file);
         });
-
-        if (files.Count == 0) return;
-        var file = files[0].Path.LocalPath;
-
-        // If the import is safe, don't show a warning dialog
-        if (vm.IsImportSafe)
-        {
-            await Import(file);
-            return;
-        }
-
-        var result = await new ConfirmationDialog(
-            "Import Configuration",
-            WarningIconPath,
-            "Are you sure you want to import a new configuration? All currently saved data will be lost.",
-            "Import"
-        ).ShowDialog(this);
 
         if (result == Result.Confirmed)
             await Import(file);
@@ -258,7 +273,10 @@ public partial class EditorWindow : Window
         async Task Import(string configFile)
         {
             var success = await WithLoadingToast(ImportInProgressMessage, () => vm.ImportConfig(configFile));
-            ShowToast(success ? ImportSuccessMessage : ImportErrorMessage);
+            ShowToast(
+                success ? ImportSuccessMessage : ImportErrorMessage,
+                success ? NotificationType.Success : NotificationType.Error
+            );
         }
     });
 
@@ -269,20 +287,27 @@ public partial class EditorWindow : Window
     /// <param name="e">The event arguments (unused).</param>
     private async void ConfigExport_OnClick(object? sender, RoutedEventArgs e) => await WithActionLock(async vm =>
     {
-        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        var folders = await WithOverlay(async () =>
         {
-            Title = "Choose export location...",
-            AllowMultiple = false,
-            SuggestedStartLocation = startFolder
+            var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
+            return await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = "Choose export location...",
+                AllowMultiple = false,
+                SuggestedStartLocation = startFolder
+            });
         });
 
         // No folder selected
         if (folders.Count == 0) return;
 
         var folder = folders[0].Path.LocalPath;
+
         var success = await WithLoadingToast(ExportInProgressMessage, () => vm.ExportConfig(folder));
-        ShowToast(success ? ExportSuccessMessage : ExportErrorMessage);
+        ShowToast(
+            success ? ExportSuccessMessage : ExportErrorMessage,
+            success ? NotificationType.Success : NotificationType.Error
+        );
     });
 
     /// <summary>
@@ -294,17 +319,22 @@ public partial class EditorWindow : Window
     {
         vm.ShowCalibrationMarkers();
 
-        var result = await new ConfirmationDialog(
-            "Camera calibration",
-            CalibrationIconPath,
-            "Ensure that the window with calibration patterns is on the correct screen and is in fullscreen mode.",
-            "Continue"
-        ).ShowDialog(this);
+        var result = await WithOverlay(() =>
+            new ConfirmationDialog(
+                "Camera calibration",
+                CalibrationIconPath,
+                "Ensure that the window with calibration patterns is on the correct screen and is in fullscreen mode.",
+                "Continue"
+            ).ShowDialog(this)
+        );
 
         if (result == Result.Confirmed)
         {
             var success = await WithLoadingToast(CalibrationInProgressMessage, vm.CalibrateCamera);
-            ShowToast(success ? CalibrationSuccessMessage : CalibrationErrorMessage);
+            ShowToast(
+                success ? CalibrationSuccessMessage : CalibrationErrorMessage,
+                success ? NotificationType.Success : NotificationType.Error
+            );
         }
         else
             vm.HideCalibrationMarkers();
@@ -400,7 +430,7 @@ public partial class EditorWindow : Window
 
         // An error occurred while saving
         if (!success)
-            ShowToast(SaveErrorMessage);
+            ShowToast(SaveErrorMessage, NotificationType.Error);
 
         return success;
     }
@@ -430,13 +460,15 @@ public partial class EditorWindow : Window
     /// </summary>
     private async Task ShowUnsavedChangesDialog(IEditorViewModel vm)
     {
-        var result = await new ConfirmationDialog(
-            "Unsaved Changes",
-            WarningIconPath,
-            "It appears that you have unsaved changes. Do you want save them before closing?",
-            "Save",
-            "Discard"
-        ).ShowDialog(this);
+        var result = await WithOverlay(() =>
+            new ConfirmationDialog(
+                "Unsaved Changes",
+                WarningIconPath,
+                "It appears that you have unsaved changes. Do you want save them before closing?",
+                "Save",
+                "Discard"
+            ).ShowDialog(this)
+        );
 
         switch (result)
         {
@@ -470,13 +502,13 @@ public partial class EditorWindow : Window
     ) => await WithActionLock(async vm =>
     {
         var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(startLocation);
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var files = await WithOverlay(() => StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select media files to import...",
             AllowMultiple = true,
             FileTypeFilter = filter,
             SuggestedStartLocation = startFolder
-        });
+        }));
 
         action(vm, files);
     });
@@ -492,12 +524,15 @@ public partial class EditorWindow : Window
     ) => await WithActionLock(async vm =>
     {
         var media = args.Media;
-        var result = await new ConfirmationDialog(
-            $"Remove {type.Name()}",
-            WarningIconPath,
-            $"Are you sure you want to remove {media.Length} {type.NumberBasedLabel(media.Length)}? This action cannot be undone.",
-            "Remove"
-        ).ShowDialog(this);
+        var result = await WithOverlay(() =>
+            new ConfirmationDialog(
+                $"Remove {type.Name()}",
+                WarningIconPath,
+                $"Are you sure you want to remove {media.Length} {type.NumberBasedLabel(media.Length)}? " +
+                $"This action cannot be undone.",
+                "Remove"
+            ).ShowDialog(this)
+        );
 
         if (result == Result.Confirmed)
             vm.RemoveMedia(type, media);
@@ -507,11 +542,30 @@ public partial class EditorWindow : Window
     /// Shows a toast with the specified message.
     /// </summary>
     /// <param name="message">The text to show in the toast.</param>
+    /// <param name="type">The type of the notification.</param>
     /// <param name="duration">The duration for which the toast should be shown.</param>
-    private void ShowToast(string message, Toast.ShowDuration duration = Toast.ShowDuration.Short)
+    private void ShowToast(
+        string message,
+        NotificationType type,
+        Toast.ShowDuration duration = Toast.ShowDuration.Short
+    )
     {
         Toast.Text = message;
-        Toast.Show(duration);
+        Toast.Show(duration, type);
+    }
+
+    /// <summary>
+    /// Performs an action while showing an overlay.
+    /// </summary>
+    /// <param name="action">The action to perform.</param>
+    /// <typeparam name="T">The return type of the action.</typeparam>
+    /// <returns>The result of the action.</returns>
+    private async Task<T> WithOverlay<T>(Func<Task<T>> action)
+    {
+        PseudoClasses.Add(":hasoverlay");
+        var result = await action();
+        PseudoClasses.Remove(":hasoverlay");
+        return result;
     }
 
     /// <summary>

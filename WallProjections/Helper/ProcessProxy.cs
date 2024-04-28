@@ -11,6 +11,22 @@ namespace WallProjections.Helper;
 public class ProcessProxy : IProcessProxy
 {
     /// <summary>
+    /// Error message if Python environment cannot be loaded.
+    /// </summary>
+    private const string PythonErrorMessage =
+        "Could not load Python environment. Please check installation guide on website.";
+
+    /// <summary>
+    /// Script used to load the Python DLL location and the Python Path from the Python environment.
+    /// </summary>
+    private static readonly string PyEnvLocatorScript = $"import sys;" +
+                                                       $"import find_libpython;" +
+                                                       $"print(" +
+                                                       $"  find_libpython.find_libpython(), " +
+                                                       $"  '{Path.PathSeparator}'.join(sys.path), " +
+                                                       $"  sep = ',' )";
+
+    /// <summary>
     /// A logger for this class.
     /// </summary>
     private readonly ILogger _logger;
@@ -20,22 +36,6 @@ public class ProcessProxy : IProcessProxy
     {
         _logger = loggerFactory.CreateLogger<ProcessProxy>();
     }
-
-    /// <summary>
-    /// Error message if Python virtual environment cannot be loaded.
-    /// </summary>
-    private const string PythonErrorMessage =
-        "Could not load Python virtual environment. Please check installation guide on website.";
-
-    /// <summary>
-    /// Script used to load the Python DLL location and the Python Path from the virtual environment.
-    /// </summary>
-    private static readonly string VEnvLocatorScript = $"import sys;" +
-                                                       $"import find_libpython;" +
-                                                       $"print(" +
-                                                       $"  find_libpython.find_libpython(), " +
-                                                       $"  '{Path.PathSeparator}'.join(sys.path), " +
-                                                       $"  sep = ',' )";
 
     // ReSharper disable once ConvertIfStatementToReturnStatement
     /// <inheritdoc />
@@ -57,21 +57,15 @@ public class ProcessProxy : IProcessProxy
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage(Justification = "Unit tests should not start external processes")]
-    public (string, string) LoadPythonVirtualEnv(string virtualEnvPath)
+    public (string, string) LoadPythonEnv(string pythonExecutablePath)
     {
-        _logger.LogInformation("Getting Python information from VirtualEnv.");
-
-        var virtualEnvScriptsPath = virtualEnvPath + (
-            OperatingSystem.IsWindows()
-                ? @"\Scripts"
-                : "/bin"
-        );
+        _logger.LogInformation("Getting Python information from environment.");
 
         // Process calls Python script to find location of the Python DLL and the Python Path
         var proc = Process.Start(new ProcessStartInfo
         {
-            FileName = Path.Combine(virtualEnvScriptsPath, "python"),
-            Arguments = $"-c \"{VEnvLocatorScript}\"",
+            FileName = pythonExecutablePath,
+            Arguments = $"-c \"{PyEnvLocatorScript}\"",
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true

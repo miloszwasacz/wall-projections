@@ -43,7 +43,7 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     public MockDisplayViewModel(INavigator? navigator = null)
     {
         _navigator = navigator ?? new MockNavigator();
-        ContentViewModel = new DescriptionViewModel("Test", "Test");
+        ContentViewModel = new WelcomeViewModel();
     }
 
     /// <summary>

@@ -2,20 +2,67 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="WallProjections.App"
              xmlns:local="using:WallProjections"
-             RequestedThemeVariant="Light">
+             xmlns:converters="using:WallProjections.Views.Converters"
+             RequestedThemeVariant="Default">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
 
-    <Application.Styles>
-        <FluentTheme />
-        <StyleInclude Source="avares://FluentAvalonia.ProgressRing/Styling/Controls/ProgressRing.axaml" />
-        <StyleInclude Source="avares://WallProjections/Icons.axaml" />
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/BaseResources.axaml" />
+                <ResourceInclude Source="/Views/Display/ContentLayout.axaml" />
+                <ResourceDictionary>
+                    <!-- Converters -->
+                    <converters:StateConverter x:Key="StateConverter" />
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 
-        <!-- Templated Controls -->
-        <StyleInclude Source="avares://WallProjections/Views/Toast.axaml" />
-        <StyleInclude Source="avares://WallProjections/Views/Editor/DescriptionEditor.axaml" />
+    <Application.Styles>
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light"
+                                       Accent="#ff005eb7"
+                                       AltHigh="White" AltLow="White" AltMedium="White"
+                                       AltMediumHigh="White" AltMediumLow="White"
+                                       BaseHigh="Black" BaseLow="#4df9f9f9" BaseMedium="#b8adadad"
+                                       BaseMediumHigh="#ff7a7a7a" BaseMediumLow="#db939393"
+                                       ChromeAltLow="#ff7a7a7a"
+                                       ChromeBlackHigh="Black" ChromeBlackLow="#4df9f9f9"
+                                       ChromeBlackMedium="#ff7a7a7a" ChromeBlackMediumLow="#b8adadad"
+                                       ChromeDisabledHigh="#4df9f9f9" ChromeDisabledLow="#b8adadad"
+                                       ChromeGray="#db939393" ChromeWhite="White"
+                                       ChromeHigh="#4df9f9f9" ChromeLow="#fffdfdfd"
+                                       ChromeMedium="#dbfcfcfc" ChromeMediumLow="#fff9f9f9"
+                                       ListLow="#09000000" ListMedium="#06000000"
+                                       RegionColor="#fff3f3f3" />
+                <ColorPaletteResources x:Key="Dark"
+                                       Accent="#ff60ccfe"
+                                       AltHigh="Black" AltLow="Black" AltMedium="Black"
+                                       AltMediumHigh="Black" AltMediumLow="Black"
+                                       BaseHigh="White" BaseLow="#4df9f9f9" BaseMedium="#dbfcfcfc"
+                                       BaseMediumHigh="#fffdfdfd" BaseMediumLow="#94fbfbfb"
+                                       ChromeAltLow="#fffdfdfd"
+                                       ChromeBlackHigh="Black" ChromeBlackLow="#fffdfdfd"
+                                       ChromeBlackMedium="Black" ChromeBlackMediumLow="Black"
+                                       ChromeDisabledHigh="#4df9f9f9" ChromeDisabledLow="#dbfcfcfc"
+                                       ChromeGray="#b8fbfbfb" ChromeWhite="Black"
+                                       ChromeHigh="#b8fbfbfb" ChromeLow="#db939393"
+                                       ChromeMedium="#b8adadad" ChromeMediumLow="#ff2c2c2c"
+                                       ListLow="#0fffffff" ListMedium="#0affffff"
+                                       RegionColor="#ff0a0a0a" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+
+        <StyleInclude Source="avares://FluentAvalonia.ProgressRing/Styling/Controls/ProgressRing.axaml" />
+        <StyleInclude Source="avares://WallProjections/Styles/Controls.axaml" />
+        <StyleInclude Source="avares://WallProjections/Styles/General.axaml" />
+        <StyleInclude Source="avares://WallProjections/Styles/Projections.axaml" />
+        <StyleInclude Source="avares://WallProjections/Icons.axaml" />
     </Application.Styles>
 </Application>

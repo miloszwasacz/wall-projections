@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -15,6 +16,8 @@ namespace WallProjections.Views;
 /// </remarks>
 public class JustifiedTextBlock : TextBlock
 {
+    protected override Type StyleKeyOverride => typeof(TextBlock);
+
     protected override TextLayout CreateTextLayout(string? text)
     {
         TextAlignment = TextAlignment.Start;

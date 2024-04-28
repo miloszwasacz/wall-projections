@@ -68,7 +68,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     {
         _logger.LogTrace("Deactivating all hotspots");
         foreach (var coord in Projections)
-            coord.IsActive = false;
+            coord.State = HotspotState.None;
     }
 
     /// <inheritdoc/>
@@ -96,8 +96,8 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     #region Event Callbacks
 
     /// <summary>
-    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.IsActivating" /> to true
-    /// and <see cref="IHotspotProjectionViewModel.IsActive" /> to false.
+    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.State" />
+    /// to <see cref="HotspotState.Activating" />.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
@@ -111,18 +111,15 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
         lock (this)
         {
-            hotspot.IsDeactivating = false;
-            hotspot.IsActive = false;
-            hotspot.IsActivating = true;
+            hotspot.State = HotspotState.Activating;
         }
 
         _logger.LogTrace("Activating hotspot with id {Id}.", e.Id);
     }
 
     /// <summary>
-    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.IsActivating" />
-    /// and <see cref="IHotspotProjectionViewModel.IsDeactivating" /> to false,
-    /// and <see cref="IHotspotProjectionViewModel.IsActive" /> to true.
+    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.State" />
+    /// to <see cref="HotspotState.Active" />.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
@@ -136,18 +133,15 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
         lock (this)
         {
-            hotspot.IsDeactivating = false;
-            hotspot.IsActivating = false;
-            hotspot.IsActive = true;
+            hotspot.State = HotspotState.Active;
         }
 
         _logger.LogTrace("Hotspot with id {Id} activated.", e.Id);
     }
 
     /// <summary>
-    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.IsActive" /> and
-    /// <see cref="IHotspotProjectionViewModel.IsActivating" /> to false,
-    /// and <see cref="IHotspotProjectionViewModel.IsDeactivating" /> to true.
+    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.State" />
+    /// to <see cref="HotspotState.Deactivating" />.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments containing the id of the hotspot to be deactivated.</param>
@@ -161,18 +155,15 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
         lock (this)
         {
-            hotspot.IsActivating = false;
-            hotspot.IsActive = false;
-            hotspot.IsDeactivating = true;
+            hotspot.State = HotspotState.Deactivating;
         }
 
         _logger.LogTrace("Deactivating hotspot with id {Id}.", e.Id);
     }
 
     /// <summary>
-    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.IsActive" />,
-    /// <see cref="IHotspotProjectionViewModel.IsActivating" />, and <see cref="IHotspotProjectionViewModel.IsDeactivating" />
-    /// to false.
+    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.State" />
+    /// to <see cref="HotspotState.None" />.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -186,9 +177,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
         lock (this)
         {
-            hotspot.IsActivating = false;
-            hotspot.IsActive = false;
-            hotspot.IsDeactivating = false;
+            hotspot.State = HotspotState.None;
         }
 
         _logger.LogTrace("Hotspot with id {Id} forcefully deactivated.", e.Id);

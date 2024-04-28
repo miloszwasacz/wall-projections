@@ -6,28 +6,27 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.ConfirmationDialog"
         x:DataType="views:ConfirmationDialogViewModel"
-        WindowStartupLocation="CenterScreen"
-        SizeToContent="WidthAndHeight"
-        ShowInTaskbar="False"
-        CanResize="False"
         Icon="{Binding Icon}"
         Title="{Binding Title}"
+        Classes="Dialog"
         Closed="Dialog_OnClosed">
 
-    <!--TODO Style this and children properly -->
-    <Grid RowDefinitions="Auto, 20, Auto"
-          Margin="20">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" MinWidth="50" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="{StaticResource DefaultGridItemSpacing}" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="{StaticResource DialogElementVerticalSpacing}" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
         <views:JustifiedTextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"
-                                  MaxWidth="300"
-                                  TextWrapping="Wrap"
+                                  Classes="DialogMessage"
                                   Text="{Binding Message}" />
 
         <Button Grid.Column="0" Grid.Row="2"
@@ -36,10 +35,12 @@
                 Click="Refuse_OnClick" />
 
         <Button Grid.Column="2" Grid.Row="2"
+                Classes="accent" IsDefault="True"
                 Content="{Binding ConfirmButtonText}"
                 Click="Confirm_OnClick" />
 
         <Button Grid.Column="4" Grid.Row="2"
+                IsCancel="True"
                 Content="{Binding CancelButtonText}"
                 Click="Cancel_OnClick" />
 

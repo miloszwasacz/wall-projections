@@ -2,15 +2,16 @@
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Notifications;
 using Avalonia.Controls.Primitives;
-
-// DO NOT IMPORT `Avalonia.Media` - it breaks `BoxShadowProperty`!
 
 namespace WallProjections.Views;
 
 /// <summary>
 /// A simple toast control for showing a message to the user for a short period of time.
 /// </summary>
+[PseudoClasses(":information", ":success", ":warning", ":error")]
 public class Toast : TemplatedControl
 {
     /// <summary>
@@ -39,18 +40,6 @@ public class Toast : TemplatedControl
             (o, v) => o.IsLoading = v
         );
 
-    /// <summary>
-    /// Defines the <see cref="BoxShadow" /> property.
-    /// </summary>
-    public static readonly StyledProperty<Avalonia.Media.BoxShadows> BoxShadowProperty =
-        AvaloniaProperty.Register<Toast, Avalonia.Media.BoxShadows>(nameof(BoxShadow));
-
-    /// <summary>
-    /// Defines the <see cref="Spacing" /> property.
-    /// </summary>
-    public static readonly StyledProperty<GridLength> SpacingProperty =
-        AvaloniaProperty.Register<Toast, GridLength>(nameof(Spacing), new GridLength(0));
-
     /// <inheritdoc cref="TextBlock.Text" />
     public string? Text
     {
@@ -67,30 +56,15 @@ public class Toast : TemplatedControl
         set => SetAndRaise(IsLoadingProperty, ref _isLoading, value);
     }
 
-    /// <inheritdoc cref="Border.BoxShadow" />
-    public Avalonia.Media.BoxShadows BoxShadow
-    {
-        get => GetValue(BoxShadowProperty);
-        set => SetValue(BoxShadowProperty, value);
-    }
-
-    /// <summary>
-    /// How much space should be left between the text and the loading spinner.
-    /// </summary>
-    public GridLength Spacing
-    {
-        get => GetValue(SpacingProperty);
-        set => SetValue(SpacingProperty, value);
-    }
-
     /// <summary>
     /// Opens the toast for the specified duration.
     /// </summary>
     /// <param name="duration">The duration for which the toast should be shown.</param>
-    /// <seealso cref="Show()" />
-    public async void Show(ShowDuration duration)
+    /// <param name="type">The type of the notification.</param>
+    /// <seealso cref="Show(NotificationType)" />
+    public async void Show(ShowDuration duration, NotificationType type = NotificationType.Information)
     {
-        Show();
+        Show(type);
         await Task.Delay((int)duration);
         Hide();
     }
@@ -98,12 +72,14 @@ public class Toast : TemplatedControl
     /// <summary>
     /// Opens the toast.
     /// </summary>
+    /// <param name="type">The type of the notification.</param>
     /// <seealso cref="Hide" />
-    /// <seealso cref="Show(ShowDuration)" />
-    public void Show()
+    /// <seealso cref="Show(ShowDuration, NotificationType)" />
+    public void Show(NotificationType type = NotificationType.Information)
     {
         lock (this)
         {
+            SetType(type);
             _openedCount++;
             IsVisible = true;
         }
@@ -112,8 +88,8 @@ public class Toast : TemplatedControl
     /// <summary>
     /// Hides the toast.
     /// </summary>
-    /// <seealso cref="Show()" />
-    /// <seealso cref="Show(ShowDuration)" />
+    /// <seealso cref="Show(NotificationType)" />
+    /// <seealso cref="Show(ShowDuration, NotificationType)" />
     public void Hide()
     {
         lock (this)
@@ -122,6 +98,18 @@ public class Toast : TemplatedControl
             if (_openedCount == 0)
                 IsVisible = false;
         }
+    }
+
+    /// <summary>
+    /// Adds appropriate pseudo-classes for the specified notification type.
+    /// </summary>
+    /// <param name="type">The type of the notification.</param>
+    private void SetType(NotificationType type)
+    {
+        PseudoClasses.Set(":information", type == NotificationType.Information);
+        PseudoClasses.Set(":success", type == NotificationType.Success);
+        PseudoClasses.Set(":warning", type == NotificationType.Warning);
+        PseudoClasses.Set(":error", type == NotificationType.Error);
     }
 
     /// <summary>

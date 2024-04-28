@@ -1,94 +1,136 @@
-﻿<Ellipse xmlns="https://github.com/avaloniaui"
-         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-         xmlns:helper="using:WallProjections.Helper.Interfaces"
-         xmlns:views="using:WallProjections.Views"
-         mc:Ignorable="d" d:DesignWidth="20" d:DesignHeight="20"
-         x:Class="WallProjections.Views.HotspotCircle"
-         Width="{Binding Diameter, RelativeSource={RelativeSource Self}}"
-         Height="{Binding Diameter, RelativeSource={RelativeSource Self}}"
-         Classes.activating="{Binding IsActivating, RelativeSource={RelativeSource Self}}"
-         Classes.deactivating="{Binding IsDeactivating, RelativeSource={RelativeSource Self}}"
-         Classes.activated="{Binding IsActivated, RelativeSource={RelativeSource Self}}"
-         Classes.pulse="{Binding Pulse, RelativeSource={RelativeSource Self}}">
+﻿<Panel xmlns="https://github.com/avaloniaui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:helper="using:WallProjections.Helper.Interfaces"
+       xmlns:enums="using:WallProjections.ViewModels.Interfaces.SecondaryScreens"
+       xmlns:views="using:WallProjections.Views"
+       mc:Ignorable="d" d:DesignWidth="20" d:DesignHeight="20"
+       x:Class="WallProjections.Views.HotspotCircle"
+       Width="{Binding Diameter, RelativeSource={RelativeSource Self}}"
+       Height="{Binding Diameter, RelativeSource={RelativeSource Self}}"
+       Classes.activating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Activating}}"
+       Classes.deactivating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Deactivating}}"
+       Classes.activated="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Active}}">
 
-    <!--TODO Style this properly -->
-    <Ellipse.Styles>
+    <Panel.Resources>
+        <views:FullArcDiameterConverter x:Key="FullArcDiameterConverter" />
+    </Panel.Resources>
 
+    <Panel.Styles>
+        <Style Selector="Ellipse.inner">
+            <Setter Property="Width" Value="{Binding $parent[views:HotspotCircle].Diameter}" />
+            <Setter Property="Height" Value="{Binding $parent[views:HotspotCircle].Diameter}" />
+        </Style>
+
+        <Style Selector="Ellipse.outer, Arc.outer">
+            <Setter Property="Width">
+                <Binding Path="$parent[views:HotspotCircle].Diameter"
+                         Converter="{StaticResource FullArcDiameterConverter}" />
+            </Setter>
+            <Setter Property="Height">
+                <Binding Path="$parent[views:HotspotCircle].Diameter"
+                         Converter="{StaticResource FullArcDiameterConverter}" />
+            </Setter>
+            <Setter Property="Stroke" Value="{StaticResource HotspotStrokeBrush}" />
+            <Setter Property="StrokeThickness" Value="{StaticResource HotspotStrokeThickness}" />
+        </Style>
+
+        <Style Selector="Arc.outer">
+            <Setter Property="StartAngle" Value="-90" />
+        </Style>
+    </Panel.Styles>
+
+    <!-- Active circle, need to appear when circle becomes active to counter the transition behaviour -->
+    <!-- that occurs between the activating and activated animation -->
+    <Ellipse Classes="outer full" />
+
+    <!-- Pulsing circle -->
+    <Ellipse Classes="hotspot inner"
+             Classes.pulse="{Binding $parent[views:HotspotCircle].Pulse}" />
+
+    <!-- Charging arc -->
+    <Arc Classes="outer" />
+
+    <!-- Animations -->
+    <Panel.Styles>
         <!-- Base transitions -->
         <Style Selector="views|HotspotCircle">
-            <Setter Property="Transitions">
-                <Transitions>
-                    <!--TODO Change to an actual transition -->
-                    <TransformOperationsTransition
-                        Property="RenderTransform"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
-                    <BrushTransition
-                        Property="Fill"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
-                </Transitions>
-            </Setter>
-            <Setter Property="RenderTransform" Value="scale(1)" />
+            <Style Selector="^ Ellipse.inner">
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <TransformOperationsTransition
+                            Property="RenderTransform"
+                            Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
+                    </Transitions>
+                </Setter>
+                <Setter Property="RenderTransform" Value="scale(1)" />
+            </Style>
+            <Style Selector="^ Arc.outer">
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <DoubleTransition
+                            Property="SweepAngle"
+                            Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
+                    </Transitions>
+                </Setter>
+                <Setter Property="SweepAngle" Value="0" />
+            </Style>
+            <Style Selector="^ Ellipse.outer.full">
+                <Setter Property="Opacity" Value="0" />
+            </Style>
         </Style>
 
         <!-- ACTIVATING animation -->
         <Style Selector="views|HotspotCircle.activating">
-            <Setter Property="Transitions">
-                <Transitions>
-                    <!--TODO Change to an actual transition -->
-                    <TransformOperationsTransition
-                        Property="RenderTransform"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
-                    <BrushTransition
-                        Property="Fill"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
-                </Transitions>
-            </Setter>
-            <!--TODO Change to an actual animation -->
-            <Setter Property="RenderTransform" Value="scale(1.25)" />
-            <Setter Property="Fill" Value="Aqua" />
+            <Style Selector="^ Arc.outer">
+                <!-- Sweeping arc animation -->
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <DoubleTransition
+                            Property="SweepAngle"
+                            Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
+                    </Transitions>
+                </Setter>
+                <Setter Property="SweepAngle" Value="360" />
+            </Style>
         </Style>
 
         <!-- DEACTIVATING animation -->
-        <Style Selector="views|HotspotCircle.deactivating">
+        <Style Selector="views|HotspotCircle.deactivating Arc.outer">
             <Setter Property="Transitions">
                 <Transitions>
-                    <!--TODO Change to an actual transition -->
-                    <TransformOperationsTransition
-                        Property="RenderTransform"
-                        Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
-                    <BrushTransition
-                        Property="Fill"
+                    <DoubleTransition
+                        Property="SweepAngle"
                         Duration="{Binding Source={x:Static helper:IHotspotHandler.ActivationTime}}" />
                 </Transitions>
             </Setter>
-            <!--TODO Change to an actual animation -->
-            <Setter Property="RenderTransform" Value="scale(1)" />
+            <Setter Property="SweepAngle" Value="0" />
         </Style>
 
         <!-- ACTIVE animation -->
         <Style Selector="views|HotspotCircle.activated">
-            <!-- Pulsing animation -->
-            <Setter Property="Transitions">
-                <Transitions>
-                    <!--TODO Change to actual transitions -->
-                    <TransformOperationsTransition
-                        Property="RenderTransform"
-                        Duration="{Binding Source={x:Static views:HotspotCircle.PulseTime}}" />
-                    <BrushTransition
-                        Property="Fill"
-                        Duration="{Binding Source={x:Static views:HotspotCircle.PulseTime}}" />
-                </Transitions>
-            </Setter>
-
-            <Setter Property="Fill" Value="Firebrick" />
-
-            <!-- Single pulse -->
-            <Style Selector="^.pulse">
-                <Setter Property="RenderTransform" Value="scale(1.25)" />
+            <Style Selector="^ Ellipse.inner">
+                <!-- Pulsing animation -->
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <TransformOperationsTransition
+                            Property="RenderTransform"
+                            Duration="{Binding Source={x:Static views:HotspotCircle.PulseTime}}" />
+                    </Transitions>
+                </Setter>
+                <!-- Single pulse -->
+                <Style Selector="^.pulse">
+                    <Setter Property="RenderTransform" Value="scale(1.25)" />
+                </Style>
+            </Style>
+            <Style Selector="^ Arc.outer">
+                <Setter Property="SweepAngle" Value="360" />
+            </Style>
+            <Style Selector="^ Ellipse.outer.full">
+                <Setter Property="Opacity" Value="1" />
             </Style>
         </Style>
 
-    </Ellipse.Styles>
-</Ellipse>
+    </Panel.Styles>
+</Panel>

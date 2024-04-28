@@ -25,7 +25,8 @@ public class LayoutProviderTest
         {
             typeof(DescriptionViewModel.Factory),
             typeof(ImageWithDescriptionViewModel.Factory),
-            typeof(VideoWithDescriptionViewModel.Factory)
+            typeof(VideoWithDescriptionViewModel.Factory),
+            typeof(ImagePlusVideoWithDescriptionViewModel.Factory)
         };
 
         var layoutProvider = new LayoutProvider(new MockLoggerFactory());
@@ -79,29 +80,59 @@ public class LayoutProviderTest
         var layoutProvider = new LayoutProvider(new[] { factory });
         var layout = layoutProvider.GetLayout(vmProvider, hotspot);
 
-        Assert.That(layout, Is.InstanceOf<DescriptionViewModel>());
-        var description = (DescriptionViewModel)layout;
+        Assert.That(layout, Is.InstanceOf<ErrorViewModel>());
+        var description = (ErrorViewModel)layout;
         Assert.Multiple(() =>
         {
-            Assert.That(description.Title, Is.EqualTo("Error"));
+            Assert.That(description.Title, Is.EqualTo(ILayoutProvider.DefaultErrorTitle));
             Assert.That(description.Description, Is.EqualTo(LayoutProvider.ErrorDescription));
         });
     }
 
     [Test]
-    public void GetSimpleDescriptionLayoutTest()
+    public void GetWelcomeLayoutTest()
     {
-        const string title = "Title";
-        const string description = "Description";
+        var layoutProvider = new LayoutProvider(new MockLoggerFactory());
+        var layout = layoutProvider.GetWelcomeLayout();
+        Assert.That(layout, Is.InstanceOf<WelcomeViewModel>());
+        var welcomeLayout = (WelcomeViewModel)layout;
+        Assert.Multiple(() =>
+        {
+            Assert.That(welcomeLayout.Title, Is.EqualTo(WelcomeViewModel.WelcomeTitle));
+            Assert.That(welcomeLayout.Description, Is.EqualTo(WelcomeViewModel.WelcomeMessage));
+        });
+    }
+
+    [Test]
+    public void GetErrorLayoutTest()
+    {
+        const string message = "Test message";
 
         var layoutProvider = new LayoutProvider(new MockLoggerFactory());
-        var layout = layoutProvider.GetSimpleDescriptionLayout(title, description);
-        Assert.That(layout, Is.InstanceOf<DescriptionViewModel>());
-        var descriptionLayout = (DescriptionViewModel)layout;
+        var layout = layoutProvider.GetErrorLayout(message);
+        Assert.That(layout, Is.InstanceOf<ErrorViewModel>());
+        var descriptionLayout = (ErrorViewModel)layout;
+        Assert.Multiple(() =>
+        {
+            Assert.That(descriptionLayout.Title, Is.EqualTo(ILayoutProvider.DefaultErrorTitle));
+            Assert.That(descriptionLayout.Description, Is.EqualTo(message));
+        });
+    }
+
+    [Test]
+    public void GetErrorLayoutCustomTitleTest()
+    {
+        const string title = "Custom title";
+        const string message = "Test message";
+
+        var layoutProvider = new LayoutProvider(new MockLoggerFactory());
+        var layout = layoutProvider.GetErrorLayout(message, title);
+        Assert.That(layout, Is.InstanceOf<ErrorViewModel>());
+        var descriptionLayout = (ErrorViewModel)layout;
         Assert.Multiple(() =>
         {
             Assert.That(descriptionLayout.Title, Is.EqualTo(title));
-            Assert.That(descriptionLayout.Description, Is.EqualTo(description));
+            Assert.That(descriptionLayout.Description, Is.EqualTo(message));
         });
     }
 

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
@@ -9,7 +11,7 @@ namespace WallProjections.ViewModels.Display.Layouts;
 /// <summary>
 /// A viewmodel for a view that displays an image with a title and description.
 /// </summary>
-public class ImageWithDescriptionViewModel : Layout
+public class ImageWithDescriptionViewModel : Layout, IDisposable
 {
     /// <summary>
     /// Image view model used to show image
@@ -36,19 +38,31 @@ public class ImageWithDescriptionViewModel : Layout
     /// <param name="hotspotId">The id of the hotspot.</param>
     /// <param name="title">The title of the hotspot.</param>
     /// <param name="description">The description of the hotspot.</param>
-    /// <param name="imagePath">The path to the image to show.</param>
+    /// <param name="imagePaths">The paths to the images to show.</param>
+    /// <param name="deactivateAfter">
+    /// The time after which the layout should deactivate.
+    /// If <i>null</i>, the layout will deactivate after the <see cref="Layout.DefaultDeactivationTime">default time</see>.
+    /// </param>
     public ImageWithDescriptionViewModel(
         IViewModelProvider vmProvider,
         int hotspotId,
         string title,
         string description,
-        string imagePath
+        IEnumerable<string> imagePaths,
+        TimeSpan? deactivateAfter = null
     ) : base(hotspotId)
     {
         Title = title;
         Description = description;
         ImageViewModel = vmProvider.GetImageViewModel();
-        ImageViewModel.ShowImage(imagePath);
+        ImageViewModel.AddImages(imagePaths);
+        ImageViewModel.StartSlideshow();
+        DeactivateAfterAsync(deactivateAfter ?? DefaultDeactivationTime);
+    }
+
+    public void Dispose()
+    {
+        ImageViewModel.Dispose();
     }
 
     // ReSharper disable once UnusedType.Global
@@ -73,7 +87,7 @@ public class ImageWithDescriptionViewModel : Layout
                 hotspot.Id,
                 hotspot.Title,
                 hotspot.Description,
-                hotspot.ImagePaths[0]
+                hotspot.ImagePaths
             );
     }
 }

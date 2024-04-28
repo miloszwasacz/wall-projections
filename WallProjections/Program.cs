@@ -43,7 +43,17 @@ internal class Program
         logger.LogInformation("Starting application");
 
         using var pythonProxy = new PythonProxy(new ProcessProxy(loggerFactory), loggerFactory);
-        using var pythonHandler = new PythonHandler(pythonProxy, loggerFactory);
+        var cameras = pythonProxy.GetAvailableCameras();
+
+        //TODO Allow user to select camera
+        if (cameras.Count == 0)
+        {
+            logger.LogError("No cameras detected. Exiting application.");
+            return;
+        }
+        var (cameraIndex, _) = cameras.First();
+
+        using var pythonHandler = new PythonHandler(cameraIndex, pythonProxy, loggerFactory);
         BuildAvaloniaApp(pythonHandler, loggerFactory).StartWithClassicDesktopLifetime(args);
 
         logger.LogInformation("Closing application");
@@ -57,7 +67,20 @@ internal class Program
     {
         return AppBuilder.Configure(() => new App(pythonHandler, loggerFactory))
             .UsePlatformDetect()
-            .WithInterFont()
+            .LogToTrace()
+            .UseReactiveUI();
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    /// <summary>
+    /// Don't use this method. It is only used by the visual designer.
+    /// </summary>
+    [ExcludeFromCodeCoverage]
+    [Obsolete("This method is only used by the visual designer.", true)]
+    private static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure(() => new App(null!, null!))
+            .UsePlatformDetect()
             .LogToTrace()
             .UseReactiveUI();
     }

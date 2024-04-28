@@ -50,7 +50,12 @@ public class EditorHotspotViewModel : ViewModelBase, IEditorHotspotViewModel
     public string Title
     {
         get => _title;
-        set => this.RaiseAndSetIfChanged(ref _title, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _title, value);
+            this.RaisePropertyChanged(nameof(IEditorHotspotViewModel.IsFallback));
+            this.RaisePropertyChanged(nameof(IEditorHotspotViewModel.TitleOrFallback));
+        }
     }
 
     /// <inheritdoc />

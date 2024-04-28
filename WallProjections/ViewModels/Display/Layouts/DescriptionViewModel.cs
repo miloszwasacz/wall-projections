@@ -1,3 +1,4 @@
+using System;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
@@ -15,12 +16,18 @@ public class DescriptionViewModel : Layout
     /// with the given <paramref name="title" /> and <paramref name="description" />
     /// not based on a hotspot.
     /// </summary>
-    /// <param name="title">The title of the hotspot.</param>
-    /// <param name="description">The description of the hotspot.</param>
-    public DescriptionViewModel(string title, string description) : base(null)
+    /// <param name="title">The title to display.</param>
+    /// <param name="description">The description to display.</param>
+    /// <param name="deactivateAfter">
+    /// The time after which the layout should deactivate.
+    /// If <i>null</i>, the layout won't deactivate on its own.
+    /// </param>
+    protected DescriptionViewModel(string title, string description, TimeSpan? deactivateAfter) : base(null)
     {
         Title = title;
         Description = description;
+        if (deactivateAfter is not null)
+            DeactivateAfterAsync(deactivateAfter.Value);
     }
 
     // ReSharper disable once MemberCanBePrivate.Global
@@ -31,10 +38,20 @@ public class DescriptionViewModel : Layout
     /// <param name="hotspotId">The id of the hotspot.</param>
     /// <param name="title">The title of the hotspot.</param>
     /// <param name="description">The description of the hotspot.</param>
-    public DescriptionViewModel(int hotspotId, string title, string description) : base(hotspotId)
+    /// <param name="deactivateAfter">
+    /// The time after which the layout should deactivate.
+    /// If <i>null</i>, the layout will deactivate after the <see cref="Layout.DefaultDeactivationTime">default time</see>.
+    /// </param>
+    public DescriptionViewModel(
+        int hotspotId,
+        string title,
+        string description,
+        TimeSpan? deactivateAfter = null
+    ) : base(hotspotId)
     {
         Title = title;
         Description = description;
+        DeactivateAfterAsync(deactivateAfter ?? DefaultDeactivationTime);
     }
 
     /// <summary>

@@ -1,0 +1,50 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="Toast.axaml" />
+                <ResourceDictionary>
+                    <GridLength x:Key="DefaultGridItemSpacing">8</GridLength>
+                    <GridLength x:Key="DefaultFormFieldSpacing">16</GridLength>
+                    <sys:Double x:Key="DefaultToolbarItemSpacing">12</sys:Double>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+
+            <ResourceDictionary.ThemeDictionaries>
+
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="ControlStrokeDefaultBrush" Color="#0F000000" />
+                    <LinearGradientBrush x:Key="ControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,3">
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStop Offset="0.33" Color="#29000000" />
+                            <!-- <GradientStop Offset="1.0" Color="#0F000000" /> -->
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="ControlStrokeDefaultBrush" Color="#0F000000" />
+                    <LinearGradientBrush x:Key="ControlElevationBorderBrush" StartPoint="0,0" EndPoint="0,3">
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStop Offset="0.33" Color="#18FFFFFF" />
+                            <!-- <GradientStop Offset="1.0" Color="#12FFFFFF " /> -->
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                </ResourceDictionary>
+
+            </ResourceDictionary.ThemeDictionaries>
+
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <StyleInclude Source="Buttons.axaml" />
+    <StyleInclude Source="IconButtons.axaml" />
+    <StyleInclude Source="Card.axaml" />
+    <StyleInclude Source="Dialogs.axaml" />
+    <StyleInclude Source="Menus.axaml" />
+
+</Styles>

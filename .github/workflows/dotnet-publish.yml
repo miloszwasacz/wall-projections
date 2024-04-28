@@ -7,17 +7,23 @@ on:
         description: 'Target runtime'
         type: string
         required: true
+      runner:
+        description: 'The Operating System used for building'
+        type: string
+        required: true
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 6.0.x
+          global-json-file: './global.json'
+          cache: true
+          cache-dependency-path: 'WallProjections.Test/packages.lock.json'
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -26,34 +32,20 @@ jobs:
           cache: 'pip'
           cache-dependency-path: .github/requirements.txt
 
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget
-
       - name: Install OpenCV
         run: pip install opencv-python-headless
-
-      - name: Install Zip
-        run: sudo apt-get install zip
 
       - name: Restore dependencies
         run: dotnet restore -r ${{ inputs.target }}
 
       - name: Publish
+        shell: bash
         run: >
           dotnet publish WallProjections --no-restore -c Release -r ${{ inputs.target }} \
-              --sc -o $HOME/build/WallProjections --verbosity normal
+              --self-contained -o $HOME/build/WallProjections --verbosity normal
 
       - name: Zip
-        run: >
-          pushd $HOME/build &&
-          zip -r $OLDPWD/WallProjections-${{ inputs.target }}.zip WallProjections &&
-          popd
+        run: 7z a WallProjections-${{ inputs.target }}.zip $HOME/build/WallProjections
 
       - name: Archive production artifact
         uses: actions/upload-artifact@v4

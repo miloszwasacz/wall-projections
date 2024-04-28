@@ -36,7 +36,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 6.0.x
+          global-json-file: './global.json'
+          cache: true
+          cache-dependency-path: 'WallProjections.Test/packages.lock.json'
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -44,15 +46,6 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
           cache-dependency-path: WallProjections/Scripts/requirements.txt
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget
 
       - name: Install Python dependencies
         run: pip install -r WallProjections/Scripts/requirements.txt

@@ -1,0 +1,122 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:views="using:WallProjections.Views"
+                    xmlns:sys="using:System"
+                    x:ClassModifier="internal">
+
+    <ResourceDictionary.ThemeDictionaries>
+
+        <ResourceDictionary x:Key="Default">
+            <StaticResource x:Key="NotificationCardForegroundBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Dark">
+            <StaticResource x:Key="NotificationCardForegroundBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+        </ResourceDictionary>
+
+    </ResourceDictionary.ThemeDictionaries>
+
+    <BoxShadows x:Key="ToastShadow">0 6 8 0 #4F000000</BoxShadows>
+    <Thickness x:Key="ToastMargin">5 5 5 10</Thickness>
+    <Thickness x:Key="ToastPadding">8</Thickness>
+    <sys:Double x:Key="ToastMaxWidth">300</sys:Double>
+
+    <!-- This control theme is based on the NotificationCard control (https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Controls/NotificationCard.xaml) -->
+    <ControlTheme x:Key="{x:Type views:Toast}" TargetType="views:Toast">
+        <Setter Property="MaxWidth" Value="{StaticResource ToastMaxWidth}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Background" Value="{DynamicResource NotificationCardBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource NotificationCardForegroundBrush}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="RenderTransformOrigin" Value="50%,75%" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="IsVisible" Value="False" />
+
+        <Style Selector="^[IsLoading=True]">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <LayoutTransformControl Name="PART_LayoutTransformControl" UseRenderTransform="True">
+                        <Border CornerRadius="{TemplateBinding CornerRadius}"
+                                BoxShadow="{StaticResource ToastShadow}"
+                                Margin="{StaticResource ToastMargin}">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{TemplateBinding CornerRadius}"
+                                    ClipToBounds="True">
+                                <DockPanel>
+                                    <!-- ReSharper disable once InconsistentNaming -->
+                                    <Panel x:Name="PART_HeaderBar"
+                                           DockPanel.Dock="Top" Height="4"
+                                           Background="{DynamicResource NotificationCardProgressBackgroundBrush}" />
+
+                                    <Grid ColumnDefinitions="Auto, 16, *"
+                                          Margin="{StaticResource ToastPadding}">
+
+                                        <views:LoadingRing Grid.Column="0" Grid.Row="0"
+                                                           x:Name="LoadingRing"
+                                                           Width="25" Height="25"
+                                                           BorderThickness="4" />
+
+                                        <TextBlock Grid.Column="2" Grid.Row="0"
+                                                   VerticalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextWrapping="Wrap"
+                                                   Text="{TemplateBinding Text}" />
+
+                                    </Grid>
+                                </DockPanel>
+                            </Border>
+                        </Border>
+                    </LayoutTransformControl>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <Setter Property="Template">
+            <ControlTemplate>
+                <LayoutTransformControl Name="PART_LayoutTransformControl" UseRenderTransform="True">
+                    <Border CornerRadius="{TemplateBinding CornerRadius}"
+                            BoxShadow="{StaticResource ToastShadow}"
+                            Margin="{StaticResource ToastMargin}">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                ClipToBounds="True">
+                            <DockPanel>
+
+                                <!-- ReSharper disable once InconsistentNaming -->
+                                <Panel x:Name="PART_HeaderBar"
+                                       DockPanel.Dock="Top" Height="4"
+                                       Background="{DynamicResource NotificationCardProgressBackgroundBrush}" />
+
+                                <TextBlock VerticalAlignment="Center"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           Margin="{StaticResource ToastPadding}"
+                                           Text="{TemplateBinding Text}" />
+
+                            </DockPanel>
+                        </Border>
+                    </Border>
+                </LayoutTransformControl>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:information /template/ Panel#PART_HeaderBar">
+            <Setter Property="Background" Value="{DynamicResource NotificationCardInformationBackgroundBrush}" />
+        </Style>
+        <Style Selector="^:success /template/ Panel#PART_HeaderBar">
+            <Setter Property="Background" Value="{DynamicResource NotificationCardSuccessBackgroundBrush}" />
+        </Style>
+        <Style Selector="^:warning /template/ Panel#PART_HeaderBar">
+            <Setter Property="Background" Value="{DynamicResource NotificationCardWarningBackgroundBrush}" />
+        </Style>
+        <Style Selector="^:error /template/ Panel#PART_HeaderBar">
+            <Setter Property="Background" Value="{DynamicResource NotificationCardErrorBackgroundBrush}" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>
