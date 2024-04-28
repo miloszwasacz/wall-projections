@@ -2,6 +2,7 @@ import threading
 
 import cv2
 import numpy as np
+import time
 
 # noinspection PyPackages
 from .logger import get_logger
@@ -69,7 +70,8 @@ class VideoCapture:
         # wait until camera is opened (1 min timeout)
         i = 0
         while self._current_frame is None and i < 600:
-            cv2.waitKey(100)
+            time.sleep(0.1)
+            print("waiting...")
             i += 1
 
         if self._current_frame is None:
@@ -79,7 +81,7 @@ class VideoCapture:
             self._current_frame = None
             raise RuntimeError("Error starting video capture: Camera failed to open (timed out).")
 
-        cv2.waitKey(1000)  # wait for a bit more as it returns garbage at first
+        time.sleep(1)  # wait for a bit more as it returns garbage at first
 
         logger.info("Video capture started.")
 
@@ -111,7 +113,7 @@ class VideoCapture:
 
             # cap framerate if it's a test video
             if isinstance(self.target, str) and len(self.target) >= 4 and self.target[-4:] in (".mp4", ".avi"):
-                cv2.waitKey(int(1000/30))
+                time.sleep(1/30)
 
         video_capture.release()
         if RECORD_VIDEO:
