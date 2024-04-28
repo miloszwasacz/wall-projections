@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia;
@@ -23,37 +22,60 @@ internal class Program
     /// </summary>
     /// <param name="args">Application arguments</param>
     [STAThread]
-    public static void Main(string[] args)
+    public static void Main(string[] args) => WithUnhandledExceptionLogging(() =>
     {
         using var loggerFactory = LoggerFactory.Create(builder =>
         {
-            var logPath = Path.Combine(
-                FileLoggerProvider.DefaultLogFolderPath,
-                $"WallProjections_{DateTime.Now:yyyy-MM-dd}.log"
-            );
-
             if (args.Contains("--trace"))
                 builder.AddFilter(level => level >= LogLevel.Trace);
 
             builder.AddSimpleConsole(options => options.TimestampFormat = "HH:mm:ss ");
-            builder.AddProvider(new FileLoggerProvider(logPath));
+            builder.AddProvider(new FileLoggerProvider());
         });
-        var logger = loggerFactory.CreateLogger("Program");
+        var logger = loggerFactory.CreateLogger(nameof(Program));
         logger.LogInformation("Starting application");
 
-        BuildAvaloniaApp(loggerFactory).StartWithClassicDesktopLifetime(args);
+        try
+        {
+            BuildAvaloniaApp(loggerFactory).StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Unhandled exception occurred");
+        }
 
         logger.LogInformation("Closing application");
-    }
+    });
 
     /// <summary>
-    /// Avalonia configuration, don't remove; also used by visual designer.
+    /// Avalonia configuration, don't remove.
     /// </summary>
     private static AppBuilder BuildAvaloniaApp(ILoggerFactory loggerFactory) =>
         AppBuilder.Configure(() => new App(loggerFactory))
             .UsePlatformDetect()
             .LogToTrace()
             .UseReactiveUI();
+
+    /// <summary>
+    /// Run the program with logging of unhandled exceptions to <b>stderr</b>.
+    /// </summary>
+    /// <param name="program">The program to run.</param>
+    private static void WithUnhandledExceptionLogging(Action program)
+    {
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddSimpleConsole(options => options.TimestampFormat = "HH:mm:ss ");
+        });
+        var logger = loggerFactory.CreateLogger("Unhandled");
+
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            var exception = (Exception)e.ExceptionObject;
+            logger.LogCritical(exception, "Unhandled exception occurred");
+        };
+
+        program();
+    }
 
     // ReSharper disable once UnusedMember.Local
     /// <summary>
