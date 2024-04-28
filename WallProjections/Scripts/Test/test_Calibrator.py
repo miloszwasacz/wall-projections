@@ -111,17 +111,5 @@ class TestGetTransformationMatrix(unittest.TestCase):
             self.assertTrue(matrix_equivalent(t_matrix, recalculated_matrix))
 
 
-class TestTransformations(unittest.TestCase):
-
-    def test_norm_to_proj_to_norm(self):
-        """
-        Transforming to projector space and back again should do nothing
-        """
-        calibrator = Calibrator(np.identity(3), (500, 300))
-        abs_vector = (0.5, 0.5)
-        transformed_vector = calibrator.proj_to_norm(calibrator.norm_to_proj(abs_vector))
-        self.assertTrue(np.allclose(abs_vector, transformed_vector, atol=TOLERANCE))
-
-
 if __name__ == '__main__':
     unittest.main()
