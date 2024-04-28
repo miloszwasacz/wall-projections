@@ -61,8 +61,7 @@
     </ItemGroup>
 
     <Target Name="SetUpPython" BeforeTargets="GenerateArUcos" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-<!--        TODO: Use requirements.txt file when file created.-->
-        <Exec Command="$(Pkgpython)\tools\python -m pip install &quot;mediapipe==0.10.9&quot; &quot;opencv-python==4.9.0.80&quot; pygrabber &quot;numpy==1.26.4&quot; find-libpython"/>
+        <Exec Command="$(Pkgpython)\tools\python -m pip install -r Scripts/requirements.txt"/>
     </Target>
     
     <Target Name="GenerateArUcos" BeforeTargets="PrepareForBuild">
