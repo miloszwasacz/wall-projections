@@ -56,8 +56,8 @@ jobs:
 
       - name: Test Python
         run: |
-          cd ./WallProjections/Scripts/Test
-          python -m unittest discover -s /Test
+          cd ./WallProjections/Scripts
+          python3 -m unittest discover -s ./Test
 
       - name: Restore dependencies
         run: dotnet restore
