@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using WallProjections.Models.Interfaces;
 
@@ -71,11 +72,28 @@ public class FileLogger : ILogger
 public class FileLoggerProvider : ILoggerProvider
 {
     /// <summary>
+    /// The maximum number of log files to keep.
+    /// </summary>
+    private const int MaxLogFiles = 100;
+
+    /// <summary>
     /// The path to the default folder where log files are stored.
     /// </summary>
-    public static readonly string DefaultLogFolderPath = Path.Combine(
-        IFileHandler.AppDataFolderPath,
-        "Logs"
+    public static readonly string DefaultLogFolderPath = Path.Combine(IFileHandler.AppDataFolderPath, "Logs");
+
+    /// <summary>
+    /// The default path format for log files.
+    /// </summary>
+    public static readonly string DefaultLogFilePath = Path.Combine(DefaultLogFolderPath, "WallProjections");
+
+    /// <summary>
+    /// Creates the path to a log file with the specified extension and the current date.
+    /// </summary>
+    /// <param name="basePath">The base path of the log file, including the directory.</param>
+    /// <param name="extension">The extension of the log file.</param>
+    private static string GetLogPath(string basePath, string extension = "log") => Path.Combine(
+        basePath,
+        $"_{DateTime.Now:yyyy-MM-dd}.{extension}"
     );
 
     /// <summary>
@@ -86,9 +104,12 @@ public class FileLoggerProvider : ILoggerProvider
     /// <summary>
     /// Creates a new <see cref="FileLoggerProvider" /> that writes log messages to the specified file.
     /// </summary>
-    /// <param name="logFilePath">The path to the file to which log messages should be written.</param>
+    /// <param name="logFilePath">
+    /// The base of the path to the file to which log messages should be written
+    /// (the current date will be appended to the file name).
+    /// </param>
     /// <exception cref="Exception">
-    /// Throws the same exceptions as <see cref="Directory.CreateDirectory" /> <see cref="StreamWriter" />.
+    /// Throws the same exceptions as <see cref="Directory.CreateDirectory" /> and <see cref="StreamWriter" />.
     /// </exception>
     public FileLoggerProvider(string logFilePath)
     {
@@ -96,7 +117,54 @@ public class FileLoggerProvider : ILoggerProvider
         if (logDirectory is not null && !Directory.Exists(logDirectory))
             Directory.CreateDirectory(logDirectory);
 
-        _logFileWriter = new StreamWriter(logFilePath, append: true);
+        var baseLogFileName = Path.GetFileNameWithoutExtension(logFilePath);
+        var logFileExtension = Path.GetExtension(logFilePath);
+        var basePathWithDir = logDirectory is not null
+            ? Path.Combine(logDirectory, baseLogFileName)
+            : baseLogFileName;
+        var logPath = GetLogPath(basePathWithDir, logFileExtension);
+
+        if (logDirectory is not null)
+            DeleteOldLogFiles(logDirectory, baseLogFileName, logFileExtension);
+
+        _logFileWriter = new StreamWriter(logPath, append: true);
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="FileLoggerProvider" /> that writes log messages to the <see cref="DefaultLogFilePath" />
+    /// </summary>
+    /// <exception cref="Exception">
+    /// Throws the same exceptions as <see cref="Directory.CreateDirectory" /> and <see cref="StreamWriter" />.
+    /// </exception>
+    public FileLoggerProvider() : this(DefaultLogFilePath)
+    {
+    }
+
+    /// <summary>
+    /// Deletes old log files, i.e. log files that exceed <see cref="MaxLogFiles" />.
+    /// </summary>
+    /// <param name="logDirectory">The directory where the log files are stored.</param>
+    /// <param name="baseLogFileName">The base name of the log files.</param>
+    /// <param name="logFileExtension">The extension of the log files.</param>
+    private static void DeleteOldLogFiles(string logDirectory, string baseLogFileName, string logFileExtension = "log")
+    {
+        var files = Directory.GetFiles(logDirectory)
+            .Where(path => path.StartsWith(baseLogFileName) && path.EndsWith($".{logFileExtension}"))
+            .OrderByDescending(path => path)
+            .Skip(MaxLogFiles);
+
+        foreach (var file in files)
+        {
+            try
+            {
+                File.Delete(file);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Failed to delete log file: {file}");
+                Console.WriteLine(e);
+            }
+        }
     }
 
     /// <inheritdoc />

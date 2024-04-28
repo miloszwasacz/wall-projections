@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia;
@@ -27,16 +26,11 @@ internal class Program
     {
         using var loggerFactory = LoggerFactory.Create(builder =>
         {
-            var logPath = Path.Combine(
-                FileLoggerProvider.DefaultLogFolderPath,
-                $"WallProjections_{DateTime.Now:yyyy-MM-dd}.log"
-            );
-
             if (args.Contains("--trace"))
                 builder.AddFilter(level => level >= LogLevel.Trace);
 
             builder.AddSimpleConsole(options => options.TimestampFormat = "HH:mm:ss ");
-            builder.AddProvider(new FileLoggerProvider(logPath));
+            builder.AddProvider(new FileLoggerProvider());
         });
         var logger = loggerFactory.CreateLogger(nameof(Program));
         logger.LogInformation("Starting application");
