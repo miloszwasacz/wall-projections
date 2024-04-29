@@ -28,7 +28,7 @@
         <None Include="$(Pkgpython)\tools\**\*" Link="python\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(Configuration)' == 'Release' OR '$(RuntimeIdentifier)' != ''">
+    <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
         <Content Include="Scripts\Platform\Windows\*.py" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
             <Link>Scripts\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -44,7 +44,7 @@
     </ItemGroup>
 
     <!-- For local development -->
-    <ItemGroup Condition="'$(Configuration)' != 'Release'">
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == ''">
         <Content Include="Scripts\Platform\Windows\*.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
             <Link>Scripts\%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
