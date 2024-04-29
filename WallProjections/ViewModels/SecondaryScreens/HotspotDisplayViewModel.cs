@@ -26,7 +26,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     /// <summary>
     /// The backing field for <see cref="Projections" /> mapped to the id of the hotspot
     /// </summary>
-    private readonly ImmutableDictionary<int, IHotspotProjectionViewModel> _projections;
+    private readonly ImmutableDictionary<int, AbsHotspotProjectionViewModel> _projections;
 
     /// <summary>
     /// Creates a new instance of <see cref="HotspotDisplayViewModel"/> based on the provided <paramref name="config" />
@@ -36,7 +36,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     /// The <see cref="IHotspotHandler" /> that sends events about hotspot activation and deactivation
     /// </param>
     /// <param name="vmProvider">
-    /// The <see cref="IViewModelProvider" /> for creating <see cref="IHotspotProjectionViewModel" />s
+    /// The <see cref="IViewModelProvider" /> for creating <see cref="AbsHotspotProjectionViewModel" />s
     /// </param>
     /// <param name="loggerFactory">A factory for creating loggers</param>
     public HotspotDisplayViewModel(
@@ -57,7 +57,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     }
 
     /// <inheritdoc/>
-    public override IEnumerable<IHotspotProjectionViewModel> Projections => _projections.Values;
+    public override IEnumerable<AbsHotspotProjectionViewModel> Projections => _projections.Values;
 
     //TODO Make initially hidden, and show when a visitor approaches the artifact
     /// <inheritdoc/>
@@ -68,7 +68,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     {
         _logger.LogTrace("Deactivating all hotspots");
         foreach (var coord in Projections)
-            coord.State = HotspotState.None;
+            coord.SetIdle();
     }
 
     /// <inheritdoc/>
@@ -79,14 +79,14 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
     /// <summary>
     /// Goes through all the hotspots in the config file and turns them into
-    /// <see cref="IHotspotProjectionViewModel"/> instances
+    /// <see cref="AbsHotspotProjectionViewModel"/> instances
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> holding information about the hotspots</param>
     /// <param name="vmProvider">
-    /// The <see cref="IViewModelProvider" /> for creating <see cref="IHotspotProjectionViewModel" />s
+    /// The <see cref="IViewModelProvider" /> for creating <see cref="AbsHotspotProjectionViewModel" />s
     /// </param>
-    /// <returns>List of <see cref="IHotspotProjectionViewModel"/> relating to all hotspots in config file</returns>
-    private static ImmutableDictionary<int, IHotspotProjectionViewModel> GetHotspots(
+    /// <returns>List of <see cref="AbsHotspotProjectionViewModel"/> relating to all hotspots in config file</returns>
+    private static ImmutableDictionary<int, AbsHotspotProjectionViewModel> GetHotspots(
         IConfig config,
         IViewModelProvider vmProvider
     ) => config.Hotspots
@@ -96,12 +96,12 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
     #region Event Callbacks
 
     /// <summary>
-    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.State" />
+    /// Looks up the hotspot with the given id and sets <see cref="AbsHotspotProjectionViewModel.State" />
     /// to <see cref="HotspotState.Activating" />.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
-    private void HotspotActivating(object? sender, IHotspotHandler.HotspotArgs e)
+    private void HotspotActivating(object? sender, IHotspotHandler.HotspotChangingArgs e)
     {
         if (!_projections.TryGetValue(e.Id, out var hotspot))
         {
@@ -111,14 +111,14 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
         lock (this)
         {
-            hotspot.State = HotspotState.Activating;
+            hotspot.SetActivating(e.RemainingTime);
         }
 
         _logger.LogTrace("Activating hotspot with id {Id}.", e.Id);
     }
 
     /// <summary>
-    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.State" />
+    /// Looks up the hotspot with the given id and sets <see cref="AbsHotspotProjectionViewModel.State" />
     /// to <see cref="HotspotState.Active" />.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
@@ -133,19 +133,19 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
         lock (this)
         {
-            hotspot.State = HotspotState.Active;
+            hotspot.SetActive();
         }
 
         _logger.LogTrace("Hotspot with id {Id} activated.", e.Id);
     }
 
     /// <summary>
-    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.State" />
+    /// Looks up the hotspot with the given id and sets <see cref="AbsHotspotProjectionViewModel.State" />
     /// to <see cref="HotspotState.Deactivating" />.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments containing the id of the hotspot to be deactivated.</param>
-    private void HotspotDeactivating(object? sender, IHotspotHandler.HotspotArgs e)
+    private void HotspotDeactivating(object? sender, IHotspotHandler.HotspotChangingArgs e)
     {
         if (!_projections.TryGetValue(e.Id, out var hotspot))
         {
@@ -155,14 +155,14 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
         lock (this)
         {
-            hotspot.State = HotspotState.Deactivating;
+            hotspot.SetDeactivating(e.RemainingTime);
         }
 
         _logger.LogTrace("Deactivating hotspot with id {Id}.", e.Id);
     }
 
     /// <summary>
-    /// Looks up the hotspot with the given id and sets <see cref="IHotspotProjectionViewModel.State" />
+    /// Looks up the hotspot with the given id and sets <see cref="AbsHotspotProjectionViewModel.State" />
     /// to <see cref="HotspotState.None" />.
     /// </summary>
     /// <param name="sender"></param>
@@ -177,7 +177,7 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
         lock (this)
         {
-            hotspot.State = HotspotState.None;
+            hotspot.SetIdle();
         }
 
         _logger.LogTrace("Hotspot with id {Id} forcefully deactivated.", e.Id);

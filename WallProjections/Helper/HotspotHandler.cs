@@ -12,13 +12,13 @@ namespace WallProjections.Helper;
 public sealed class HotspotHandler : IHotspotHandler
 {
     /// <inheritdoc />
-    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotActivating;
+    public event EventHandler<IHotspotHandler.HotspotChangingArgs>? HotspotActivating;
 
     /// <inheritdoc />
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotActivated;
 
     /// <inheritdoc />
-    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotDeactivating;
+    public event EventHandler<IHotspotHandler.HotspotChangingArgs>? HotspotDeactivating;
 
     /// <inheritdoc />
     public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotForcefullyDeactivated;
@@ -115,7 +115,7 @@ public sealed class HotspotHandler : IHotspotHandler
                 return;
 
             // Cancel the current task and add it to the cancelled tasks
-            currentTask.Cancel();
+            var progress = currentTask.Cancel();
             _currentTask = null;
             _cancelledTasks.AddOrUpdate(
                 currentTask.Id,
@@ -125,7 +125,7 @@ public sealed class HotspotHandler : IHotspotHandler
             );
 
             if (_currentlyActivated is null || _currentlyActivated != e.Id)
-                InvokeDeactivating(e.Id);
+                InvokeDeactivating(e.Id, progress);
         }
     }
 
@@ -157,7 +157,14 @@ public sealed class HotspotHandler : IHotspotHandler
     /// Invokes the <see cref="HotspotActivating" /> event.
     /// </summary>
     /// <param name="id">The ID of the hotspot that is activating.</param>
-    private void InvokeActivating(int id) => HotspotActivating?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
+    /// <param name="progress">The progress when the hotspot starts/resumes activating.</param>
+    private void InvokeActivating(int id, TimeSpan progress)
+    {
+        var remainingTime = IHotspotHandler.ActivationTime - progress;
+        remainingTime = remainingTime < TimeSpan.Zero ? TimeSpan.Zero : remainingTime;
+        remainingTime = remainingTime > IHotspotHandler.ActivationTime ? IHotspotHandler.ActivationTime : remainingTime;
+        HotspotActivating?.Invoke(this, new IHotspotHandler.HotspotChangingArgs(id, remainingTime));
+    }
 
     /// <summary>
     /// Invokes the <see cref="HotspotActivated" /> event and updates <see cref="_currentlyActivated" />.
@@ -185,7 +192,13 @@ public sealed class HotspotHandler : IHotspotHandler
     /// Invokes the <see cref="HotspotDeactivating" /> event.
     /// </summary>
     /// <param name="id">The ID of the hotspot that is deactivating.</param>
-    private void InvokeDeactivating(int id) => HotspotDeactivating?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
+    /// <param name="progress">The progress when the hotspot starts deactivating.</param>
+    private void InvokeDeactivating(int id, TimeSpan progress)
+    {
+        progress = progress < TimeSpan.Zero ? TimeSpan.Zero : progress;
+        progress = progress > IHotspotHandler.ActivationTime ? IHotspotHandler.ActivationTime : progress;
+        HotspotDeactivating?.Invoke(this, new IHotspotHandler.HotspotChangingArgs(id, progress));
+    }
 
     /// <summary>
     /// Invokes the <see cref="HotspotForcefullyDeactivated" /> event.
@@ -223,6 +236,11 @@ public sealed class HotspotHandler : IHotspotHandler
         public int Id { get; }
 
         /// <summary>
+        /// The starting progress if the task is resumed, or <see cref="TimeSpan.Zero" /> if the task is new.
+        /// </summary>
+        private TimeSpan ProgressOffset { get; }
+
+        /// <summary>
         /// The time when the task was cancelled and the progress at that time.
         /// </summary>
         private (DateTimeOffset time, TimeSpan progress)? CancelledAt { get; set; }
@@ -251,12 +269,13 @@ public sealed class HotspotHandler : IHotspotHandler
         /// <seealso cref="Run" />
         public ActivationTask(
             int id,
-            Action<int> activatingCallback,
+            Action<int, TimeSpan> activatingCallback,
             Action<int> activatedCallback,
             ILogger logger
         )
         {
             Id = id;
+            ProgressOffset = TimeSpan.Zero;
             Run(activatingCallback, activatedCallback);
             logger.LogTrace("Started activation task for hotspot {HotspotId}", id);
         }
@@ -271,7 +290,7 @@ public sealed class HotspotHandler : IHotspotHandler
         /// <exception cref="ArgumentException">Thrown when the provided task has not been cancelled.</exception>
         public ActivationTask(
             ActivationTask cancelledTask,
-            Action<int> activatingCallback,
+            Action<int, TimeSpan> activatingCallback,
             Action<int> activatedCallback,
             ILogger logger
         )
@@ -286,16 +305,16 @@ public sealed class HotspotHandler : IHotspotHandler
             // - If the task was done, we start from the beginning
             // - If the task was not done, we subtract the time passed since the task was cancelled from the old progress
             var (cancelledAt, oldProgress) = cancelledTask.CancelledAt.Value;
-            var progress = cancelledTask.Done
+            ProgressOffset = cancelledTask.Done
                 ? TimeSpan.Zero
                 : oldProgress - (DateTimeOffset.UtcNow - cancelledAt);
 
             // Run the task with the new progress
-            Run(activatingCallback, activatedCallback, progress);
+            Run(activatingCallback, activatedCallback, ProgressOffset);
             logger.LogTrace(
                 "Resumed activation task for hotspot {HotspotId} (progress: {Progress} ms)",
                 Id,
-                progress.Milliseconds
+                ProgressOffset.Milliseconds
             );
         }
 
@@ -307,7 +326,7 @@ public sealed class HotspotHandler : IHotspotHandler
         /// <param name="activatedCallback">The callback to invoke when the hotspot is fully activated</param>
         /// <param name="progress">The progress of the task</param>
         private Task Run(
-            Action<int> activatingCallback,
+            Action<int, TimeSpan> activatingCallback,
             Action<int> activatedCallback,
             TimeSpan? progress = null
         ) => Task.Run(async () =>
@@ -319,7 +338,7 @@ public sealed class HotspotHandler : IHotspotHandler
                     return;
 
                 // Start the activation
-                activatingCallback(Id);
+                activatingCallback(Id, progress ?? TimeSpan.Zero);
             }
 
             // Wait for the remaining time
@@ -346,13 +365,16 @@ public sealed class HotspotHandler : IHotspotHandler
         /// <summary>
         /// Cancels the task using <see cref="_cts" /> and sets <see cref="CancelledAt" />.
         /// </summary>
-        public void Cancel()
+        /// <returns>The progress of the task when it was cancelled.</returns>
+        public TimeSpan Cancel()
         {
             lock (_cts)
             {
                 var now = DateTimeOffset.UtcNow;
                 _cts.Cancel();
-                CancelledAt = (now, now - _startTime);
+                var progress = now - _startTime;
+                CancelledAt = (now, progress);
+                return progress;
             }
         }
 
@@ -370,7 +392,7 @@ public sealed class HotspotHandler : IHotspotHandler
         [ExcludeFromCodeCoverage(Justification = "This constructor is for testing purposes only.")]
         internal ActivationTask(
             int id,
-            Action<int> activatingCallback,
+            Action<int, TimeSpan> activatingCallback,
             out Func<Task> runTask,
             out CancellationTokenSource cts
         )

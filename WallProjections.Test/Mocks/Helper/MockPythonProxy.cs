@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test.Mocks.Helper;
@@ -70,18 +71,17 @@ public class MockPythonProxy : IPythonProxy
         return arucoPositions.Count > 0 ? CalibrationResult : null;
     }
 
-    public ImmutableDictionary<int, string> GetAvailableCameras()
+    public ImmutableList<Camera> GetAvailableCameras()
     {
         Task.Delay(Delay).Wait();
         if (Exception != null)
             throw Exception;
 
-        return new Dictionary<int, string>
-        {
-            { 0, "Camera 0" },
-            { 700, "Camera 1" },
-            { 702, "Camera 2" }
-        }.ToImmutableDictionary();
+        return ImmutableList.Create(
+            new Camera(0, "Camera 0"),
+            new Camera(700, "Camera 1"),
+            new Camera(702, "Camera 2")
+        );
     }
 
     public void Dispose()

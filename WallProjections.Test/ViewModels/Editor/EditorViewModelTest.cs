@@ -749,7 +749,7 @@ namespace WallProjections.Test.ViewModels.Editor
         [TestCase(false, TestName = "Unsuccessful")]
         public async Task ExportConfigTest(bool expectedSuccess)
         {
-            const string exportPath = "test";
+            var exportPath = Path.Combine("test", IEditorViewModel.ExportFileName);
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(expectedSuccess)
             {
@@ -773,16 +773,14 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(exported, Is.EqualTo(expectedSuccess));
                 Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
-                Assert.That(
-                    fileHandler.ExportedZips,
-                    Is.EquivalentTo(new[] { Path.Combine(exportPath, IEditorViewModel.ExportFileName) })
-                );
+                Assert.That(fileHandler.ExportedZips, Is.EquivalentTo(new[] { exportPath }));
             });
         }
 
         [AvaloniaTest]
         public async Task ExportConfigExceptionTest()
         {
+            var exportPath = Path.Combine("test", IEditorViewModel.ExportFileName);
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
             var pythonHandler = new MockPythonHandler();
@@ -796,8 +794,7 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
-            var exported = await editorViewModel.ExportConfig("test");
-
+            var exported = await editorViewModel.ExportConfig(exportPath);
             Assert.Multiple(() =>
             {
                 Assert.That(exported, Is.False);

@@ -23,6 +23,11 @@ public class MockPythonHandler : IPythonHandler
     /// </summary>
     public int Delay { get; set; }
 
+    /// <summary>
+    /// The exception that will be thrown when running a Python script
+    /// </summary>
+    public Exception? Exception { get; set; }
+
 #pragma warning disable CA1822
     public int CameraIndex => 700;
 #pragma warning restore CA1822
@@ -31,18 +36,24 @@ public class MockPythonHandler : IPythonHandler
     {
         CurrentScript = PythonScript.HotspotDetection;
         await Task.Delay(Delay);
+        if (Exception is not null)
+            throw Exception;
     }
 
     public async Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
     {
         CurrentScript = PythonScript.Calibration;
         await Task.Delay(Delay);
+        if (Exception is not null)
+            throw Exception;
         return arucoPositions.Count > 0 ? MockPythonProxy.CalibrationResult : null;
     }
 
     public void CancelCurrentTask()
     {
         CurrentScript = null;
+        if (Exception is not null)
+            throw Exception;
     }
 
     /// <summary>

@@ -50,7 +50,7 @@ public class HotspotDisplayViewModelTest
         {
             Assert.That(
                 hotspotViewModel.Projections,
-                Is.EquivalentTo(config.Hotspots).Using<IHotspotProjectionViewModel, Hotspot>(
+                Is.EquivalentTo(config.Hotspots).Using<AbsHotspotProjectionViewModel, Hotspot>(
                     (actual, expected) => actual.IsSameAsHotspot(expected)
                 )
             );
@@ -231,7 +231,7 @@ public class HotspotDisplayViewModelTest
     private static void AssertChangedHotspot(
         AbsHotspotDisplayViewModel vm,
         int? activeId,
-        Func<IHotspotProjectionViewModel, bool> grouping
+        Func<AbsHotspotProjectionViewModel, bool> grouping
     )
     {
         var projections = vm.Projections.GroupBy(grouping).ToImmutableList();

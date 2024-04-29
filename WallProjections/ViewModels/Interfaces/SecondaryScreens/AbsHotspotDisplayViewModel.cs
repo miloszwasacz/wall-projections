@@ -8,18 +8,19 @@ namespace WallProjections.ViewModels.Interfaces.SecondaryScreens;
 public abstract class AbsHotspotDisplayViewModel : ViewModelBase
 {
     /// <summary>
-    /// An interator of <see cref="IHotspotProjectionViewModel">projections</see> of hotspots to be displayed
+    /// An iterator of <see cref="AbsHotspotProjectionViewModel">projections</see> of hotspots to be displayed
     /// </summary>
-    public abstract IEnumerable<IHotspotProjectionViewModel> Projections { get; }
+    public abstract IEnumerable<AbsHotspotProjectionViewModel> Projections { get; }
 
     /// <summary>
-    /// Decides whether or not to display the hotspots
+    /// Whether to display the hotspots
     /// </summary>
     public abstract bool IsVisible { get; protected set; }
 
     /// <summary>
-    /// Changes the <see cref="IHotspotProjectionViewModel.IsActive"/> parameter for the
-    /// <see cref="IHotspotProjectionViewModel"/> to false for all <see cref="Projections"/>
+    /// Changes the <see cref="AbsHotspotProjectionViewModel.State" /> of all
+    /// <see cref="AbsHotspotProjectionViewModel" />s in <see cref="Projections" />
+    /// to <see cref="HotspotState.None" />
     /// (to be used when user doesn't hover over hotspot for long enough)
     /// </summary>
     public abstract void DeactivateHotspots();

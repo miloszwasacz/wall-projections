@@ -1,19 +1,18 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using Microsoft.Extensions.Logging;
 using WallProjections.Helper;
-using WallProjections.Helper.Interfaces;
 
 [assembly: InternalsVisibleTo("WallProjections.Test")]
 
 namespace WallProjections;
 
 // ReSharper disable once ClassNeverInstantiated.Global
+[ExcludeFromCodeCoverage(Justification = "This is the main entry point, which uses not testable application lifetime")]
 internal class Program
 {
     /// <summary>
@@ -23,65 +22,70 @@ internal class Program
     /// </summary>
     /// <param name="args">Application arguments</param>
     [STAThread]
-    [ExcludeFromCodeCoverage]
-    public static void Main(string[] args)
+    public static void Main(string[] args) => WithUnhandledExceptionLogging(() =>
     {
         using var loggerFactory = LoggerFactory.Create(builder =>
         {
-            var logPath = Path.Combine(
-                FileLoggerProvider.DefaultLogFolderPath,
-                $"WallProjections_{DateTime.Now:yyyy-MM-dd}.log"
-            );
-
             if (args.Contains("--trace"))
                 builder.AddFilter(level => level >= LogLevel.Trace);
 
             builder.AddSimpleConsole(options => options.TimestampFormat = "HH:mm:ss ");
-            builder.AddProvider(new FileLoggerProvider(logPath));
+            builder.AddProvider(new FileLoggerProvider());
         });
-        var logger = loggerFactory.CreateLogger("Program");
+        var logger = loggerFactory.CreateLogger(nameof(Program));
         logger.LogInformation("Starting application");
 
-        using var pythonProxy = new PythonProxy(new ProcessProxy(loggerFactory), loggerFactory);
-        var cameras = pythonProxy.GetAvailableCameras();
-
-        //TODO Allow user to select camera
-        if (cameras.Count == 0)
+        try
         {
-            logger.LogError("No cameras detected. Exiting application.");
-            return;
+            BuildAvaloniaApp(loggerFactory).StartWithClassicDesktopLifetime(args);
         }
-        var (cameraIndex, _) = cameras.First();
-
-        using var pythonHandler = new PythonHandler(cameraIndex, pythonProxy, loggerFactory);
-        BuildAvaloniaApp(pythonHandler, loggerFactory).StartWithClassicDesktopLifetime(args);
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Unhandled exception occurred");
+        }
 
         logger.LogInformation("Closing application");
-    }
+    });
 
     /// <summary>
-    /// Avalonia configuration, don't remove; also used by visual designer.
+    /// Avalonia configuration, don't remove.
     /// </summary>
-    [ExcludeFromCodeCoverage]
-    private static AppBuilder BuildAvaloniaApp(IPythonHandler pythonHandler, ILoggerFactory loggerFactory)
-    {
-        return AppBuilder.Configure(() => new App(pythonHandler, loggerFactory))
+    private static AppBuilder BuildAvaloniaApp(ILoggerFactory loggerFactory) =>
+        AppBuilder.Configure(() => new App(loggerFactory))
             .UsePlatformDetect()
             .LogToTrace()
             .UseReactiveUI();
+
+    /// <summary>
+    /// Run the program with logging of unhandled exceptions to <b>stderr</b>.
+    /// </summary>
+    /// <param name="program">The program to run.</param>
+    private static void WithUnhandledExceptionLogging(Action program)
+    {
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddSimpleConsole(options => options.TimestampFormat = "HH:mm:ss ");
+        });
+        var logger = loggerFactory.CreateLogger("Unhandled");
+
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            var exception = (Exception)e.ExceptionObject;
+            logger.LogCritical(exception, "Unhandled exception occurred");
+        };
+
+        program();
     }
 
     // ReSharper disable once UnusedMember.Local
     /// <summary>
     /// Don't use this method. It is only used by the visual designer.
+    /// Use <see cref="BuildAvaloniaApp(ILoggerFactory)"/> instead.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     [Obsolete("This method is only used by the visual designer.", true)]
-    private static AppBuilder BuildAvaloniaApp()
-    {
-        return AppBuilder.Configure(() => new App(null!, null!))
+    private static AppBuilder BuildAvaloniaApp() =>
+        AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace()
             .UseReactiveUI();
-    }
 }

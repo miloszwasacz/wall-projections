@@ -1,0 +1,36 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:WallProjections.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="WallProjections.Views.InfoDialog"
+        x:DataType="views:ConfirmationDialogViewModel"
+        Icon="{Binding Icon}"
+        Title="{Binding Title}"
+        Classes="Dialog"
+        Closed="Dialog_OnClosed">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="50" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="{StaticResource DialogElementVerticalSpacing}" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <views:JustifiedTextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
+                                  Classes="DialogMessage"
+                                  Text="{Binding Message}" />
+
+        <Button Grid.Column="1" Grid.Row="2"
+                Classes="accent" IsDefault="True"
+                Content="{Binding ConfirmButtonText}"
+                Click="Confirm_OnClick" />
+
+    </Grid>
+
+</Window>

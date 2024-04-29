@@ -11,12 +11,10 @@
 
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
-                    <StaticResource x:Key="ProjectionBackgroundBrush" ResourceKey="RegionBrush" />
                     <StaticResource x:Key="HotspotFillBrush" ResourceKey="TextControlForeground" />
                     <StaticResource x:Key="HotspotStrokeBrush" ResourceKey="TextControlForeground" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <StaticResource x:Key="ProjectionBackgroundBrush" ResourceKey="RegionBrush" />
                     <StaticResource x:Key="HotspotFillBrush" ResourceKey="TextControlForeground" />
                     <StaticResource x:Key="HotspotStrokeBrush" ResourceKey="TextControlForeground" />
                 </ResourceDictionary>

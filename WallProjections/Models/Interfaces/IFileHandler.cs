@@ -14,11 +14,10 @@ public interface IFileHandler
     /// <summary>
     /// Path to the config folder for the program.
     /// </summary>
-    public static string AppDataFolderPath =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData,
-                Environment.SpecialFolderOption.Create),
-            ConfigFolderName);
+    public static string AppDataFolderPath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create),
+        ConfigFolderName
+    );
 
     /// <summary>
     /// Path to the folder containing the current config.json and the media files.
@@ -55,21 +54,21 @@ public interface IFileHandler
     /// <exception cref="ConfigPackageFormatException">If format of config package is invalid.</exception>
     public IConfig? ImportConfig(string zipPath);
 
-    //TODO Make this method try other path (i.e. with a number at the end) if the provided path already has a config and return the actual path of the exported file
     /// <summary>
     /// Export config file and media file to a zip file.
     /// </summary>
     /// <param name="exportPath">Path to the zip file</param>
     /// <returns>True if file is exported</returns>
     /// <exception cref="ConfigNotImportedException">If there is no imported config to export.</exception>
-    /// <exception cref="ConfigDuplicateFileException"> If file already exists at <see cref="exportPath"/>.</exception>
     /// <exception cref="ConfigIOException">If there is an issue saving the package file or accessing config.</exception>
+    /// <remarks>If the file already exists, it will be overwritten.</remarks>
     public bool ExportConfig(string exportPath);
 
     /// <summary>
     /// Loads the config.json file from the config folder.
     /// </summary>
     /// <returns>Loaded <see cref="IConfig"/></returns>
+    /// <exception cref="ConfigNotImportedException">If the config.json file is not found.</exception>
     /// <exception cref="ConfigInvalidException">If the config.json file is not a valid <see cref="IConfig"/></exception>
     /// <exception cref="ConfigIOException">If there is an issue accessing internal config files/folders.</exception>
     public IConfig LoadConfig();

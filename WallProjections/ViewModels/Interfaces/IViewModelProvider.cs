@@ -10,7 +10,7 @@ namespace WallProjections.ViewModels.Interfaces;
 /// <summary>
 /// A provider for creating viewmodels using Dependency Injection
 /// </summary>
-public interface IViewModelProvider
+public interface IViewModelProvider : IDisposable
 {
     #region Display
 
@@ -124,11 +124,11 @@ public interface IViewModelProvider
     public AbsHotspotDisplayViewModel GetHotspotDisplayViewModel(IConfig config);
 
     /// <summary>
-    /// Creates a new <see cref="IHotspotProjectionViewModel" /> instance
+    /// Creates a new <see cref="AbsHotspotProjectionViewModel" /> instance
     /// </summary>
     /// <param name="hotspot">The hotspot to be projected</param>
-    /// <returns>A new <see cref="IHotspotProjectionViewModel" /> instance</returns>
-    public IHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot);
+    /// <returns>A new <see cref="AbsHotspotProjectionViewModel" /> instance</returns>
+    public AbsHotspotProjectionViewModel GetHotspotProjectionViewModel(Hotspot hotspot);
 
     /// <summary>
     /// Creates a new <see cref="AbsArUcoGridViewModel" /> instance

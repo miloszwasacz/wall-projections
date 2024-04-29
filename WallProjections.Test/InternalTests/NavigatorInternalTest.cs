@@ -1,15 +1,14 @@
 ﻿using System.Reflection;
-using Avalonia.Threading;
 using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.Views;
-using WallProjections.Test.ViewModels;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.Views.Editor;
+using static WallProjections.Test.ViewModels.NavigatorAssertions;
 
 namespace WallProjections.Test.InternalTests;
 
@@ -21,7 +20,7 @@ public class NavigatorInternalTest
     /// </summary>
     [AvaloniaTest]
     [NonParallelizable]
-    public async Task OpenDisplayNoConfigTest()
+    public void OpenDisplayNoConfigTest()
     {
         using var lifetime = new MockDesktopLifetime();
         var pythonHandler = new MockPythonHandler();
@@ -33,21 +32,18 @@ public class NavigatorInternalTest
             pythonHandler,
             (_, _) => vmProvider,
             () => fileHandler,
+            _ => { },
             new MockLoggerFactory()
         );
-        lifetime.MainWindow = null;
-        Assert.That(lifetime.MainWindow, Is.Null);
 
         var openDisplayMethod =
             typeof(Navigator).GetMethod("OpenDisplay", BindingFlags.NonPublic | BindingFlags.Instance)
             ?? throw new InvalidOperationException("Method not found");
         openDisplayMethod.Invoke(navigator, null);
 
-        Dispatcher.UIThread.RunJobs();
-        await Task.Delay(400);
-        lifetime.AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>();
         Assert.Multiple(() =>
         {
+            AssertOpenedWindows<EditorWindow, IEditorViewModel, AbsPositionEditorViewModel>(navigator);
             Assert.That(pythonHandler.CurrentScript, Is.Not.EqualTo(MockPythonHandler.PythonScript.HotspotDetection));
             Assert.That(lifetime.Shutdowns, Is.Empty);
         });
