@@ -1,14 +1,14 @@
 ﻿import threading
+
 import cv2
 import mediapipe as mp
-
 from Scripts.Helper.EventHandler import EventHandler
 from Scripts.Helper.Hotspot import Hotspot
-from Scripts.video_capture_factory import getVideoCapture
+from Scripts.Helper.logger import setup_logger
 from Scripts.Interop import numpy_dotnet_converters as npnet
 from Scripts.Interop.json_dict_converters import json_to_3dict
 from Scripts.calibration import Calibrator
-from Scripts.Helper.logger import setup_logger
+from Scripts.video_capture_factory import getVideoCapture
 
 logger = setup_logger("hotspot_detection")
 
@@ -54,7 +54,7 @@ def generate_hotspots(
 
 
 def hotspot_detection(
-        camera_index: int,
+        video_capture_target: int | str,
         event_handler: EventHandler,
         calibration_matrix_net_array,
         hotspot_coords_str: str
@@ -81,7 +81,7 @@ def hotspot_detection(
                                            min_tracking_confidence=MIN_TRACKING_CONFIDENCE)
 
     # initialise video capture
-    video_capture = getVideoCapture(camera_index)
+    video_capture = getVideoCapture(video_capture_target)
     video_capture.start()
 
     # initialise calibrator

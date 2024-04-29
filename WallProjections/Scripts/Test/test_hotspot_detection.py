@@ -1,18 +1,19 @@
+import os
 import threading
 import time
 import unittest
-import numpy as np
 
-from Scripts.Helper import VideoCapture
+import numpy as np
 from Scripts.Helper.EventHandler import EventHandler
 from Scripts.Interop import numpy_dotnet_converters as npnet
 from Scripts.hotspot_detection import hotspot_detection, stop_hotspot_detection
 
 
-class TestHotspotDetection(unittest.TestCase):
-    def setUp(self):  # called before every test
-        VideoCapture.DEFAULT_TARGET = "Assets/hotspot_test.avi"
+def get_asset(path) -> str:
+    return str(os.path.join(os.path.dirname(__file__), "Assets", path))
 
+
+class TestHotspotDetection(unittest.TestCase):
     def test_hotspot_detection_video(self):
         class TestEventHandler(EventHandler):
             def __init__(self):
@@ -30,12 +31,11 @@ class TestHotspotDetection(unittest.TestCase):
                                                         [-1.31811578e-04,  2.86799201e-04,  1.00000000e+00]]))
         hotspot_coords_str = '{"0":[260,211,87],"1":[1682,228,89],"2":[1689,885,93],"3":[240,900,89]}'
         thread = threading.Thread(target=hotspot_detection,
-                                  args=(event_handler, calibration_matrix, hotspot_coords_str))
+                args=(get_asset("hotspot_test.avi"), event_handler, calibration_matrix, hotspot_coords_str))
         thread.start()
         time.sleep(20)
         stop_hotspot_detection()
         assert not thread.is_alive()  # not what we're testing but just checking the thread is finished
-        print(f"Hotspots pressed: {event_handler.hotspots_pressed}")
         correct_set = {0, 1, 2, 3}
         self.assertSetEqual(event_handler.hotspots_pressed, correct_set)
 

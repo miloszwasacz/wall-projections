@@ -5,15 +5,15 @@ import numpy as np
 from Scripts.Helper.VideoCapture import VideoCapture
 
 
-def getVideoCapture(camera_index: int) -> VideoCapture:
+def getVideoCapture(video_capture_target: int | str) -> VideoCapture:
     """
     Create a new VideoCapture that uses the specified camera index.
     """
-    return VideoCapture(target=camera_index)
+    return VideoCapture(target=video_capture_target)
 
 
-def take_photo(camera_index: int) -> np.ndarray:
+def take_photo(video_capture_target: int | str) -> np.ndarray:
     """
     Take a photo using the specified camera index.
     """
-    return VideoCapture.take_photo(target=camera_index)
+    return VideoCapture.take_photo(target=video_capture_target)
