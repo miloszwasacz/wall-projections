@@ -7,7 +7,7 @@
         x:Class="WallProjections.Views.Display.DisplayWindow"
         x:DataType="vm:IDisplayViewModel"
         Icon="/Assets/app-icon.ico"
-        Title="WallProjections"
+        Title="Wall Projections"
         Classes="Projection"
         WindowState="FullScreen"
         Closing="Window_OnClosing"

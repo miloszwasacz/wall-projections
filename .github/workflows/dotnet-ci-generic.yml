@@ -45,10 +45,10 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: .github/requirements.txt
+          cache-dependency-path: WallProjections/Scripts/Test/requirements.txt
 
-      - name: Install OpenCV
-        run: pip install opencv-python-headless
+      - name: Install Python dependencies
+        run: pip install -r WallProjections/Scripts/Test/requirements.txt
 
       - name: Install LibVLCSharp dependencies
         if: ${{ startsWith(inputs.os, 'ubuntu') }}
@@ -69,6 +69,10 @@ jobs:
         run: >
           dotnet test --no-build -c DebugSkipPython --verbosity normal \
               --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory TestResults
+
+      - name: Test Python
+        if: success() || failure()
+        run: python3 -m unittest discover -s ./WallProjections
 
       - name: Upload coverage reports to Codecov
         if: ${{ inputs.coverage }}

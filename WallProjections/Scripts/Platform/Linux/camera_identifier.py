@@ -1,14 +1,14 @@
 import glob
 import json
 import cv2
-# noinspection PyPackages
-from .Helper.logger import setup_logger
+from Scripts.Helper.logger import setup_logger
 
 logger = setup_logger("camera_identifier")
 
 
 def get_cameras() -> str:
     camera_indices: dict[int, str] = {}
+    cv2.setLogLevel(0)
     devices = glob.glob('/dev/video*')
     for device_name, device in enumerate(devices):
         try:

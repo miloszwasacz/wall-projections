@@ -2,9 +2,9 @@ import threading
 
 import cv2
 import numpy as np
+import time
 
-# noinspection PyPackages
-from .logger import get_logger
+from Scripts.Helper.logger import get_logger
 
 logger =get_logger()
 
@@ -30,6 +30,8 @@ Tweaking these properties could be found useful in case of any issues with captu
 See https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d and
 https://docs.opencv.org/3.4/dc/dfc/group__videoio__flags__others.html."""
 
+RECORD_VIDEO: bool = False
+
 
 class VideoCapture:
     """Helper class for capturing video (or a photo)."""
@@ -50,6 +52,9 @@ class VideoCapture:
         """The current frame in BGR."""
         self._stopping: bool = False
         self._lock: threading.Lock = threading.Lock()
+        if RECORD_VIDEO:
+            codec = cv2.VideoWriter.fourcc(*'DIVX')
+            self._video_writer = cv2.VideoWriter('output.avi', codec, 30.0, (640, 480))
 
     def start(self) -> None:
         """Start capturing video. Blocks for a few seconds until the webcam is opened."""
@@ -64,7 +69,7 @@ class VideoCapture:
         # wait until camera is opened (1 min timeout)
         i = 0
         while self._current_frame is None and i < 600:
-            cv2.waitKey(100)
+            time.sleep(0.1)
             i += 1
 
         if self._current_frame is None:
@@ -74,7 +79,7 @@ class VideoCapture:
             self._current_frame = None
             raise RuntimeError("Error starting video capture: Camera failed to open (timed out).")
 
-        cv2.waitKey(1000)  # wait for a bit more as it returns garbage at first
+        time.sleep(1)  # wait for a bit more as it returns garbage at first
 
         logger.info("Video capture started.")
 
@@ -91,20 +96,26 @@ class VideoCapture:
 
         while video_capture.isOpened():
             success, video_capture_img = video_capture.read()
-            if not success:
+            if success:
+                # normalise and downscale resolution
+                new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
+                video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)
+                self._current_frame = video_capture_img
+                if RECORD_VIDEO:
+                    self._video_writer.write(video_capture_img)
+            else:
                 logger.warning("Unsuccessful video read; ignoring frame.")
-                continue
-
-            # normalise and downscale resolution
-            new_dim = (int(video_capture_img.shape[1] / video_capture_img.shape[0] * 480), 480)
-            video_capture_img = cv2.resize(video_capture_img, new_dim, interpolation=cv2.INTER_NEAREST)
-
-            self._current_frame = video_capture_img
 
             if self._stopping:
                 break
 
+            # cap framerate if it's a test video
+            if isinstance(self.target, str) and len(self.target) >= 4 and self.target[-4:] in (".mp4", ".avi"):
+                time.sleep(1/30)
+
         video_capture.release()
+        if RECORD_VIDEO:
+            self._video_writer.release()
 
     def get_current_frame(self) -> np.ndarray:
         """Get the current frame in BGR. Throws a RuntimeError if the video capture is not running. (Or if video capture

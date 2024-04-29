@@ -91,10 +91,8 @@ public class FileLoggerProvider : ILoggerProvider
     /// </summary>
     /// <param name="basePath">The base path of the log file, including the directory.</param>
     /// <param name="extension">The extension of the log file.</param>
-    private static string GetLogPath(string basePath, string extension = "log") => Path.Combine(
-        basePath,
-        $"_{DateTime.Now:yyyy-MM-dd}.{extension}"
-    );
+    private static string GetLogPath(string basePath, string extension = ".log") =>
+        $"{basePath}_{DateTime.Now:yyyy-MM-dd}.{extension}";
 
     /// <summary>
     /// The <see cref="StreamWriter" /> used to write log messages to a text file.
@@ -146,10 +144,10 @@ public class FileLoggerProvider : ILoggerProvider
     /// <param name="logDirectory">The directory where the log files are stored.</param>
     /// <param name="baseLogFileName">The base name of the log files.</param>
     /// <param name="logFileExtension">The extension of the log files.</param>
-    private static void DeleteOldLogFiles(string logDirectory, string baseLogFileName, string logFileExtension = "log")
+    private static void DeleteOldLogFiles(string logDirectory, string baseLogFileName, string logFileExtension = ".log")
     {
         var files = Directory.GetFiles(logDirectory)
-            .Where(path => path.StartsWith(baseLogFileName) && path.EndsWith($".{logFileExtension}"))
+            .Where(path => path.StartsWith(baseLogFileName) && path.EndsWith(logFileExtension))
             .OrderByDescending(path => path)
             .Skip(MaxLogFiles);
 

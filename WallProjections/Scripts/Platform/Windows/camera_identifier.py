@@ -1,14 +1,14 @@
 import json
 import cv2
 from pygrabber.dshow_graph import FilterGraph
-# noinspection PyPackages
-from .Helper.logger import setup_logger
+from Scripts.Helper.logger import setup_logger
 
 logger = setup_logger("camera_identifier")
 
 
 def get_cameras() -> str:
     indices: dict[int, str] = {}
+    cv2.setLogLevel(0)
     devices = FilterGraph().get_input_devices()
     for device_index, device_name in enumerate(devices):
         try:
