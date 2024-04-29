@@ -1,16 +1,13 @@
-import os
 import threading
 import time
 import unittest
 
 import numpy as np
+
 from Scripts.Helper.EventHandler import EventHandler
 from Scripts.Interop import numpy_dotnet_converters as npnet
+from Scripts.Test.helper import get_asset
 from Scripts.hotspot_detection import hotspot_detection, stop_hotspot_detection
-
-
-def get_asset(path) -> str:
-    return str(os.path.join(os.path.dirname(__file__), "Assets", path))
 
 
 class TestHotspotDetection(unittest.TestCase):

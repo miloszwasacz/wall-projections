@@ -1,12 +1,8 @@
 import time
 import unittest
-import os
 
 from Scripts.Helper.VideoCapture import VideoCapture
-
-
-def get_asset(path) -> str:
-    return str(os.path.join(os.path.dirname(__file__), "Assets", path))
+from Scripts.Test.helper import get_asset
 
 
 class TestVideoCapture(unittest.TestCase):
