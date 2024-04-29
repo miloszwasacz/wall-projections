@@ -90,12 +90,23 @@ public class GlobalWindowManager : IDisposable
         _pythonProxy = new PythonProxy(_processProxy, loggerFactory);
         _appLifetime.Exit += (_, _) => OnExit();
 
-        var cameras = _pythonProxy.GetAvailableCameras();
+        ImmutableList<Camera> cameras;
+        try
+        {
+            cameras = _pythonProxy.GetAvailableCameras();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error getting available cameras");
+            OnNavigatorShutdown(ExitCode.PythonError);
+            return;
+        }
+
         switch (cameras.Count)
         {
             case 0:
                 _logger.LogError("No cameras detected");
-                _appLifetime.Shutdown(ExitCode.NoCamerasDetected);
+                OnNavigatorShutdown(ExitCode.NoCamerasDetected);
                 return;
             case > 1:
                 _logger.LogTrace("Multiple cameras detected");

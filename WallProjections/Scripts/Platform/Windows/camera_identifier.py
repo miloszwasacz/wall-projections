@@ -8,6 +8,7 @@ logger = setup_logger("camera_identifier")
 
 def get_cameras() -> str:
     indices: dict[int, str] = {}
+    cv2.setLogLevel(0)
     devices = FilterGraph().get_input_devices()
     for device_index, device_name in enumerate(devices):
         try:

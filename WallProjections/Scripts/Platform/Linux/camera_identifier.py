@@ -8,6 +8,7 @@ logger = setup_logger("camera_identifier")
 
 def get_cameras() -> str:
     camera_indices: dict[int, str] = {}
+    cv2.setLogLevel(0)
     devices = glob.glob('/dev/video*')
     for device_name, device in enumerate(devices):
         try:

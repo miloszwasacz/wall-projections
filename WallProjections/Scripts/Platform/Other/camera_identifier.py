@@ -28,10 +28,17 @@ def get_cameras() -> str:
     cv2.setLogLevel(0)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(open_camera, i) for i in range(MAX_INDEX)]
-        for future in concurrent.futures.as_completed(futures, timeout=TIMEOUT):
-            index = future.result()
-            if index is not None:
-                camera_indices[index] = f"Camera {len(camera_indices) + 1}"
+        done, not_done = concurrent.futures.wait(futures, timeout=TIMEOUT)
+        for future in done:
+            try:
+                index = future.result()
+                if index is not None:
+                    camera_indices[index] = f"Camera {len(camera_indices) + 1}"
+            except concurrent.futures.TimeoutError:
+                continue
+
+        for future in not_done:
+            future.cancel()
 
     logger.info(f"Identified {len(camera_indices)} cameras.")
     return json.dumps(camera_indices)
