@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace WallProjections.Helper.Interfaces;
 
@@ -18,7 +19,7 @@ public interface IProcessProxy
     ///     (Python DLL - used to run PythonNET, Python Path - location of all executable files accessible to python)
     ///     of virtual environment stored at <see cref="pythonExecutablePath"/>
     /// </returns>
-    /// <exception>If the virtual environment cannot be loaded for PythonNET</exception>
+    /// <exception cref="Exception">If the virtual environment cannot be loaded for PythonNET</exception>
     public (string, string) LoadPythonEnv(string pythonExecutablePath);
 
     /// <inheritdoc cref="Process.Start(string, string)" />
