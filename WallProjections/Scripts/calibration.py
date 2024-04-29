@@ -1,11 +1,7 @@
-# noinspection PyPackages
-from .Helper.Calibrator import Calibrator
-# noinspection PyPackages
-from .Interop import numpy_dotnet_converters as npnet
-# noinspection PyPackages
-from .Interop.json_dict_converters import json_to_2dict
-# noinspection PyPackages
-from .Helper.logger import setup_logger
+from Scripts.Helper.Calibrator import Calibrator
+from Scripts.Interop import numpy_dotnet_converters as npnet
+from Scripts.Interop.json_dict_converters import json_to_2dict
+from Scripts.Helper.logger import setup_logger
 
 logger = setup_logger("calibration")
 

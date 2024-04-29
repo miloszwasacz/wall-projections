@@ -1,8 +1,7 @@
 import glob
 import json
 import cv2
-# noinspection PyPackages
-from .Helper.logger import setup_logger
+from Scripts.Helper.logger import setup_logger
 
 logger = setup_logger("camera_identifier")
 

@@ -1,6 +1,5 @@
 ﻿import numpy as np
-# noinspection PyPackages
-from .Helper.VideoCapture import VideoCapture
+from Scripts.Helper.VideoCapture import VideoCapture
 
 
 def getVideoCapture(camera_index: int) -> VideoCapture:

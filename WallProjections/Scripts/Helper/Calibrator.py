@@ -2,10 +2,8 @@ import cv2
 import numpy as np
 from cv2 import aruco
 
-# noinspection PyPackages
-from ..video_capture_factory import take_photo
-# noinspection PyPackages
-from .logger import get_logger
+from Scripts.video_capture_factory import take_photo
+from Scripts.Helper.logger import get_logger
 
 
 DICT = aruco.getPredefinedDictionary(aruco.DICT_7X7_100)

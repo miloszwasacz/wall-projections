@@ -1,8 +1,7 @@
 import concurrent.futures
 import json
 import cv2
-# noinspection PyPackages
-from .Helper.logger import setup_logger
+from Scripts.Helper.logger import setup_logger
 
 MAX_INDEX = 1000
 TIMEOUT = 5

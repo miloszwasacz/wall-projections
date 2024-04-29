@@ -1,6 +1,8 @@
-﻿import numpy as np
-# noinspection PyPackages
-from .Helper.VideoCapture import VideoCapture
+﻿# This is a mock module that is used in unit tests but is replaced by the actual platform-specific module in production.
+
+
+import numpy as np
+from Scripts.Helper.VideoCapture import VideoCapture
 
 
 def getVideoCapture(camera_index: int) -> VideoCapture:

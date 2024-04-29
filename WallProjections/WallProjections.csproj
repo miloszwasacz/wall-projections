@@ -20,11 +20,11 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
-        <Content Include="Scripts\**\*" Exclude="Scripts\Internal\**;Scripts\Platform\**;Scripts\video_capture_factory.py;Scripts\Test\**;Scripts\**\__init__.py">
+        <Content Include="Scripts\**\*" Exclude="Scripts\Internal\**;Scripts\Platform\**;Scripts\video_capture_factory.py;Scripts\Test\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
-    
+
     <ItemGroup>
         <None Include="$(Pkgpython)\tools\**\*" Link="python\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
     </ItemGroup>
@@ -63,7 +63,7 @@
     <Target Name="SetUpPython" BeforeTargets="GenerateArUcos" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
         <Exec Command="$(Pkgpython)\tools\python -m pip install -r Scripts/requirements.txt"/>
     </Target>
-    
+
     <Target Name="GenerateArUcos" BeforeTargets="PrepareForBuild">
         <Exec Command="$(Pkgpython)\tools\python Scripts\Internal\aruco_generator.py" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
         <Exec Command="python3 Scripts/Internal/aruco_generator.py" Condition="!Exists('$(AppDataDir)/WallProjections/VirtualEnv') AND !$([MSBuild]::IsOsPlatform('Windows'))"/>
@@ -86,8 +86,8 @@
         <PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="VideoLAN.LibVLC.Windows" Version="3.0.20"/>
         <PackageReference Condition="$([MSBuild]::IsOsPlatform('OSX'))" Include="VideoLAN.LibVLC.Mac" Version="3.1.3.1"/>
         <PackageReference Include="pythonnet" Version="3.0.3"/>
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0"/>
         <PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="python" Version="3.11.9"/>
     </ItemGroup>
 </Project>

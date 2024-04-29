@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 # noinspection PyPackages
-from Helper.Calibrator import Calibrator
+from Scripts.Helper.Calibrator import Calibrator
 
 logging.basicConfig(level=logging.INFO)
 

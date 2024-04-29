@@ -4,8 +4,7 @@ import cv2
 import numpy as np
 import time
 
-# noinspection PyPackages
-from .logger import get_logger
+from Scripts.Helper.logger import get_logger
 
 logger =get_logger()
 
