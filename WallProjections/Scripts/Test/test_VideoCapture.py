@@ -2,7 +2,7 @@ import time
 import unittest
 import os
 
-from Helper.VideoCapture import VideoCapture
+from Scripts.Helper.VideoCapture import VideoCapture
 
 
 def get_asset(path) -> str:

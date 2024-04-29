@@ -1,13 +1,12 @@
 import threading
 import time
 import unittest
-
 import numpy as np
 
-from Helper import VideoCapture
-from Helper.EventHandler import EventHandler
-from Interop import numpy_dotnet_converters as npnet
-from hotspot_detection import hotspot_detection, stop_hotspot_detection
+from Scripts.Helper import VideoCapture
+from Scripts.Helper.EventHandler import EventHandler
+from Scripts.Interop import numpy_dotnet_converters as npnet
+from Scripts.hotspot_detection import hotspot_detection, stop_hotspot_detection
 
 
 class TestHotspotDetection(unittest.TestCase):

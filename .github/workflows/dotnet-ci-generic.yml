@@ -54,11 +54,6 @@ jobs:
         if: ${{ startsWith(inputs.os, 'ubuntu') }}
         run: sudo apt-get update -y && sudo apt-get install -y libvlc-dev vlc
 
-      - name: Test Python
-        run: |
-          cd ./WallProjections/Scripts
-          python3 -m unittest discover -s ./Test
-
       - name: Restore dependencies
         run: dotnet restore
 
@@ -74,6 +69,10 @@ jobs:
         run: >
           dotnet test --no-build -c DebugSkipPython --verbosity normal \
               --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory TestResults
+
+      - name: Test Python
+        if: success() || failure()
+        run: python3 -m unittest discover -s ./WallProjections
 
       - name: Upload coverage reports to Codecov
         if: ${{ inputs.coverage }}
