@@ -3,10 +3,6 @@
 ## SEP
 [SEP projects list](https://www.ole.bris.ac.uk/bbcswebdav/pid-8046087-dt-content-rid-46849402_2/xid-46849402_2)
 
-## Raspberry Pi
-- [.NET app deployment for Raspberry](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
-- [.NET GPIO tutorial for Raspberry](https://learn.microsoft.com/en-us/dotnet/iot/tutorials/gpio-input)
-
 ## Avalonia
 - [Avalonia docs](https://docs.avaloniaui.net/docs/next/welcome)
 - [LibVLCSharp docs](https://code.videolan.org/videolan/LibVLCSharp)
