@@ -49,14 +49,12 @@ make full use of the system.
 
 The system features an editor to allow for full visual editing of hotspots, with no editing of config files or manual 
 import of media required. The configuration can be backed up via a single, easy to manage file and later restored back 
-to into the program. We aim for the software to be installed and ran on a small form factor computer, specifically the
-Raspberry Pi Model 4.
+to into the program. We aim for the software to be installed and ran on a Windows machine integrated into the display.
 
 ## Getting Started
-The software can be installed on Windows, MacOS, and Linux computers, as well as on the Raspberry Pi for deployment.
+The software can be installed on Windows, MacOS, and Linux computers.
 
-> Go to installation guide: [spe-uob.github.io/2023-WallProjections/docs/installation/](https://spe-uob.github.io/2023-WallProjections/docs/installation/)
-
+> For installation and usage guidance go to [spe-uob.github.io/2023-WallProjections/docs/](https://spe-uob.github.io/2023-WallProjections/docs/)
 
 ## Stakeholders
 
@@ -68,12 +66,14 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 
 ### Curator
 
+- Does not have technical skills so system should be easy to deploy.
 - Would like to create exhibits which are more engaging and as informative as possible.
 - Oversees funding for exhibits so would like the system to be inexpensive to install and maintain.
 - System should be attractive to board members so funding will be accepted to install. 
 
 ### Exhibition Designer
 
+- Does not have advanced technical skills so system should be easy to configure and use.
 - Use system to make new exhibits which are inventive and engaging.
 - System should be polished and easy to integrate with the rest of the exhibit.
 - System should require little custom configuration so more time can be spent on other aspects of exhibit.
@@ -98,7 +98,7 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 - As an **exhibit designer**, I want to package the data, so that the museum curator can load it up without manual editing.
 - As a **museum curator**, I want to quickly setup the installation, so that it is ready to use with minimal effort.
 - As a **museum curator**, I want to be able to easily diagnose any issues with the system, so that it has minimal downtime.
-- As a **museum curator**, I want to spend as little money as possible maintaining the system, so that more money can be spent.
+- As a **museum curator**, I want to spend as little money as possible maintaining the system, so that more money can be spent on the rest of the museum.
 
 ## Releases
 
@@ -143,27 +143,25 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 
 ### Final Release
 
-#### Hotspot Input (Computer Vision)
-- [ ] Crop the camera view to reduce the required processing power for hand tracking.
-- [ ] Use a faster model to quickly find hands, before using the slower model to find a fingertip on a much smaller area of the image.
-- [ ] All of the computer vision code runs at a good speed on a Raspberry Pi Model 5.
+#### Setup
+- [x] Installation is easy to perform
+  - Windows version works out-of-the-box, Linux version has an installation script
+- [x] Support for multiple cameras 
 
 #### Hotspot Display
-- [ ] Hotspots illuminate one at a time when a user enters the space of the installation.
-- [ ] Hotspots have a rich, engaging animation making it obvious when it is activated.
+- [x] Hotspots have a rich, engaging animation making it obvious when it is activated.
 
 #### Information Display
-- [ ] Multiple images and videos can be displayed at the same time, while keeping the content easily readable and digestible.
-- [ ] Transitions upon activation of a hotspot will be eye catching.
+- [x] Multiple images and videos can be displayed at the same time, while keeping the content easily readable and digestible.
+- [x] Transitions upon activation of a hotspot will be eye catching.
 
-#### Editor
-- [ ] A preview shows what the information will look like.
+#### Quality of Life
+- [x] Improved UI based on feedback from users
+- [x] Better error handling
+- [x] Improved performance by utilizing multiple threads
+- [x] Logging for easier troubleshooting
 
 ## Technologies used
-
-### Hardware/OS
-- [Raspberry Pi Model 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/)
-- [Raspberry Pi OS with desktop](https://www.raspberrypi.com/software/raspberry-pi-desktop/)
 
 ### User Interface
 - [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
@@ -175,6 +173,7 @@ The software can be installed on Windows, MacOS, and Linux computers, as well as
 - [Python 3.11](https://www.python.org/downloads/release/python-3110/)
 - [Python.NET](https://github.com/pythonnet/pythonnet)
 - [MediaPipe](https://developers.google.com/mediapipe)
+- [OpenCV](https://opencv.org/)
 
 ## More Info
 - [User Flows](docs/USER_FLOWS.md)
