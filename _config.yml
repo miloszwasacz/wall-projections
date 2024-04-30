@@ -20,9 +20,12 @@
 
 title: WallProjections
 description: >- # this means to ignore newlines until "baseurl:"
-  Make exhibitions more engaging through interaction with 3-D replicas of artefacts.
+  Make exhibitions more engaging through interaction with 3D replicas of artefacts.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
+
+favicon_ico: "/assets/logo/app-icon.ico"
+logo: "/assets/logo/app-icon.svg"
 
 # Build settings
 theme: just-the-docs
