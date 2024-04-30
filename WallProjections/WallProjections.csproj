@@ -28,6 +28,11 @@
         <None Include="$(Pkgpython)\tools\**\*" Link="python\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Condition="$([MSBuild]::IsOsPlatform('Windows'))"/>
     </ItemGroup>
 
+    <!-- Install script for Linux -->
+    <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64' OR $([MSBuild]::IsOsPlatform('Linux'))">
+        <None Include="install.sh" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
+
     <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
         <Content Include="Scripts\Platform\Windows\*.py" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
             <Link>Scripts\%(Filename)%(Extension)</Link>
