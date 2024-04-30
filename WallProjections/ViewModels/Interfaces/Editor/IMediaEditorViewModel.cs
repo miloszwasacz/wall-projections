@@ -20,6 +20,11 @@ public interface IMediaEditorViewModel
     public string Title { get; }
 
     /// <summary>
+    /// Whether the Media Editor is enabled.
+    /// </summary>
+    public bool IsEnabled { get; set; }
+
+    /// <summary>
     /// A collection of <see cref="IThumbnailViewModel" />s to be displayed in the Media Editor.
     /// </summary>
     public ObservableCollection<IThumbnailViewModel> Media { get; set; }

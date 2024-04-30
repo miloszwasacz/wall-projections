@@ -1,5 +1,6 @@
 ﻿using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Editor;
@@ -18,7 +19,7 @@ public class SecondaryWindowViewModelTest
     public void ConstructorTest()
     {
         var vmProvider = new MockViewModelProvider();
-        var viewModel = new SecondaryWindowViewModel(vmProvider);
+        var viewModel = new SecondaryWindowViewModel(vmProvider, new MockLoggerFactory());
         Assert.That(viewModel.Content, Is.Null);
     }
 
@@ -26,7 +27,7 @@ public class SecondaryWindowViewModelTest
     public void ShowHotspotDisplayTest()
     {
         var vmProvider = new MockViewModelProvider();
-        using var viewModel = new SecondaryWindowViewModel(vmProvider);
+        using var viewModel = new SecondaryWindowViewModel(vmProvider, new MockLoggerFactory());
         viewModel.ShowHotspotDisplay(CreateConfig());
         Assert.That(viewModel.Content, Is.InstanceOf<AbsHotspotDisplayViewModel>());
     }
@@ -36,7 +37,7 @@ public class SecondaryWindowViewModelTest
     {
         var vmProvider = new MockViewModelProvider();
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
-        using var viewModel = new SecondaryWindowViewModel(vmProvider);
+        using var viewModel = new SecondaryWindowViewModel(vmProvider, new MockLoggerFactory());
         var editorViewModel = new MockEditorViewModel(vmProvider, fileHandler);
         viewModel.ShowPositionEditor(editorViewModel);
         Assert.That(viewModel.Content, Is.InstanceOf<AbsPositionEditorViewModel>());
@@ -47,7 +48,7 @@ public class SecondaryWindowViewModelTest
     public void ShowArUcoGridTest()
     {
         var vmProvider = new MockViewModelProvider();
-        using var viewModel = new SecondaryWindowViewModel(vmProvider);
+        using var viewModel = new SecondaryWindowViewModel(vmProvider, new MockLoggerFactory());
         viewModel.ShowArUcoGrid();
         Assert.That(viewModel.Content, Is.InstanceOf<AbsArUcoGridViewModel>());
     }
@@ -56,7 +57,7 @@ public class SecondaryWindowViewModelTest
     public void ChangeContentTest()
     {
         var vmProvider = new MockViewModelProvider();
-        using var viewModel = new SecondaryWindowViewModel(vmProvider);
+        using var viewModel = new SecondaryWindowViewModel(vmProvider, new MockLoggerFactory());
 
         viewModel.ShowHotspotDisplay(CreateConfig());
         var hotspotDisplay = viewModel.Content as MockHotspotDisplayViewModel;
@@ -74,7 +75,7 @@ public class SecondaryWindowViewModelTest
     public void DisposeTest()
     {
         var vmProvider = new MockViewModelProvider();
-        var viewModel = new SecondaryWindowViewModel(vmProvider);
+        var viewModel = new SecondaryWindowViewModel(vmProvider, new MockLoggerFactory());
 
         viewModel.ShowHotspotDisplay(CreateConfig());
         var hotspotDisplay = viewModel.Content as MockHotspotDisplayViewModel;

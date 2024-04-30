@@ -1,0 +1,61 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="using:WallProjections.Styles.Converters"
+                    xmlns:sys="using:System">
+
+    <!-- Overriding default values -->
+    <Thickness x:Key="ControlPadding">4</Thickness>
+    <Thickness x:Key="OverlayPadding">8</Thickness>
+    <Thickness x:Key="TopLevelPadding">16</Thickness>
+    <CornerRadius x:Key="ControlCornerRadius">4</CornerRadius>
+    <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+
+    <!-- region Fonts -->
+
+    <FontFamily x:Key="ContentControlThemeFontFamily">avares://WallProjections/Assets/Fonts/Nunito#Nunito, $Default</FontFamily>
+
+    <sys:Double x:Key="CaptionFontSize">12</sys:Double>
+    <sys:Double x:Key="CaptionLineHeight">16</sys:Double>
+    <FontWeight x:Key="CaptionFontWeight">Regular</FontWeight>
+
+    <sys:Double x:Key="BodyFontSize">14</sys:Double>
+    <sys:Double x:Key="BodyLineHeight">20</sys:Double>
+    <FontWeight x:Key="BodyFontWeight">Regular</FontWeight>
+
+    <sys:Double x:Key="BodyStrongFontSize">14</sys:Double>
+    <sys:Double x:Key="BodyStrongLineHeight">20</sys:Double>
+    <FontWeight x:Key="BodyStrongFontWeight">Bold</FontWeight>
+
+    <sys:Double x:Key="BodyLargeFontSize">18</sys:Double>
+    <sys:Double x:Key="BodyLargeLineHeight">24</sys:Double>
+    <FontWeight x:Key="BodyLargeFontWeight">Regular</FontWeight>
+
+    <sys:Double x:Key="SubtitleFontSize">20</sys:Double>
+    <sys:Double x:Key="SubtitleLineHeight">28</sys:Double>
+    <FontWeight x:Key="SubtitleFontWeight">Bold</FontWeight>
+
+    <sys:Double x:Key="TitleFontSize">28</sys:Double>
+    <sys:Double x:Key="TitleLineHeight">36</sys:Double>
+    <FontWeight x:Key="TitleFontWeight">Bold</FontWeight>
+
+    <sys:Double x:Key="TitleLargeFontSize">40</sys:Double>
+    <sys:Double x:Key="TitleLargeLineHeight">52</sys:Double>
+    <FontWeight x:Key="TitleLargeFontWeight">Bold</FontWeight>
+
+    <sys:Double x:Key="DisplayFontSize">68</sys:Double>
+    <sys:Double x:Key="DisplayLineHeight">92</sys:Double>
+    <FontWeight x:Key="DisplayFontWeight">Bold</FontWeight>
+
+    <!-- endregion -->
+
+    <!-- region Converters -->
+
+    <converters:ThicknessConverter x:Key="ThicknessConverter" />
+    <converters:CornerRadiusConverter x:Key="CornerRadiusConverter" />
+    <converters:ThicknessMultiConverter x:Key="ThicknessMultiConverter" />
+    <converters:CornerRadiusMultiConverter x:Key="CornerRadiusMultiConverter" />
+    <converters:SpacingConverter x:Key="SpacingConverter" />
+
+    <!-- endregion -->
+
+</ResourceDictionary>

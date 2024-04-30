@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using ReactiveUI;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -19,17 +18,17 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
     /// This prevents the <see cref="ContentChanged" /> event from being raised when the Hotspot is being changed
     /// to ensure that the event is only raised when the <see cref="Title" /> or <see cref="Description" /> is actually
     /// changed (e.g. to implement saving properly).
+    /// <br /><br />
+    /// Remember to use <i>lock (this)</i> when accessing this field.
     /// </remarks>
     private bool _isHotspotChanging;
 
     /// <summary>
-    /// A mutex guarding sequential access to <see cref="_isHotspotChanging" />.
-    /// </summary>
-    private readonly Mutex _hotspotMutex = new();
-
-    /// <summary>
     /// The backing field for <see cref="Hotspot"/>.
     /// </summary>
+    /// <remarks>
+    /// Remember to use <i>lock (this)</i> when accessing this field.
+    /// </remarks>
     private IEditorHotspotViewModel? _hotspot;
 
     /// <inheritdoc />
@@ -37,16 +36,17 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
     {
         set
         {
-            _hotspotMutex.WaitOne();
-            _isHotspotChanging = true;
+            lock (this)
+            {
+                _isHotspotChanging = true;
 
-            _hotspot = value;
-            this.RaisePropertyChanged(nameof(Title));
-            this.RaisePropertyChanged(nameof(Description));
-            this.RaisePropertyChanged(nameof(IsEnabled));
+                _hotspot = value;
+                this.RaisePropertyChanged(nameof(Title));
+                this.RaisePropertyChanged(nameof(Description));
+                this.RaisePropertyChanged(nameof(IsEnabled));
 
-            _isHotspotChanging = false;
-            _hotspotMutex.ReleaseMutex();
+                _isHotspotChanging = false;
+            }
         }
     }
 
@@ -61,13 +61,16 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
         get => _hotspot?.Title ?? "";
         set
         {
-            if (_hotspot is null) return;
+            lock (this)
+            {
+                if (_hotspot is null) return;
 
-            _hotspot.Title = value;
-            this.RaisePropertyChanged();
+                _hotspot.Title = value;
+                this.RaisePropertyChanged();
 
-            if (!_isHotspotChanging)
-                ContentChanged?.Invoke(this, EventArgs.Empty);
+                if (!_isHotspotChanging)
+                    ContentChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 
@@ -82,13 +85,16 @@ public class DescriptionEditorViewModel : ViewModelBase, IDescriptionEditorViewM
         get => _hotspot?.Description ?? "";
         set
         {
-            if (_hotspot is null) return;
+            lock (this)
+            {
+                if (_hotspot is null) return;
 
-            _hotspot.Description = value;
-            this.RaisePropertyChanged();
+                _hotspot.Description = value;
+                this.RaisePropertyChanged();
 
-            if (!_isHotspotChanging)
-                ContentChanged?.Invoke(this, EventArgs.Empty);
+                if (!_isHotspotChanging)
+                    ContentChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 

@@ -16,7 +16,36 @@ public class MockEditorViewModel : IEditorViewModel
     public IMediaEditorViewModel ImageEditor { get; }
     public IMediaEditorViewModel VideoEditor { get; }
     public bool IsSaved { get; set; } = false;
+    public bool IsImportSafe { get; set; } = false;
     public bool CanExport { get; set; } = false;
+    public bool IsSaving { get; set; } = false;
+    public bool IsImporting { get; set; } = false;
+    public bool IsExporting { get; set; } = false;
+    public bool IsCalibrating { get; set; } = false;
+    public bool AreActionsDisabled { get; private set; }
+
+    public async Task<bool> WithActionLock(Func<Task> action)
+    {
+        lock (this)
+        {
+            if (AreActionsDisabled) return false;
+
+            AreActionsDisabled = true;
+        }
+
+        try
+        {
+            await action();
+            return true;
+        }
+        finally
+        {
+            lock (this)
+            {
+                AreActionsDisabled = false;
+            }
+        }
+    }
 
     // ReSharper disable once UnusedParameter.Local
     public MockEditorViewModel(IConfig config, IViewModelProvider vmProvider, IFileHandler fileHandler) :
@@ -57,17 +86,17 @@ public class MockEditorViewModel : IEditorViewModel
         throw new NotImplementedException();
     }
 
-    public bool SaveConfig()
+    public Task<bool> SaveConfig()
     {
         throw new NotImplementedException();
     }
 
-    public bool ImportConfig(string filePath)
+    public Task<bool> ImportConfig(string filePath)
     {
         throw new NotImplementedException();
     }
 
-    public bool ExportConfig(string exportPath)
+    public Task<bool> ExportConfig(string exportPath)
     {
         throw new NotImplementedException();
     }

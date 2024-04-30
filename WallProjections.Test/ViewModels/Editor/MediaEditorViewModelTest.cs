@@ -21,6 +21,7 @@ public class MediaEditorViewModelTest
         Assert.Multiple(() =>
         {
             Assert.That(mediaEditorViewModel.Title, Is.EqualTo(Title));
+            Assert.That(mediaEditorViewModel.IsEnabled, Is.False);
             Assert.That(mediaEditorViewModel.Media, Is.Empty);
             Assert.That(mediaEditorViewModel.SelectedMedia.SingleSelect, Is.False);
             Assert.That(mediaEditorViewModel.SelectedMedia.Count, Is.Zero);

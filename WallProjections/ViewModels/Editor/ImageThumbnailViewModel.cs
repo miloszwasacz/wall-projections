@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 
@@ -36,8 +37,10 @@ public class ImageThumbnailViewModel : ViewModelBase, IThumbnailViewModel
     /// </summary>
     /// <param name="path">Path to the associated file.</param>
     /// <param name="proxy">A proxy for starting up <see cref="Process" />es.</param>
-    public ImageThumbnailViewModel(string path, IProcessProxy proxy)
+    /// <param name="loggerFactory">A factory for creating loggers.</param>
+    public ImageThumbnailViewModel(string path, IProcessProxy proxy, ILoggerFactory loggerFactory)
     {
+        var logger = loggerFactory.CreateLogger<ImageThumbnailViewModel>();
         ProcessProxy = proxy;
         FilePath = path;
         Name = Path.GetFileName(path);
@@ -49,8 +52,7 @@ public class ImageThumbnailViewModel : ViewModelBase, IThumbnailViewModel
         }
         catch (Exception e)
         {
-            //TODO Write to log
-            Console.Error.WriteLine(e);
+            logger.LogError(e, "Failed to load image from {Path}. Loading fallback image.", path);
             Image = new Bitmap(AssetLoader.Open(FallbackImagePath));
         }
     }

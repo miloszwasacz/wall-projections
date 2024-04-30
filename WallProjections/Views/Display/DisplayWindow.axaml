@@ -6,10 +6,10 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.Display.DisplayWindow"
         x:DataType="vm:IDisplayViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="WallProjections"
+        Icon="/Assets/app-icon.ico"
+        Title="Wall Projections"
+        Classes="Projection"
         WindowState="FullScreen"
-        Padding="42"
         Closing="Window_OnClosing"
         KeyDown="OnKeyDown">
 

@@ -1,4 +1,5 @@
-﻿using WallProjections.Test.Mocks.ViewModels.Editor;
+﻿using WallProjections.Test.Mocks;
+using WallProjections.Test.Mocks.ViewModels.Editor;
 using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
 using static WallProjections.Test.TestExtensions;
@@ -46,7 +47,7 @@ public class ImportViewModelTest
         var descriptionEditor = new MockDescriptionEditorViewModel(
             "Title",
             "Description",
-            descVm => new ImportViewModel(descVm)
+            descVm => new ImportViewModel(descVm, new MockLoggerFactory())
         );
         var importVm = descriptionEditor.Importer as ImportViewModel;
         return importVm!;

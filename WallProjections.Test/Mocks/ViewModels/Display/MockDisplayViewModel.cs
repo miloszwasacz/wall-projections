@@ -4,6 +4,7 @@ using WallProjections.Models;
 using WallProjections.Test.Mocks.ViewModels.Display.Layouts;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display;
+using WallProjections.ViewModels.Display.Layouts;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
@@ -42,6 +43,7 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     public MockDisplayViewModel(INavigator? navigator = null)
     {
         _navigator = navigator ?? new MockNavigator();
+        ContentViewModel = new WelcomeViewModel();
     }
 
     /// <summary>
@@ -49,11 +51,8 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     /// </summary>
     public int DisposedCount { get; private set; }
 
-    /// <summary>
-    /// Sets
-    /// </summary>
     /// <inheritdoc />
-    public void OnHotspotSelected(object? sender, IPythonHandler.HotspotSelectedArgs e)
+    public void OnHotspotActivated(object? sender, IHotspotHandler.HotspotArgs e)
     {
         var media = new Hotspot.Media(
             e.Id,
@@ -66,7 +65,7 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     }
 
     /// <inheritdoc />
-    public Layout? ContentViewModel { get; private set; }
+    public Layout ContentViewModel { get; private set; }
 
     /// <summary>
     /// Calls <see cref="INavigator.OpenEditor" /> on <see cref="_navigator" />

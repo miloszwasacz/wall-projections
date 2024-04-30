@@ -8,99 +8,114 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.Editor.EditorWindow"
         x:DataType="vm:IEditorViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="EditorWindow"
+        Icon="/Assets/app-icon.ico"
+        Title="Hotspot Editor"
         WindowState="Maximized"
+        IsEnabled="{Binding !AreActionsDisabled}"
+        IsInPositionEditMode="{Binding PositionEditor.IsInEditMode}"
         KeyDown="Editor_OnKeyDown"
-        Closing="Editor_OnClosing"
-        Name="Editor"
-        Tag="{Binding PositionEditor.IsInEditMode}">
-    <!-- This `Tag` is used by the button for toggling position edit mode because it has a different DataContext -->
+        Closing="Editor_OnClosing">
 
     <Window.Styles>
-        <!--TODO Change to a reasonable style -->
-        <Style Selector=".edit-mode-toggled /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Firebrick" />
+        <Style Selector="Grid.card-grid">
+            <Setter Property="Margin">
+                <Binding Source="{StaticResource TopLevelPadding}"
+                         Converter="{StaticResource ThicknessConverter}"
+                         ConverterParameter="1 0.5 1 1" />
+            </Setter>
+        </Style>
+
+        <Style Selector="FlyoutPresenter.teaching-tip > TextBlock">
+            <Setter Property="MaxWidth" Value="170" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
     </Window.Styles>
 
-    <Grid RowDefinitions="Auto, *">
+    <DockPanel>
 
-        <Border Grid.Column="0" Grid.Row="0"
-                BorderBrush="LightGray"
-                BorderThickness="0 0 0 2"
-                Padding="8">
+        <StackPanel DockPanel.Dock="Top"
+                    Classes="toolbar">
 
-            <Grid ColumnDefinitions="Auto, *, Auto">
+            <views:IconButton ToolTip.Tip="Return to Viewer"
+                              Classes="transparent"
+                              IconData="{StaticResource arrow_left_regular}"
+                              Click="Close_OnClick" />
 
-                <StackPanel Grid.Column="0" Grid.Row="0"
-                            Orientation="Horizontal"
-                            Spacing="15">
+            <Menu>
+                <MenuItem Header="_File">
 
-                    <Button Click="ConfigImport_OnClick">
-                        Import Config
-                    </Button>
+                    <MenuItem Header="Import"
+                              Click="ConfigImport_OnClick" />
 
-                    <Button IsEnabled="{Binding CanExport}"
-                            Click="ConfigExport_OnClick">
-                        Export Config
-                    </Button>
+                    <MenuItem Header="Export"
+                              IsEnabled="{Binding CanExport}"
+                              Click="ConfigExport_OnClick" />
 
-                    <Button IsEnabled="{Binding }"
-                            Click="Calibrate_OnClick">
-                        Calibrate camera
-                    </Button>
+                </MenuItem>
 
-                </StackPanel>
+                <MenuItem Header="_Calibrate"
+                          Click="Calibrate_OnClick" />
 
-                <StackPanel Grid.Column="2" Grid.Row="0"
-                            Orientation="Horizontal"
-                            Spacing="15">
+                <MenuItem Header="_Save"
+                          IsEnabled="{Binding !IsSaved}"
+                          Click="Save_OnClick" />
+            </Menu>
 
-                    <Button IsEnabled="{Binding !IsSaved}"
-                            Click="Save_OnClick">
-                        Save
-                    </Button>
+        </StackPanel>
 
-                    <Button Content="{Binding CloseButtonText}"
-                            Click="Close_OnClick" />
+        <Grid Classes="card-grid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{StaticResource DefaultFormFieldSpacing}" />
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="{StaticResource DefaultFormFieldSpacing}" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="{StaticResource DefaultFormFieldSpacing}" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-                </StackPanel>
-
-            </Grid>
-
-        </Border>
-
-        <Grid Grid.Column="0" Grid.Row="1"
-              ColumnDefinitions="*, 15, 3*, 15, 2*" RowDefinitions="*, 15, *"
-              Margin="15">
-
-            <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
-                  ColumnDefinitions="*" RowDefinitions="*, 15, Auto">
-
-                <editor:HotspotList Grid.Column="0" Grid.Row="0"
-                                    DataContext="{Binding}"
-                                    DeleteHotspot="HotspotList_OnDeleteHotspot" />
-
-                <Button Grid.Column="0" Grid.Row="2"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Command="{Binding AddHotspot}">
-                    Add Hotspot
-                </Button>
-
-            </Grid>
+            <editor:HotspotList Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
+                                DataContext="{Binding}"
+                                AddHotspot="HotspotList_OnAddHotspot"
+                                DeleteHotspot="HotspotList_OnDeleteHotspot" />
 
             <editor:DescriptionEditor Grid.Column="2" Grid.Row="0" Grid.RowSpan="3"
-                                      Spacing="15"
-                                      DataContext="{Binding DescriptionEditor}"
-                                      ImportDescription="DescriptionEditor_OnImportDescription">
+                                      DataContext="{Binding DescriptionEditor}">
+                <editor:DescriptionEditor.MenuItems>
 
-                <views:IconButton ToolTip.Tip="Edit position"
-                                  Classes.edit-mode-toggled="{Binding #Editor.Tag}"
-                                  IconData="{StaticResource my_location_regular}"
-                                  Click="EditPosition_OnClick" />
+                    <views:IconButton IconData="{StaticResource document_import_regular}"
+                                      IsEnabled="{Binding IsEnabled}"
+                                      Click="DescriptionEditor_OnImportDescription">
+                        <ToolTip.Tip>
+                            <TextBlock>
+                                Import title and description<LineBreak />
+                                from a text file
+                            </TextBlock>
+                        </ToolTip.Tip>
+                    </views:IconButton>
 
+                    <views:IconToggleButton Name="PositionEditorToggle"
+                                            ToolTip.Tip="Edit position"
+                                            IconData="{StaticResource my_location_regular}"
+                                            IsChecked="{Binding $parent[editor:EditorWindow].IsInPositionEditMode}"
+                                            IsEnabled="{Binding IsEnabled}"
+                                            Click="EditPosition_OnClick">
+                        <FlyoutBase.AttachedFlyout>
+                            <Flyout FlyoutPresenterClasses="teaching-tip attached-bottom"
+                                    ShowMode="Transient"
+                                    Placement="BottomEdgeAlignedRight"
+                                    OverlayInputPassThroughElement="{Binding $parent[Window]}">
+
+                                <TextBlock Text="Use your mouse to move the hotspot around on the second screen" />
+
+                            </Flyout>
+                        </FlyoutBase.AttachedFlyout>
+                    </views:IconToggleButton>
+                </editor:DescriptionEditor.MenuItems>
             </editor:DescriptionEditor>
 
             <editor:MediaEditor Grid.Column="4" Grid.Row="0"
@@ -115,12 +130,17 @@
                                 RemoveMedia="VideoEditor_OnRemoveMedia"
                                 OpenExplorerFailed="MediaEditor_OnOpenExplorerFailed" />
 
+            <views:Toast Name="LoadingToast"
+                         Grid.Column="0" Grid.Row="0"
+                         Grid.ColumnSpan="5" Grid.RowSpan="3"
+                         IsLoading="True" />
+
             <views:Toast Name="Toast"
                          Grid.Column="0" Grid.Row="0"
                          Grid.ColumnSpan="5" Grid.RowSpan="3" />
 
         </Grid>
 
-    </Grid>
+    </DockPanel>
 
 </Window>

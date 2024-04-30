@@ -1,0 +1,77 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="Border.Card">
+        <Style.Resources>
+            <ResourceDictionary>
+                <Thickness x:Key="CardPadding">16</Thickness>
+                <StaticResource x:Key="CardCornerRadius" ResourceKey="OverlayCornerRadius" />
+
+                <ResourceDictionary.ThemeDictionaries>
+
+                    <ResourceDictionary x:Key="Default">
+                        <StaticResource x:Key="CardBackground" ResourceKey="SystemControlBackgroundAltMediumHighBrush" />
+                        <SolidColorBrush x:Key="CardStrokeBrush" Color="#0F000000" />
+                    </ResourceDictionary>
+
+                    <ResourceDictionary x:Key="Dark">
+                        <StaticResource x:Key="CardBackground" ResourceKey="SystemControlBackgroundAltMediumHighBrush" />
+                        <SolidColorBrush x:Key="CardStrokeBrush" Color="#0F000000" />
+                    </ResourceDictionary>
+
+                </ResourceDictionary.ThemeDictionaries>
+            </ResourceDictionary>
+        </Style.Resources>
+
+        <Setter Property="Background" Value="{DynamicResource CardBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BoxShadow" Value="0 2 4 0 #29000000" />
+        <Setter Property="CornerRadius" Value="{StaticResource CardCornerRadius}" />
+        <Setter Property="ClipToBounds" Value="True" />
+
+        <Style Selector="^:not(.no-padding)">
+            <Setter Property="Padding" Value="{StaticResource CardPadding}" />
+        </Style>
+        <Style Selector="^.no-padding">
+            <Style.Resources>
+                <CornerRadius x:Key="CardChildCornerRadiusModifier">-1</CornerRadius>
+            </Style.Resources>
+
+            <Setter Property="Padding" Value="0" />
+
+            <Style Selector="^ :is(TemplatedControl).cut-bottom-corners">
+                <Setter Property="ClipToBounds" Value="True" />
+                <Setter Property="CornerRadius">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource CornerRadiusMultiConverter}">
+                            <Binding Source="{StaticResource CardCornerRadius}"
+                                     Converter="{StaticResource CornerRadiusConverter}"
+                                     ConverterParameter="0, 0, 1, 1" />
+                            <Binding Source="{StaticResource CardChildCornerRadiusModifier}"
+                                     Converter="{StaticResource CornerRadiusConverter}"
+                                     ConverterParameter="0, 0, 1, 1" />
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style Selector="^ :is(TemplatedControl).cut-top-corners">
+                <Setter Property="ClipToBounds" Value="True" />
+                <Setter Property="CornerRadius">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource CornerRadiusMultiConverter}">
+                            <Binding Source="{StaticResource CardCornerRadius}"
+                                     Converter="{StaticResource CornerRadiusConverter}"
+                                     ConverterParameter="1, 1, 0, 0" />
+                            <Binding Source="{StaticResource CardChildCornerRadiusModifier}"
+                                     Converter="{StaticResource CornerRadiusConverter}"
+                                     ConverterParameter="1, 1, 0, 0" />
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Style>
+    </Style>
+
+</Styles>

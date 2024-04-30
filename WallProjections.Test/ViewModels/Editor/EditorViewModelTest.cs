@@ -6,6 +6,7 @@ using NUnit.Framework.Constraints;
 using WallProjections.Helper;
 using WallProjections.Models;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
@@ -14,7 +15,6 @@ using WallProjections.ViewModels.Editor;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 // ReSharper disable AccessToStaticMemberViaDerivedType
-using Is = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions.Is;
 using Has = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions.Has;
 
 namespace WallProjections.Test.ViewModels.Editor
@@ -84,7 +84,8 @@ namespace WallProjections.Test.ViewModels.Editor
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var pythonHandler = new MockPythonHandler();
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             Assert.Multiple(() =>
             {
@@ -98,7 +99,10 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(editorViewModel.DescriptionEditor.Description, Is.Empty);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.IsSaved);
+                Assert.That(editorViewModel.IsImportSafe, Is.True);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -113,7 +117,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var expectedSelectedCoord = config.Hotspots[0].Position;
             var expectedUnselectedCoord = config.Hotspots.Skip(1).Select(h => h.Position);
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             var descriptionEditor = (MockDescriptionEditorViewModel)editorViewModel.DescriptionEditor;
             Assert.That(editorViewModel.Hotspots, Is.Not.Empty);
@@ -125,7 +129,10 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(descriptionEditor.Hotspot, Is.SameAs(editorViewModel.Hotspots[0]));
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(editorViewModel.Hotspots[0].Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(editorViewModel.Hotspots[0].Videos));
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled);
+                Assert.That(editorViewModel.IsSaved);
+                Assert.That(editorViewModel.IsImportSafe, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.True);
             });
         }
@@ -138,7 +145,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             var hotspots = new[]
             {
@@ -157,7 +164,9 @@ namespace WallProjections.Test.ViewModels.Editor
                 Assert.That(editorViewModel.SelectedHotspot, Is.Null);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -170,7 +179,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             var selected = expectedViewModels[1];
             editorViewModel.SelectedHotspot = selected;
@@ -184,7 +193,9 @@ namespace WallProjections.Test.ViewModels.Editor
                 );
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(selected.Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(selected.Videos));
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.CanExport, Is.True);
             });
         }
@@ -197,7 +208,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             // Asserts that modifying hotspot's properties doesn't change SelectedHotspot
             // and sets the editor to "unsaved".
@@ -212,7 +223,9 @@ namespace WallProjections.Test.ViewModels.Editor
                 );
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(selected.Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(selected.Videos));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
@@ -228,7 +241,9 @@ namespace WallProjections.Test.ViewModels.Editor
                 );
                 Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(selected.Images));
                 Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(selected.Videos));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -241,7 +256,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.AddHotspot();
 
@@ -253,7 +268,11 @@ namespace WallProjections.Test.ViewModels.Editor
             {
                 Assert.That(editorViewModel.Hotspots, Has.EquivalentHotspots(expectedViewModels));
                 Assert.That(editorViewModel.SelectedHotspot, Is.SameAs(newHotspot));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
+                Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
@@ -271,19 +290,24 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.SelectedHotspot = editorViewModel.Hotspots[selectedIndex];
             var deleted = editorViewModel.Hotspots[deletedIndex];
             editorViewModel.DeleteHotspot(deleted);
 
             expectedViewModels = expectedViewModels.RemoveAt(deletedIndex);
+            var expectedSelected = editorViewModel.Hotspots[0];
 
             Assert.Multiple(() =>
             {
                 Assert.That(editorViewModel.Hotspots, Has.EquivalentHotspots(expectedViewModels));
-                Assert.That(editorViewModel.SelectedHotspot, Is.SameAs(editorViewModel.Hotspots[0]));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.SelectedHotspot, Is.SameAs(expectedSelected));
+                Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(expectedSelected.Images));
+                Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(expectedSelected.Videos));
+                Assert.That(editorViewModel.ImageEditor.IsEnabled);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -299,7 +323,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             // Thanks to Dependency Injection we know that the selected hotspot is a MockEditorHotspotViewModel
             var selectedHotspot = editorViewModel.SelectedHotspot as MockEditorHotspotViewModel;
@@ -331,7 +355,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(added, Is.True);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -344,17 +368,19 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.SelectedHotspot = null;
             editorViewModel.AddMedia(MediaEditorType.Images, Array.Empty<IStorageFile>());
 
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.CanExport, Is.True);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled, Is.False);
             });
         }
 
@@ -369,7 +395,7 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             // Thanks to Dependency Injection we know that the selected hotspot is a MockEditorHotspotViewModel
             var selectedHotspot = editorViewModel.SelectedHotspot as MockEditorHotspotViewModel;
@@ -419,7 +445,7 @@ namespace WallProjections.Test.ViewModels.Editor
             Assert.Multiple(() =>
             {
                 Assert.That(removed, Is.True);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
                 Assert.That(mediaEditor.SelectedMedia, Has.Count.Zero);
             });
@@ -433,45 +459,130 @@ namespace WallProjections.Test.ViewModels.Editor
             var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.SelectedHotspot = null;
             editorViewModel.RemoveMedia(MediaEditorType.Images, Array.Empty<IThumbnailViewModel>());
 
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.CanExport, Is.True);
                 Assert.That(editorViewModel.ImageEditor.Media, Is.Empty);
                 Assert.That(editorViewModel.VideoEditor.Media, Is.Empty);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled, Is.False);
             });
+        }
+
+        [AvaloniaTest]
+        public async Task WithActionLockTest()
+        {
+            var navigator = new MockNavigator();
+            var fileHandler = new MockFileHandler(true);
+            var pythonHandler = new MockPythonHandler();
+            var (config, _) = CreateConfig();
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
+
+            var result1 = false;
+            var result2 = false;
+
+            // Start the first task
+            var task = editorViewModel.WithActionLock(async () =>
+            {
+                await Task.Delay(500);
+                result1 = true;
+            });
+            Assert.That(editorViewModel.AreActionsDisabled, Is.True);
+
+            // Start the second task (should be ignored)
+            var success2 = await editorViewModel.WithActionLock(() =>
+            {
+                result2 = true;
+                return Task.CompletedTask;
+            });
+            var success1 = await task;
+            Assert.That(editorViewModel.AreActionsDisabled, Is.False);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result1, Is.True);
+                Assert.That(result2, Is.False);
+                Assert.That(success1, Is.True);
+                Assert.That(success2, Is.False);
+            });
+        }
+
+        [AvaloniaTest]
+        public async Task WithActionLockExceptionTest()
+        {
+            var navigator = new MockNavigator();
+            var fileHandler = new MockFileHandler(true);
+            var pythonHandler = new MockPythonHandler();
+            var (config, _) = CreateConfig();
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
+
+            var task = editorViewModel.WithActionLock(async () =>
+            {
+                await Task.Delay(500);
+                throw new Exception();
+            });
+            Assert.That(editorViewModel.AreActionsDisabled, Is.True);
+
+            try
+            {
+                await task;
+                Assert.Fail("The task should have thrown an exception");
+            }
+            catch (Exception)
+            {
+                // Assert that the editor releases the lock
+                Assert.That(editorViewModel.AreActionsDisabled, Is.False);
+            }
+
+            // Assert that the lock can be acquired again
+            var lock2 = await editorViewModel.WithActionLock(() =>
+            {
+                Assert.That(editorViewModel.AreActionsDisabled, Is.True);
+                return Task.CompletedTask;
+            });
+            Assert.That(lock2, Is.True);
         }
 
         [AvaloniaTest]
         [TestCase(true, TestName = "Successful")]
         [TestCase(false, TestName = "Unsuccessful")]
-        public void SaveConfigTest(bool savingSuccessful)
+        public async Task SaveConfigTest(bool savingSuccessful)
         {
             var navigator = new MockNavigator();
-            var fileHandler = new MockFileHandler(savingSuccessful);
+            var fileHandler = new MockFileHandler(savingSuccessful)
+            {
+                Delay = 500
+            };
             var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.AddHotspot();
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
-            var saved = editorViewModel.SaveConfig();
+            var task = editorViewModel.SaveConfig();
+            Assert.That(editorViewModel.IsSaving, Is.True);
+
+            var saved = await task;
+            Assert.That(editorViewModel.IsSaving, Is.False);
 
             Assert.Multiple(() =>
             {
                 Assert.That(saved, Is.EqualTo(savingSuccessful));
-                Assert.That(editorViewModel, savingSuccessful ? Is.Saved : Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, savingSuccessful ? Is.True : Is.False);
                 Assert.That(editorViewModel.CanExport, Is.EqualTo(savingSuccessful));
                 //TODO Improve Config comparison
                 Assert.That(
@@ -482,77 +593,87 @@ namespace WallProjections.Test.ViewModels.Editor
         }
 
         [AvaloniaTest]
-        public void SaveConfigExceptionTest()
+        public async Task SaveConfigExceptionTest()
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
             var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.AddHotspot();
             editorViewModel.DeleteHotspot(editorViewModel.Hotspots[^1]);
-            Assert.That(editorViewModel, Is.Unsaved);
+            Assert.That(editorViewModel.IsSaved, Is.False);
 
-            var saved = editorViewModel.SaveConfig();
+            var saved = await editorViewModel.SaveConfig();
 
             Assert.Multiple(() =>
             {
                 Assert.That(saved, Is.False);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
 
         [AvaloniaTest]
-        public void SaveConfigNoHotspotsTest()
+        public async Task SaveConfigNoHotspotsTest()
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(true);
             var pythonHandler = new MockPythonHandler();
             var (config, _) = CreateConfig();
             IEditorViewModel editorViewModel =
-                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider);
+                new EditorViewModel(config, navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.Hotspots.Clear();
-            var saved = editorViewModel.SaveConfig();
+            var saved = await editorViewModel.SaveConfig();
 
             Assert.Multiple(() =>
             {
                 Assert.That(saved, Is.True);
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
             });
         }
 
         [AvaloniaTest]
         [TestCase(true, TestName = "Successful")]
         [TestCase(false, TestName = "Unsuccessful")]
-        public void ImportConfigTest(bool expectedSuccess)
+        public async Task ImportConfigTest(bool expectedSuccess)
         {
             const string filePath = "test.zip";
             var navigator = new MockNavigator();
-            var fileHandler = new MockFileHandler(expectedSuccess);
+            var fileHandler = new MockFileHandler(expectedSuccess)
+            {
+                Delay = 500
+            };
             var pythonHandler = new MockPythonHandler();
             var (config, expectedViewModels) = CreateConfig();
             fileHandler.Config = config;
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.AddHotspot();
             editorViewModel.DeleteHotspot(editorViewModel.Hotspots[^1]);
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
-            var imported = editorViewModel.ImportConfig(filePath);
+            var task = editorViewModel.ImportConfig(filePath);
+            Assert.That(editorViewModel.IsImporting, Is.True);
+
+            var imported = await task;
+            Assert.That(editorViewModel.IsImporting, Is.False);
 
             Assert.Multiple(() =>
             {
                 Assert.That(imported, Is.EqualTo(expectedSuccess));
-                Assert.That(editorViewModel, expectedSuccess ? Is.Saved : Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, expectedSuccess ? Is.True : Is.False);
                 Assert.That(editorViewModel.CanExport, Is.EqualTo(expectedSuccess));
+                Assert.That(editorViewModel.ImageEditor.IsEnabled, Is.EqualTo(expectedSuccess));
+                Assert.That(editorViewModel.VideoEditor.IsEnabled, Is.EqualTo(expectedSuccess));
                 Assert.That(fileHandler.LoadedZips, Is.EquivalentTo(new[] { filePath }));
                 Assert.That(
                     editorViewModel.Hotspots,
@@ -566,29 +687,37 @@ namespace WallProjections.Test.ViewModels.Editor
         }
 
         [AvaloniaTest]
-        public void ImportConfigExceptionTest()
+        public async Task ImportConfigExceptionTest()
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
             var pythonHandler = new MockPythonHandler();
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.AddHotspot();
-            Assert.That(editorViewModel, Is.Unsaved);
+            editorViewModel.DeleteHotspot(editorViewModel.Hotspots[0]);
+            Assert.Multiple(() =>
+            {
+                Assert.That(editorViewModel.Hotspots, Is.Empty);
+                Assert.That(editorViewModel.IsSaved, Is.False);
+            });
 
-            var imported = editorViewModel.ImportConfig("test.zip");
+            var imported = await editorViewModel.ImportConfig("test.zip");
 
             Assert.Multiple(() =>
             {
                 Assert.That(imported, Is.False);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
-                Assert.That(editorViewModel.Hotspots, Has.Exactly(1).Items);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.Hotspots, Is.Empty);
             });
         }
 
         [AvaloniaTest]
-        public void ImportConfigNoHotspotsTest()
+        public async Task ImportConfigNoHotspotsTest()
         {
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(true)
@@ -596,18 +725,21 @@ namespace WallProjections.Test.ViewModels.Editor
                 Config = new Config(MockPythonProxy.CalibrationResult, new List<Hotspot>())
             };
             var pythonHandler = new MockPythonHandler();
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.AddHotspot();
-            Assert.That(editorViewModel, Is.Unsaved);
+            Assert.That(editorViewModel.IsSaved, Is.False);
 
-            var imported = editorViewModel.ImportConfig("test.zip");
+            var imported = await editorViewModel.ImportConfig("test.zip");
 
             Assert.Multiple(() =>
             {
                 Assert.That(imported, Is.True);
-                Assert.That(editorViewModel, Is.Saved);
+                Assert.That(editorViewModel.IsSaved);
                 Assert.That(editorViewModel.CanExport, Is.True);
+                Assert.That(editorViewModel.ImageEditor.IsEnabled, Is.False);
+                Assert.That(editorViewModel.VideoEditor.IsEnabled, Is.False);
                 Assert.That(editorViewModel.Hotspots, Is.Empty);
             });
         }
@@ -615,52 +747,58 @@ namespace WallProjections.Test.ViewModels.Editor
         [AvaloniaTest]
         [TestCase(true, TestName = "Successful")]
         [TestCase(false, TestName = "Unsuccessful")]
-        public void ExportConfigTest(bool expectedSuccess)
+        public async Task ExportConfigTest(bool expectedSuccess)
         {
-            const string exportPath = "test";
+            var exportPath = Path.Combine("test", IEditorViewModel.ExportFileName);
             var navigator = new MockNavigator();
-            var fileHandler = new MockFileHandler(expectedSuccess);
+            var fileHandler = new MockFileHandler(expectedSuccess)
+            {
+                Delay = 500
+            };
             var pythonHandler = new MockPythonHandler();
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.AddHotspot();
-            Assert.That(editorViewModel, Is.Unsaved);
+            Assert.That(editorViewModel.IsSaved, Is.False);
 
-            var exported = editorViewModel.ExportConfig(exportPath);
+            var task = editorViewModel.ExportConfig(exportPath);
+            Assert.That(editorViewModel.IsExporting, Is.True);
+
+            var exported = await task;
+            Assert.That(editorViewModel.IsExporting, Is.False);
 
             Assert.Multiple(() =>
             {
                 Assert.That(exported, Is.EqualTo(expectedSuccess));
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
-                Assert.That(
-                    fileHandler.ExportedZips,
-                    Is.EquivalentTo(new[] { Path.Combine(exportPath, IEditorViewModel.ExportFileName) })
-                );
+                Assert.That(fileHandler.ExportedZips, Is.EquivalentTo(new[] { exportPath }));
             });
         }
 
         [AvaloniaTest]
-        public void ExportConfigExceptionTest()
+        public async Task ExportConfigExceptionTest()
         {
+            var exportPath = Path.Combine("test", IEditorViewModel.ExportFileName);
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new IOException());
             var pythonHandler = new MockPythonHandler();
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.AddHotspot();
             Assert.Multiple(() =>
             {
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
-            var exported = editorViewModel.ExportConfig("test");
-
+            var exported = await editorViewModel.ExportConfig(exportPath);
             Assert.Multiple(() =>
             {
                 Assert.That(exported, Is.False);
-                Assert.That(editorViewModel, Is.Unsaved);
+                Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
         }
@@ -671,7 +809,8 @@ namespace WallProjections.Test.ViewModels.Editor
             var navigator = new MockNavigator();
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
             var pythonHandler = new MockPythonHandler();
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
             Assert.That(navigator.AreArUcoMarkersVisible, Is.False);
 
             editorViewModel.ShowCalibrationMarkers();
@@ -691,17 +830,27 @@ namespace WallProjections.Test.ViewModels.Editor
             var positions = positionsBuilder.ToImmutable();
             var navigator = new MockNavigator(positions);
             var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
-            var pythonHandler = new MockPythonHandler();
+            var pythonHandler = new MockPythonHandler()
+            {
+                Delay = 500
+            };
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
-            Assert.That(await editorViewModel.CalibrateCamera(), Is.True);
+            var task = editorViewModel.CalibrateCamera();
+            Assert.That(editorViewModel.IsCalibrating, Is.True);
+
+            var result = await task;
+            Assert.That(editorViewModel.IsCalibrating, Is.False);
+
             Assert.Multiple(() =>
             {
+                Assert.That(result, Is.True);
                 Assert.That(editorViewModel.IsSaved, Is.False);
                 Assert.That(editorViewModel.CanExport, Is.False);
             });
 
-            editorViewModel.SaveConfig();
+            await editorViewModel.SaveConfig();
             Assert.That(fileHandler.Config.HomographyMatrix, Is.EquivalentTo(MockPythonProxy.CalibrationResult));
         }
 
@@ -712,7 +861,8 @@ namespace WallProjections.Test.ViewModels.Editor
             var fileHandler = new MockFileHandler(true);
             var pythonHandler = new MockPythonHandler();
 
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
             Assert.That(await editorViewModel.CalibrateCamera(), Is.False);
             Assert.Multiple(() =>
             {
@@ -730,7 +880,8 @@ namespace WallProjections.Test.ViewModels.Editor
             navigator.OpenEditor();
             Assert.That(navigator.IsEditorOpen, Is.True);
 
-            IEditorViewModel editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider);
+            IEditorViewModel editorViewModel =
+                new EditorViewModel(navigator, fileHandler, pythonHandler, VMProvider, new MockLoggerFactory());
 
             editorViewModel.CloseEditor();
 
@@ -771,76 +922,6 @@ namespace WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
     /// </summary>
     internal static class NUnitExtensions
     {
-        #region IsSaved
-
-        /// <summary>
-        /// Returns whether the given <see cref="IEditorViewModel" /> is
-        /// <see cref="IEditorViewModel.IsSaved">saved</see>, and has
-        /// the correct <see cref="IEditorViewModel.CloseButtonText" />,
-        /// based on the value of <see cref="IEditorViewModel.IsSaved" />.
-        /// </summary>
-        /// <seealso cref="CorrectSavedCloseButtonText" />.
-        /// <seealso cref="CorrectUnsavedCloseButtonText" />.
-        public sealed class IsSavedConstraint : Constraint
-        {
-            // ReSharper disable once MemberCanBePrivate.Global
-            /// <summary>
-            /// The correct text for the close button when the editor is saved.
-            /// </summary>
-            public const string CorrectSavedCloseButtonText = "Close";
-
-            // ReSharper disable once MemberCanBePrivate.Global
-            /// <summary>
-            /// The correct text for the close button when the editor is unsaved.
-            /// </summary>
-            public const string CorrectUnsavedCloseButtonText = "Discard";
-
-            /// <summary>
-            /// Whether <see cref="IEditorViewModel.IsSaved" /> should be <i>true</i>.
-            /// </summary>
-            private readonly bool _expectedIsSaved;
-
-            public IsSavedConstraint(bool expectedIsSaved = true)
-            {
-                _expectedIsSaved = expectedIsSaved;
-                Description = _expectedIsSaved
-                    ? $"saved and close button has correct text (\"{CorrectSavedCloseButtonText}\")"
-                    : $"unsaved and close button has correct text (\"{CorrectUnsavedCloseButtonText}\")";
-            }
-
-            public override ConstraintResult ApplyTo<TActual>(TActual actual)
-            {
-                if (actual is not IEditorViewModel editorViewModel)
-                    return new ConstraintResult(this, actual, ConstraintStatus.Error);
-
-                var expectedCloseButtonText = _expectedIsSaved
-                    ? CorrectSavedCloseButtonText
-                    : CorrectUnsavedCloseButtonText;
-
-                var actualIsSaved = $"{nameof(editorViewModel.IsSaved)}: {editorViewModel.IsSaved}";
-                var actualCloseButtonText =
-                    $"{nameof(editorViewModel.CloseButtonText)}: `{editorViewModel.CloseButtonText}`";
-
-                var matches =
-                    editorViewModel.IsSaved == _expectedIsSaved &&
-                    editorViewModel.CloseButtonText == expectedCloseButtonText;
-
-                return new ConstraintResult(this, (actualIsSaved, actualCloseButtonText), matches);
-            }
-        }
-
-        /// <summary>
-        /// Appends a <see cref="IsSavedConstraint" /> to the given <see cref="ConstraintExpression" />.
-        /// </summary>
-        public static IsSavedConstraint IsSaved(this ConstraintExpression expression)
-        {
-            var constraint = new IsSavedConstraint();
-            expression.Append(constraint);
-            return constraint;
-        }
-
-        #endregion
-
         #region HasEquivalentHotspots
 
         /// <summary>
@@ -848,7 +929,7 @@ namespace WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
         /// </summary>
         public static CollectionItemsEqualConstraint HasEquivalentHotspots(
             IEnumerable<IEditorHotspotViewModel> expectedCollection
-        ) => NUnit.Framework.Is.EquivalentTo(expectedCollection)
+        ) => Is.EquivalentTo(expectedCollection)
             .Using<IEditorHotspotViewModel>((actual, expected) =>
             {
                 var thumbnailComparer = new ThumbnailComparer();
@@ -897,36 +978,6 @@ namespace WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions
         }
 
         #endregion
-    }
-
-
-    /// <inheritdoc />
-    internal abstract class Is : NUnit.Framework.Is
-    {
-        /// <summary>
-        /// Returns whether the given <see cref="IEditorViewModel" /> is
-        /// <see cref="IEditorViewModel.IsSaved">saved</see>, and has
-        /// the correct <see cref="IEditorViewModel.CloseButtonText" />,
-        /// based on the value of <see cref="IEditorViewModel.IsSaved" />.
-        /// </summary>
-        /// <seealso cref="NUnitExtensions.IsSavedConstraint.CorrectSavedCloseButtonText" />.
-        /// <seealso cref="Unsaved" />.
-        public static NUnitExtensions.IsSavedConstraint Saved => new();
-
-        /// <summary>
-        /// Returns whether the given <see cref="IEditorViewModel" /> is
-        /// <see cref="IEditorViewModel.IsSaved">unsaved</see>, and has
-        /// the correct <see cref="IEditorViewModel.CloseButtonText" />,
-        /// based on the value of <see cref="IEditorViewModel.IsSaved" />.
-        /// </summary>
-        /// <remarks>
-        /// This is not the same as using <see cref="Is" />.<see cref="Is.Not" />.<see cref="Is.Saved" />,
-        /// as it also checks the <see cref="IEditorViewModel.CloseButtonText" />
-        /// (generally <i>Is.Not.Saved</i> should not be used).
-        /// </remarks>
-        /// <seealso cref="NUnitExtensions.IsSavedConstraint.CorrectUnsavedCloseButtonText" />.
-        /// <seealso cref="Saved" />.
-        public static NUnitExtensions.IsSavedConstraint Unsaved => new(false);
     }
 
     /// <inheritdoc />

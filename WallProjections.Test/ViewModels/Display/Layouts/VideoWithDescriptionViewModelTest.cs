@@ -13,6 +13,7 @@ public class VideoWithDescriptionViewModelTest
     [Test]
     public void ConstructorTest()
     {
+        const int hotspotId = 0;
         const string title = "Title";
         const string description = "Description";
         IEnumerable<string> videoPaths = new[]
@@ -25,11 +26,12 @@ public class VideoWithDescriptionViewModelTest
 
         var videoWithDescriptionViewModel = new VideoWithDescriptionViewModel(
             vmProvider,
+            hotspotId,
             title,
             description,
             videoPaths
         );
-        AssertVMProperties(videoWithDescriptionViewModel, title, description, videoPaths);
+        AssertVMProperties(videoWithDescriptionViewModel, hotspotId, title, description, videoPaths);
     }
 
     [TestFixture]
@@ -76,6 +78,7 @@ public class VideoWithDescriptionViewModelTest
                 testCase,
                 (videoWithDescriptionViewModel, media) => AssertVMProperties(
                     videoWithDescriptionViewModel,
+                    media.Id,
                     media.Title,
                     media.Description,
                     media.VideoPaths
@@ -91,6 +94,7 @@ public class VideoWithDescriptionViewModelTest
     /// <remarks>Disposes of <paramref name="videoWithDescriptionViewModel" /></remarks>
     private static void AssertVMProperties(
         VideoWithDescriptionViewModel videoWithDescriptionViewModel,
+        int hotspotId,
         string title,
         string description,
         IEnumerable<string> videoPaths
@@ -100,6 +104,7 @@ public class VideoWithDescriptionViewModelTest
         {
             Assert.Multiple(() =>
             {
+                Assert.That(videoWithDescriptionViewModel.HotspotId, Is.EqualTo(hotspotId));
                 Assert.That(videoWithDescriptionViewModel.Title, Is.EqualTo(title));
                 Assert.That(videoWithDescriptionViewModel.Description, Is.EqualTo(description));
             });

@@ -1,16 +1,24 @@
-﻿using System;
+﻿#if !DEBUGSKIPPYTHON
+using System;
 using System.Collections.Immutable;
+using System.IO;
+using Microsoft.Extensions.Logging;
 using Avalonia;
-#if !DEBUGSKIPPYTHON
+using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
-using System.Threading;
-using System.Diagnostics;
 using Python.Runtime;
+using WallProjections.Models;
+
 #else
 using System.Diagnostics.CodeAnalysis;
+using System.Collections.Immutable;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Avalonia;
+using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 #endif
-using WallProjections.Helper.Interfaces;
 
 namespace WallProjections.Helper;
 
@@ -18,33 +26,123 @@ namespace WallProjections.Helper;
 /// <inheritdoc />
 public sealed class PythonProxy : IPythonProxy
 {
+    private const string PythonDllExceptionMessage = "Could not load Python environment.";
+
+    /// <summary>
+    /// Folder to store virtual environment.
+    /// </summary>
+    private const string VirtualEnvFolder = "VirtualEnv";
+
+    /// <summary>
+    /// Folder where the virtual environment is stored (if it exists).
+    /// </summary>
+    private static readonly string VirtualEnvPath = Path.Combine(IFileHandler.AppDataFolderPath, VirtualEnvFolder);
+
+    /// <summary>
+    /// Path to the Python executable in the virtual environment.
+    /// </summary>
+    /// <seealso cref="VirtualEnvPath"/>
+    private static readonly string VirtualEnvExecutablePath = Path.Combine(VirtualEnvPath,
+        OperatingSystem.IsWindows()
+            ? @"Scripts\python"
+            : "bin/python"
+    );
+
+    /// <summary>
+    /// Folder where the embedded Python environment is stored (if it exists).
+    /// </summary>
+    private static readonly string EmbeddedEnvFolder = Path.Combine(
+        AppDomain.CurrentDomain.BaseDirectory,
+        "python"
+    );
+
+    /// <summary>
+    /// Path to embedded Python environment executable.
+    /// </summary>
+    private static readonly string EmbeddedEnvExecutablePath = EmbeddedEnvFolder + (
+        OperatingSystem.IsWindows()
+            ? @"\python.exe"
+            : "/python"
+    );
+
     /// <summary>
     /// A handle to Python threads
     /// </summary>
     private readonly IntPtr _threadsPtr;
 
     /// <summary>
-    /// The currently running Python module for hotspot detection
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
+    /// <summary>
+    /// The currently running Python module
     /// </summary>
     private readonly AtomicPythonModule _currentModule = new();
 
     /// <summary>
     /// Initializes the Python runtime
     /// </summary>
-    public PythonProxy()
+    /// <exception cref="DllNotFoundException">If Python could not be initialized</exception>
+    /// <remarks>Reference for VirtualEnv code: https://gist.github.com/AMArostegui/9b2ecf9d87042f2c119e417b4e38524b</remarks>
+    public PythonProxy(IProcessProxy processProxy, ILoggerFactory loggerFactory)
     {
-        Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
-        Debug.Write("Initializing Python...    ");
+        _logger = loggerFactory.CreateLogger<PythonProxy>();
+        _logger.LogInformation("Initializing Python.");
+
+        string? pythonExecutablePath = null;
+
+        if (File.Exists(EmbeddedEnvExecutablePath))
+        {
+            _logger.LogInformation("Embedded Python environment detected.");
+            _logger.LogTrace("Python executable path: {Path}", EmbeddedEnvExecutablePath);
+            pythonExecutablePath = EmbeddedEnvExecutablePath;
+        }
+        else if (File.Exists(VirtualEnvExecutablePath))
+        {
+            _logger.LogInformation("Virtual Python environment detected.");
+            _logger.LogTrace("Python executable path: {Path}", VirtualEnvExecutablePath);
+            pythonExecutablePath = VirtualEnvExecutablePath;
+        }
+
+        // Only use embedded/virtual environment if executable exists.
+        if (pythonExecutablePath is not null)
+        {
+            try
+            {
+                var (pythonDll, pythonPath) = processProxy.LoadPythonEnv(pythonExecutablePath);
+                Runtime.PythonDLL = pythonDll;
+                PythonEngine.PythonPath = pythonPath;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Could not load Python non-global environment.");
+                throw new DllNotFoundException(PythonDllExceptionMessage, e);
+            }
+        }
+        else
+        {
+            _logger.LogInformation("No non-global environment detected. Loading Python from system.");
+            Runtime.PythonDLL = Environment.GetEnvironmentVariable("PYTHON_DLL");
+            if (Runtime.PythonDLL is null)
+            {
+                _logger.LogError("PythonDLL environment variable not set.");
+                throw new DllNotFoundException(PythonDllExceptionMessage);
+            }
+        }
+
         PythonEngine.Initialize();
         _threadsPtr = PythonEngine.BeginAllowThreads();
-        Debug.WriteLine("Done");
+        _logger.LogInformation("Python initialized.");
     }
 
     /// <inheritdoc />
-    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
-    {
-        RunPythonAction(PythonModule.HotspotDetection, module => { module.StartDetection(eventListener, config); });
-    }
+    public void StartHotspotDetection(IPythonHandler eventListener, IConfig config) =>
+        RunPythonAction(PythonModule.HotspotDetection, module =>
+        {
+            _logger.LogInformation("Starting hotspot detection.");
+            module.StartDetection(eventListener, config);
+        });
 
     /// <inheritdoc />
     public void StopCurrentAction()
@@ -54,16 +152,26 @@ public sealed class PythonProxy : IPythonProxy
 
         using (Py.GIL())
         {
+            _logger.LogInformation("Stopping hotspot detection.");
             module.StopDetection();
         }
     }
 
     /// <inheritdoc />
-    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
-    {
-        //TODO Change to the actual entrypoint
-        return RunPythonAction(PythonModule.Calibration, module => module.CalibrateCamera(arucoPositions));
-    }
+    public double[,]? CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions) =>
+        RunPythonAction(PythonModule.Calibration, module =>
+        {
+            _logger.LogInformation("Calibrating camera.");
+            return module.CalibrateCamera(cameraIndex, arucoPositions);
+        });
+
+    /// <inheritdoc />
+    public ImmutableList<Camera> GetAvailableCameras() =>
+        RunPythonAction(PythonModule.CameraIdentification, module =>
+        {
+            _logger.LogInformation("Identifying available cameras.");
+            return module.GetAvailableCameras(_logger);
+        });
 
     /// <summary>
     /// Runs the given action after acquiring the Python GIL importing the given module
@@ -76,7 +184,6 @@ public sealed class PythonProxy : IPythonProxy
     {
         using (Py.GIL())
         {
-            //TODO Maybe Import a module once and reuse it?
             var module = moduleFactory();
             _currentModule.Set(module);
             action(module);
@@ -95,7 +202,6 @@ public sealed class PythonProxy : IPythonProxy
     {
         using (Py.GIL())
         {
-            //TODO Maybe Import a module once and reuse it?
             var module = moduleFactory();
             _currentModule.Set(module);
             return action(module);
@@ -113,7 +219,12 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     private class AtomicPythonModule
     {
-        private readonly Mutex _mutex = new();
+        /// <summary>
+        /// The internal module reference
+        /// </summary>
+        /// <remarks>
+        /// Remember to lock on <i>this</i> when accessing this field
+        /// </remarks>
         private PythonModule? _module;
 
         /// <summary>
@@ -121,9 +232,10 @@ public sealed class PythonProxy : IPythonProxy
         /// </summary>
         public void Set(PythonModule module)
         {
-            _mutex.WaitOne();
-            _module = module;
-            _mutex.ReleaseMutex();
+            lock (this)
+            {
+                _module = module;
+            }
         }
 
         /// <summary>
@@ -132,11 +244,12 @@ public sealed class PythonProxy : IPythonProxy
         /// <returns>The previously held module, or <i>null</i> if there was none</returns>
         public PythonModule? Take()
         {
-            _mutex.WaitOne();
-            var module = _module;
-            _module = null;
-            _mutex.ReleaseMutex();
-            return module;
+            lock (this)
+            {
+                var module = _module;
+                _module = null;
+                return module;
+            }
         }
     }
 }
@@ -148,11 +261,26 @@ public sealed class PythonProxy : IPythonProxy
 public sealed class PythonProxy : IPythonProxy
 {
     /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
+    // ReSharper disable UnusedParameter.Local
+    /// <summary>
+    /// Constructor to keep definitions consistent with the Python version.
+    /// </summary>
+    public PythonProxy(IProcessProxy processProxy, ILoggerFactory loggerFactory)
+    {
+        _logger = loggerFactory.CreateLogger<PythonProxy>();
+    }
+    // ReSharper restore UnusedParameter.Local
+
+    /// <summary>
     /// Prints a message to the console
     /// </summary>
     public void StartHotspotDetection(IPythonHandler eventListener, IConfig config)
     {
-        Console.WriteLine("Starting hotspot detection");
+        _logger.LogInformation("Starting hotspot detection");
     }
 
     /// <summary>
@@ -160,15 +288,15 @@ public sealed class PythonProxy : IPythonProxy
     /// </summary>
     public void StopCurrentAction()
     {
-        Console.WriteLine("Stopping currently running action");
+        _logger.LogInformation("Stopping currently running action");
     }
 
     /// <summary>
     /// Prints a message to the console and returns an identity matrix
     /// </summary>
-    public double[,] CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+    public double[,] CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions)
     {
-        Console.WriteLine("Calibrating camera");
+        _logger.LogInformation("Calibrating camera");
         return new double[,]
         {
             { 1, 0, 0 },
@@ -177,12 +305,23 @@ public sealed class PythonProxy : IPythonProxy
         };
     }
 
+    public ImmutableList<Camera> GetAvailableCameras()
+    {
+        _logger.LogInformation("Identifying available cameras");
+        Task.Delay(2000).Wait();
+        return ImmutableList.Create(
+            new Camera(0, "Camera 0"),
+            new Camera(700, "Camera 1"),
+            new Camera(702, "Camera 2")
+        );
+    }
+
     /// <summary>
     /// Prints a message to the console
     /// </summary>
     public void Dispose()
     {
-        Console.WriteLine("Disposing PythonProxy");
+        _logger.LogInformation("Disposing PythonProxy");
     }
 }
 #endif

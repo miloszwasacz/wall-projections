@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Avalonia;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Test.Mocks.Helper;
@@ -15,9 +16,9 @@ public class MockPythonProxy : IPythonProxy
     /// </summary>
     public static readonly double[,] CalibrationResult =
     {
-        { 0.0f, 0.1f, 0.2f },
-        { 1.0f, 1.1f, 1.2f },
-        { 2.0f, 2.1f, 2.2f }
+        { 0.0d, 0.1d, 0.2d },
+        { 1.0d, 1.1d, 1.2d },
+        { 2.0d, 2.1d, 2.2d }
     };
 
     /// <summary>
@@ -60,7 +61,7 @@ public class MockPythonProxy : IPythonProxy
         Task.Delay(Delay).Wait();
     }
 
-    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+    public double[,]? CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions)
     {
         Task.Delay(Delay).Wait();
         if (Exception != null)
@@ -68,6 +69,19 @@ public class MockPythonProxy : IPythonProxy
 
         IsCameraCalibrated = true;
         return arucoPositions.Count > 0 ? CalibrationResult : null;
+    }
+
+    public ImmutableList<Camera> GetAvailableCameras()
+    {
+        Task.Delay(Delay).Wait();
+        if (Exception != null)
+            throw Exception;
+
+        return ImmutableList.Create(
+            new Camera(0, "Camera 0"),
+            new Camera(700, "Camera 1"),
+            new Camera(702, "Camera 2")
+        );
     }
 
     public void Dispose()

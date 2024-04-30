@@ -5,16 +5,29 @@ using WallProjections.ViewModels.Interfaces.Display;
 #if DEBUGSKIPPYTHON
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Data;
-using WallProjections.Helper;
+#endif
+#if !RELEASE
+using Avalonia;
 #endif
 
 namespace WallProjections.Views.Display;
 
 public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
 {
+#if DEBUGSKIPPYTHON
+    // ReSharper disable once InconsistentNaming
+    /// <summary>
+    /// Whether the application is running in a CI environment.
+    /// </summary>
+    public bool IsCI { get; init; }
+#endif
+
     public DisplayWindow()
     {
         InitializeComponent();
+#if !RELEASE
+        this.AttachDevTools();
+#endif
     }
 
     // ReSharper disable UnusedParameter.Local
@@ -31,6 +44,9 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     /// <param name="e">The event arguments containing the key that was pressed.</param>
     internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        // Ignore handled events and ones with key modifiers
+        if (e.Handled || e.KeyModifiers != KeyModifiers.None) return;
+
         // Toggle fullscreen
         if (e.Key == Key.F)
         {
@@ -60,7 +76,8 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             default:
             {
 #if DEBUGSKIPPYTHON
-                MockPythonInput(e.Key);
+                if (!IsCI)
+                    MockPythonInput(e.Key);
 #endif
                 base.OnKeyDown(e);
                 break;
@@ -113,10 +130,26 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             Key.D9 => new Optional<int>(9),
             _ => new Optional<int>()
         };
+        if (keyVal.HasValue)
+            (Application.Current as App)?.PythonHandler.OnHotspotPressed(keyVal.Value);
 
-        if (!keyVal.HasValue) return;
 
-        PythonHandler.Instance.OnHotspotPressed(keyVal.Value);
+        var keyValUnpressed = key switch
+        {
+            Key.NumPad0 => new Optional<int>(0),
+            Key.NumPad1 => new Optional<int>(1),
+            Key.NumPad2 => new Optional<int>(2),
+            Key.NumPad3 => new Optional<int>(3),
+            Key.NumPad4 => new Optional<int>(4),
+            Key.NumPad5 => new Optional<int>(5),
+            Key.NumPad6 => new Optional<int>(6),
+            Key.NumPad7 => new Optional<int>(7),
+            Key.NumPad8 => new Optional<int>(8),
+            Key.NumPad9 => new Optional<int>(9),
+            _ => new Optional<int>()
+        };
+        if (keyValUnpressed.HasValue)
+            (Application.Current as App)?.PythonHandler.OnHotspotUnpressed(keyValUnpressed.Value);
     }
 #endif
 }

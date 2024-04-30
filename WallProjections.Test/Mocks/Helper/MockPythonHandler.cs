@@ -15,46 +15,79 @@ namespace WallProjections.Test.Mocks.Helper;
 /// </remarks>
 public class MockPythonHandler : IPythonHandler
 {
-    public PythonScript? CurrentScript { get; private set; }
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotPressed;
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotReleased;
 
-    public bool IsDisposed { get; private set; }
+    /// <summary>
+    /// The delay (in milliseconds) simulating the time it takes to call a Python script
+    /// </summary>
+    public int Delay { get; set; }
 
-    /// <inheritdoc />
-    public event EventHandler<IPythonHandler.HotspotSelectedArgs>? HotspotSelected;
+    /// <summary>
+    /// The exception that will be thrown when running a Python script
+    /// </summary>
+    public Exception? Exception { get; set; }
 
-    public Task RunHotspotDetection(IConfig config)
+#pragma warning disable CA1822
+    public int CameraIndex => 700;
+#pragma warning restore CA1822
+
+    public async Task RunHotspotDetection(IConfig config)
     {
         CurrentScript = PythonScript.HotspotDetection;
-        return Task.CompletedTask;
+        await Task.Delay(Delay);
+        if (Exception is not null)
+            throw Exception;
     }
 
-    public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
+    public async Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions)
     {
         CurrentScript = PythonScript.Calibration;
-        return Task.FromResult(arucoPositions.Count > 0 ? MockPythonProxy.CalibrationResult : null);
+        await Task.Delay(Delay);
+        if (Exception is not null)
+            throw Exception;
+        return arucoPositions.Count > 0 ? MockPythonProxy.CalibrationResult : null;
     }
 
     public void CancelCurrentTask()
     {
         CurrentScript = null;
+        if (Exception is not null)
+            throw Exception;
     }
+
+    /// <summary>
+    /// The current script being run
+    /// </summary>
+    /// <seealso cref="PythonScript" />
+    public PythonScript? CurrentScript { get; private set; }
+
+    /// <summary>
+    /// Whether <see cref="Dispose" /> has been called
+    /// </summary>
+    public bool IsDisposed { get; private set; }
 
     /// <inheritdoc />
     public void OnHotspotPressed(int id)
     {
-        HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
+        HotspotPressed?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 
     /// <inheritdoc />
     public void OnHotspotUnpressed(int id)
     {
-        throw new NotImplementedException();
+        HotspotReleased?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 
     /// <summary>
-    /// Returns if there are any subscribers to <see cref="HotspotSelected" />
+    /// Returns if there are any subscribers to <see cref="HotspotPressed" />
     /// </summary>
-    public bool HasSubscribers => HotspotSelected is not null && HotspotSelected.GetInvocationList().Length > 0;
+    public bool HasPressedSubscribers => HotspotPressed is not null && HotspotPressed.GetInvocationList().Length > 0;
+
+    /// <summary>
+    /// Returns if there are any subscribers to <see cref="HotspotReleased" />
+    /// </summary>
+    public bool HasReleasedSubscribers => HotspotReleased is not null && HotspotReleased.GetInvocationList().Length > 0;
 
     public void Dispose()
     {

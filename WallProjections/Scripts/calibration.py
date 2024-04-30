@@ -1,14 +1,15 @@
-import logging
+from Scripts.Helper.Calibrator import Calibrator
+from Scripts.Interop import numpy_dotnet_converters as npnet
+from Scripts.Interop.json_dict_converters import json_to_2dict
+from Scripts.Helper.logger import setup_logger
 
-# noinspection PyPackages
-from .Helper.Calibrator import Calibrator
-# noinspection PyPackages
-from .Interop.json_dict_converters import json_to_2dict
-# noinspection PyPackages
-from .Interop import numpy_dotnet_converters as npnet
+logger = setup_logger("calibration")
 
 
-def calibrate(projector_id_to_coord_json: str):
+def calibrate(camera_index: int, projector_id_to_coord_json: str):
+    logger.info("Calibration started.")
     projector_id_to_coord = json_to_2dict(projector_id_to_coord_json)
-    logging.info("Deserialized: " + str(projector_id_to_coord))
-    return npnet.asNetArray(Calibrator.calibrate(projector_id_to_coord))
+    transform_matrix = npnet.asNetArray(Calibrator.calibrate(camera_index, projector_id_to_coord))
+    logger.info("Calibration complete.")
+    return transform_matrix
+

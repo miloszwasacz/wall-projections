@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
+using System.Threading.Tasks;
 using LibVLCSharp.Shared;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Display;
@@ -12,6 +13,14 @@ namespace WallProjections.ViewModels.Display;
 /// <inheritdoc cref="IVideoViewModel" />
 public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
 {
+    /// <inheritdoc />
+    public event EventHandler? AllVideosFinished;
+
+    /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
+
     /// <summary>
     /// The <see cref="LibVLC" /> object used to play the videos
     /// </summary>
@@ -20,16 +29,17 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <summary>
     /// Whether or not this <see cref="VideoViewModel" /> has been disposed
     /// </summary>
+    /// <remarks>
+    /// Remember to use <i>lock (this)</i> when accessing this field
+    /// </remarks>
     private bool _isDisposed;
-
-    /// <summary>
-    /// Mutex for <see cref="_isLoaded"/> and <see cref="_isDisposed" />
-    /// </summary>
-    private readonly Mutex _stateMutex;
 
     /// <summary>
     /// Whether the video player has loaded
     /// </summary>
+    /// <remarks>
+    /// Remember to use <i>lock (this)</i> when accessing this field
+    /// </remarks>
     private bool _isLoaded;
 
     /// <summary>
@@ -50,13 +60,14 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <summary>
     /// Creates a new <see cref="VideoViewModel" /> with the given <see cref="IMediaPlayer" />
     /// </summary>
-    /// <param name="libVlc"></param>
-    /// <param name="mediaPlayer"></param>
-    public VideoViewModel(LibVLC libVlc, IMediaPlayer mediaPlayer)
+    /// <param name="libVlc">The <see cref="LibVLC" /> object used by <see cref="LibVLCSharp" /></param>
+    /// <param name="mediaPlayer">The <see cref="IMediaPlayer" /> used to play the videos</param>
+    /// <param name="loggerFactory">A factory for creating loggers</param>
+    public VideoViewModel(LibVLC libVlc, IMediaPlayer mediaPlayer, ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<VideoViewModel>();
         _libVlc = libVlc;
         _mediaPlayer = mediaPlayer;
-        _stateMutex = new Mutex();
         _playQueue = new ConcurrentQueue<string>();
         _mediaPlayer.EndReached += PlayNextVideoEvent;
 
@@ -112,12 +123,13 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     /// <inheritdoc />
     public void MarkLoaded()
     {
-        _stateMutex.WaitOne();
-        if (HasVideos)
-            PlayNextVideo();
+        lock (this)
+        {
+            if (HasVideos)
+                PlayNextVideo();
 
-        _isLoaded = true;
-        _stateMutex.ReleaseMutex();
+            _isLoaded = true;
+        }
     }
 
     /// <inheritdoc />
@@ -126,29 +138,24 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
         foreach (var path in paths)
             _playQueue.Enqueue(path);
 
-        _stateMutex.WaitOne();
         var success = false;
         if (_isLoaded && HasVideos)
-            success = PlayNextVideo();
+            success = PlayNextVideo().Result;
 
         IsVisible = success;
-        _stateMutex.ReleaseMutex();
-
         return success;
     }
 
     /// <inheritdoc />
     public void StopVideo()
     {
-        _stateMutex.WaitOne();
-        if (_isDisposed)
+        lock (this)
         {
-            _stateMutex.ReleaseMutex();
-            return;
-        }
+            if (_isDisposed)
+                return;
 
-        ForceStopVideo();
-        _stateMutex.ReleaseMutex();
+            ForceStopVideo();
+        }
     }
 
     /// <summary>
@@ -162,52 +169,56 @@ public sealed class VideoViewModel : ViewModelBase, IVideoViewModel
     }
 
     /// <inheritdoc />
-    public bool PlayNextVideo()
+    public Task<bool> PlayNextVideo() => Task.Run(() =>
     {
-        // End of queue reached
-        _stateMutex.WaitOne();
-        if (_isDisposed || MediaPlayer is null || !_playQueue.TryDequeue(out var nextVideo))
+        lock (this)
         {
-            IsVisible = false;
-            _stateMutex.ReleaseMutex();
-            return false;
+            if (_isDisposed || MediaPlayer is null || !_playQueue.TryDequeue(out var nextVideo))
+            {
+                // End of queue reached
+                IsVisible = false;
+                return false;
+            }
+
+            var media = new Media(_libVlc, nextVideo);
+            var success = MediaPlayer.Play(media);
+            IsVisible = success;
+            media.Dispose();
+            return success;
         }
-
-        _stateMutex.ReleaseMutex();
-
-        var media = new Media(_libVlc, nextVideo);
-        var success = MediaPlayer.Play(media);
-        IsVisible = success;
-        media.Dispose();
-        return success;
-    }
+    });
 
     /// <summary>
     /// Event handler wrapper for playing the next video in the sequence when one ends.
     /// </summary>
     /// <param name="sender">Object who sent request</param>
     /// <param name="e">Arguments for the event</param>
-    private void PlayNextVideoEvent(object? sender, EventArgs e)
+    private async void PlayNextVideoEvent(object? sender, EventArgs e)
     {
-        var success = PlayNextVideo();
-
-        //TODO Log to file
-        if (!success)
-            Console.WriteLine("Could not play next video");
+        switch (await PlayNextVideo())
+        {
+            case false when _playQueue.IsEmpty:
+                _logger.LogInformation("End of video queue reached");
+                AllVideosFinished?.Invoke(this, EventArgs.Empty);
+                break;
+            case false:
+                _logger.LogError("Failed to play next video");
+                //TODO Maybe send an error message?
+                AllVideosFinished?.Invoke(this, EventArgs.Empty);
+                break;
+        }
     }
 
     public void Dispose()
     {
-        _stateMutex.WaitOne();
-        if (_isDisposed)
+        lock (this)
         {
-            _stateMutex.ReleaseMutex();
-            return;
-        }
+            if (_isDisposed)
+                return;
 
-        ForceStopVideo();
-        _isDisposed = true;
-        _stateMutex.ReleaseMutex();
+            ForceStopVideo();
+            _isDisposed = true;
+        }
 
         var player = MediaPlayer;
         MediaPlayer = null;

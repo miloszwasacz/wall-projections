@@ -1,0 +1,90 @@
+﻿<Panel xmlns="https://github.com/avaloniaui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:helper="using:WallProjections.Helper.Interfaces"
+       xmlns:enums="using:WallProjections.ViewModels.Interfaces.SecondaryScreens"
+       xmlns:views="using:WallProjections.Views"
+       mc:Ignorable="d" d:DesignWidth="20" d:DesignHeight="20"
+       x:Class="WallProjections.Views.HotspotCircle"
+       Width="{Binding Diameter, RelativeSource={RelativeSource Self}}"
+       Height="{Binding Diameter, RelativeSource={RelativeSource Self}}"
+       Classes.activating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Activating}}"
+       Classes.deactivating="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Deactivating}}"
+       Classes.activated="{Binding HotspotState, RelativeSource={RelativeSource Self}, Converter={StaticResource StateConverter}, ConverterParameter={x:Static enums:HotspotState.Active}}">
+
+    <Panel.Resources>
+        <views:FullArcDiameterConverter x:Key="FullArcDiameterConverter" />
+    </Panel.Resources>
+
+    <Panel.Styles>
+        <Style Selector="Ellipse.inner">
+            <Setter Property="Width" Value="{Binding $parent[views:HotspotCircle].Diameter}" />
+            <Setter Property="Height" Value="{Binding $parent[views:HotspotCircle].Diameter}" />
+        </Style>
+
+        <Style Selector="Arc.outer">
+            <Setter Property="Width">
+                <Binding Path="$parent[views:HotspotCircle].Diameter"
+                         Converter="{StaticResource FullArcDiameterConverter}" />
+            </Setter>
+            <Setter Property="Height">
+                <Binding Path="$parent[views:HotspotCircle].Diameter"
+                         Converter="{StaticResource FullArcDiameterConverter}" />
+            </Setter>
+            <Setter Property="Stroke" Value="{DynamicResource HotspotStrokeBrush}" />
+            <Setter Property="StrokeThickness" Value="{StaticResource HotspotStrokeThickness}" />
+            <Setter Property="StartAngle" Value="-90" />
+        </Style>
+    </Panel.Styles>
+
+    <!-- Pulsing circle -->
+    <Ellipse Classes="hotspot inner"
+             Classes.pulse="{Binding $parent[views:HotspotCircle].Pulse}" />
+
+    <!-- Charging arc -->
+    <Arc Name="OuterArc"
+         Classes="outer"
+         Tag="{Binding $parent[views:HotspotCircle].AnimationDuration}" />
+
+    <!-- NOTE: Animations for OuterArc are defined in code-behind, -->
+    <!--       because they have dynamic duration based on the current activation progress -->
+
+    <!-- Animations for inner ellipse -->
+    <Panel.Styles>
+
+        <!-- Base transitions -->
+        <Style Selector="views|HotspotCircle">
+            <Style Selector="^ Ellipse.inner">
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <TransformOperationsTransition
+                            Property="RenderTransform"
+                            Duration="{Binding Source={x:Static helper:IHotspotHandler.ForcefulDeactivationTime}}" />
+                    </Transitions>
+                </Setter>
+                <Setter Property="RenderTransform" Value="scale(1)" />
+            </Style>
+        </Style>
+
+        <!-- ACTIVE animation -->
+        <Style Selector="views|HotspotCircle.activated">
+            <Style Selector="^ Ellipse.inner">
+                <!-- Pulsing animation -->
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <TransformOperationsTransition
+                            Property="RenderTransform"
+                            Duration="{Binding Source={x:Static views:HotspotCircle.PulseTime}}" />
+                    </Transitions>
+                </Setter>
+
+                <!-- Single pulse -->
+                <Style Selector="^.pulse">
+                    <Setter Property="RenderTransform" Value="scale(1.25)" />
+                </Style>
+            </Style>
+        </Style>
+
+    </Panel.Styles>
+</Panel>

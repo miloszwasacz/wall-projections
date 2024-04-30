@@ -1,25 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Notifications;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
-#if !RELEASE
-using Avalonia;
-#endif
+using static WallProjections.Views.ResultDialog;
 
 namespace WallProjections.Views.Editor;
 
+[PseudoClasses(":hasoverlay")]
 public partial class EditorWindow : Window
 {
+    private const string ImportInProgressMessage = "Importing configuration...";
+    private const string ExportInProgressMessage = "Exporting configuration...";
+    private const string CalibrationInProgressMessage = "Calibrating camera...";
+    private const string SaveInProgressMessage = "Saving configuration...";
+
+    private const string ImportSuccessMessage = "Configuration imported successfully";
+    private const string ExportSuccessMessage = "Configuration exported successfully";
+    private const string CalibrationSuccessMessage = "Camera calibration successful";
+
     private const string ExplorerErrorMessage = "Could not open the File Explorer";
     private const string ImportErrorMessage = "An error occured while importing the configuration file";
     private const string ExportErrorMessage = "An error occured while exporting configuration to a file";
     private const string CalibrationErrorMessage = "An error occured while calibrating the camera";
     private const string SaveErrorMessage = "An error occured while saving the configuration";
+
+    private const string ImportGenericWarningMessage =
+        "Importing this file will overwrite the current data.\n\nAre you sure you want to continue?";
 
     /// <summary>
     /// The path to the warning icon.
@@ -32,14 +48,42 @@ public partial class EditorWindow : Window
     private static readonly Uri CalibrationIconPath = new("avares://WallProjections/Assets/webcam-icon.ico");
 
     /// <summary>
-    /// Whether any dialog is currently shown.
+    /// The backing field for the <see cref="IsInPositionEditMode" /> property.
     /// </summary>
-    private bool _isDialogShown;
+    private bool _isInPositionEditMode;
+
+    // /// <summary>
+    // /// Whether a dialog is currently open.
+    // /// </summary>
+    // private bool _hasOpenDialog;
 
     /// <summary>
-    /// Whether calibration is currently running.
+    /// A <see cref="DirectProperty{TOwner,TValue}">DirectProperty</see> that defines the <see cref="IsInPositionEditMode" /> property.
     /// </summary>
-    private bool _isCalibrationRunning;
+    protected static readonly DirectProperty<EditorWindow, bool> IsInPositionEditModeProperty =
+        AvaloniaProperty.RegisterDirect<EditorWindow, bool>(
+            nameof(IsInPositionEditMode),
+            o => o.IsInPositionEditMode,
+            (o, v) => o.IsInPositionEditMode = v
+        );
+
+    /// <summary>
+    /// Whether the PositionEditor is in edit mode.
+    /// </summary>
+    public bool IsInPositionEditMode
+    {
+        get => _isInPositionEditMode;
+        set
+        {
+            SetAndRaise(IsInPositionEditModeProperty, ref _isInPositionEditMode, value);
+
+            if (PositionEditorToggle is null) return;
+            if (value)
+                FlyoutBase.ShowAttachedFlyout(PositionEditorToggle);
+            else
+                FlyoutBase.GetAttachedFlyout(PositionEditorToggle)?.Hide();
+        }
+    }
 
     public EditorWindow()
     {
@@ -56,53 +100,66 @@ public partial class EditorWindow : Window
     /// </summary>
     private void MediaEditor_OnOpenExplorerFailed(object? sender, RoutedEventArgs e)
     {
-        ShowToast(ExplorerErrorMessage);
+        ShowToast(ExplorerErrorMessage, NotificationType.Error);
     }
 
     /// <summary>
     /// Opens a file picker to import a description from a file.
     /// Then, if the import is <see cref="IImportViewModel.IsImportSafe">safe</see>, the file is imported;
-    /// otherwise, a <see cref="ImportWarningDialog">dialog</see> is shown.
+    /// otherwise, a warning dialog is shown.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private async void DescriptionEditor_OnImportDescription(object? sender, RoutedEventArgs e)
-    {
-        // Prevent multiple dialogs from being shown at once
-        if (_isDialogShown) return;
-
-        if (DataContext is not IEditorViewModel vm) return;
-        var importer = vm.DescriptionEditor.Importer;
-
-        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+    private async void DescriptionEditor_OnImportDescription(object? sender, RoutedEventArgs e) =>
+        await WithActionLock(async vm =>
         {
-            Title = "Select a file to import...",
-            AllowMultiple = false,
-            FileTypeFilter = new[] { FilePickerFileTypes.TextPlain },
-            SuggestedStartLocation = startFolder
+            var importer = vm.DescriptionEditor.Importer;
+
+            var (result, file) = await WithOverlay(async () =>
+            {
+                var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
+                var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Select a text file to import...",
+                    AllowMultiple = false,
+                    FileTypeFilter = new[] { FilePickerFileTypes.TextPlain },
+                    SuggestedStartLocation = startFolder
+                });
+
+                // No file was selected
+                if (files.Count == 0) return (Result.Cancelled, "");
+
+                var file = files[0].Path.LocalPath;
+                var safety = importer.IsImportSafe();
+                if (safety is ImportWarningLevel.None)
+                    return (Result.Confirmed, file);
+
+                // Import is not safe
+                var result = await new ConfirmationDialog(
+                    "Data overwrite warning",
+                    WarningIconPath,
+                    $"{safety.ToWarningText()} {ImportGenericWarningMessage}",
+                    "Import anyway"
+                ).ShowDialog(this);
+
+                return (result, file);
+            });
+
+            //TODO Use the result of ImportFromFile to show an error message
+            if (result == Result.Confirmed)
+                importer.ImportFromFile(file);
         });
 
-        // No file was selected
-        if (files.Count == 0) return;
+    /// <summary>
+    /// Adds a new hotspot.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
+    private void HotspotList_OnAddHotspot(object? sender, EventArgs e)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
 
-        var file = files[0].Path.LocalPath;
-        var safety = importer.IsImportSafe();
-        if (safety is ImportWarningLevel.None)
-        {
-            //TODO Use the result of ImportFromFile to show an error message
-            importer.ImportFromFile(file);
-            return;
-        }
-
-        // Import is not safe
-        var dialog = new ImportWarningDialog(file, safety)
-        {
-            DataContext = importer
-        };
-        _isDialogShown = true;
-        await dialog.ShowDialog(this);
-        _isDialogShown = false;
+        vm.AddHotspot();
     }
 
     /// <summary>
@@ -110,201 +167,185 @@ public partial class EditorWindow : Window
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private async void HotspotList_OnDeleteHotspot(object? sender, HotspotList.DeleteArgs e)
-    {
-        if (_isDialogShown) return;
+    private async void HotspotList_OnDeleteHotspot(object? sender, HotspotList.DeleteArgs e) =>
+        await WithActionLock(async vm =>
+        {
+            var result = await WithOverlay(() =>
+                new ConfirmationDialog(
+                    "Delete Hotspot",
+                    WarningIconPath,
+                    "Are you sure you want to delete this hotspot? All associated data will be lost.",
+                    "Delete"
+                ).ShowDialog(this)
+            );
 
-        if (DataContext is not IEditorViewModel vm) return;
-
-        var dialog = new ConfirmationDialog(
-            "Delete Hotspot",
-            WarningIconPath,
-            "Are you sure you want to delete this hotspot? All associated data will be lost.",
-            "Delete"
-        );
-        dialog.Confirm += (_, _) => vm.DeleteHotspot(e.Hotspot);
-
-        _isDialogShown = true;
-        await dialog.ShowDialog(this);
-        _isDialogShown = false;
-    }
+            if (result == Result.Confirmed)
+                vm.DeleteHotspot(e.Hotspot);
+        });
 
     /// <summary>
     /// Opens a file picker to import images.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private void ImageEditor_OnAddMedia(object? sender, RoutedEventArgs e)
-    {
-        FetchMediaFiles(
-            new[] { FilePickerFileTypes.ImageAll },
-            WellKnownFolder.Pictures,
-            (vm, files) => vm.SelectedHotspot?.AddMedia(MediaEditorType.Images, files)
-        );
-    }
+    private void ImageEditor_OnAddMedia(object? sender, RoutedEventArgs e) => FetchMediaFiles(
+        new[] { FilePickerFileTypes.ImageAll },
+        WellKnownFolder.Pictures,
+        (vm, files) => vm.SelectedHotspot?.AddMedia(MediaEditorType.Images, files)
+    );
 
     /// <summary>
     /// Opens a file picker to import videos.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private void VideoEditor_OnAddMedia(object? sender, RoutedEventArgs e)
-    {
-        FetchMediaFiles(
-            new[] { IContentProvider.FilePickerVideoType },
-            WellKnownFolder.Videos,
-            (vm, files) => vm.AddMedia(MediaEditorType.Videos, files)
-        );
-    }
+    private void VideoEditor_OnAddMedia(object? sender, RoutedEventArgs e) => FetchMediaFiles(
+        new[] { IContentProvider.FilePickerVideoType },
+        WellKnownFolder.Videos,
+        (vm, files) => vm.AddMedia(MediaEditorType.Videos, files)
+    );
+
 
     /// <summary>
     /// Removes media from the <see cref="IEditorHotspotViewModel.Images" /> collection.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments holding the media to remove.</param>
-    private void ImagesEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e)
-    {
+    private void ImagesEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e) =>
         RemoveMedia(MediaEditorType.Images, e);
-    }
 
     /// <summary>
     /// Removes media from the <see cref="IEditorHotspotViewModel.Videos" /> collection.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments holding the media to remove.</param>
-    private void VideoEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e)
-    {
+    private void VideoEditor_OnRemoveMedia(object? sender, MediaEditor.RemoveMediaArgs e) =>
         RemoveMedia(MediaEditorType.Videos, e);
-    }
 
     /// <summary>
     /// Opens a file picker to imports a new configuration from a file.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private async void ConfigImport_OnClick(object? sender, RoutedEventArgs e)
+    private async void ConfigImport_OnClick(object? sender, RoutedEventArgs e) => await WithActionLock(async vm =>
     {
-        if (DataContext is not IEditorViewModel vm) return;
-
-        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var (result, file) = await WithOverlay(async () =>
         {
-            Title = "Select a configuration file to import...",
-            AllowMultiple = false,
-            FileTypeFilter = new[]
+            var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                new FilePickerFileType("Configuration")
+                Title = "Select a configuration file to import...",
+                AllowMultiple = false,
+                FileTypeFilter = new[]
                 {
-                    Patterns = new[] { "*.zip" }, //TODO Change to custom file type
-                    AppleUniformTypeIdentifiers = new[] { "public.zip-archive" },
-                    MimeTypes = new[] { "application/zip" }
-                }
-            },
-            SuggestedStartLocation = startFolder
+                    new FilePickerFileType("Configuration")
+                    {
+                        Patterns = new[] { "*.zip" }, //TODO Change to custom file type
+                        AppleUniformTypeIdentifiers = new[] { "public.zip-archive" },
+                        MimeTypes = new[] { "application/zip" }
+                    }
+                },
+                SuggestedStartLocation = startFolder
+            });
+
+            if (files.Count == 0) return (Result.Cancelled, "");
+
+            var file = files[0].Path.LocalPath;
+
+            // If the import is safe, don't show a warning dialog
+            if (vm.IsImportSafe)
+                return (Result.Confirmed, file);
+
+            var result = await new ConfirmationDialog(
+                "Import Configuration",
+                WarningIconPath,
+                "Are you sure you want to import a new configuration? All currently saved data will be lost.",
+                "Import"
+            ).ShowDialog(this);
+
+            return (result, file);
         });
 
-        if (files.Count == 0) return;
+        if (result == Result.Confirmed)
+            await Import(file);
+        return;
 
-        var file = files[0].Path.LocalPath;
-
-        var dialog = new ConfirmationDialog(
-            "Import Configuration",
-            WarningIconPath,
-            "Are you sure you want to import a new configuration? All currently saved data will be lost.",
-            "Import"
-        );
-        dialog.Confirm += (_, _) =>
+        async Task Import(string configFile)
         {
-            if (vm.ImportConfig(file)) return;
-
-            // An error occurred while importing
-            ShowToast(ImportErrorMessage);
-        };
-
-        _isDialogShown = true;
-        await dialog.ShowDialog(this);
-        _isDialogShown = false;
-    }
+            var success = await WithLoadingToast(ImportInProgressMessage, () => vm.ImportConfig(configFile));
+            ShowToast(
+                success ? ImportSuccessMessage : ImportErrorMessage,
+                success ? NotificationType.Success : NotificationType.Error
+            );
+        }
+    });
 
     /// <summary>
     /// Opens a folder picker to export the current configuration to a file.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private async void ConfigExport_OnClick(object? sender, RoutedEventArgs e)
+    private async void ConfigExport_OnClick(object? sender, RoutedEventArgs e) => await WithActionLock(async vm =>
     {
-        if (DataContext is not IEditorViewModel vm) return;
-
-        var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        var file = await WithOverlay(async () =>
         {
-            Title = "Choose export location...",
-            AllowMultiple = false,
-            SuggestedStartLocation = startFolder
+            var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
+            return await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                Title = "Choose export location...",
+                SuggestedStartLocation = startFolder,
+                SuggestedFileName = IEditorViewModel.ExportFileName,
+                ShowOverwritePrompt = true
+            });
         });
 
-        if (folders.Count == 0) return;
+        // No file selected
+        if (file is null) return;
 
-        var folder = folders[0].Path.LocalPath;
-        if (vm.ExportConfig(folder)) return; //TODO Show a success message
-
-        // An error occurred while exporting
-        ShowToast(ExportErrorMessage);
-    }
+        var path = file.Path.LocalPath;
+        var success = await WithLoadingToast(ExportInProgressMessage, () => vm.ExportConfig(path));
+        ShowToast(
+            success ? ExportSuccessMessage : ExportErrorMessage,
+            success ? NotificationType.Success : NotificationType.Error
+        );
+    });
 
     /// <summary>
     /// Starts camera calibration.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private async void Calibrate_OnClick(object? sender, RoutedEventArgs e)
+    private async void Calibrate_OnClick(object? sender, RoutedEventArgs e) => await WithActionLock(async vm =>
     {
-        if (DataContext is not IEditorViewModel vm) return;
-        if (_isCalibrationRunning || _isDialogShown) return;
-
-        _isCalibrationRunning = true;
         vm.ShowCalibrationMarkers();
 
-        var dialog = new ConfirmationDialog(
-            "Camera calibration",
-            CalibrationIconPath,
-            "Ensure that the window with calibration patterns is on the right screen and is in fullscreen mode.",
-            "Continue"
+        var result = await WithOverlay(() =>
+            new ConfirmationDialog(
+                "Camera calibration",
+                CalibrationIconPath,
+                "Ensure that the window with calibration patterns is on the correct screen and is in fullscreen mode.",
+                "Continue"
+            ).ShowDialog(this)
         );
-        dialog.Confirm += async (_, _) =>
-        {
-            var success = await vm.CalibrateCamera();
-            _isCalibrationRunning = false;
-            if (success) return; //TODO Show a success message
 
-            // An error occurred while calibrating
-            ShowToast(CalibrationErrorMessage);
-        };
-        dialog.Cancel += (_, _) =>
+        if (result == Result.Confirmed)
         {
+            var success = await WithLoadingToast(CalibrationInProgressMessage, vm.CalibrateCamera);
+            ShowToast(
+                success ? CalibrationSuccessMessage : CalibrationErrorMessage,
+                success ? NotificationType.Success : NotificationType.Error
+            );
+        }
+        else
             vm.HideCalibrationMarkers();
-            _isCalibrationRunning = false;
-        };
-
-        _isDialogShown = true;
-        await dialog.ShowDialog(this);
-        _isDialogShown = false;
-    }
+    });
 
     /// <summary>
     /// Saves the current configuration to a file.
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments (unused).</param>
-    private void Save_OnClick(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not IEditorViewModel vm) return;
-
-        if (vm.SaveConfig()) return;
-
-        // An error occurred while saving
-        ShowToast(SaveErrorMessage);
-    }
+    private async void Save_OnClick(object? sender, RoutedEventArgs e) => await WithActionLock(Save);
 
     /// <summary>
     /// Shows a <see cref="ConfirmationDialog">dialog</see> to confirm discarding changes,
@@ -316,25 +357,17 @@ public partial class EditorWindow : Window
     {
         if (DataContext is not IEditorViewModel vm) return;
 
-        if (vm.IsSaved)
-        {
-            vm.CloseEditor();
-            return;
-        }
-
-        var dialog = CreateDiscardChangesDialog(vm);
-
-        _isDialogShown = true;
-        await dialog.ShowDialog(this);
-        _isDialogShown = false;
+        await CloseEditor(vm);
     }
 
+    /// <summary>
+    /// Toggles the <see cref="AbsPositionEditorViewModel.IsInEditMode">edit mode</see> for the PositionEditor.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments (unused).</param>
     private void EditPosition_OnClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not IEditorViewModel vm) return;
-
-        //TODO Show some indication that the PositionEditor is in edit mode
-        //TODO Add focus management to Navigator so that focus is automatically set to the PositionEditor
 
         vm.PositionEditor.IsInEditMode = !vm.PositionEditor.IsInEditMode;
     }
@@ -342,7 +375,10 @@ public partial class EditorWindow : Window
     /// <summary>
     /// Handles key presses:
     /// <ul>
-    ///     <li><b>Escape</b>: Exit <see cref="AbAbsPositionEditorViewModelsInEditMode">edit mode</see> for <see cref="IEditorViewModel.PositionEditor" /></li>
+    ///     <li>
+    ///         <b>Escape</b>: Exit <see cref="AbsPositionEditorViewModel.IsInEditMode">edit mode</see>
+    ///                        for <see cref="IEditorViewModel.PositionEditor" />
+    ///     </li>
     /// </ul>
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
@@ -377,34 +413,76 @@ public partial class EditorWindow : Window
         // Prevent the window from closing
         e.Cancel = true;
 
+        await CloseEditor(vm);
+    }
+
+    //ReSharper restore UnusedParameter.Local
+
+    /// <summary>
+    /// Saves the Editor's state while showing a loading toast. Shows an error toast if the save fails.
+    /// </summary>
+    /// <param name="vm">The Editor's viewmodel</param>
+    /// <returns>Whether the save was successful</returns>
+    /// <seealso cref="IEditorViewModel.SaveConfig" />
+    private async Task<bool> Save(IEditorViewModel vm)
+    {
+        var success = await WithLoadingToast(SaveInProgressMessage, vm.SaveConfig);
+
+        // An error occurred while saving
+        if (!success)
+            ShowToast(SaveErrorMessage, NotificationType.Error);
+
+        return success;
+    }
+
+    /// <summary>
+    /// Closes the Editor if the viewmodel's state is saved, otherwise shows a warning dialog.
+    /// </summary>
+    /// <param name="vm">The Editor's viewmodel</param>
+    /// <seealso cref="IEditorViewModel.IsSaved" />
+    /// <seealso cref="IEditorViewModel.CloseEditor" />
+    private async Task CloseEditor(IEditorViewModel vm) => await vm.WithActionLock(async () =>
+    {
         if (vm.IsSaved)
         {
             vm.CloseEditor();
             return;
         }
 
-        var dialog = CreateDiscardChangesDialog(vm);
-
-        _isDialogShown = true;
-        await dialog.ShowDialog(this);
-        _isDialogShown = false;
-    }
-
-    //ReSharper restore UnusedParameter.Local
+        await ShowUnsavedChangesDialog(vm);
+    });
 
     /// <summary>
-    /// Creates a new <see cref="ConfirmationDialog" /> to discard changes.
+    /// Shows a new <see cref="ConfirmationDialog" /> to discard changes.
+    /// The user can choose to save the changes, discard them, or cancel the action.
+    /// If the user chooses to either save or discard the changes, the Editor is closed afterwards
+    /// (if the save is successful).
     /// </summary>
-    private static ConfirmationDialog CreateDiscardChangesDialog(IEditorViewModel vm)
+    private async Task ShowUnsavedChangesDialog(IEditorViewModel vm)
     {
-        var dialog = new ConfirmationDialog(
-            "Discard Changes",
-            WarningIconPath,
-            "Are you sure you want to discard your changes? All unsaved data will be lost.",
-            "Discard"
+        var result = await WithOverlay(() =>
+            new ConfirmationDialog(
+                "Unsaved Changes",
+                WarningIconPath,
+                "It appears that you have unsaved changes. Do you want save them before closing?",
+                "Save",
+                "Discard"
+            ).ShowDialog(this)
         );
-        dialog.Confirm += (_, _) => vm.CloseEditor();
-        return dialog;
+
+        switch (result)
+        {
+            case Result.Confirmed:
+                if (await Save(vm))
+                    vm.CloseEditor();
+                break;
+            case Result.Refused:
+                vm.CloseEditor();
+                break;
+            case Result.Cancelled:
+            default:
+                break;
+        }
     }
 
     /// <summary>
@@ -421,50 +499,101 @@ public partial class EditorWindow : Window
         IReadOnlyList<FilePickerFileType> filter,
         WellKnownFolder startLocation,
         Action<IEditorViewModel, IReadOnlyList<IStorageFile>> action
-    )
+    ) => await WithActionLock(async vm =>
     {
-        if (DataContext is not IEditorViewModel vm) return;
-
         var startFolder = await StorageProvider.TryGetWellKnownFolderAsync(startLocation);
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var files = await WithOverlay(() => StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select media files to import...",
             AllowMultiple = true,
             FileTypeFilter = filter,
             SuggestedStartLocation = startFolder
-        });
+        }));
 
         action(vm, files);
-    }
+    });
 
     /// <summary>
     /// Removes media from the currently selected hotspot.
     /// </summary>
     /// <param name="type">The type of media to remove.</param>
     /// <param name="args">The event arguments holding the media to remove.</param>
-    private async void RemoveMedia(MediaEditorType type, MediaEditor.RemoveMediaArgs args)
+    private async void RemoveMedia(
+        MediaEditorType type,
+        MediaEditor.RemoveMediaArgs args
+    ) => await WithActionLock(async vm =>
     {
-        if (_isDialogShown) return;
-
-        if (DataContext is not IEditorViewModel vm) return;
-
         var media = args.Media;
-        var dialog = new ConfirmationDialog(
-            $"Remove {type.Name()}",
-            WarningIconPath,
-            $"Are you sure you want to remove {media.Length} {type.NumberBasedLabel(media.Length)}? This action cannot be undone.",
-            "Remove"
+        var result = await WithOverlay(() =>
+            new ConfirmationDialog(
+                $"Remove {type.Name()}",
+                WarningIconPath,
+                $"Are you sure you want to remove {media.Length} {type.NumberBasedLabel(media.Length)}? " +
+                $"This action cannot be undone.",
+                "Remove"
+            ).ShowDialog(this)
         );
-        dialog.Confirm += (_, _) => vm.RemoveMedia(type, media);
 
-        _isDialogShown = true;
-        await dialog.ShowDialog(this);
-        _isDialogShown = false;
-    }
+        if (result == Result.Confirmed)
+            vm.RemoveMedia(type, media);
+    });
 
-    private void ShowToast(string message, Toast.ShowDuration duration = Toast.ShowDuration.Short)
+    /// <summary>
+    /// Shows a toast with the specified message.
+    /// </summary>
+    /// <param name="message">The text to show in the toast.</param>
+    /// <param name="type">The type of the notification.</param>
+    /// <param name="duration">The duration for which the toast should be shown.</param>
+    private void ShowToast(
+        string message,
+        NotificationType type,
+        Toast.ShowDuration duration = Toast.ShowDuration.Short
+    )
     {
         Toast.Text = message;
-        Toast.Show(duration);
+        Toast.Show(duration, type);
+    }
+
+    /// <summary>
+    /// Performs an action while showing an overlay.
+    /// </summary>
+    /// <param name="action">The action to perform.</param>
+    /// <typeparam name="T">The return type of the action.</typeparam>
+    /// <returns>The result of the action.</returns>
+    private async Task<T> WithOverlay<T>(Func<Task<T>> action)
+    {
+        PseudoClasses.Add(":hasoverlay");
+        var result = await action();
+        PseudoClasses.Remove(":hasoverlay");
+        return result;
+    }
+
+    /// <summary>
+    /// Shows a loading toast with the specified message while performing an action.
+    /// </summary>
+    /// <param name="message">The message to show in the loading toast.</param>
+    /// <param name="action">The action to perform.</param>
+    /// <typeparam name="T">The return type of the action.</typeparam>
+    /// <returns>The result of the action.</returns>
+    private async Task<T> WithLoadingToast<T>(string message, Func<Task<T>> action)
+    {
+        LoadingToast.Text = message;
+        await Task.Delay(10);
+        LoadingToast.Show();
+        var result = await action();
+        LoadingToast.Hide();
+        return result;
+    }
+
+    /// <summary>
+    /// Calls <see cref="IEditorViewModel.WithActionLock" /> on <see cref="EditorWindow.DataContext" />
+    /// with the specified action given the current DataContext.
+    /// </summary>
+    /// <param name="action">The action to perform.</param>
+    private async Task WithActionLock(Func<IEditorViewModel, Task> action)
+    {
+        if (DataContext is not IEditorViewModel vm) return;
+
+        await vm.WithActionLock(() => action(vm));
     }
 }

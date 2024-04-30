@@ -6,10 +6,10 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.SecondaryScreens.SecondaryWindow"
         x:DataType="vm:ISecondaryWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="HotspotWindow"
+        Icon="/Assets/app-icon.ico"
+        Title="Hotspot Projections"
+        Classes="Projection"
         Content="{Binding Content}"
         KeyDown="OnKeyDown"
         Closing="OnClosing">
 </Window>
-

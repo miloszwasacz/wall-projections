@@ -15,7 +15,7 @@ public class MockGenericLayout : Layout, IDisposable
     /// </summary>
     public Hotspot.Media Media { get; }
 
-    public MockGenericLayout(Hotspot.Media media)
+    public MockGenericLayout(Hotspot.Media media) : base(media.Id)
     {
         Media = media;
     }

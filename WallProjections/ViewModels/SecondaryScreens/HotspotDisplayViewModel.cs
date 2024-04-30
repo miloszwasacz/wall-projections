@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
@@ -12,46 +14,61 @@ namespace WallProjections.ViewModels.SecondaryScreens;
 public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 {
     /// <summary>
-    /// The Python handler that invokes events about hotspot activation
+    /// A logger for this class
     /// </summary>
-    private readonly IPythonHandler _pythonHandler;
+    private readonly ILogger _logger;
+
+    /// <summary>
+    /// The <see cref="IHotspotHandler" /> that sends events about hotspot activation and deactivation
+    /// </summary>
+    private readonly IHotspotHandler _hotspotHandler;
+
+    /// <summary>
+    /// The backing field for <see cref="Projections" /> mapped to the id of the hotspot
+    /// </summary>
+    private readonly ImmutableDictionary<int, AbsHotspotProjectionViewModel> _projections;
 
     /// <summary>
     /// Creates a new instance of <see cref="HotspotDisplayViewModel"/> based on the provided <paramref name="config" />
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> holding information about the hotspots</param>
-    /// <param name="pythonHandler">The Python handler that invokes events about hotspot activation</param>
-    /// <param name="vmProvider">
-    /// The <see cref="IViewModelProvider" /> for creating <see cref="IHotspotProjectionViewModel" />s
+    /// <param name="hotspotHandler">
+    /// The <see cref="IHotspotHandler" /> that sends events about hotspot activation and deactivation
     /// </param>
-    public HotspotDisplayViewModel(IConfig config, IPythonHandler pythonHandler, IViewModelProvider vmProvider)
+    /// <param name="vmProvider">
+    /// The <see cref="IViewModelProvider" /> for creating <see cref="AbsHotspotProjectionViewModel" />s
+    /// </param>
+    /// <param name="loggerFactory">A factory for creating loggers</param>
+    public HotspotDisplayViewModel(
+        IConfig config,
+        IHotspotHandler hotspotHandler,
+        IViewModelProvider vmProvider,
+        ILoggerFactory loggerFactory
+    )
     {
-        _pythonHandler = pythonHandler;
-        Projections = GetHotspots(config, vmProvider);
+        _logger = loggerFactory.CreateLogger<HotspotDisplayViewModel>();
+        _hotspotHandler = hotspotHandler;
+        _projections = GetHotspots(config, vmProvider);
 
-        _pythonHandler.HotspotSelected += HotspotActivated;
+        _hotspotHandler.HotspotActivating += HotspotActivating;
+        _hotspotHandler.HotspotActivated += HotspotActivated;
+        _hotspotHandler.HotspotDeactivating += HotspotDeactivating;
+        _hotspotHandler.HotspotForcefullyDeactivated += HotspotForcefullyDeactivated;
     }
 
     /// <inheritdoc/>
-    public override ImmutableList<IHotspotProjectionViewModel> Projections { get; }
+    public override IEnumerable<AbsHotspotProjectionViewModel> Projections => _projections.Values;
 
     //TODO Make initially hidden, and show when a visitor approaches the artifact
     /// <inheritdoc/>
     public override bool IsVisible { get; protected set; } = true;
 
     /// <inheritdoc/>
-    public override void ActivateHotspot(int id)
-    {
-        foreach (var coord in Projections)
-            coord.IsActive = coord.Id == id;
-    }
-
-    /// <inheritdoc/>
     public override void DeactivateHotspots()
     {
-        var active = Projections.Where(coord => coord.IsActive);
-        foreach (var coord in active)
-            coord.IsActive = false;
+        _logger.LogTrace("Deactivating all hotspots");
+        foreach (var coord in Projections)
+            coord.SetIdle();
     }
 
     /// <inheritdoc/>
@@ -62,28 +79,118 @@ public class HotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposable
 
     /// <summary>
     /// Goes through all the hotspots in the config file and turns them into
-    /// <see cref="IHotspotProjectionViewModel"/> instances
+    /// <see cref="AbsHotspotProjectionViewModel"/> instances
     /// </summary>
     /// <param name="config">The <see cref="IConfig" /> holding information about the hotspots</param>
     /// <param name="vmProvider">
-    /// The <see cref="IViewModelProvider" /> for creating <see cref="IHotspotProjectionViewModel" />s
+    /// The <see cref="IViewModelProvider" /> for creating <see cref="AbsHotspotProjectionViewModel" />s
     /// </param>
-    /// <returns>List of <see cref="IHotspotProjectionViewModel"/> relating to all hotspots in config file</returns>
-    private static ImmutableList<IHotspotProjectionViewModel> GetHotspots(
+    /// <returns>List of <see cref="AbsHotspotProjectionViewModel"/> relating to all hotspots in config file</returns>
+    private static ImmutableDictionary<int, AbsHotspotProjectionViewModel> GetHotspots(
         IConfig config,
         IViewModelProvider vmProvider
     ) => config.Hotspots
         .Select(vmProvider.GetHotspotProjectionViewModel)
-        .ToImmutableList();
+        .ToImmutableDictionary(vm => vm.Id, vm => vm);
 
-    private void HotspotActivated(object? sender, IPythonHandler.HotspotSelectedArgs e)
+    #region Event Callbacks
+
+    /// <summary>
+    /// Looks up the hotspot with the given id and sets <see cref="AbsHotspotProjectionViewModel.State" />
+    /// to <see cref="HotspotState.Activating" />.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
+    private void HotspotActivating(object? sender, IHotspotHandler.HotspotChangingArgs e)
     {
-        ActivateHotspot(e.Id);
+        if (!_projections.TryGetValue(e.Id, out var hotspot))
+        {
+            _logger.LogWarning("Hotspot with id {Id} not found.", e.Id);
+            return;
+        }
+
+        lock (this)
+        {
+            hotspot.SetActivating(e.RemainingTime);
+        }
+
+        _logger.LogTrace("Activating hotspot with id {Id}.", e.Id);
     }
+
+    /// <summary>
+    /// Looks up the hotspot with the given id and sets <see cref="AbsHotspotProjectionViewModel.State" />
+    /// to <see cref="HotspotState.Active" />.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the id of the hotspot to be activated.</param>
+    private void HotspotActivated(object? sender, IHotspotHandler.HotspotArgs e)
+    {
+        if (!_projections.TryGetValue(e.Id, out var hotspot))
+        {
+            _logger.LogWarning("Hotspot with id {Id} not found.", e.Id);
+            return;
+        }
+
+        lock (this)
+        {
+            hotspot.SetActive();
+        }
+
+        _logger.LogTrace("Hotspot with id {Id} activated.", e.Id);
+    }
+
+    /// <summary>
+    /// Looks up the hotspot with the given id and sets <see cref="AbsHotspotProjectionViewModel.State" />
+    /// to <see cref="HotspotState.Deactivating" />.
+    /// </summary>
+    /// <param name="sender">The sender of the event (unused).</param>
+    /// <param name="e">The event arguments containing the id of the hotspot to be deactivated.</param>
+    private void HotspotDeactivating(object? sender, IHotspotHandler.HotspotChangingArgs e)
+    {
+        if (!_projections.TryGetValue(e.Id, out var hotspot))
+        {
+            _logger.LogWarning("Hotspot with id {Id} not found.", e.Id);
+            return;
+        }
+
+        lock (this)
+        {
+            hotspot.SetDeactivating(e.RemainingTime);
+        }
+
+        _logger.LogTrace("Deactivating hotspot with id {Id}.", e.Id);
+    }
+
+    /// <summary>
+    /// Looks up the hotspot with the given id and sets <see cref="AbsHotspotProjectionViewModel.State" />
+    /// to <see cref="HotspotState.None" />.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void HotspotForcefullyDeactivated(object? sender, IHotspotHandler.HotspotArgs e)
+    {
+        if (!_projections.TryGetValue(e.Id, out var hotspot))
+        {
+            _logger.LogWarning("Hotspot with id {Id} not found.", e.Id);
+            return;
+        }
+
+        lock (this)
+        {
+            hotspot.SetIdle();
+        }
+
+        _logger.LogTrace("Hotspot with id {Id} forcefully deactivated.", e.Id);
+    }
+
+    #endregion
 
     public void Dispose()
     {
-        _pythonHandler.HotspotSelected -= HotspotActivated;
+        _hotspotHandler.HotspotActivating -= HotspotActivating;
+        _hotspotHandler.HotspotActivated -= HotspotActivated;
+        _hotspotHandler.HotspotDeactivating -= HotspotDeactivating;
+        _hotspotHandler.HotspotForcefullyDeactivated -= HotspotForcefullyDeactivated;
         GC.SuppressFinalize(this);
     }
 }

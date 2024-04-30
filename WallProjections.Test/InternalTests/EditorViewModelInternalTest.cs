@@ -1,13 +1,11 @@
 ﻿using System.Reflection;
 using WallProjections.Models;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
 using WallProjections.Test.Mocks.ViewModels.Editor;
 using WallProjections.ViewModels.Editor;
-
-// ReSharper disable AccessToStaticMemberViaDerivedType
-using Is = WallProjections.Test.ViewModels.Editor.EditorViewModelTestExtensions.Is;
 
 namespace WallProjections.Test.InternalTests;
 
@@ -21,8 +19,8 @@ public class EditorViewModelInternalTest
         var fileHandler = new MockFileHandler(new List<Hotspot.Media>());
         var pythonHandler = new MockPythonHandler();
         var vmProvider = new MockViewModelProvider();
-
-        var editorViewModel = new EditorViewModel(navigator, fileHandler, pythonHandler, vmProvider);
+        var editorViewModel =
+            new EditorViewModel(navigator, fileHandler, pythonHandler, vmProvider, new MockLoggerFactory());
 
         editorViewModel.AddHotspot();
         editorViewModel.AddHotspot();
@@ -47,7 +45,7 @@ public class EditorViewModelInternalTest
             );
             Assert.That(editorViewModel.ImageEditor.Media, Is.EquivalentTo(selected.Images));
             Assert.That(editorViewModel.VideoEditor.Media, Is.EquivalentTo(selected.Videos));
-            Assert.That(editorViewModel, Is.Unsaved);
+            Assert.That(editorViewModel.IsSaved, Is.False);
         });
     }
 }

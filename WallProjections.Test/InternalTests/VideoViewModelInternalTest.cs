@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using LibVLCSharp.Shared;
 using WallProjections.Models.Interfaces;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.ViewModels.Display;
 
@@ -30,7 +31,7 @@ public class VideoViewModelInternalTest
     public void MediaPlayerSetterTest()
     {
         var mediaPlayer = new MockMediaPlayer();
-        var videoViewModel = new VideoViewModel(_libVlc, mediaPlayer);
+        var videoViewModel = new VideoViewModel(_libVlc, mediaPlayer, new MockLoggerFactory());
         videoViewModel.MarkLoaded();
 
         var newMediaPlayer = new MockMediaPlayer();
@@ -52,7 +53,7 @@ public class VideoViewModelInternalTest
     [Test]
     public void DisposeNoMediaPlayerTest()
     {
-        var videoViewModel = new VideoViewModel(_libVlc, new MockMediaPlayer());
+        var videoViewModel = new VideoViewModel(_libVlc, new MockMediaPlayer(), new MockLoggerFactory());
         videoViewModel.MarkLoaded();
         SetMediaPlayer(videoViewModel, null);
 

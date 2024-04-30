@@ -13,18 +13,20 @@ public class ImageWithDescriptionViewModelTest
     [AvaloniaTest]
     public void ConstructorTest()
     {
+        const int hotspotId = 0;
         const string title = "Title";
         const string description = "Description";
-        const string imagePath = "image_0.png";
+        var imagePaths = new List<string> { "image_0.png" };
         var vmProvider = new MockViewModelProvider();
 
         var imageWithDescriptionViewModel = new ImageWithDescriptionViewModel(
             vmProvider,
+            hotspotId,
             title,
             description,
-            imagePath
+            imagePaths
         );
-        AssertVMProperties(imageWithDescriptionViewModel, title, description, imagePath);
+        AssertVMProperties(imageWithDescriptionViewModel, hotspotId, title, description, imagePaths);
     }
 
     [TestFixture]
@@ -71,9 +73,10 @@ public class ImageWithDescriptionViewModelTest
                 testCase,
                 (imageWithDescriptionViewModel, media) => AssertVMProperties(
                     imageWithDescriptionViewModel,
+                    media.Id,
                     media.Title,
                     media.Description,
-                    media.ImagePaths[0]
+                    media.ImagePaths
                 )
             );
         }
@@ -85,13 +88,15 @@ public class ImageWithDescriptionViewModelTest
     /// </summary>
     private static void AssertVMProperties(
         ImageWithDescriptionViewModel imageWithDescriptionViewModel,
+        int hotspotId,
         string title,
         string description,
-        string imagePath
+        IEnumerable<string> imagePaths
     )
     {
         Assert.Multiple(() =>
         {
+            Assert.That(imageWithDescriptionViewModel.HotspotId, Is.EqualTo(hotspotId));
             Assert.That(imageWithDescriptionViewModel.Title, Is.EqualTo(title));
             Assert.That(imageWithDescriptionViewModel.Description, Is.EqualTo(description));
         });
@@ -101,7 +106,7 @@ public class ImageWithDescriptionViewModelTest
         Assert.Multiple(() =>
         {
             Assert.That(imageViewModel.HasImages);
-            Assert.That(imageViewModel.ImagePaths, Is.EquivalentTo(new[] { imagePath }));
+            CollectionAssert.AreEquivalent(imageViewModel.ImagePaths, imagePaths);
         });
     }
 }

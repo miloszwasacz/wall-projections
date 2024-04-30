@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:WallProjections.ViewModels.Display.Layouts"
+             xmlns:text="using:WallProjections.Views"
+             xmlns:views="using:WallProjections.Views.Display"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="WallProjections.Views.Display.Layouts.ImagePlusVideoWithDescriptionView"
+             x:DataType="vm:ImagePlusVideoWithDescriptionViewModel">
+
+    <views:ContentLayout HotspotTitle="{Binding Title}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{StaticResource DefaultContentSpacing}" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="{StaticResource DefaultContentSpacing}" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <text:JustifiedTextBlock Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
+                                     Classes="hotspot-description"
+                                     Text="{Binding Description}" />
+
+            <views:ImageView Grid.Column="2" Grid.Row="0"
+                             DataContext="{Binding ImageViewModel}" />
+
+            <views:VideoView Grid.Column="2" Grid.Row="2"
+                             DataContext="{Binding VideoViewModel}" />
+
+        </Grid>
+    </views:ContentLayout>
+
+</UserControl>

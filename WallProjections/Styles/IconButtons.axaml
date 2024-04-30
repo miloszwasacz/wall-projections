@@ -1,0 +1,107 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System">
+
+    <Styles.Resources>
+        <Thickness x:Key="IconButtonPadding">8</Thickness>
+        <Thickness x:Key="SmallIconButtonPadding">4</Thickness>
+        <sys:Double x:Key="IconButtonIconMinSize">16</sys:Double>
+    </Styles.Resources>
+
+    <!-- Using Button instead of views:IconButton because of StyleKeyOverride -->
+    <Style Selector="Button.IconButton">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="{StaticResource IconButtonPadding}" />
+
+        <Style Selector="^.small">
+            <Setter Property="Padding" Value="{StaticResource SmallIconButtonPadding}" />
+        </Style>
+
+        <Style Selector="^.transparent">
+            <Setter Property="Background" Value="Transparent" />
+
+            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+        </Style>
+
+        <Style Selector="^ PathIcon#PART_PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForeground}" />
+        </Style>
+
+        <Style Selector="^:pointerover PathIcon#PART_PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
+        </Style>
+
+        <Style Selector="^:pressed PathIcon#PART_PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPressed}" />
+        </Style>
+
+        <Style Selector="^:disabled PathIcon#PART_PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+        </Style>
+    </Style>
+
+    <!-- Using ToggleButton instead of views:IconToggleButton because of StyleKeyOverride -->
+    <Style Selector="ToggleButton.IconToggleButton">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="{DynamicResource IconButtonPadding}" />
+
+        <Style Selector="^ PathIcon#PART_PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForeground}" />
+        </Style>
+
+        <Style Selector="^:pointerover PathIcon#PART_PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundPointerOver}" />
+        </Style>
+
+        <Style Selector="^:pressed PathIcon#PART_PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundPressed}" />
+        </Style>
+
+        <Style Selector="^:disabled PathIcon#PART_PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundDisabled}" />
+        </Style>
+
+        <Style Selector="^:indeterminate">
+            <Style Selector="^ PathIcon#PART_PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminate}" />
+            </Style>
+
+            <Style Selector="^:pointerover PathIcon#PART_PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminatePointerOver}" />
+            </Style>
+
+            <Style Selector="^:pressed PathIcon#PART_PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminatePressed}" />
+            </Style>
+
+            <Style Selector="^:disabled PathIcon#PART_PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminateDisabled}" />
+            </Style>
+        </Style>
+
+        <Style Selector="^:checked">
+            <Style Selector="^ PathIcon#PART_PathIcon"></Style>
+
+            <Style Selector="^ PathIcon#PART_PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundChecked}" />
+            </Style>
+
+            <Style Selector="^:pointerover PathIcon#PART_PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundCheckedPointerOver}" />
+            </Style>
+
+            <Style Selector="^:pressed PathIcon#PART_PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundCheckedPressed}" />
+            </Style>
+
+            <Style Selector="^:disabled PathIcon#PART_PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundCheckedDisabled}" />
+            </Style>
+        </Style>
+    </Style>
+
+</Styles>

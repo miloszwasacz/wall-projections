@@ -1,0 +1,46 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <sys:Double x:Key="HotspotStrokeThickness">10</sys:Double>
+            <StaticResource x:Key="ProjectionMessageFontSize" ResourceKey="TitleLargeFontSize" />
+            <sys:Double x:Key="ProjectionMessageLineHeight">68</sys:Double>
+            <FontWeight x:Key="ProjectionMessageFontWeight">Medium</FontWeight>
+
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <StaticResource x:Key="HotspotFillBrush" ResourceKey="TextControlForeground" />
+                    <StaticResource x:Key="HotspotStrokeBrush" ResourceKey="TextControlForeground" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <StaticResource x:Key="HotspotFillBrush" ResourceKey="TextControlForeground" />
+                    <StaticResource x:Key="HotspotStrokeBrush" ResourceKey="TextControlForeground" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <Style Selector="Window.Projection">
+        <Setter Property="RequestedThemeVariant" Value="Dark" />
+    </Style>
+
+    <Style Selector="Path.hotspot, Ellipse.hotspot">
+        <Setter Property="Fill" Value="{DynamicResource HotspotFillBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.hotspot-description">
+        <Setter Property="FontSize" Value="{StaticResource TitleFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource TitleLineHeight}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBlock.projection-message">
+        <Setter Property="FontSize" Value="{StaticResource ProjectionMessageFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource ProjectionMessageLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource ProjectionMessageFontWeight}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+</Styles>

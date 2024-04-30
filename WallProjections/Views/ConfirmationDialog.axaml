@@ -2,46 +2,48 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:WallProjections.Views"
+        xmlns:views="using:WallProjections.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WallProjections.Views.ConfirmationDialog"
-        x:DataType="vm:ConfirmationDialogViewModel"
-        WindowStartupLocation="CenterScreen"
-        SizeToContent="WidthAndHeight"
-        ShowInTaskbar="False"
-        CanResize="False"
+        x:DataType="views:ConfirmationDialogViewModel"
         Icon="{Binding Icon}"
         Title="{Binding Title}"
+        Classes="Dialog"
         Closed="Dialog_OnClosed">
 
-    <!--TODO Style this and children properly -->
-    <StackPanel Spacing="20"
-                Margin="20">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" MinWidth="50" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="{StaticResource DefaultGridItemSpacing}" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="{StaticResource DialogElementVerticalSpacing}" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-        <TextBlock MaxWidth="256"
-                   TextWrapping="Wrap"
-                   Text="{Binding Message}" />
+        <views:JustifiedTextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5"
+                                  Classes="DialogMessage"
+                                  Text="{Binding Message}" />
 
-        <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="10">
+        <Button Grid.Column="0" Grid.Row="2"
+                IsVisible="{Binding HasRefuseButton}"
+                Content="{Binding RefuseButtonText}"
+                Click="Refuse_OnClick" />
 
-            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
-                    Click="Confirm_OnClick">
+        <Button Grid.Column="2" Grid.Row="2"
+                Classes="accent" IsDefault="True"
+                Content="{Binding ConfirmButtonText}"
+                Click="Confirm_OnClick" />
 
-                <TextBlock Text="{Binding ConfirmButtonText}" />
+        <Button Grid.Column="4" Grid.Row="2"
+                IsCancel="True"
+                Content="{Binding CancelButtonText}"
+                Click="Cancel_OnClick" />
 
-            </Button>
-
-            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
-                    Click="Cancel_OnClick">
-
-                <TextBlock Text="{Binding CancelButtonText}" />
-
-            </Button>
-
-        </StackPanel>
-
-    </StackPanel>
+    </Grid>
 
 </Window>

@@ -12,8 +12,10 @@ public class MockPositionEditorViewModel : AbsPositionEditorViewModel
     /// </summary>
     private IEditorHotspotViewModel? _selectedHotspot;
 
+#pragma warning disable CS0067
     /// <inheritdoc/>
     public override event EventHandler? HotspotPositionChanged;
+#pragma warning disable CS0067
 
     /// <inheritdoc/>
     public override bool IsInEditMode { get; set; }

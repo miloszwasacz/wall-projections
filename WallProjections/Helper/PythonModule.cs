@@ -5,8 +5,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text.Json;
 using Avalonia;
+using Microsoft.Extensions.Logging;
 using Python.Runtime;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper;
@@ -27,6 +29,9 @@ public abstract class PythonModule
 
     /// <inheritdoc cref="CalibrationModule" />
     public static Func<CalibrationModule> Calibration => () => new CalibrationModule();
+
+    /// <inheritdoc cref="CameraIdentificationModule" />
+    public static Func<CameraIdentificationModule> CameraIdentification => () => new CameraIdentificationModule();
 
     /// <summary>
     /// The Python module object that this class wraps.
@@ -67,7 +72,12 @@ public abstract class PythonModule
             );
             var serialized = JsonSerializer.Serialize(positions);
 
-            _rawModule.hotspot_detection(eventListener.ToPython(), config.HomographyMatrix, serialized);
+            _rawModule.hotspot_detection(
+                eventListener.CameraIndex,
+                eventListener.ToPython(),
+                config.HomographyMatrix,
+                serialized
+            );
         }
 
         /// <summary>
@@ -91,8 +101,9 @@ public abstract class PythonModule
         /// <summary>
         /// Calibrates the camera and returns the homography matrix
         /// </summary>
+        /// <param name="cameraIndex">The index of the camera that will be passed to OpenCV</param>
         /// <param name="arucoPositions">The positions of the ArUco markers (ID, top-left corner)</param>
-        public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions)
+        public double[,]? CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions)
         {
             var positions = arucoPositions.ToDictionary(
                 pair => pair.Key,
@@ -102,13 +113,52 @@ public abstract class PythonModule
             try
             {
                 var serialized = JsonSerializer.Serialize(positions);
-                PyObject? homography = _rawModule.calibrate(serialized);
+                PyObject? homography = _rawModule.calibrate(cameraIndex, serialized);
                 return homography?.As<double[,]>();
             }
             catch (Exception e)
             {
                 //TODO Refactor to use a custom exceptions based on the reason for the failure
                 throw new Exception($"Failed to calibrate the camera: {e.Message}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// A module that identifies the available cameras on the system that OpenCV can access
+    /// </summary>
+    public sealed class CameraIdentificationModule : PythonModule
+    {
+        public CameraIdentificationModule() : base("camera_identifier")
+        {
+        }
+
+        /// <summary>
+        /// Identifies the available cameras on the system that OpenCV can access
+        /// </summary>
+        /// <returns>A dictionary of camera indices (passed to OpenCV) and their corresponding names</returns>
+        public ImmutableList<Camera> GetAvailableCameras(ILogger logger)
+        {
+            PyObject? camerasPy = _rawModule.get_cameras();
+            var serialized = camerasPy?.As<string>();
+            if (serialized is null)
+            {
+                logger.LogError("Failed to get cameras from Python");
+                return ImmutableList<Camera>.Empty;
+            }
+
+            try
+            {
+                var cameras = JsonSerializer.Deserialize<ImmutableDictionary<int, string>>(serialized);
+                if (cameras is null) throw new NullReferenceException("Deserialized cameras is null");
+
+                logger.LogTrace("Cameras detected by Python: {Cameras}", serialized);
+                return cameras.Select(pair => new Camera(pair.Key, pair.Value)).ToImmutableList();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to deserialize cameras");
+                return ImmutableList<Camera>.Empty;
             }
         }
     }

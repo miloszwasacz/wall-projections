@@ -1,90 +1,71 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="using:WallProjections.Views.Editor"
-        xmlns:converters="using:WallProjections.Views.Converters"
-        xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
-        xmlns:views="using:WallProjections.Views">
-    <Design.PreviewWith>
-        <controls:DescriptionEditor />
-    </Design.PreviewWith>
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:WallProjections.ViewModels.Interfaces.Editor"
+             xmlns:editor="using:WallProjections.Views.Editor"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="WallProjections.Views.Editor.DescriptionEditor"
+             x:DataType="vm:IDescriptionEditorViewModel">
 
-    <Style Selector="controls|DescriptionEditor">
-        <Style.Resources>
-            <converters:SpacingConverter x:Key="SpacingConverter" />
-        </Style.Resources>
+    <UserControl.Styles>
 
-        <!-- Set Defaults -->
-        <Setter Property="Spacing" Value="15" />
-        <Setter Property="MenuItemSpacing" Value="5" />
-        <Setter Property="ClipToBounds" Value="False" />
-        <Setter Property="Template">
-            <ControlTemplate x:DataType="vm:IDescriptionEditorViewModel">
+        <Style Selector="TextBox.input">
+            <Setter Property="UseFloatingWatermark" Value="True" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
 
-                <!--TODO Style children properly -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition
-                            Width="{Binding MenuItemSpacing, RelativeSource={RelativeSource TemplatedParent}}" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition
-                            Width="{Binding MenuItemSpacing, RelativeSource={RelativeSource TemplatedParent}}" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition
-                            Height="{Binding Spacing, RelativeSource={RelativeSource TemplatedParent}}" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+            <Style Selector="^.multiline">
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="AcceptsReturn" Value="True" />
+                <Setter Property="AcceptsTab" Value="True" />
+            </Style>
+        </Style>
 
-                    <TextBox Grid.Column="0" Grid.Row="0"
-                             Watermark="Title"
-                             UseFloatingWatermark="True"
-                             TextWrapping="NoWrap"
-                             Background="White"
-                             BorderBrush="LightGray"
-                             BorderThickness="2"
-                             CornerRadius="8"
-                             IsEnabled="{Binding IsEnabled}"
-                             Text="{Binding Title}" />
+    </UserControl.Styles>
 
-                    <views:IconButton Grid.Column="2" Grid.Row="0"
-                                      ToolTip.Tip="Import from file"
-                                      Command="{Binding ImportButton_OnClick, RelativeSource={RelativeSource TemplatedParent}}"
-                                      CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
-                                      IconData="{StaticResource document_import_regular}" />
+    <Border Classes="Card"
+            IsEnabled="{Binding $parent[editor:DescriptionEditor].IsEnabled}">
 
-                    <ItemsControl Grid.Column="4" Grid.Row="0"
-                                  ItemsSource="{TemplateBinding MenuItems}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{StaticResource DefaultFormFieldSpacing}" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="{StaticResource DefaultFormFieldSpacing}" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
+            <TextBox Grid.Column="0" Grid.Row="0"
+                     Classes="input"
+                     Watermark="Title"
+                     Text="{Binding Title}" />
 
-                                <StackPanel Orientation="Horizontal"
-                                            Spacing="{Binding $parent[controls:DescriptionEditor].MenuItemSpacing, Converter={StaticResource SpacingConverter}}" />
+            <ItemsControl Grid.Column="2" Grid.Row="0"
+                          ItemsSource="{Binding $parent[editor:DescriptionEditor].MenuItems}">
 
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel.Spacing>
+                                <Binding Source="{StaticResource DefaultGridItemSpacing}"
+                                         Converter="{StaticResource SpacingConverter}" />
+                            </StackPanel.Spacing>
+                        </StackPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
 
-                    </ItemsControl>
+            </ItemsControl>
 
-                    <TextBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="5"
-                             Watermark="Description"
-                             UseFloatingWatermark="True"
-                             TextWrapping="Wrap"
-                             AcceptsReturn="True"
-                             AcceptsTab="True"
-                             Background="White"
-                             BorderBrush="LightGray"
-                             BorderThickness="2"
-                             CornerRadius="8"
-                             IsEnabled="{Binding IsEnabled}"
-                             Text="{Binding Description}" />
+            <TextBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3"
+                     Classes="input multiline"
+                     Watermark="Description"
+                     Text="{Binding Description}" />
 
-                </Grid>
+        </Grid>
 
-            </ControlTemplate>
-        </Setter>
-    </Style>
-</Styles>
+    </Border>
+
+</UserControl>

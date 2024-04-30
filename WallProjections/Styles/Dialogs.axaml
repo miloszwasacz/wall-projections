@@ -1,0 +1,56 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System">
+
+    <Styles.Resources>
+        <GridLength x:Key="DialogElementVerticalSpacing">20</GridLength>
+        <Thickness x:Key="DialogPadding">20</Thickness>
+        <sys:Double x:Key="MinDialogWidth">300</sys:Double>
+    </Styles.Resources>
+
+    <Style Selector="Window.Dialog">
+        <Setter Property="MinWidth" Value="{StaticResource MinDialogWidth}" />
+        <Setter Property="WindowStartupLocation" Value="CenterScreen" />
+        <Setter Property="SizeToContent" Value="WidthAndHeight" />
+        <Setter Property="ShowInTaskbar" Value="False" />
+        <Setter Property="CanResize" Value="False" />
+        <Setter Property="Padding" Value="{StaticResource DialogPadding}" />
+
+        <Style Selector="^.global">
+            <Setter Property="ShowInTaskbar" Value="True" />
+
+            <Style Selector="^.list-chooser">
+                <Setter Property="Padding" Value="{StaticResource OverlayPadding}" />
+
+                <Style Selector="^ TextBlock.header">
+                    <Setter Property="Margin" Value="{StaticResource MenuFlyoutSeparatorThemePadding}" />
+                    <Setter Property="FontSize" Value="{StaticResource SubtitleFontSize}" />
+                    <Setter Property="LineHeight" Value="{StaticResource SubtitleLineHeight}" />
+                    <Setter Property="FontWeight" Value="{StaticResource SubtitleFontWeight}" />
+                </Style>
+
+                <Style Selector="^ ListBox">
+                    <Setter Property="Background" Value="Transparent" />
+                </Style>
+
+                <Style Selector="^.single ListBox">
+                    <Setter Property="SelectionMode" Value="Single" />
+                </Style>
+            </Style>
+
+            <Style Selector="^.app-cleanup">
+                <Setter Property="MinWidth" Value="0" />
+
+                <Style Selector="^ > :is(Control)">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+            </Style>
+        </Style>
+
+        <Style Selector="^ TextBlock.DialogMessage">
+            <Setter Property="MaxWidth" Value="300" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </Style>
+
+</Styles>

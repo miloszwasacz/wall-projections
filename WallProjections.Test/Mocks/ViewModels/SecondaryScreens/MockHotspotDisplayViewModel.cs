@@ -16,7 +16,7 @@ public class MockHotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposab
     public bool IsDisposed { get; private set; }
 
     /// <inheritdoc/>
-    public override ImmutableList<IHotspotProjectionViewModel> Projections { get; } = new[]
+    public override ImmutableList<AbsHotspotProjectionViewModel> Projections { get; } = new[]
     {
         (0, 10.0, 10.0, 10.0),
         (1, 90.0, 130.0, 30.0),
@@ -32,30 +32,19 @@ public class MockHotspotDisplayViewModel : AbsHotspotDisplayViewModel, IDisposab
             ImmutableList<string>.Empty,
             ImmutableList<string>.Empty
         );
-        return new HotspotProjectionViewModel(hotspot) as IHotspotProjectionViewModel;
+        return new HotspotProjectionViewModel(hotspot) as AbsHotspotProjectionViewModel;
     }).ToImmutableList();
 
     /// <inheritdoc/>
     public override bool IsVisible { get; protected set; }
 
     /// <summary>
-    /// Mock version of the ActivateHotspot function in <see cref="HotspotDisplayViewModel"/> which just
-    /// sets the first hotspot in the list to true, takes in the param <paramref name="id"></paramref>
-    /// to uphold the interface but does not use this parameter 
-    /// </summary>
-    /// <param name="id">The id of the hotspot to be activated</param>
-    public override void ActivateHotspot(int id)
-    {
-        Projections.First().IsActive = true;
-    }
-
-    /// <summary>
     /// Mock version of the DeactivateHotspot function in <see cref="HotspotDisplayViewModel"/> which just
-    /// sets the first hotspot in the list to false
+    /// sets <see cref="AbsHotspotProjectionViewModel.State" /> of the first hotspot in the list to <see cref="HotspotState.None" />
     /// </summary>
     public override void DeactivateHotspots()
     {
-        Projections.First().IsActive = false;
+        Projections.First().State = HotspotState.None;
     }
 
     /// <inheritdoc/>

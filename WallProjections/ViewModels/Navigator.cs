@@ -2,13 +2,12 @@
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
@@ -24,14 +23,19 @@ namespace WallProjections.ViewModels;
 public sealed class Navigator : ViewModelBase, INavigator
 {
     /// <summary>
-    /// A mutex to ensure sequential access to <see cref="_appLifetime" />.<see cref="AppLifetime.MainWindow" />
+    /// A logger for this class.
     /// </summary>
-    private readonly Mutex _windowMutex = new();
+    private readonly ILogger _logger;
 
     /// <summary>
     /// The application lifetime.
     /// </summary>
     private readonly AppLifetime _appLifetime;
+
+    /// <summary>
+    /// A method executed when the navigator is shut down (usually because of an error).
+    /// </summary>
+    private readonly Action<ExitCode> _shutdown;
 
     /// <summary>
     /// The viewmodel provider.
@@ -56,7 +60,11 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <summary>
     /// Currently opened main window
     /// </summary>
-    private Window? _mainWindow;
+    private Window? MainWindow
+    {
+        get => _appLifetime.MainWindow;
+        set => _appLifetime.MainWindow = value;
+    }
 
     /// <summary>
     /// Secondary screen window and its viewmodel
@@ -70,19 +78,30 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// <param name="pythonHandler">The handler for Python interop.</param>
     /// <param name="vmProviderFactory">A factory to create a <see cref="IViewModelProvider" /> instance.</param>
     /// <param name="fileHandlerFactory">A factory to create <see cref="IFileHandler">file handlers</see>.</param>
+    /// <param name="shutdown">A method to shut down the application.</param>
+    /// <param name="loggerFactory">A factory to create loggers.</param>
     public Navigator(
         AppLifetime appLifetime,
         IPythonHandler pythonHandler,
         Func<INavigator, IPythonHandler, IViewModelProvider> vmProviderFactory,
-        Func<IFileHandler> fileHandlerFactory
+        Func<IFileHandler> fileHandlerFactory,
+        Action<ExitCode> shutdown,
+        ILoggerFactory loggerFactory
     )
     {
+        _logger = loggerFactory.CreateLogger<Navigator>();
         _appLifetime = appLifetime;
+        _shutdown = shutdown;
         _pythonHandler = pythonHandler;
         _fileHandlerFactory = fileHandlerFactory;
         _vmProvider = vmProviderFactory(this, pythonHandler);
-        _secondaryScreen = OpenSecondaryWindow(_vmProvider);
-        _appLifetime.Exit += OnExit;
+
+        var vm = _vmProvider.GetSecondaryWindowViewModel();
+        var window = new SecondaryWindow
+        {
+            DataContext = vm
+        };
+        _secondaryScreen = (window, vm);
 
         Initialize();
     }
@@ -93,17 +112,21 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     private void Initialize()
     {
-        var fileHandler = _fileHandlerFactory();
         try
         {
+            var fileHandler = _fileHandlerFactory();
             _config = fileHandler.LoadConfig();
             OpenDisplay();
         }
+        catch (ConfigNotImportedException)
+        {
+            _logger.LogInformation("No configuration found");
+            Shutdown(ExitCode.ConfigNotFound);
+        }
         catch (Exception e)
         {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
-            OpenEditor();
+            _logger.LogError(e, "Error loading configuration file");
+            Shutdown(ExitCode.ConfigLoadError);
         }
     }
 
@@ -113,24 +136,36 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     private void OpenDisplay()
     {
-        _windowMutex.WaitOne();
-        var config = _config;
-        if (config is null)
+        lock (this)
         {
-            _windowMutex.ReleaseMutex();
-            OpenEditor();
-            return;
+            OpenDisplayInternal();
         }
+    }
 
-        _pythonHandler.RunHotspotDetection(config);
-        var displayWindow = new DisplayWindow
+    /// <summary>
+    /// Same as <see cref="OpenDisplay" /> but without the lock.
+    /// </summary>
+    private void OpenDisplayInternal()
+    {
+        lock (this)
         {
-            DataContext = _vmProvider.GetDisplayViewModel(config)
-        };
-        Navigate(displayWindow);
-        _secondaryScreen.viewModel.ShowHotspotDisplay(config);
+            var config = _config;
+            if (config is null)
+            {
+                OpenEditorInternal();
+                return;
+            }
 
-        _windowMutex.ReleaseMutex();
+            // TODO Await the task and handle exceptions
+            _pythonHandler.RunHotspotDetection(config);
+
+            var displayWindow = new DisplayWindow
+            {
+                DataContext = _vmProvider.GetDisplayViewModel(config)
+            };
+            Navigate(displayWindow, true);
+            _secondaryScreen.viewModel.ShowHotspotDisplay(config);
+        }
     }
 
     /// <summary>
@@ -138,7 +173,17 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     public void OpenEditor()
     {
-        _windowMutex.WaitOne();
+        lock (this)
+        {
+            OpenEditorInternal();
+        }
+    }
+
+    /// <summary>
+    /// Same as <see cref="OpenEditor" /> but without the lock.
+    /// </summary>
+    private void OpenEditorInternal()
+    {
         var config = _config;
         var fileHandler = _fileHandlerFactory();
 
@@ -148,15 +193,23 @@ public sealed class Navigator : ViewModelBase, INavigator
             ? _vmProvider.GetEditorViewModel(config, fileHandler)
             : _vmProvider.GetEditorViewModel(fileHandler);
 
-        _pythonHandler.CancelCurrentTask();
+        try
+        {
+            _pythonHandler.CancelCurrentTask();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error cancelling current Python task");
+            Shutdown(ExitCode.PythonError);
+            return;
+        }
+
         var editorWindow = new EditorWindow
         {
             DataContext = vm
         };
-        Navigate(editorWindow);
+        Navigate(editorWindow, true);
         _secondaryScreen.viewModel.ShowPositionEditor(vm);
-
-        _windowMutex.ReleaseMutex();
     }
 
     /// <summary>
@@ -166,95 +219,120 @@ public sealed class Navigator : ViewModelBase, INavigator
     /// </summary>
     public void CloseEditor()
     {
-        var fileHandler = _fileHandlerFactory();
-        try
+        lock (this)
         {
-            _config = fileHandler.LoadConfig();
-            OpenDisplay();
-        }
-        catch (Exception e)
-        {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
-            _config = null;
-            //TODO Show error message
-            Shutdown();
+            // If _config is null, it means that there was no configuration to begin with.
+            var isInitial = _config is null;
+            try
+            {
+                var fileHandler = _fileHandlerFactory();
+                _config = fileHandler.LoadConfig();
+                OpenDisplayInternal();
+            }
+            catch (ConfigNotImportedException e)
+            {
+                // If there was no configuration in the first place, closing the editor is the same as closing the app.
+                if (isInitial)
+                {
+                    _logger.LogInformation("Configuration not initialized and not created, closing application");
+                    Shutdown();
+                    return;
+                }
+
+                _logger.LogError(e, "No configuration found");
+                Shutdown(ExitCode.ConfigLoadError);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error loading configuration file");
+                _config = null;
+                Shutdown(ExitCode.ConfigLoadError);
+            }
         }
     }
 
     /// <inheritdoc />
     public void ShowCalibrationMarkers()
     {
-        _secondaryScreen.viewModel.ShowArUcoGrid();
+        lock (this)
+        {
+            _secondaryScreen.viewModel.ShowArUcoGrid();
+        }
     }
 
     /// <inheritdoc />
     public void HideCalibrationMarkers()
     {
-        IEditorViewModel? vm = null;
-        Dispatcher.UIThread.Invoke(() =>
+        lock (this)
         {
-            if (_mainWindow?.DataContext is IEditorViewModel editorViewModel)
-                vm = editorViewModel;
-        });
-
-        // TODO Test this physically
-        if (vm is not null)
-            _secondaryScreen.viewModel.ShowPositionEditor(vm);
+            if (MainWindow?.DataContext is IEditorViewModel editorViewModel)
+                _secondaryScreen.viewModel.ShowPositionEditor(editorViewModel);
+        }
     }
 
     /// <inheritdoc />
     public ImmutableDictionary<int, Point>? GetArUcoPositions()
     {
-        var arUcoGridView = _secondaryScreen.window.FindDescendantOfType<ArUcoGridView>();
-        ImmutableDictionary<int, Point>? positions = null;
-        Dispatcher.UIThread.Invoke(() =>
+        lock (this)
         {
-            // This has to be run on the UI thread
-            positions = arUcoGridView?.GetArUcoPositions();
-        });
-        return positions;
+            var arUcoGridView = _secondaryScreen.window.FindDescendantOfType<ArUcoGridView>();
+            return arUcoGridView?.GetArUcoPositions();
+        }
     }
 
-    /// <summary>
-    /// Shuts down the application.
-    /// </summary>
-    /// <seealso cref="AppLifetime.Shutdown(int)"/>
-    public void Shutdown()
+    /// <inheritdoc />
+    public void Shutdown(ExitCode exitCode = ExitCode.Success)
     {
-        _secondaryScreen.window.Close();
-        _appLifetime.Shutdown();
+        var main = MainWindow;
+        var secondary = _secondaryScreen.window;
+
+        secondary.ShowInTaskbar = false;
+        secondary.Hide();
+
+        if (main is not null)
+        {
+            main.ShowInTaskbar = false;
+            main.Hide();
+        }
+
+        _shutdown(exitCode);
     }
 
     /// <summary>
-    /// Opens the specified window, sets it as the <see cref="_mainWindow" /> and the <see cref="AppLifetime.MainWindow" />,
+    /// Opens the specified window, sets it as the <see cref="MainWindow" /> and the <see cref="AppLifetime.MainWindow" />,
     /// and <see cref="WindowExtensions.CloseAndDispose">closes</see> the currently opened window.
     /// </summary>
     /// <param name="newWindow">The new window to open.</param>
-    private void Navigate(Window newWindow)
+    /// <param name="showSecondary">Whether to show the secondary screen.</param>
+    private void Navigate(Window newWindow, bool showSecondary)
     {
-        var currentWindow = _mainWindow;
-        _mainWindow = newWindow;
-        newWindow.Show();
-        _appLifetime.MainWindow = newWindow;
-        currentWindow?.CloseAndDispose();
+        lock (this)
+        {
+            var currentWindow = MainWindow;
+
+            if (showSecondary)
+                OpenSecondaryWindow();
+            else
+            {
+                _secondaryScreen.window.ShowInTaskbar = false;
+                _secondaryScreen.window.Hide();
+            }
+
+            newWindow.Show();
+            MainWindow = newWindow;
+
+            currentWindow?.CloseAndDispose();
+        }
     }
 
     /// <summary>
-    /// Opens a <see cref="SecondaryWindow" /> on the secondary screen (if available).
+    /// Shows the <see cref="_secondaryScreen">secondary window</see> on the secondary screen (if available).
     /// </summary>
-    /// <param name="vmProvider">
-    /// The <see cref="IViewModelProvider" /> for creating the <see cref="ISecondaryWindowViewModel" />
-    /// </param>
-    /// <returns>The opened window and its viewmodel</returns>
     [ExcludeFromCodeCoverage(Justification = "Headless mode doesn't support multiple screens")]
-    private static (SecondaryWindow, ISecondaryWindowViewModel) OpenSecondaryWindow(IViewModelProvider vmProvider)
+    private void OpenSecondaryWindow()
     {
-        var vm = vmProvider.GetSecondaryWindowViewModel();
-        var window = new SecondaryWindow
-        {
-            DataContext = vm
-        };
+        var window = _secondaryScreen.window;
+        window.ShowInTaskbar = true;
 
         var screens = window.Screens;
         var secondaryScreen = screens.All.FirstOrDefault(s => !s.IsPrimary);
@@ -267,37 +345,22 @@ public sealed class Navigator : ViewModelBase, INavigator
         }
         else
             window.Show();
-
-        return (window, vm);
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        if (_vmProvider is IDisposable vmProvider)
-            vmProvider.Dispose();
+        lock (this)
+        {
+            var mainWindow = MainWindow;
+            MainWindow = null;
+            if (_vmProvider is IDisposable vmProvider)
+                vmProvider.Dispose();
 
-        if (_appLifetime.MainWindow?.DataContext is IDisposable vm)
-            vm.Dispose();
-
-        _pythonHandler.CancelCurrentTask();
-
-        _appLifetime.MainWindow = null;
-        _appLifetime.Exit -= OnExit;
+            if (mainWindow?.DataContext is IDisposable vm)
+                vm.Dispose();
+        }
     }
-
-    // ReSharper disable UnusedParameter.Local
-
-    /// <summary>
-    /// A callback for the <see cref="_appLifetime" />'s <see cref="AppLifetime.Exit" /> event
-    /// which simply <see cref="Dispose">disposes</see> the <see cref="Navigator" />.
-    /// </summary>
-    private void OnExit(object? sender, EventArgs e)
-    {
-        Dispose();
-    }
-
-    // ReSharper restore UnusedParameter.Local
 }
 
 /// <summary>
@@ -310,7 +373,7 @@ internal static class WindowExtensions
     /// and <see cref="Window.Close()">closes</see> the <paramref name="window" />.
     /// </summary>
     /// <param name="window">The window to close and dispose.</param>
-    public static async void CloseAndDispose(this Window window)
+    public static void CloseAndDispose(this Window window)
     {
         var dataContext = window.DataContext;
         window.ShowInTaskbar = false;
@@ -318,8 +381,7 @@ internal static class WindowExtensions
         if (dataContext is IDisposable vm)
             vm.Dispose();
 
-        // A delay to allow a smooth transition between windows.
-        await Task.Delay(200);
+        window.Hide();
         window.Close();
     }
 }

@@ -1,0 +1,181 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- region TextBlock styles -->
+
+    <Style Selector="TextBlock.caption">
+        <Setter Property="FontSize" Value="{StaticResource CaptionFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource CaptionLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource CaptionFontWeight}" />
+    </Style>
+
+    <Style Selector="TextBlock.body">
+        <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource BodyLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource BodyFontWeight}" />
+    </Style>
+
+    <Style Selector="TextBlock.body-strong">
+        <Setter Property="FontSize" Value="{StaticResource BodyStrongFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource BodyStrongLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource BodyStrongFontWeight}" />
+    </Style>
+
+    <Style Selector="TextBlock.body-large">
+        <Setter Property="FontSize" Value="{StaticResource BodyLargeFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource BodyLargeLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource BodyLargeFontWeight}" />
+    </Style>
+
+    <Style Selector="TextBlock.subtitle">
+        <Setter Property="FontSize" Value="{StaticResource SubtitleFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource SubtitleLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource SubtitleFontWeight}" />
+    </Style>
+
+    <Style Selector="TextBlock.title">
+        <Setter Property="FontSize" Value="{StaticResource TitleFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource TitleLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource TitleFontWeight}" />
+    </Style>
+
+    <Style Selector="TextBlock.title-large">
+        <Setter Property="FontSize" Value="{StaticResource TitleLargeFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource TitleLargeLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource TitleLargeFontWeight}" />
+    </Style>
+
+    <Style Selector="TextBlock.display">
+        <Setter Property="FontSize" Value="{StaticResource DisplayFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource DisplayLineHeight}" />
+        <Setter Property="FontWeight" Value="{StaticResource DisplayFontWeight}" />
+    </Style>
+
+    <!-- endregion -->
+
+    <Style Selector=":hasoverlay ChromeOverlayLayer">
+        <Setter Property="Background">
+            <SolidColorBrush Color="#4D000000" />
+        </Setter>
+    </Style>
+
+    <Style Selector="Separator">
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    </Style>
+
+    <Style Selector="Window.splash-screen">
+        <Setter Property="MaxWidth" Value="500" />
+        <Setter Property="MaxHeight" Value="250" />
+        <Setter Property="WindowStartupLocation" Value="CenterScreen" />
+        <Setter Property="SystemDecorations" Value="BorderOnly" />
+        <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+        <Setter Property="CanResize" Value="False" />
+        <Setter Property="Padding" Value="30" />
+        <Setter Property="Background">
+            <LinearGradientBrush StartPoint="0%,200%" EndPoint="100%,-50%">
+                <GradientStop Color="#ffffec80" Offset="0.25" />
+                <GradientStop Color="#ffb39800" Offset="0.75" />
+                <GradientStop Color="#ff806c00" Offset="1" />
+            </LinearGradientBrush>
+        </Setter>
+        <Setter Property="Foreground" Value="#ff332b00" />
+
+        <Style Selector="^ > StackPanel">
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="Spacing" Value="30" />
+
+            <Style Selector="^ > :is(Control)">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style Selector="^ > TextBlock">
+                <Setter Property="FontWeight" Value="UltraBlack" />
+            </Style>
+
+            <Style Selector="^ > Image">
+                <Setter Property="MaxHeight" Value="160" />
+            </Style>
+        </Style>
+
+    </Style>
+
+    <Style Selector="ListBox.classic-list ListBoxItem">
+        <Setter Property="Margin" Value="{StaticResource MenuFlyoutSeparatorThemePadding}" />
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector=":is(Control).list-card">
+        <Setter Property="ClipToBounds" Value="False" />
+
+        <Style Selector="^ :is(Control).header">
+            <Setter Property="Margin">
+                <Binding Source="{StaticResource CardPadding}"
+                         Converter="{StaticResource ThicknessConverter}"
+                         ConverterParameter="1 1 1 0.5" />
+            </Setter>
+
+            <Style Selector="^ > :is(Control)">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style Selector="^ > TextBlock">
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="FontSize" Value="{StaticResource SubtitleFontSize}" />
+                <Setter Property="LineHeight" Value="{StaticResource SubtitleLineHeight}" />
+                <Setter Property="FontWeight" Value="{StaticResource SubtitleFontWeight}" />
+            </Style>
+        </Style>
+
+        <Style Selector="^ Separator.divider">
+            <Setter Property="Margin">
+                <Setter.Value>
+                    <Binding Source="{StaticResource MenuFlyoutSeparatorThemePadding}"
+                             Converter="{StaticResource ThicknessConverter}"
+                             ConverterParameter="1 0" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style Selector="^ ListBox.transparent">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style Selector="^ TextBlock.item-label">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="FontSize" Value="{StaticResource BodyLargeFontSize}" />
+            <Setter Property="LineHeight" Value="{StaticResource BodyLargeLineHeight}" />
+            <Setter Property="FontWeight" Value="{StaticResource BodyLargeFontWeight}" />
+
+            <Style Selector="^.small">
+                <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
+                <Setter Property="LineHeight" Value="{StaticResource BodyLineHeight}" />
+                <Setter Property="FontWeight" Value="{StaticResource BodyFontWeight}" />
+            </Style>
+        </Style>
+    </Style>
+
+    <Style Selector="StackPanel.toolbar">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="{StaticResource DefaultToolbarItemSpacing}" />
+        <Setter Property="Margin">
+            <Binding Source="{StaticResource TopLevelPadding}"
+                     Converter="{StaticResource ThicknessConverter}"
+                     ConverterParameter="1 0.5 1 0" />
+        </Setter>
+
+        <Style Selector="^ > :is(Control)">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Style>
+
+    <Style Selector="ToolTip > TextBlock">
+        <Setter Property="TextAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="FlyoutPresenter.attached-bottom">
+        <Setter Property="Margin" Value="0 5 0 0" />
+    </Style>
+
+</Styles>

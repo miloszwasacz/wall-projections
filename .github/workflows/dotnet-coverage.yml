@@ -6,52 +6,10 @@ on:
       - dev
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 6.0.x
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: .github/requirements.txt
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget
-
-      - name: Install OpenCV
-        run: pip install opencv-python-headless
-
-      - name: Install LibVLCSharp dependencies
-        run: sudo apt install -y libvlc-dev vlc
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --no-restore
-
-      - name: Test & generate Code Coverage report
-        run: >
-          dotnet test --no-build --verbosity normal \
-              --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory TestResults
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./TestResults
-          verbose: true
+  coverage:
+    uses: ./.github/workflows/dotnet-ci-generic.yml
+    with:
+      os: 'ubuntu-latest'
+      coverage: true
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

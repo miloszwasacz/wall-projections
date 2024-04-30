@@ -14,10 +14,19 @@ jobs:
   publish:
     strategy:
       matrix:
-        target: [ win-x64, osx-x64, linux-x64, linux-arm64 ]
+        include:
+          - target: win-x64
+            runner: windows-latest
+          - target: osx-x64
+            runner: macos-12 # Not using latest because it can be run on ARM machines, which don't support LibVLCSharp
+          - target: linux-x64
+            runner: ubuntu-latest
+          - target: linux-arm64
+            runner: ubuntu-latest
     uses: ./.github/workflows/dotnet-publish.yml
     with:
       target: ${{ matrix.target }}
+      runner: ${{ matrix.runner }}
 
   deploy:
     needs: publish

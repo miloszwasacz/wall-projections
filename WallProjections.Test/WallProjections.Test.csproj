@@ -32,6 +32,8 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
         <PackageReference Include="Avalonia.Headless.NUnit" Version="11.0.5"/>
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.5"/>
         <PackageReference Include="Avalonia.Diagnostics" Version="11.0.5"/>

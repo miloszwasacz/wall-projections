@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.ViewModels.Interfaces.Display;
@@ -10,6 +11,11 @@ namespace WallProjections.ViewModels.Interfaces.Display;
 public interface IVideoViewModel : IDisposable
 {
     /// <summary>
+    /// An event that is triggered when all the videos have finished playing.
+    /// </summary>
+    public event EventHandler? AllVideosFinished;
+
+    /// <summary>
     /// The <see cref="IMediaPlayer" /> used to play videos.
     /// </summary>
     public IMediaPlayer? MediaPlayer { get; }
@@ -18,7 +24,7 @@ public interface IVideoViewModel : IDisposable
     /// Whether or not the viewmodel has a video to display.
     /// </summary>
     public bool HasVideos { get; }
-    
+
     /// <summary>
     /// Whether the player should be shown.
     /// </summary>
@@ -52,7 +58,7 @@ public interface IVideoViewModel : IDisposable
     /// Plays the next video in the queue.
     /// </summary>
     /// <returns>Whether the video has started playing successfully.</returns>
-    public bool PlayNextVideo();
+    public Task<bool> PlayNextVideo();
 
     /// <summary>
     /// Stops the currently playing video.

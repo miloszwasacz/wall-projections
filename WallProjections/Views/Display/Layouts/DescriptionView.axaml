@@ -3,29 +3,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:layouts="using:WallProjections.ViewModels.Display.Layouts"
+             xmlns:views="using:WallProjections.Views.Display"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WallProjections.Views.Display.Layouts.DescriptionView"
              x:DataType="layouts:DescriptionViewModel">
 
-    <Grid ColumnDefinitions="*, 10, *" RowDefinitions="Auto, *">
+    <views:ContentLayout HotspotTitle="{Binding Title}">
+        <Grid ColumnDefinitions="*, 6*, *" RowDefinitions="*">
 
-        <Border Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
-                Margin="0 0 0 24"
-                Padding="0 0 0 12"
-                BorderThickness="0 0 0 4"
-                BorderBrush="Black">
+            <TextBlock Grid.Column="1" Grid.Row="0"
+                       Classes="hotspot-description"
+                       TextAlignment="Center"
+                       Text="{Binding Description}" />
 
-            <TextBlock FontSize="42"
-                       FontWeight="Bold"
-                       Text="{Binding Title}" />
-        </Border>
-
-        <TextBlock Grid.Column="0" Grid.Row="1"
-                   Text="{Binding Description}"
-                   TextWrapping="Wrap"
-                   TextAlignment="Start"
-                   FontSize="24" />
-
-    </Grid>
+        </Grid>
+    </views:ContentLayout>
 
 </UserControl>

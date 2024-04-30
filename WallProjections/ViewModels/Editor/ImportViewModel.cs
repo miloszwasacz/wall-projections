@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Extensions.Logging;
 using WallProjections.ViewModels.Interfaces.Editor;
 
 namespace WallProjections.ViewModels.Editor;
@@ -7,6 +8,11 @@ namespace WallProjections.ViewModels.Editor;
 /// <inheritdoc cref="IImportViewModel" />
 public class ImportViewModel : ViewModelBase, IImportViewModel
 {
+    /// <summary>
+    /// A logger for this class.
+    /// </summary>
+    private readonly ILogger _logger;
+
     /// <inheritdoc />
     public IDescriptionEditorViewModel DescriptionEditor { get; }
 
@@ -14,8 +20,10 @@ public class ImportViewModel : ViewModelBase, IImportViewModel
     /// Creates a new <see cref="ImportViewModel"/> belonging to the given <see cref="IDescriptionEditorViewModel"/>.
     /// </summary>
     /// <param name="descriptionEditor">The parent <see cref="IDescriptionEditorViewModel"/>.</param>
-    public ImportViewModel(IDescriptionEditorViewModel descriptionEditor)
+    /// <param name="loggerFactory">A factory for creating loggers.</param>
+    public ImportViewModel(IDescriptionEditorViewModel descriptionEditor, ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<ImportViewModel>();
         DescriptionEditor = descriptionEditor;
     }
 
@@ -40,7 +48,11 @@ public class ImportViewModel : ViewModelBase, IImportViewModel
         try
         {
             var lines = File.ReadAllLines(path);
-            if (lines.Length == 0) return true;
+            if (lines.Length == 0)
+            {
+                _logger.LogWarning("File {Path} is empty.", path);
+                return true;
+            }
 
             DescriptionEditor.Title = lines[0].Trim();
             DescriptionEditor.Description = lines.Length > 1
@@ -51,8 +63,7 @@ public class ImportViewModel : ViewModelBase, IImportViewModel
         }
         catch (Exception e)
         {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
+            _logger.LogError(e, "Failed to import from file {Path}.", path);
             return false;
         }
     }

@@ -1,0 +1,20 @@
+name: General issue
+description: File an issue that doesn't fit into any other category
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Please use this template only as a last resort.
+        If you can't find a more specific template that fits your issue, please provide as much detail as possible.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the issue here.

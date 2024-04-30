@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
 using WallProjections.Models;
+using WallProjections.Test.Mocks;
 using WallProjections.Test.Mocks.Helper;
 using WallProjections.Test.Mocks.Models;
 using WallProjections.Test.Mocks.ViewModels;
@@ -10,6 +11,7 @@ using WallProjections.Test.Mocks.ViewModels.SecondaryScreens;
 using WallProjections.ViewModels;
 using WallProjections.ViewModels.Display;
 using WallProjections.ViewModels.Editor;
+using WallProjections.ViewModels.Interfaces;
 using WallProjections.ViewModels.Interfaces.Editor;
 using WallProjections.ViewModels.Interfaces.SecondaryScreens;
 using WallProjections.ViewModels.SecondaryScreens;
@@ -24,6 +26,7 @@ public class ViewModelProviderTest
     {
         var navigator = new MockNavigator();
         var pythonHandler = new MockPythonHandler();
+        var hotspotHandler = new MockHotspotHandler();
         var processProxy = new MockProcessProxy();
         var contentProvider = new MockContentProvider(Enumerable.Empty<Hotspot.Media>());
         var layoutProvider = new MockLayoutProvider();
@@ -31,8 +34,10 @@ public class ViewModelProviderTest
             navigator,
             pythonHandler,
             processProxy,
+            _ => hotspotHandler,
             _ => contentProvider,
-            () => layoutProvider
+            () => layoutProvider,
+            new MockLoggerFactory()
         );
     }
 
@@ -277,13 +282,13 @@ public class ViewModelProviderTest
         Assert.That(hotspotViewModel, Is.InstanceOf<HotspotDisplayViewModel>());
         Assert.Multiple(() =>
         {
-            Assert.That(hotspotViewModel.Projections, Has.Count.EqualTo(config.Hotspots.Count));
+            Assert.That(hotspotViewModel.Projections.Count(), Is.EqualTo(config.Hotspots.Count));
             //TODO Add this assertion when the hiding has been properly implemented
             // Assert.That(hotspotViewModel.IsVisible, Is.False);
         });
         Assert.That(
             hotspotViewModel.Projections,
-            Is.EquivalentTo(config.Hotspots).Using<IHotspotProjectionViewModel, Hotspot>(
+            Is.EquivalentTo(config.Hotspots).Using<AbsHotspotProjectionViewModel, Hotspot>(
                 (actual, expected) => actual.IsSameAsHotspot(expected)
             )
         );
@@ -295,14 +300,14 @@ public class ViewModelProviderTest
         var hotspot = CreateHotspot(0);
         using var vmProvider = CreateViewModelProvider();
         var hotspotProjectionViewModel = vmProvider.GetHotspotProjectionViewModel(hotspot);
-        Assert.That(hotspotProjectionViewModel, Is.InstanceOf<HotspotProjectionViewModel>());
+        Assert.That(hotspotProjectionViewModel, Is.InstanceOf<AbsHotspotProjectionViewModel>());
         Assert.Multiple(() =>
         {
             Assert.That(hotspotProjectionViewModel.Id, Is.EqualTo(hotspot.Id));
             Assert.That(hotspotProjectionViewModel.X, Is.EqualTo(hotspot.Position.X));
             Assert.That(hotspotProjectionViewModel.Y, Is.EqualTo(hotspot.Position.Y));
             Assert.That(hotspotProjectionViewModel.D, Is.EqualTo(hotspot.Position.R * 2));
-            Assert.That(hotspotProjectionViewModel.IsActive, Is.False);
+            Assert.That(hotspotProjectionViewModel.State, Is.EqualTo(HotspotState.None));
         });
     }
 
@@ -320,12 +325,37 @@ public class ViewModelProviderTest
     [Test]
     public void UsingAfterDisposingTest()
     {
+        var config = new Config(new double[,] { }, Enumerable.Empty<Hotspot>());
         var vmProvider = CreateViewModelProvider();
+
+        // Make sure that private instances of LibVLC and HotspotHandler are created
+        AssertValidDisplayVM(vmProvider);
+        AssertValidVideoVM(vmProvider);
+
         vmProvider.Dispose();
         Assert.That(vmProvider, Is.Not.Null);
-        var videoViewModel = vmProvider.GetVideoViewModel();
-        Assert.That(videoViewModel, Is.InstanceOf<VideoViewModel>());
-        Assert.That(videoViewModel.MediaPlayer, Is.Not.Null);
+
+        // Check if LibVLC and HotspotHandler are recreated
+        AssertValidDisplayVM(vmProvider);
+        AssertValidVideoVM(vmProvider);
+
         vmProvider.Dispose();
+        return;
+
+        // ReSharper disable once InconsistentNaming
+        void AssertValidDisplayVM(IViewModelProvider viewModelProvider)
+        {
+            var displayViewModel = viewModelProvider.GetDisplayViewModel(config);
+            Assert.That(displayViewModel, Is.InstanceOf<DisplayViewModel>());
+            Assert.That(displayViewModel.ContentViewModel, Is.Not.Null);
+        }
+
+        // ReSharper disable once InconsistentNaming
+        void AssertValidVideoVM(IViewModelProvider viewModelProvider)
+        {
+            var videoViewModel = viewModelProvider.GetVideoViewModel();
+            Assert.That(videoViewModel, Is.InstanceOf<VideoViewModel>());
+            Assert.That(videoViewModel.MediaPlayer, Is.Not.Null);
+        }
     }
 }

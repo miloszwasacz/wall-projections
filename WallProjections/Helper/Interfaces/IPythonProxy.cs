@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using Avalonia;
+using WallProjections.Models;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper.Interfaces;
@@ -19,5 +20,8 @@ public interface IPythonProxy : IDisposable
     public void StopCurrentAction();
 
     /// <inheritdoc cref="PythonModule.CalibrationModule.CalibrateCamera" />
-    public double[,]? CalibrateCamera(ImmutableDictionary<int, Point> arucoPositions);
+    public double[,]? CalibrateCamera(int cameraIndex, ImmutableDictionary<int, Point> arucoPositions);
+
+    /// <inheritdoc cref="PythonModule.CameraIdentificationModule.GetAvailableCameras" />
+    public ImmutableList<Camera> GetAvailableCameras();
 }

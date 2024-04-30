@@ -3,52 +3,35 @@ using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using Microsoft.Extensions.Logging;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models.Interfaces;
 
 namespace WallProjections.Helper;
 
 /// <summary>
-/// The event handler singleton for Python interop
+/// The event handler for Python interop
 /// </summary>
+/// <remarks>Should only be instantiated once in <see cref="Program" /></remarks>
 public sealed class PythonHandler : IPythonHandler
 {
     /// <summary>
-    /// The backing field for <see cref="Instance" />
-    /// </summary>
-    private static PythonHandler? _instance;
-
-    /// <summary>
-    /// The global instance of the event handler
-    /// </summary>
-    /// <remarks>If possible, <b>don't use this global instance</b> - use Dependency Injection instead</remarks>
-    /// <exception cref="TypeInitializationException">
-    /// If the global instance has not been <see cref="Initialize">initialized</see>
-    /// </exception>
-    public static PythonHandler Instance =>
-        _instance ?? throw new TypeInitializationException(nameof(PythonHandler), null);
-
-    /// <summary>
-    /// Initializes the global instance of the Python event handler
-    /// </summary>
-    /// <param name="pythonProxy">The proxy used for executing Python scripts</param>
-    /// <exception cref="InvalidOperationException">If the global instance has already been initialized</exception>
-    public static IPythonHandler Initialize(IPythonProxy pythonProxy)
-    {
-        if (_instance != null)
-            throw new InvalidOperationException("PythonEventHandler has already been initialized");
-
-        _instance = new PythonHandler(pythonProxy);
-        return _instance;
-    }
-
-    /// <summary>
     /// Creates a new instance of <see cref="PythonHandler" /> which uses the given <see cref="IPythonProxy" />
     /// </summary>
-    private PythonHandler(IPythonProxy pythonProxy)
+    /// <param name="cameraIndex">The index of the camera that will be passed to OpenCV</param>
+    /// <param name="pythonProxy">A proxy for setting up Python runtime and executing Python scripts</param>
+    /// <param name="loggerFactory">A factory for creating loggers</param>
+    public PythonHandler(int cameraIndex, IPythonProxy pythonProxy, ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<PythonHandler>();
         _pythonProxy = pythonProxy;
+        CameraIndex = cameraIndex;
     }
+
+    /// <summary>
+    /// A logger for this class
+    /// </summary>
+    private readonly ILogger _logger;
 
     //TODO Maybe exclude this when marshalling to a Python object?
     /// <summary>
@@ -57,44 +40,39 @@ public sealed class PythonHandler : IPythonHandler
     private readonly IPythonProxy _pythonProxy;
 
     /// <summary>
-    /// A mutex to ensure sequential access to <see cref="_currentTask" />
-    /// </summary>
-    private readonly Mutex _taskMutex = new();
-
-    /// <summary>
     /// The currently running Python task
     /// </summary>
     private CancellationTokenSource? _currentTask;
 
     /// <inheritdoc />
+    public int CameraIndex { get; }
+
+    /// <inheritdoc />
     public Task RunHotspotDetection(IConfig config) =>
-        RunNewPythonAction(python => python.StartHotspotDetection(this, config));
+        RunNewPythonAction(python => python.StartHotspotDetection(this, config), "Hotspot Detection");
 
     /// <inheritdoc />
     public Task<double[,]?> RunCalibration(ImmutableDictionary<int, Point> arucoPositions) =>
-        RunNewPythonAction(python => python.CalibrateCamera(arucoPositions));
+        RunNewPythonAction(python => python.CalibrateCamera(CameraIndex, arucoPositions), "Calibration");
 
     /// <inheritdoc />
     public void CancelCurrentTask()
     {
-        _taskMutex.WaitOne();
-        if (_currentTask is null)
+        lock (this)
         {
-            _taskMutex.ReleaseMutex();
-            return;
-        }
+            if (_currentTask is null)
+                return;
 
-        try
-        {
-            RunPythonAction(python => python.StopCurrentAction());
-        }
-        finally
-        {
-            _currentTask?.Cancel();
-            _currentTask?.Dispose();
-            _currentTask = null;
-
-            _taskMutex.ReleaseMutex();
+            try
+            {
+                RunPythonAction(python => python.StopCurrentAction(), "Stop Current Action");
+            }
+            finally
+            {
+                _currentTask?.Cancel();
+                _currentTask?.Dispose();
+                _currentTask = null;
+            }
         }
     }
 
@@ -104,17 +82,21 @@ public sealed class PythonHandler : IPythonHandler
     /// Cancels the current task and calls <see cref="RunPythonAction">RunPythonAction</see> on a separate thread.
     /// </summary>
     /// <param name="action">The action passed to <see cref="RunPythonAction" /></param>
-    private Task RunNewPythonAction(Action<IPythonProxy> action)
+    /// <param name="actionName">The name of the action (for logging purposes)</param>
+    private Task RunNewPythonAction(Action<IPythonProxy> action, string actionName)
     {
         CancelCurrentTask();
-        _taskMutex.WaitOne();
-        var task = _currentTask = new CancellationTokenSource();
-        _taskMutex.ReleaseMutex();
+        CancellationTokenSource task;
+        lock (this)
+        {
+            task = _currentTask = new CancellationTokenSource();
+        }
+
         return Task.Run(() =>
         {
             try
             {
-                RunPythonAction(action);
+                RunPythonAction(action, actionName);
             }
             catch (Exception)
             {
@@ -130,19 +112,23 @@ public sealed class PythonHandler : IPythonHandler
     /// Cancels the current task and calls <see cref="RunPythonAction{TR}">RunPythonAction</see> on a separate thread.
     /// </summary>
     /// <param name="action">The action passed to <see cref="RunPythonAction{TR}" /></param>
+    /// <param name="actionName">The name of the action (for logging purposes)</param>
     /// <typeparam name="TR">The return type of the action</typeparam>
     /// <returns>The result of the action</returns>
-    private Task<TR?> RunNewPythonAction<TR>(Func<IPythonProxy, TR?> action)
+    private Task<TR?> RunNewPythonAction<TR>(Func<IPythonProxy, TR?> action, string actionName)
     {
         CancelCurrentTask();
-        _taskMutex.WaitOne();
-        var task = _currentTask = new CancellationTokenSource();
-        _taskMutex.ReleaseMutex();
+        CancellationTokenSource task;
+        lock (this)
+        {
+            task = _currentTask = new CancellationTokenSource();
+        }
+
         return Task.Run(() =>
         {
             try
             {
-                return RunPythonAction(action);
+                return RunPythonAction(action, actionName);
             }
             catch (Exception)
             {
@@ -160,7 +146,9 @@ public sealed class PythonHandler : IPythonHandler
     /// <param name="action">
     /// The action to execute (it should involve calling a method on the input <see cref="IPythonProxy" />)
     /// </param>
-    private void RunPythonAction(Action<IPythonProxy> action)
+    /// <param name="actionName">The name of the action (for logging purposes)</param>
+    /// <exception cref="Exception">If an error occurs while running the action</exception>
+    private void RunPythonAction(Action<IPythonProxy> action, string actionName)
     {
         try
         {
@@ -168,8 +156,7 @@ public sealed class PythonHandler : IPythonHandler
         }
         catch (Exception e)
         {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
+            _logger.LogError(e, "Error running Python action ({ActionName})", actionName);
             throw;
         }
     }
@@ -180,9 +167,11 @@ public sealed class PythonHandler : IPythonHandler
     /// <param name="action">
     /// The action to execute (it should involve calling a method on the input <see cref="IPythonProxy" />)
     /// </param>
+    /// <param name="actionName">The name of the action (for logging purposes)</param>
     /// <typeparam name="TR">The return type of the action</typeparam>
     /// <returns>The result of the action</returns>
-    private TR RunPythonAction<TR>(Func<IPythonProxy, TR> action)
+    /// <exception cref="Exception">If an error occurs while running the action</exception>
+    private TR RunPythonAction<TR>(Func<IPythonProxy, TR> action, string actionName)
     {
         try
         {
@@ -190,8 +179,7 @@ public sealed class PythonHandler : IPythonHandler
         }
         catch (Exception e)
         {
-            //TODO Log to file
-            Console.Error.WriteLine(e);
+            _logger.LogError(e, "Error running Python action ({ActionName})", actionName);
             throw;
         }
     }
@@ -199,21 +187,23 @@ public sealed class PythonHandler : IPythonHandler
     #endregion
 
     /// <inheritdoc />
-    public event EventHandler<IPythonHandler.HotspotSelectedArgs>? HotspotSelected;
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotPressed;
+
+    /// <inheritdoc />
+    public event EventHandler<IHotspotHandler.HotspotArgs>? HotspotReleased;
 
     /// <inheritdoc />
     public void OnHotspotPressed(int id)
     {
-        Console.WriteLine($"Hotspot {id} was pressed");
-        HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
+        _logger.LogTrace("Hotspot {HotspotId} pressed", id);
+        HotspotPressed?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 
     /// <inheritdoc />
     public void OnHotspotUnpressed(int id)
     {
-        //TODO Implement OnHotspotUnpressed
-        Console.WriteLine($"Hotspot {id} was unpressed");
-        // HotspotSelected?.Invoke(this, new IPythonHandler.HotspotSelectedArgs(id));
+        _logger.LogTrace("Hotspot {HotspotId} released", id);
+        HotspotReleased?.Invoke(this, new IHotspotHandler.HotspotArgs(id));
     }
 
     public void Dispose()
