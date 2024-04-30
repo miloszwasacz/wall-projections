@@ -105,10 +105,9 @@ public sealed class PythonProxy : IPythonProxy
             pythonExecutablePath = VirtualEnvExecutablePath;
         }
 
-        // Only use embedded environment if executable exists.
+        // Only use embedded/virtual environment if executable exists.
         if (pythonExecutablePath is not null)
         {
-            // TODO: Show error message to user before shutting down program if environment cannot be loaded.
             try
             {
                 var (pythonDll, pythonPath) = processProxy.LoadPythonEnv(pythonExecutablePath);

@@ -87,7 +87,19 @@ public class GlobalWindowManager : IDisposable
         splashScreen.Show();
 
         _processProxy = new ProcessProxy(loggerFactory);
-        _pythonProxy = new PythonProxy(_processProxy, loggerFactory);
+        _pythonProxy = null!;
+
+        try
+        {
+            _pythonProxy = new PythonProxy(_processProxy, loggerFactory);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error initializing Python environment");
+            OnNavigatorShutdown(ExitCode.PythonError);
+            return;
+        }
+
         _appLifetime.Exit += (_, _) => OnExit();
 
         ImmutableList<Camera> cameras;
@@ -260,9 +272,13 @@ public class GlobalWindowManager : IDisposable
 
             _navigator?.Dispose();
             _navigator = null;
+
             _pythonHandler?.Dispose();
             _pythonHandler = null;
-            _pythonProxy.Dispose();
+
+            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+            // Marked as nullable because this can be called before the proxy is initialized in the constructor
+            _pythonProxy?.Dispose();
 
             _logger.LogTrace("Cleanup complete");
         }

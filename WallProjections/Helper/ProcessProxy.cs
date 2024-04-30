@@ -42,15 +42,17 @@ public class ProcessProxy : IProcessProxy
     [ExcludeFromCodeCoverage(Justification = "Is platform specific (especially Linux) and should be tested manually")]
     public string? GetFileExplorerCommand()
     {
-        //TODO Verify this works on all (necessary) platforms
-        // Tested on: Windows 11
+        // Tested on:
+        // - Windows 11
+        // - macOS 14.4.1
+        // - Ubuntu 22.04
 
         if (OperatingSystem.IsWindows())
             return "explorer.exe";
         if (OperatingSystem.IsMacOS())
             return "open";
         if (OperatingSystem.IsLinux())
-            return "pcmanfm"; // This only handles default Raspbian file manager
+            return "xdg-open";
 
         return null;
     }
