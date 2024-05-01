@@ -17,3 +17,11 @@ with to display detailed, rich information about the touched area.
 ## Installation
 
 To run Wall Projections, start [HERE]({%link docs/installation/index.md %})
+
+## Usage
+
+To learn how to use Wall Projections, start [HERE]({%link docs/usage/index.md %})
+
+## Development
+
+If you are interested in contributing to Wall Projections, start [HERE]({%link docs/development/index.md %})

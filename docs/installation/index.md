@@ -8,15 +8,13 @@ nav_order: 2
 
 # Installation
 
-Wall Projections currently has support for Windows, macOS, and Linux (x64 and ARM64).
+Wall Projections currently has support for Windows, macOS (x64 only), and Linux (x64 and ARM64).
 
 {: .note-title}
 > Recommended
 >
 > Windows is the recommended platform to use to run *Wall Projections*, due to
 > the ease of installation.
-
-{:toc}
 
 ## Download the app
 
@@ -30,6 +28,13 @@ Wall Projections currently has support for Windows, macOS, and Linux (x64 and AR
 
 You are now ready to run the app, but there are some additional optional steps
 that make it easier to run the app in the future.
+
+{: .note-title}
+> Note
+> 
+> When running the app for the first time, Windows may display a warning about
+> running an app from an unknown publisher. Click **More info** and 
+> then **Run** to proceed.
 
 #### Create a shortcut
 
@@ -90,9 +95,7 @@ that make it easier to run the app in the future.
 
 You're all set up with *Wall Projections*! Create or import some content to begin.
 
-{% capture troubleshooting_link %}{%link docs/usage/index.md %}#troubleshooting{% endcapture %}
-
 {: .note-title}
 > Troubleshooting
 > 
-> If you have any issues, please refer to the [troubleshooting guide]({{ troubleshooting_link }}).
+> If you have any issues, please refer to the [troubleshooting guide]({%link docs/usage/troubleshooting.md %}).
