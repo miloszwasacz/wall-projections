@@ -12,8 +12,6 @@ nav_order: 1
 This is a project in collaboration with Bristol Museums, to allow 3D printed replicas of artefacts to be interacted
 with to display detailed, rich information about the touched area.
 
-![Demo image](assets/demo.png)
-
 ## Installation
 
 To run Wall Projections, start [HERE]({%link docs/installation/index.md %})

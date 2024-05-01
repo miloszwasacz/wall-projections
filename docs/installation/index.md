@@ -7,6 +7,7 @@ nav_order: 2
 ---
 
 # Installation
+{: .no_toc }
 
 Wall Projections currently has support for Windows, macOS (x64 only), and Linux (x64 and ARM64).
 
@@ -15,6 +16,12 @@ Wall Projections currently has support for Windows, macOS (x64 only), and Linux 
 >
 > Windows is the recommended platform to use to run *Wall Projections*, due to
 > the ease of installation.
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
 
 ## Download the app
 

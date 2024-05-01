@@ -7,8 +7,15 @@ nav_order: 3
 ---
 
 # Usage
+{: .no_toc }
 
 Here are some instructions on how to use Wall Projections.
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 ## Starting the app
 

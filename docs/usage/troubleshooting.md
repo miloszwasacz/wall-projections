@@ -8,6 +8,7 @@ nav_order: 1
 ---
 
 # Troubleshooting
+{: .no_toc }
 
 Here are some common scenarios where Wall Projections may not work as expected, and how to resolve them.
 
@@ -18,6 +19,12 @@ Here are some common scenarios where Wall Projections may not work as expected, 
 > on Windows, or `~/.config/WallProjections/Logs` on Linux and macOS.
 >
 > The app can also be run with extra console output by running it from the command line with the `--trace` flag.
+
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
 
 ## Hotspots not being activated
 
