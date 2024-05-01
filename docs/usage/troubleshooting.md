@@ -15,7 +15,7 @@ Here are some common scenarios where Wall Projections may not work as expected, 
 {: .note-title}
 > General troubleshooting tip
 >
-> The app logs of any errors that occur. The log files can be found in the `%APPDATA%\WallProjections\Logs` folder 
+> The app logs any errors that occur. The log files can be found in the `%APPDATA%\WallProjections\Logs` folder 
 > on Windows, or `~/.config/WallProjections/Logs` on Linux and macOS.
 >
 > The app can also be run with extra console output by running it from the command line with the `--trace` flag.

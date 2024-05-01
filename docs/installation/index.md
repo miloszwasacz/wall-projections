@@ -68,7 +68,7 @@ that make it easier to run the app in the future.
    ```
 4. Navigate to the *WallProjections* folder and run the installer script:
     ```bash
-    sudo sudo bash ./install.sh
+    sudo bash ./install.sh
     ```
 5. The app can now be run using:
    ```bash
