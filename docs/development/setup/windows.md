@@ -33,3 +33,7 @@ This can be done either using Git in the terminal, or by using the built in Git 
 Once cloned, open the repository inside your IDE and restore the dependencies, either by using the `dotnet restore` 
 command in the terminal, or by using your IDE's built in nuget tools 
 ([Guide for Rider](https://www.jetbrains.com/help/rider/Using_NuGet.html#restoring)).
+
+## 4. Python Dependencies
+If developing in python additional dependencies are required, which can be installed by
+running `pip install -r WallProjections/Scripts/Test/requirements.txt` in the project root.
