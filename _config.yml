@@ -25,7 +25,7 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 favicon_ico: "/assets/logo/app-icon.ico"
-logo: "/assets/logo/app-icon.svg"
+logo: "/assets/logo/app-icon-with-text.svg"
 
 # Build settings
 theme: just-the-docs
@@ -45,6 +45,8 @@ color_scheme: dark
 aux_links:
   "Wall Projections on GitHub":
   - "https://github.com/spe-uob/2023-WallProjections"
+
+aux_links_new_tab: true
 
 # Exclude from processing.
 # The following items will not be processed, by default.
