@@ -18,7 +18,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Wall Projections
+title: "Wall Projections"
 description: >- # this means to ignore newlines until "baseurl:"
   Make exhibitions more engaging through interaction with 3D replicas of artefacts.
 baseurl: "" # the subpath of your site, e.g. /blog
