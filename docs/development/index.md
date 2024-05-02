@@ -114,7 +114,7 @@ popd
 
 We recommend using a virtual environment to manage the Python dependencies.
 It should be created in the `~/.config/WallProjections/VirtualEnv` directory
-using the following command (prepend `arch -86_64 ` if on Apple Silicon Macs):
+using the following command (prepend `arch -86_64` if on Apple Silicon Macs):
 
 ```shell
 python3.11 -m venv ~/.config/WallProjections/VirtualEnv
