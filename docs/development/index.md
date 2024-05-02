@@ -98,9 +98,23 @@ popd
 
 #### Backend (Linux/macOS)
 
+{: .note-title}
+> Apple Silicon Macs
+>
+> When running Wall Projections on Apple Sillicon Macs, you must use the x64 version of Python. To do this:
+> 1. Install x64 Homebrew
+>  ```
+>  arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+>  ```
+>  
+> 2. Use x64 Homebrew to install x64 Python 3.11
+> ```
+> arch -x86_64 /usr/local/bin/brew install Python@3.11
+> ```
+
 We recommend using a virtual environment to manage the Python dependencies.
 It should be created in the `~/.config/WallProjections/VirtualEnv` directory
-using the following command:
+using the following command (prepend `arch -86_64 ` if on Apple Silicon Macs):
 
 ```shell
 python3.11 -m venv ~/.config/WallProjections/VirtualEnv
