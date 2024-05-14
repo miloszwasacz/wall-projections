@@ -71,7 +71,7 @@ jobs:
               --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory TestResults
 
       - name: Test Python
-        if: success() || failure()
+        if: ${{ (success() || failure()) && !inputs.coverage }}
         run: python3 -m unittest discover -s ./WallProjections
 
       - name: Upload coverage reports to Codecov

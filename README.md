@@ -1,14 +1,15 @@
 # Wall Projections
 
-[![.NET CI](https://github.com/spe-uob/2023-WallProjections/actions/workflows/dotnet-ci.yml/badge.svg)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/dotnet-ci.yml)
-[![Documentation Deployment](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml/badge.svg?branch=docs)](https://github.com/spe-uob/2023-WallProjections/actions/workflows/github-pages.yml)
+[![.NET CI](https://github.com/miloszwasacz/wall-projections/actions/workflows/dotnet-ci.yml/badge.svg)](https://github.com/miloszwasacz/wall-projections/actions/workflows/dotnet-ci.yml)
+[![Codecov](https://codecov.io/gh/miloszwasacz/wall-projections/graph/badge.svg?token=AB95AVI2TW)](https://codecov.io/gh/miloszwasacz/wall-projections)
+[![Documentation Deployment](https://github.com/miloszwasacz/wall-projections/actions/workflows/github-pages.yml/badge.svg?branch=docs)](https://github.com/miloszwasacz/wall-projections/actions/workflows/github-pages.yml)
 
 This is a project in collaboration with Bristol Museums, to allow 3D printed replicas of artefacts to be interacted with
 to display detailed, rich information about the touched area.
 
 > [!Important]
 > Find the complete documentation
-> here: [spe-uob.github.io/2023-WallProjections/](https://spe-uob.github.io/2023-WallProjections/)
+> here: [miloszwasacz.github.io/wall-projections/](https://miloszwasacz.github.io/wall-projections/)
 
 ## Table of Contents
 
@@ -50,7 +51,7 @@ to into the program. We aim for the software to be installed and ran on a Window
 The software can be installed on Windows, macOS, and Linux computers.
 
 > For installation and usage guidance go
-> to [spe-uob.github.io/2023-WallProjections/docs/](https://spe-uob.github.io/2023-WallProjections/docs/)
+> to [miloszwasacz.github.io/wall-projections/docs/installation/](https://miloszwasacz.github.io/wall-projections/docs/installation/)
 
 ## Stakeholders
 
@@ -194,9 +195,16 @@ The software can be installed on Windows, macOS, and Linux computers.
 - [MediaPipe](https://developers.google.com/mediapipe)
 - [OpenCV](https://opencv.org/)
 
+### Links to licenses used by the libraries
+
+- [MIT License](https://opensource.org/license/MIT)
+- [LGPL 2.1](https://opensource.org/license/LGPL-2.1)
+- [Apache 2.0](https://opensource.org/license/Apache-2.0)
+- [BSD 3-Clause](https://opensource.org/license/BSD-3-Clause)
+
 ## More Info
 
-- [Full Documentation](https://spe-uob.github.io/2023-WallProjections/)
+- [Full Documentation](https://miloszwasacz.github.io/wall-projections/)
 - [User Flows](docs/USER_FLOWS.md)
 - [Useful Links](docs/USEFUL_LINKS.md)
 - [Main SEP Repository](https://github.com/spe-uob/SEP2023)
