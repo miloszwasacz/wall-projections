@@ -1,9 +1,11 @@
 name: .NET Coverage
 
 on:
-  pull_request:
+  push:
     branches:
       - dev
+
+  pull_request:
 
 jobs:
   coverage:
