@@ -25,7 +25,7 @@ Wall Projections currently has support for Windows, macOS (x64 only), and Linux 
 
 ## Download the app
 
-1. Go to the [releases page](https://github.com/spe-uob/2023-WallProjections/releases)
+1. Go to the [releases page](https://github.com/miloszwasacz/wall-projections/releases)
    and download the latest version of Wall Projections for your platform.
 2. Extract the downloaded *.zip* file to a memorable folder, such as the Desktop.
 

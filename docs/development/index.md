@@ -50,10 +50,10 @@ so it is recommended to install all the prerequisites for both systems.
 
 ### Cloning the repository
 
-First, clone the repository from [GitHub](https://github.com/spe-uob/2023-WallProjections).
+First, clone the repository from [GitHub](https://github.com/miloszwasacz/wall-projections).
 
 ```shell
-git clone git@github.com:spe-uob/2023-WallProjections.git
+git clone git@github.com:miloszwasacz/wall-projections.git
 ```
 
 {: .note-title}
