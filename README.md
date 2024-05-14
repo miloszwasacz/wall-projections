@@ -9,7 +9,14 @@ to display detailed, rich information about the touched area.
 
 > [!Important]
 > Find the complete documentation
-> here: [miloszwasacz.github.io/wall-projections/](https://miloszwasacz.github.io/wall-projections/)
+> at [https://miloszwasacz.github.io/wall-projections/](https://miloszwasacz.github.io/wall-projections/)
+
+> [!Note]
+> This is a clone of the original repository, managed by the University of Bristol's 
+> [Software Engineering Project](https://github.com/spe-uob) organization, 
+> which can be found [here](https://github.com/spe-uob/2023-WallProjections). 
+> 
+> _Keep in mind that access might be restricted due to university policies._
 
 ## Table of Contents
 
