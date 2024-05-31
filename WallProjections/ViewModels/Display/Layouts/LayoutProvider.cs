@@ -87,6 +87,9 @@ public class LayoutProvider : ILayoutProvider
     public Layout GetWelcomeLayout() => new WelcomeViewModel();
 
     /// <inheritdoc />
+    public Layout GetMessageLayout(string title, string description) => new MessageViewModel(title, description);
+
+    /// <inheritdoc />
     public Layout GetErrorLayout(string message, string title = ILayoutProvider.DefaultErrorTitle) =>
         new ErrorViewModel(title, message);
 }

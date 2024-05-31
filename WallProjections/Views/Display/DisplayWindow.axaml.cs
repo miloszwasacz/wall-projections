@@ -42,7 +42,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
     /// </summary>
     /// <param name="sender">The sender of the event (unused).</param>
     /// <param name="e">The event arguments containing the key that was pressed.</param>
-    internal void OnKeyDown(object? sender, KeyEventArgs e)
+    internal async void OnKeyDown(object? sender, KeyEventArgs e)
     {
         // Ignore handled events and ones with key modifiers
         if (e.Handled || e.KeyModifiers != KeyModifiers.None) return;
@@ -69,7 +69,7 @@ public partial class DisplayWindow : ReactiveWindow<IDisplayViewModel>
             // Open the editor
             case Key.E:
             {
-                viewModel.OpenEditor();
+                await viewModel.OpenEditor();
                 return;
             }
 

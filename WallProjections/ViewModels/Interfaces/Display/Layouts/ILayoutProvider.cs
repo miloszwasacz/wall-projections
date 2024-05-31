@@ -26,6 +26,13 @@ public interface ILayoutProvider
     public Layout GetWelcomeLayout();
 
     /// <summary>
+    /// Gets a layout with a message.
+    /// </summary>
+    /// <param name="title">The message title.</param>
+    /// <param name="description">The full description.</param>
+    public Layout GetMessageLayout(string title, string description);
+
+    /// <summary>
     /// Gets a layout with an error message.
     /// </summary>
     /// <param name="message">Error message to display.</param>
