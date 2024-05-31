@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using WallProjections.Helper.Interfaces;
 using WallProjections.Models;
 using WallProjections.ViewModels.Interfaces.Display.Layouts;
@@ -12,6 +13,11 @@ namespace WallProjections.ViewModels.Interfaces.Display;
 /// </summary>
 public interface IDisplayViewModel : IDisposable
 {
+    public static readonly (string Title, string Description) CleanupMessage = (
+        "Closing content display",
+        "The hand tracking is stopping.\nPlease wait..."
+    );
+
     /// <summary>
     /// Event callback for when a <see cref="Hotspot" /> has been activated.
     /// </summary>
@@ -28,7 +34,7 @@ public interface IDisplayViewModel : IDisposable
     /// <summary>
     /// Opens the <see cref="EditorWindow">Editor</see>.
     /// </summary>
-    public void OpenEditor();
+    public Task OpenEditor();
 
     /// <summary>
     /// Closes the <see cref="DisplayWindow">Display</see>.

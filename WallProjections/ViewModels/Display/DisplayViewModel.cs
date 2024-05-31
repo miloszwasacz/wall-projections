@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using WallProjections.Helper.Interfaces;
@@ -57,6 +58,14 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     /// </summary>
     private Layout _contentViewModel;
 
+    /// <summary>
+    /// Whether the Display is performing cleanup and closing
+    /// </summary>
+    /// <remarks>
+    /// Remember to use <i>lock (this)</i> when accessing this field
+    /// </remarks>
+    private bool _closing;
+
     /// <inheritdoc />
     /// <remarks>
     /// Remember to use <i>lock (this)</i> when accessing this property
@@ -111,7 +120,7 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     {
         lock (this)
         {
-            if (ContentViewModel.HotspotId == e.Id) return;
+            if (ContentViewModel.HotspotId == e.Id || _closing) return;
 
             _logger.LogTrace("Activating layout for hotspot with id {HotspotId}", e.Id);
             ShowHotspot(e.Id);
@@ -127,7 +136,7 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
     {
         lock (this)
         {
-            if (!ContentViewModel.IsDeactivated(e)) return;
+            if (!ContentViewModel.IsDeactivated(e) || _closing) return;
 
             _logger.LogTrace("Deactivating layout for hotspot with id {HotspotId}", ContentViewModel.HotspotId);
             ShowWelcomeScreen();
@@ -180,11 +189,46 @@ public sealed class DisplayViewModel : ViewModelBase, IDisplayViewModel
         ContentViewModel = _layoutProvider.GetWelcomeLayout();
     }
 
-    /// <inheritdoc />
-    public void OpenEditor()
+    /// <summary>
+    /// Disposes of the current <see cref="ContentViewModel" /> (if any and is <see cref="IDisposable" />)
+    /// and shows message screen informing the user about Python cleanup
+    /// </summary>
+    /// <remarks>
+    /// Remember to use <i>lock (this)</i> when calling this method
+    /// </remarks>
+    private void ShowCleanupMessage()
     {
-        _navigator.OpenEditor();
+        if (ContentViewModel.HotspotId is not null)
+            _hotspotHandler.DeactivateHotspot(ContentViewModel.HotspotId.Value);
+
+        if (ContentViewModel is IDisposable disposable)
+            disposable.Dispose();
+
+        var (title, description) = IDisplayViewModel.CleanupMessage;
+        ContentViewModel = _layoutProvider.GetMessageLayout(title, description);
     }
+
+    /// <inheritdoc />
+    public Task OpenEditor() => Task.Run(async () =>
+    {
+        lock (this)
+        {
+            _closing = true;
+        }
+
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            lock (this)
+            {
+                ShowCleanupMessage();
+            }
+        });
+
+        // Wait for the cleanup message to be properly displayed
+        await Task.Delay(500);
+
+        Dispatcher.UIThread.Invoke(() => _navigator.OpenEditor());
+    });
 
     /// <inheritdoc />
     public void CloseDisplay()
