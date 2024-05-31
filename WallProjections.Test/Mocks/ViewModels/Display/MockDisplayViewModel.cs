@@ -70,9 +70,10 @@ public sealed class MockDisplayViewModel : ViewModelBase, IDisplayViewModel
     /// <summary>
     /// Calls <see cref="INavigator.OpenEditor" /> on <see cref="_navigator" />
     /// </summary>
-    public void OpenEditor()
+    public Task OpenEditor()
     {
         _navigator.OpenEditor();
+        return Task.CompletedTask;
     }
 
     /// <summary>

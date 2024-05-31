@@ -310,16 +310,17 @@ public sealed class Navigator : ViewModelBase, INavigator
         {
             var currentWindow = MainWindow;
 
-            if (showSecondary)
-                OpenSecondaryWindow();
+            newWindow.Show();
+            MainWindow = newWindow;
+
+            if (showSecondary) OpenSecondaryWindow();
             else
             {
                 _secondaryScreen.window.ShowInTaskbar = false;
                 _secondaryScreen.window.Hide();
             }
 
-            newWindow.Show();
-            MainWindow = newWindow;
+            newWindow.Activate();
 
             currentWindow?.CloseAndDispose();
         }
@@ -341,6 +342,7 @@ public sealed class Navigator : ViewModelBase, INavigator
             window.WindowStartupLocation = WindowStartupLocation.Manual;
             window.Position = secondaryScreen.Bounds.Position;
             window.Show();
+            window.WindowState = WindowState.Maximized;
             window.WindowState = WindowState.FullScreen;
         }
         else

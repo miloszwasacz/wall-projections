@@ -10,7 +10,7 @@ public interface IHotspotHandler : IDisposable
     /// <summary>
     /// The total time required to activate a hotspot.
     /// </summary>
-    public static readonly TimeSpan ActivationTime = TimeSpan.FromSeconds(2);
+    public static readonly TimeSpan ActivationTime = TimeSpan.FromSeconds(1);
 
     /// <summary>
     /// The total time required to deactivate a hotspot.

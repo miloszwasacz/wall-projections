@@ -338,7 +338,8 @@ public class DisplayViewModelTest
     }
 
     [Test]
-    public void OpenEditorTest()
+    [Timeout(5000)]
+    public async Task OpenEditorTest()
     {
         var navigator = new MockNavigator();
         var contentProvider = new MockContentProvider(FilesAll);
@@ -353,7 +354,7 @@ public class DisplayViewModelTest
             hotspotHandler,
             new MockLoggerFactory()
         );
-        displayViewModel.OpenEditor();
+        await displayViewModel.OpenEditor();
 
         Assert.That(navigator.IsEditorOpen, Is.True);
     }

@@ -204,7 +204,7 @@ public partial class HotspotCircle : Panel, IDisposable
         var current = OuterArc.SweepAngle;
         var transitions = new Transitions
         {
-            ResetBehavior = ResetBehavior.Remove
+            ResetBehavior = ResetBehavior.Reset
         };
         transitions.Add(new DoubleTransition
         {
